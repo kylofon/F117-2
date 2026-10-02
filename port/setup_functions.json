@@ -1,0 +1,2437 @@
+{
+ "exe": "work/unpacked/SETUP.EXE",
+ "dgroup": "024c",
+ "entry": "0000:1516",
+ "segments": [
+  "0000",
+  "0237",
+  "024b"
+ ],
+ "jump_tables": {},
+ "functions": [
+  {
+   "start": "0000:0010",
+   "image": "00010",
+   "far": false,
+   "calls": [
+    "0000:0503",
+    "0000:0512",
+    "0000:053b",
+    "0000:0a4b",
+    "0000:0a9f",
+    "0000:0ba2",
+    "0000:0c35",
+    "0000:0c84",
+    "0000:0fc0",
+    "0000:0ffe",
+    "0000:1244",
+    "0000:125f",
+    "0000:1387",
+    "0000:14be",
+    "0000:1509",
+    "0237:0004",
+    "0237:002c",
+    "0237:004d",
+    "0237:0115",
+    "024b:0a82",
+    "024b:0a87"
+   ],
+   "callers": [
+    "0000:1516"
+   ],
+   "ds_reads": [
+    "0716",
+    "0776",
+    "0780",
+    "0fd4",
+    "0fd6",
+    "0fd8"
+   ],
+   "ds_writes": [
+    "0e24",
+    "0e25",
+    "0fbe",
+    "0fc0",
+    "0fd0",
+    "0fd2",
+    "0fd4",
+    "0fd6",
+    "0fd8"
+   ],
+   "strings": {
+    "00bf": "misc.exe",
+    "0362": "F117A works best if played from a hard disk.",
+    "038f": "It can be played from 1.2 Mb floppies,",
+    "03b6": "but we recommend you use backup disks.",
+    "03dd": "The game CANNOT be played from 720Kb floppy disks;",
+    "0410": "it must be installed on to your hard drive.",
+    "043c": "Instructions for game installation can be found in the Technical Supplement.",
+    "0489": "You cannot play F117A off of 720K floppy disks!!",
+    "0536": "         Move joystick to upper left corner, then press fire button 1 ",
+    "057d": "       Now move joystick to lower right corner, then press fire button 2 ",
+    "05c7": "Mgraphic.exe",
+    "0624": "                        1) IBM Sound                                          ",
+    "0673": "                        2) Ad Lib Sound Board                                 ",
+    "06c2": "                        3) Roland Sound Board                                 ",
+    "0711": "                        4) No Sound                                           ",
+    "0760": "One Moment Please..."
+   },
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 505,
+   "end": "0000:0503",
+   "size": 1267
+  },
+  {
+   "start": "0000:0503",
+   "image": "00503",
+   "far": false,
+   "calls": [
+    "0000:053b"
+   ],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [
+    "0ac8"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 7,
+   "end": "0000:0512",
+   "size": 15
+  },
+  {
+   "start": "0000:0512",
+   "image": "00512",
+   "far": false,
+   "calls": [
+    "0000:1387"
+   ],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [],
+   "ds_writes": [
+    "0fc1",
+    "0fc3",
+    "0fc6",
+    "0fc7"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 17,
+   "end": "0000:053b",
+   "size": 41
+  },
+  {
+   "start": "0000:053b",
+   "image": "0053b",
+   "far": false,
+   "calls": [
+    "0000:0bfb",
+    "0000:0c58",
+    "0000:0ffe",
+    "0000:16ce"
+   ],
+   "callers": [
+    "0000:0010",
+    "0000:0503"
+   ],
+   "ds_reads": [
+    "0e29",
+    "0fbe"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 17,
+   "end": "0000:0561",
+   "size": 38
+  },
+  {
+   "start": "0000:0562",
+   "image": "00562",
+   "far": false,
+   "calls": [
+    "0000:05a3"
+   ],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [
+    "0008",
+    "000a"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 14,
+   "end": "0000:0582",
+   "size": 32
+  },
+  {
+   "start": "0000:0582",
+   "image": "00582",
+   "far": false,
+   "calls": [
+    "024b:08cf"
+   ],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [
+    "0008",
+    "000a"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 15,
+   "end": "0000:05a3",
+   "size": 33
+  },
+  {
+   "start": "0000:05a3",
+   "image": "005a3",
+   "far": false,
+   "calls": [
+    "0000:1276",
+    "024b:08cf"
+   ],
+   "callers": [
+    "0000:0562"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 18,
+   "end": "0000:05ce",
+   "size": 43
+  },
+  {
+   "start": "0000:05ce",
+   "image": "005ce",
+   "far": false,
+   "calls": [
+    "0000:1340",
+    "024b:08cf",
+    "024b:09a1"
+   ],
+   "callers": [],
+   "ds_reads": [
+    "000a",
+    "000c"
+   ],
+   "ds_writes": [
+    "0008",
+    "000a"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 113,
+   "end": "0000:070a",
+   "size": 316
+  },
+  {
+   "start": "0000:070a",
+   "image": "0070a",
+   "far": false,
+   "calls": [
+    "0000:1322",
+    "024b:08cf",
+    "024b:09a1"
+   ],
+   "callers": [],
+   "ds_reads": [
+    "0000",
+    "000a",
+    "000c"
+   ],
+   "ds_writes": [
+    "0008",
+    "000a"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 99,
+   "end": "0000:0811",
+   "size": 263
+  },
+  {
+   "start": "0000:0811",
+   "image": "00811",
+   "far": false,
+   "calls": [
+    "024b:09a1"
+   ],
+   "callers": [],
+   "ds_reads": [
+    "0000",
+    "000c"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 26,
+   "end": "0000:0851",
+   "size": 64
+  },
+  {
+   "start": "0000:0851",
+   "image": "00851",
+   "far": false,
+   "calls": [
+    "0000:17d6",
+    "0000:18a2",
+    "0000:194e"
+   ],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [
+    "0000"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 135,
+   "end": "0000:0979",
+   "size": 296
+  },
+  {
+   "start": "0000:0979",
+   "image": "00979",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [
+    "0000"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 89,
+   "end": "0000:0a4b",
+   "size": 210
+  },
+  {
+   "start": "0000:0a4b",
+   "image": "00a4b",
+   "far": false,
+   "calls": [
+    "0000:0fc0",
+    "0000:0ffe"
+   ],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [
+    "0782"
+   ],
+   "ds_writes": [
+    "0782"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 12,
+   "end": "0000:0a67",
+   "size": 28
+  },
+  {
+   "start": "0000:0a70",
+   "image": "00a70",
+   "far": false,
+   "calls": [
+    "0000:17b0",
+    "0000:1870",
+    "0000:1942"
+   ],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 16,
+   "end": "0000:0a8c",
+   "size": 28
+  },
+  {
+   "start": "0000:0a9f",
+   "image": "00a9f",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [
+    "0786",
+    "0788"
+   ],
+   "ds_writes": [
+    "0786",
+    "0788",
+    "078a",
+    "078c",
+    "078e"
+   ],
+   "strings": {},
+   "ints": [
+    "21.09",
+    "21.48",
+    "21.4a",
+    "21.4b"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 91,
+   "end": "0000:0b82",
+   "size": 227
+  },
+  {
+   "start": "0000:0b83",
+   "image": "00b83",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [
+    "0786",
+    "078e"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "21.4c"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 16,
+   "end": "0000:0ba2",
+   "size": 31
+  },
+  {
+   "start": "0000:0ba2",
+   "image": "00ba2",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [
+    "078e"
+   ],
+   "ds_writes": [
+    "0001",
+    "0003",
+    "078e"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 38,
+   "end": "0000:0bfb",
+   "size": 89
+  },
+  {
+   "start": "0000:0bfb",
+   "image": "00bfb",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:053b"
+   ],
+   "ds_reads": [
+    "078e"
+   ],
+   "ds_writes": [
+    "078e"
+   ],
+   "strings": {},
+   "ints": [
+    "21.09",
+    "21.49"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 28,
+   "end": "0000:0c35",
+   "size": 58
+  },
+  {
+   "start": "0000:0c35",
+   "image": "00c35",
+   "far": false,
+   "calls": [
+    "0000:0c69"
+   ],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [],
+   "ds_writes": [
+    "0ac9",
+    "0acb"
+   ],
+   "strings": {},
+   "ints": [
+    "21.25"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 18,
+   "end": "0000:0c58",
+   "size": 35
+  },
+  {
+   "start": "0000:0c58",
+   "image": "00c58",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:053b"
+   ],
+   "ds_reads": [
+    "0ac9",
+    "0acb"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "21.25"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 8,
+   "end": "0000:0c69",
+   "size": 17
+  },
+  {
+   "start": "0000:0c69",
+   "image": "00c69",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0c35"
+   ],
+   "ds_reads": [
+    "0000",
+    "0002"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 7,
+   "end": "0000:0c75",
+   "size": 12
+  },
+  {
+   "start": "0000:0c75",
+   "image": "00c75",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [
+    "0ac8"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 8,
+   "end": "0000:0c84",
+   "size": 15
+  },
+  {
+   "start": "0000:0c84",
+   "image": "00c84",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [
+    "0ace",
+    "0b0b"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "21.11",
+    "21.1a"
+   ],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 20,
+   "end": "0000:0cb1",
+   "size": 45
+  },
+  {
+   "start": "0000:0cb2",
+   "image": "00cb2",
+   "far": false,
+   "calls": [
+    "0000:0d53",
+    "0000:0d77",
+    "0000:0d85"
+   ],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 24,
+   "end": "0000:0ce5",
+   "size": 51
+  },
+  {
+   "start": "0000:0ce5",
+   "image": "00ce5",
+   "far": false,
+   "calls": [
+    "0000:0d53",
+    "0000:0d77",
+    "0000:0d98"
+   ],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 25,
+   "end": "0000:0d1b",
+   "size": 54
+  },
+  {
+   "start": "0000:0d1b",
+   "image": "00d1b",
+   "far": false,
+   "calls": [
+    "0000:0d65",
+    "0000:0d77",
+    "0000:0dae"
+   ],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 25,
+   "end": "0000:0d53",
+   "size": 56
+  },
+  {
+   "start": "0000:0d53",
+   "image": "00d53",
+   "far": false,
+   "calls": [
+    "0000:0dc7"
+   ],
+   "callers": [
+    "0000:0cb2",
+    "0000:0ce5"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 10,
+   "end": "0000:0d65",
+   "size": 18
+  },
+  {
+   "start": "0000:0d65",
+   "image": "00d65",
+   "far": false,
+   "calls": [
+    "0000:0e1e"
+   ],
+   "callers": [
+    "0000:0d1b"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 10,
+   "end": "0000:0d77",
+   "size": 18
+  },
+  {
+   "start": "0000:0d77",
+   "image": "00d77",
+   "far": false,
+   "calls": [
+    "0000:0e75"
+   ],
+   "callers": [
+    "0000:0cb2",
+    "0000:0ce5",
+    "0000:0d1b"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 8,
+   "end": "0000:0d85",
+   "size": 14
+  },
+  {
+   "start": "0000:0d85",
+   "image": "00d85",
+   "far": false,
+   "calls": [
+    "0000:0e97"
+   ],
+   "callers": [
+    "0000:0cb2"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 9,
+   "end": "0000:0d98",
+   "size": 19
+  },
+  {
+   "start": "0000:0d98",
+   "image": "00d98",
+   "far": false,
+   "calls": [
+    "0000:0ec2"
+   ],
+   "callers": [
+    "0000:0ce5"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 10,
+   "end": "0000:0dae",
+   "size": 22
+  },
+  {
+   "start": "0000:0dae",
+   "image": "00dae",
+   "far": false,
+   "calls": [
+    "0000:0f52"
+   ],
+   "callers": [
+    "0000:0d1b"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 11,
+   "end": "0000:0dc7",
+   "size": 25
+  },
+  {
+   "start": "0000:0dc7",
+   "image": "00dc7",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0d53"
+   ],
+   "ds_reads": [],
+   "ds_writes": [
+    "0df0"
+   ],
+   "strings": {},
+   "ints": [
+    "21.3d"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 39,
+   "end": "0000:0e1e",
+   "size": 87
+  },
+  {
+   "start": "0000:0e1e",
+   "image": "00e1e",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0d65"
+   ],
+   "ds_reads": [],
+   "ds_writes": [
+    "0df0"
+   ],
+   "strings": {},
+   "ints": [
+    "21.3c"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 39,
+   "end": "0000:0e75",
+   "size": 87
+  },
+  {
+   "start": "0000:0e75",
+   "image": "00e75",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0d77"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "21.3e"
+   ],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 20,
+   "end": "0000:0e96",
+   "size": 33
+  },
+  {
+   "start": "0000:0e97",
+   "image": "00e97",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0d85"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "21.3f"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 24,
+   "end": "0000:0ec2",
+   "size": 43
+  },
+  {
+   "start": "0000:0ec2",
+   "image": "00ec2",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0d98"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "21.3f"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 26,
+   "end": "0000:0ef0",
+   "size": 46
+  },
+  {
+   "start": "0000:0f19",
+   "image": "00f19",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0f3a"
+   ],
+   "ds_reads": [
+    "0df2"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "21.3f"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 14,
+   "end": "0000:0f3a",
+   "size": 33
+  },
+  {
+   "start": "0000:0f3a",
+   "image": "00f3a",
+   "far": false,
+   "calls": [
+    "0000:0f19"
+   ],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [
+    "0df2"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 16,
+   "end": "0000:0f52",
+   "size": 24
+  },
+  {
+   "start": "0000:0f52",
+   "image": "00f52",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0dae"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [
+    "0000",
+    "0b86",
+    "0b87"
+   ],
+   "strings": {},
+   "ints": [
+    "10.00",
+    "21.09",
+    "21.40",
+    "21.4c"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 53,
+   "end": "0000:0fc1",
+   "size": 111
+  },
+  {
+   "start": "0000:0fc0",
+   "image": "00fc0",
+   "far": false,
+   "calls": [
+    "0000:111a"
+   ],
+   "callers": [
+    "0000:0010",
+    "0000:0a4b"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [
+    "0000",
+    "0e29",
+    "0e2a",
+    "0e2c",
+    "0e34",
+    "0e3e"
+   ],
+   "strings": {},
+   "ints": [
+    "21.25",
+    "21.35"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 21,
+   "end": "0000:0ffe",
+   "size": 62
+  },
+  {
+   "start": "0000:0ffe",
+   "image": "00ffe",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0010",
+    "0000:053b",
+    "0000:0a4b"
+   ],
+   "ds_reads": [],
+   "ds_writes": [
+    "0e29"
+   ],
+   "strings": {},
+   "ints": [
+    "21.25"
+   ],
+   "ports": [
+    "40h",
+    "43h"
+   ],
+   "sets_ds": true,
+   "insns": 15,
+   "end": "0000:101f",
+   "size": 33
+  },
+  {
+   "start": "0000:111a",
+   "image": "0111a",
+   "far": false,
+   "calls": [
+    "0000:11af"
+   ],
+   "callers": [
+    "0000:0fc0"
+   ],
+   "ds_reads": [
+    "0e2a",
+    "0e2c",
+    "0e34",
+    "0e39",
+    "0e3b"
+   ],
+   "ds_writes": [
+    "0e2a",
+    "0e2c",
+    "0e2e",
+    "0e30",
+    "0e34",
+    "0e36",
+    "0e37",
+    "0e39",
+    "0e3b",
+    "0e3d"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 54,
+   "end": "0000:11af",
+   "size": 149
+  },
+  {
+   "start": "0000:11af",
+   "image": "011af",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:111a"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [
+    "40h",
+    "43h",
+    "dx"
+   ],
+   "sets_ds": false,
+   "insns": 27,
+   "end": "0000:11de",
+   "size": 47
+  },
+  {
+   "start": "0000:11e6",
+   "image": "011e6",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [
+    "dx"
+   ],
+   "sets_ds": false,
+   "insns": 8,
+   "end": "0000:11f4",
+   "size": 14
+  },
+  {
+   "start": "0000:11f4",
+   "image": "011f4",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [
+    "0000"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 18,
+   "end": "0000:1214",
+   "size": 32
+  },
+  {
+   "start": "0000:1214",
+   "image": "01214",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 22,
+   "end": "0000:1244",
+   "size": 48
+  },
+  {
+   "start": "0000:1244",
+   "image": "01244",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [
+    "0000"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 14,
+   "end": "0000:125f",
+   "size": 27
+  },
+  {
+   "start": "0000:125f",
+   "image": "0125f",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 16,
+   "end": "0000:1276",
+   "size": 23
+  },
+  {
+   "start": "0000:1276",
+   "image": "01276",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:05a3"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 20,
+   "end": "0000:1291",
+   "size": 27
+  },
+  {
+   "start": "0000:1291",
+   "image": "01291",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 13,
+   "end": "0000:12ad",
+   "size": 28
+  },
+  {
+   "start": "0000:12ad",
+   "image": "012ad",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [
+    "0000"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 19,
+   "end": "0000:12d5",
+   "size": 40
+  },
+  {
+   "start": "0000:12d5",
+   "image": "012d5",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 17,
+   "end": "0000:12f8",
+   "size": 35
+  },
+  {
+   "start": "0000:12f8",
+   "image": "012f8",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 11,
+   "end": "0000:130c",
+   "size": 20
+  },
+  {
+   "start": "0000:130c",
+   "image": "0130c",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 13,
+   "end": "0000:1322",
+   "size": 22
+  },
+  {
+   "start": "0000:1322",
+   "image": "01322",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:070a"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [
+    "0000"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 15,
+   "end": "0000:1340",
+   "size": 30
+  },
+  {
+   "start": "0000:1340",
+   "image": "01340",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:05ce"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 19,
+   "end": "0000:135c",
+   "size": 28
+  },
+  {
+   "start": "0000:135c",
+   "image": "0135c",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 20,
+   "end": "0000:1387",
+   "size": 43
+  },
+  {
+   "start": "0000:1387",
+   "image": "01387",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0010",
+    "0000:0512"
+   ],
+   "ds_reads": [
+    "0000",
+    "0002",
+    "0004",
+    "0006"
+   ],
+   "ds_writes": [
+    "0000",
+    "0002",
+    "0004",
+    "0006"
+   ],
+   "strings": {},
+   "ints": [
+    "10",
+    "16",
+    "1a",
+    "21"
+   ],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 47,
+   "end": "0000:13ec",
+   "size": 101
+  },
+  {
+   "start": "0000:13ec",
+   "image": "013ec",
+   "far": false,
+   "calls": [
+    "0000:1429",
+    "0000:1454",
+    "0000:149c"
+   ],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [
+    "0000"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 25,
+   "end": "0000:1429",
+   "size": 61
+  },
+  {
+   "start": "0000:1429",
+   "image": "01429",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:13ec"
+   ],
+   "ds_reads": [],
+   "ds_writes": [
+    "0000"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 22,
+   "end": "0000:1454",
+   "size": 43
+  },
+  {
+   "start": "0000:1454",
+   "image": "01454",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:13ec"
+   ],
+   "ds_reads": [],
+   "ds_writes": [
+    "0000"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 32,
+   "end": "0000:149c",
+   "size": 72
+  },
+  {
+   "start": "0000:149c",
+   "image": "0149c",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:13ec"
+   ],
+   "ds_reads": [],
+   "ds_writes": [
+    "0000"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 15,
+   "end": "0000:14bd",
+   "size": 33
+  },
+  {
+   "start": "0000:14be",
+   "image": "014be",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "10",
+    "10.09",
+    "10.0e"
+   ],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 36,
+   "end": "0000:1509",
+   "size": 75
+  },
+  {
+   "start": "0000:1509",
+   "image": "01509",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "21.09"
+   ],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 7,
+   "end": "0000:1515",
+   "size": 12
+  },
+  {
+   "start": "0000:1516",
+   "image": "01516",
+   "far": true,
+   "calls": [
+    "0000:0010",
+    "0000:1600",
+    "0000:16ce",
+    "0000:196e",
+    "0000:19b6",
+    "0000:1b44",
+    "0000:1bed"
+   ],
+   "callers": [],
+   "ds_reads": [
+    "0000",
+    "0002",
+    "0e46",
+    "0ea1",
+    "0ea3",
+    "0ea5",
+    "0ebe"
+   ],
+   "ds_writes": [
+    "0002"
+   ],
+   "strings": {},
+   "ints": [
+    "21.30",
+    "21.4a",
+    "21.4c"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 91,
+   "end": "0000:1600",
+   "size": 234
+  },
+  {
+   "start": "0000:1600",
+   "image": "01600",
+   "far": false,
+   "calls": [
+    "0000:177c",
+    "0000:178b"
+   ],
+   "callers": [
+    "0000:1516"
+   ],
+   "ds_reads": [
+    "0000",
+    "0e84",
+    "0e8d",
+    "0ed0",
+    "0ed4"
+   ],
+   "ds_writes": [
+    "0000",
+    "0e70",
+    "0e72",
+    "0e8d",
+    "0ed2",
+    "0eda"
+   ],
+   "strings": {
+    "0e62": "_C_FILE_INFO=",
+    "0edc": "<<NMSG>>"
+   },
+   "ints": [
+    "21.25",
+    "21.35",
+    "21.44"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 84,
+   "end": "0000:16ce",
+   "size": 206
+  },
+  {
+   "start": "0000:16ce",
+   "image": "016ce",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:053b",
+    "0000:1516"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 4,
+   "end": "0000:16d5",
+   "size": 7
+  },
+  {
+   "start": "0000:16d5",
+   "image": "016d5",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 4,
+   "end": "0000:16dd",
+   "size": 8
+  },
+  {
+   "start": "0000:16dd",
+   "image": "016dd",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 6,
+   "end": "0000:16e7",
+   "size": 10
+  },
+  {
+   "start": "0000:16e7",
+   "image": "016e7",
+   "far": false,
+   "calls": [
+    "0000:174f",
+    "0000:177c",
+    "0000:178b",
+    "0000:1994"
+   ],
+   "callers": [],
+   "ds_reads": [
+    "0ec0",
+    "0ec6"
+   ],
+   "ds_writes": [],
+   "strings": {
+    "0edc": "<<NMSG>>"
+   },
+   "ints": [
+    "21.4c"
+   ],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 44,
+   "end": "0000:174f",
+   "size": 104
+  },
+  {
+   "start": "0000:174f",
+   "image": "0174f",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:16e7"
+   ],
+   "ds_reads": [
+    "0e70",
+    "0eae",
+    "0eaf",
+    "0eb0",
+    "0ed0",
+    "0ed2"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "21.25"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 18,
+   "end": "0000:177c",
+   "size": 45
+  },
+  {
+   "start": "0000:177c",
+   "image": "0177c",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:1600",
+    "0000:16e7"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 9,
+   "end": "0000:178b",
+   "size": 15
+  },
+  {
+   "start": "0000:178b",
+   "image": "0178b",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:1600",
+    "0000:16e7"
+   ],
+   "ds_reads": [
+    "0000",
+    "0002"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 9,
+   "end": "0000:179e",
+   "size": 19
+  },
+  {
+   "start": "0000:179e",
+   "image": "0179e",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [
+    "0eb4",
+    "0eb6"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 7,
+   "end": "0000:17af",
+   "size": 17
+  },
+  {
+   "start": "0000:17b0",
+   "image": "017b0",
+   "far": false,
+   "calls": [
+    "0000:1870"
+   ],
+   "callers": [
+    "0000:0a70"
+   ],
+   "ds_reads": [
+    "0eb4",
+    "0eb6"
+   ],
+   "ds_writes": [
+    "0eb4",
+    "0eb6"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 14,
+   "end": "0000:17d6",
+   "size": 38
+  },
+  {
+   "start": "0000:17d6",
+   "image": "017d6",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0851",
+    "0000:194e"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 73,
+   "end": "0000:1870",
+   "size": 154
+  },
+  {
+   "start": "0000:1870",
+   "image": "01870",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0a70",
+    "0000:17b0"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 23,
+   "end": "0000:18a2",
+   "size": 50
+  },
+  {
+   "start": "0000:18a2",
+   "image": "018a2",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0851"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 72,
+   "end": "0000:1942",
+   "size": 160
+  },
+  {
+   "start": "0000:1942",
+   "image": "01942",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:0a70"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 6,
+   "end": "0000:194d",
+   "size": 11
+  },
+  {
+   "start": "0000:194e",
+   "image": "0194e",
+   "far": false,
+   "calls": [
+    "0000:17d6"
+   ],
+   "callers": [
+    "0000:0851"
+   ],
+   "ds_reads": [
+    "0000",
+    "0002"
+   ],
+   "ds_writes": [
+    "0000",
+    "0002"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 14,
+   "end": "0000:196d",
+   "size": 31
+  },
+  {
+   "start": "0000:196e",
+   "image": "0196e",
+   "far": false,
+   "calls": [
+    "0000:1bed"
+   ],
+   "callers": [
+    "0000:1516",
+    "0000:1994"
+   ],
+   "ds_reads": [
+    "0eb8"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 16,
+   "end": "0000:1994",
+   "size": 38
+  },
+  {
+   "start": "0000:1994",
+   "image": "01994",
+   "far": false,
+   "calls": [
+    "0000:196e",
+    "0000:1bed"
+   ],
+   "callers": [
+    "0000:16e7"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {
+    "0042": "Isound.117"
+   },
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 17,
+   "end": "0000:19b6",
+   "size": 34
+  },
+  {
+   "start": "0000:19b6",
+   "image": "019b6",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:1516"
+   ],
+   "ds_reads": [
+    "0000",
+    "0e84",
+    "0ea7",
+    "0eba"
+   ],
+   "ds_writes": [
+    "0000",
+    "0e86",
+    "0ea1",
+    "0ea3",
+    "0ea7",
+    "0ea9",
+    "0eba"
+   ],
+   "strings": {},
+   "ints": [
+    "21.30"
+   ],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 204,
+   "end": "0000:1b44",
+   "size": 398
+  },
+  {
+   "start": "0000:1b44",
+   "image": "01b44",
+   "far": false,
+   "calls": [
+    "0000:1c22"
+   ],
+   "callers": [
+    "0000:1516"
+   ],
+   "ds_reads": [
+    "0000",
+    "0e84"
+   ],
+   "ds_writes": [
+    "0000",
+    "0ea5"
+   ],
+   "strings": {
+    "0e62": "_C_FILE_INFO="
+   },
+   "ints": [],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 65,
+   "end": "0000:1bc1",
+   "size": 125
+  },
+  {
+   "start": "0000:1bc2",
+   "image": "01bc2",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:1bed"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 26,
+   "end": "0000:1bed",
+   "size": 43
+  },
+  {
+   "start": "0000:1bed",
+   "image": "01bed",
+   "far": false,
+   "calls": [
+    "0000:1bc2"
+   ],
+   "callers": [
+    "0000:1516",
+    "0000:196e",
+    "0000:1994"
+   ],
+   "ds_reads": [
+    "0ec0",
+    "0ec2"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "21.40"
+   ],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 24,
+   "end": "0000:1c22",
+   "size": 53
+  },
+  {
+   "start": "0000:1c22",
+   "image": "01c22",
+   "far": false,
+   "calls": [
+    "0000:1c46"
+   ],
+   "callers": [
+    "0000:1b44"
+   ],
+   "ds_reads": [
+    "0ebc"
+   ],
+   "ds_writes": [
+    "0ebc"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 19,
+   "end": "0000:1c45",
+   "size": 35
+  },
+  {
+   "start": "0000:1c46",
+   "image": "01c46",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:1c22"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 1,
+   "end": "0000:1c49",
+   "size": 3
+  },
+  {
+   "start": "0000:1c4a",
+   "image": "01c4a",
+   "far": false,
+   "calls": [
+    "0000:1cd6",
+    "0000:1d27"
+   ],
+   "callers": [
+    "0000:1d69"
+   ],
+   "ds_reads": [
+    "0000",
+    "0002",
+    "0004",
+    "000a"
+   ],
+   "ds_writes": [
+    "0000",
+    "0004",
+    "0008",
+    "000a"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 68,
+   "end": "0000:1cd6",
+   "size": 140
+  },
+  {
+   "start": "0000:1cd6",
+   "image": "01cd6",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:1c4a"
+   ],
+   "ds_reads": [
+    "0002",
+    "0004",
+    "0e84",
+    "fffe"
+   ],
+   "ds_writes": [
+    "fffe"
+   ],
+   "strings": {},
+   "ints": [
+    "21.4a"
+   ],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 39,
+   "end": "0000:1d27",
+   "size": 81
+  },
+  {
+   "start": "0000:1d27",
+   "image": "01d27",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:1c4a"
+   ],
+   "ds_reads": [
+    "0000",
+    "0006",
+    "0008",
+    "000a"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 17,
+   "end": "0000:1d47",
+   "size": 32
+  },
+  {
+   "start": "0000:1d48",
+   "image": "01d48",
+   "far": false,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [
+    "0000",
+    "0006",
+    "0008"
+   ],
+   "ds_writes": [
+    "0000",
+    "0008"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 17,
+   "end": "0000:1d69",
+   "size": 33
+  },
+  {
+   "start": "0000:1d69",
+   "image": "01d69",
+   "far": false,
+   "calls": [
+    "0000:1c4a",
+    "0000:1d92"
+   ],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 21,
+   "end": "0000:1d91",
+   "size": 40
+  },
+  {
+   "start": "0000:1d92",
+   "image": "01d92",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:1d69"
+   ],
+   "ds_reads": [
+    "0000",
+    "0006",
+    "0008",
+    "000a"
+   ],
+   "ds_writes": [
+    "0000",
+    "0008",
+    "fffe"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 63,
+   "end": "0000:1e0e",
+   "size": 124
+  },
+  {
+   "start": "0000:1e4f",
+   "image": "01e4f",
+   "far": true,
+   "calls": [
+    "0000:1f51"
+   ],
+   "callers": [],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 12,
+   "end": "0000:1e60",
+   "size": 17
+  },
+  {
+   "start": "0000:1f51",
+   "image": "01f51",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0000:1e4f"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 4,
+   "end": "0000:1f55",
+   "size": 4
+  },
+  {
+   "start": "0237:0004",
+   "image": "02374",
+   "far": true,
+   "calls": [],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [
+    "21.35",
+    "33"
+   ],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 17,
+   "end": "0237:002c",
+   "size": 40
+  },
+  {
+   "start": "0237:002c",
+   "image": "0239c",
+   "far": true,
+   "calls": [
+    "0237:003a",
+    "0237:005c"
+   ],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 7,
+   "end": "0237:003a",
+   "size": 14
+  },
+  {
+   "start": "0237:003a",
+   "image": "023aa",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0237:002c"
+   ],
+   "ds_reads": [
+    "0e1c"
+   ],
+   "ds_writes": [
+    "0df4",
+    "0dfc",
+    "0e04"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 7,
+   "end": "0237:004d",
+   "size": 19
+  },
+  {
+   "start": "0237:004d",
+   "image": "023bd",
+   "far": true,
+   "calls": [
+    "0237:005c",
+    "0237:00a4"
+   ],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 6,
+   "end": "0237:005c",
+   "size": 15
+  },
+  {
+   "start": "0237:005c",
+   "image": "023cc",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0237:002c",
+    "0237:004d"
+   ],
+   "ds_reads": [],
+   "ds_writes": [
+    "0e1c",
+    "0e1e"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [
+    "201h",
+    "dx"
+   ],
+   "sets_ds": false,
+   "insns": 42,
+   "end": "0237:00a4",
+   "size": 72
+  },
+  {
+   "start": "0237:00a4",
+   "image": "02414",
+   "far": false,
+   "calls": [],
+   "callers": [
+    "0237:004d"
+   ],
+   "ds_reads": [
+    "0df4",
+    "0dfc",
+    "0e04",
+    "0e0c",
+    "0e14",
+    "0e1c"
+   ],
+   "ds_writes": [
+    "0df4",
+    "0dfc",
+    "0e0c",
+    "0e14",
+    "0e24"
+   ],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 48,
+   "end": "0237:0115",
+   "size": 113
+  },
+  {
+   "start": "0237:0115",
+   "image": "02485",
+   "far": true,
+   "calls": [],
+   "callers": [
+    "0000:0010"
+   ],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": false,
+   "insns": 10,
+   "end": "0237:0127",
+   "size": 18
+  },
+  {
+   "start": "0237:0127",
+   "image": "02497",
+   "far": true,
+   "calls": [],
+   "callers": [],
+   "ds_reads": [
+    "0000"
+   ],
+   "ds_writes": [],
+   "strings": {},
+   "ints": [],
+   "ports": [],
+   "sets_ds": true,
+   "insns": 14,
+   "end": "0237:013d",
+   "size": 22
+  }
+ ]
+}
