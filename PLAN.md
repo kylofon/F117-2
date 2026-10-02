@@ -71,7 +71,7 @@ Model: H = Haiku 4.5, S = Sonnet 5.5, O = Opus 5.5. Size: rough session length (
 | S1.1 | `tools/survey.py`: MZ headers, relocs, packer signatures (EXEPACK/LZEXE/PKLITE), compiler RTL strings, INT/port usage counts for every EXE/COM/.117 → `work/survey.txt`; unpack if packed; 20-line summary into `RE_GUIDE.md` §1 | H | done 2026-10-02 |
 | S1.2 | Overlay chain and driver protocol: how `F117.COM` loads/chains programs, shared memory area, exit/next-program codes, `MGRAPHIC.EXE` and `*.117` entry tables (all small files) → `RE_GUIDE.md` §2 | O | M |
 | S1.3 | Indexer `tools/f117index.py` from `tools/apindex.py`/`td3index.py` (compiler found in S1.1): segments, functions, DGROUP, strings, ints, ports → `port/<exe>_functions.csv` | S | done 2026-10-02 |
-| S1.4 | Ghidra: adapt `tools/ghidra/aotp_*.sh` → `f117_*.sh`, run headless in the background, decompiles to `port/decomp/` (ignored). Print only counts | H | S |
+| S1.4 | Ghidra: adapt `tools/ghidra/aotp_*.sh` → `f117_*.sh`, run headless in the background, decompiles to `port/decomp/` (ignored). Print only counts | H | done 2026-10-02 |
 | S1.5 | Shared code: compiler RTL + MicroProse library matched across the EXEs (`tools/apmatch.py`), first names → `port/symbols.csv` (`tools/merge_symbols.py`) | S | M |
 
 ### Phase 2 — File formats (output: `FORMATS.md`, decoders in `tools/`, PNG/WAV in `work/`)
