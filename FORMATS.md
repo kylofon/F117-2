@@ -9,11 +9,16 @@ cleared (width 9, free 256, previous code kept). Output goes through RLE-90 (`90
 byte n-1 more times, `90 00` = literal 90). Result is exactly 64000 pixels. 52/52 files decode.
 
 ## .PAL / PALETTES.PAL
-768 bytes = 256 x RGB, VGA 6-bit (0-63). `PALETTES.PAL` = 9 palettes, indexed by theatre in the order
-LIBYA, PERSIAN, N_CAPE, C_EUROPE, VIETNAM, MID_EAST, KUWAIT, CUBA, KOREA (START/END string order;
-index mapping to be confirmed in U5). PICs without an own `.PAL` (cockpit, hangar, planes, weapons, ...)
-are rendered with `ADV.PAL` as a guess; real palette source to find in S2.2/3 (likely set by the
-caller or left from the previous screen).
+768 bytes = 256 x RGB, VGA 6-bit (0-63). `PALETTES.PAL` = 9 palettes (START.EXE 0000:826C copies slot
+min(n,8)). Slots 0-8 follow START's screen table (DS:0CBA): 0 AIR_ID, 1 ARMSSCRN, 2 BREFSCRN, 3 FOLDER1,
+4 HANGSCRN, 5 HOMESCRN, 6 ORDRSCRN, 7 ROSTSCRN, 8 BREFICON. Confirmed in U5: theatre maps -> slot 2,
+PLANES1-5 -> slot 0, CLIMBIN -> slot 8, WEAPONS1-3 -> slot 1 (slots 1 and 4 differ only in UI colours; 1 = ARMSSCRN chosen), own-named .PAL files (ADV, AWARDS, BREFSCRN,
+CEMETARY, DESK, ENDHANGR, FLAG, FLIGHT, LANDED1 (also LANDED2-4), RESCUE, SWAP, TASS), ORDRSPRT -> slot 6.
+Also confirmed: FOLDER2 (slot 3), ROSTSPRT (slot 7), HANGSPRT (slot 4), MEDALS (AWARDS.PAL).
+**Parked (no single palette fits, probably runtime-composed): ORDNANCE (loaded by VGAME, likely tied to the
+cockpit palette), REQUESTR (shown with ADV.PAL as placeholder).**
+**256LEFT/PIT/REAR/RIGHT (cockpit): none of the 21 palettes fits** - VGAME has no palette write of its own,
+so the flight palette is probably composed at run time (colour ramps in VGAME near image 0x1FD9A); later task.
 
 ## 3D objects: .3DX — `tools/f3d.py` (VGAME 11EB:00D3 renderer, loader 0000:0994)
 Three banks; object id word = `bank<<8 | index`, bank segment at DS:B75E+2·bank: 0 = `STFLT.3DX`
