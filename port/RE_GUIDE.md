@@ -200,3 +200,43 @@ u8 mode, then nframes × `{u32 off, u16 flag, x, y, w-1, h-1}` (last record = en
 ncolours × `{r,g,b,slot}` (6-bit), then sprite data at that base + off. Sprite RLE: row marker `FA` →
 literals (`FD n v` run, `FC` skip 1), other marker → (count,value) pairs; value `FC` = transparent;
 `FE` end of row, `FF` end of sprite. Pixel p maps to palette entry p-1.
+
+## §5 Sound: driver API, `.LOG` overlays, speech (S2.4)
+
+**There is no separate music data file.** `?SOUND.LOG` (`ASOUND/ISOUND/RSOUND.LOG`, 6 120 / 2 458 / 5 481 B)
+is a second MZ overlay of the same kind as `?SOUND.117` (§2.2) that `MPS_LOGO.EXE` loads itself
+(`"rsound.log"`…`"tsound.log"` strings; the driver letter picks the file) to play the **logo jingle**.
+Header differs from `.117`: id at image+10h (`"AdLib Logo   7-18-91"`), then `cseg`(+28h) `dseg`(+2Ah)
+`size`(+2Ch) `slot base`(+2Eh = 100) `n`(+30h = 11) and n entry offsets from +32h. Code is image 0..11B2h,
+copyright string at 11CFh, DS = image 11C0h (tune/voice data + 7 voice blocks of 1Ah bytes at DS:043C+1Ah·i).
+Entries: 100 `init(x)` (hooks **INT 8** itself, PIT reload 4C90h = 60.9 Hz), 101 `cmd(n)`, 102 shutdown,
+105 returns tick count; the rest are `retf`. `cmd` 0 = stop, 1 = pause (all streams → DS:0100), **2 = play
+the jingle** (stream starts DS:010E/0120/014C/017A/01A6/01B6). The ISR calls the sequencer (`0000:116E`,
+one `0D1A` step per voice) every 3rd, then every 5th tick. Per-voice byte stream: `<80h` = note data,
+`F5h..FFh` = control (switch at `0D86`, includes 1- and 2-level repeat counters and loops); the exact event
+grammar is **not decoded** — the port can run the original sequencer (S3.3) or emulate it as `tools/sound/drvemu.py` does.
+
+**`?SOUND.117` (in-game; ASOUND shown)** is polled: the game's own timer ISR (START `0000:8E6D`,
+PIT reload 4DAEh/5 = **300 Hz**) calls `snd_poll` (slot 103). `snd_cmd(n)` slot 101 dispatches 0..2Dh via
+`cs:0911`; all commands start OPL sequences that `snd_poll` advances. Detection in `snd_init`: AdLib timers
+(reg 4 ← 60h/80h/21h, status & E0h = C0h), PAS at port B8Ah/B8Bh and SB at 220h are probed for speech.
+Command numbers seen at call sites: START 2, 26-31, 33, 34; VGAME 0, 19, 23-25, 32, 40-45; END 2, 26, 28,
+36-39; PLAYER 2, 3. Rendered (`work/sound/asound_cmdNN.wav`): **3** 18 s tune (PLAYER intro), **36/37/38**
+3.8/5.1/6.5 s jingles (END), **39** long looping tune, **11/12** 0.5-0.7 s effects, 6-10, 13-20, 26-35 short
+UI/effect blips; 0, 1, 2, 21-25, 40 write nothing (stop/state; 40 = `snd_cmd(40, seg)` sets the speech
+buffer segment `[17E2]`); 41-45 = speech.
+(Rate caveat: tempo depends on the 300 Hz poll assumption; U5 listen.)
+
+**Speech** (`SPEECH.117`, 26 408 B = 8 clips) is loaded by VGAME at startup (`0000:0110`) and handed over by
+cmd 40. Format: unsigned 8-bit PCM, **8000 Hz** (cmd 41-45 handlers `cs:096D..` load AX=1F40h). On AdLib it is
+played by writing `sample>>2` through a table (`cs:0018`) into **OPL reg 43h** (operator volume) in a PIT-paced
+loop (`0B0F`) — no SB needed. Clip table (record = `end:u16, start:u16, para:u16`, 0-terminated) at
+`cs:09AA`: clip starts 0, 4216, 9251, 10572, 12829, 15654, 18343, 22119, end 26408. cmd 41 = clips 0+1,
+42 = clip 1, 43 = (clip 2 or 3, alternating by poll parity) + clip 4, 44 = clips 5+6, 45 = clips 5+7.
+
+Tools: `tools/sound/drvemu.py` (Unicorn 16-bit harness: loads the overlay at 2000h, applies relocations,
+hooks AdLib 388/389/38A/38B and the PIT, calls `snd_init/cmd/poll` or the INT 8 ISR, logs OPL writes with
+49 716 Hz time stamps), `tools/sound/oplrender.c` (Nuked-OPL3, `third_party/nuked-opl3`, log → WAV; build:
+`gcc -O2 -o work/oplrender.exe tools/sound/oplrender.c third_party/nuked-opl3/opl3.c -Ithird_party/nuked-opl3`),
+`tools/sound/render_all.py` (everything → `work/sound/*.wav`). Needs `pip install unicorn`.
+Roland (`RSOUND.*`, MT-32) and IBM/Tandy/speaker drivers are not rendered.
