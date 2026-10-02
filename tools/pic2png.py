@@ -25,6 +25,9 @@ THEATRES = ['LIBYA', 'PERSIAN', 'N_CAPE', 'C_EUROPE', 'VIETNAM', 'MID_EAST', 'KU
 SCREENS = ['AIR_ID', 'ARMSSCRN', 'BREFSCRN', 'FOLDER1', 'HANGSCRN', 'HOMESCRN', 'ORDRSCRN', 'ROSTSCRN', 'BREFICON']
 SPRITES = {'FOLDER2': 'FOLDER1', 'ORDRSPRT': 'ORDRSCRN', 'ROSTSPRT': 'ROSTSCRN', 'HANGSPRT': 'HANGSCRN'}  # guess
 EXTRA = {'LANDED2': 'LANDED1', 'LANDED3': 'LANDED1', 'LANDED4': 'LANDED1'}
+# guesses (U5): cockpit/climb -> FLIGHT, medals -> AWARDS
+GUESS = {'256LEFT': 'FLIGHT', '256PIT': 'FLIGHT', '256REAR': 'FLIGHT', '256RIGHT': 'FLIGHT', 'CLIMBIN': 'FLIGHT', 'MEDALS': 'AWARDS'}
+GUESS_IDX = {'PLANES1': 0, 'PLANES2': 0, 'PLANES3': 0, 'PLANES4': 0, 'PLANES5': 0, 'WEAPONS1': 6, 'WEAPONS2': 6, 'WEAPONS3': 6, 'ORDNANCE': 6}
 
 
 def choose(name):
@@ -38,6 +41,10 @@ def choose(name):
     if name in SPRITES:
         i = SCREENS.index(SPRITES[name])
         return PALS[i], f'PALETTES[{i}]?'
+    if name in GUESS:
+        return load_pal(f'{G}/{GUESS[name]}.PAL'), GUESS[name] + '.PAL?'
+    if name in GUESS_IDX:
+        return PALS[GUESS_IDX[name]], f'PALETTES[{GUESS_IDX[name]}]?'
     if name in EXTRA:
         return load_pal(f'{G}/{EXTRA[name]}.PAL'), EXTRA[name] + '.PAL'
     return load_pal(f'{G}/ADV.PAL'), 'ADV.PAL?'
