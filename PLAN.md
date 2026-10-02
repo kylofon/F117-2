@@ -82,6 +82,8 @@ Model: H = Haiku 4.5, S = Sonnet 5.5, O = Opus 5.5. Size: rough session length (
 _S2.1 status: decoder + PNGs done (`tools/picdec.py`, `tools/pic2png.py`, `work/pic/`); awaiting U5 (`work/pic/sheet.png`, `palettes.png`)._
 
 | S2.2 | `.PAN` animations and `LABSLOGO.SS` → PNG frames + contact sheet; **U5 check** against U3 captures | S | M |
+
+_S2.2 status: decoders done (`tools/lzs.py`, `panlib.py`, `pan2png.py`, `ss2png.py`; output `work/pan/`); all 6 PAN cels and 81 LABSLOGO sprites decode to exact record boundaries. Awaiting U5: `work/pan/*_sheet.png` vs U3 captures 02_title1, 03_title2, 04_title3a, 05_credits, 01_mps_logo (+ cockpit/bunker). Formats in `port/RE_GUIDE.md` §4._
 | S2.3 | 3D: `.3DX` objects (+ `STFLT`, `PHOTO`), `.3DG`/`.3DT`, `.WLD` layout → OBJ files + top-down theatre map PNGs; **U5 check** | O | L |
 | S2.4 | Sound: `.LOG` music format and driver API (from S1.2); AdLib render via Nuked-OPL3 (copy `../AcesOfThePacificEnhanced/third_party/nuked-opl3`) → `work/sound/*.wav`; `SPEECH.117`; **U5 listen** | S | M |
 | S2.5 | `ROSTER.FIL`, files written by SETUP/START (config, saves) → `FORMATS.md` | H | done 2026-10-02 |

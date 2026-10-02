@@ -184,3 +184,19 @@ writes `port/<name>_functions.csv/.json` (start, size, far, callers/callees, INT
 Addresses `SSSS:OOOO` as stored (Ghidra = SSSS+1000). Functions/coverage: SETUP 105/81%, PLAYER 111/93%, START 267/98%,
 VGAME 450/66% (the uncovered rest is far data segments 14b2/1853/1d50, not code), END 196/97%, MPS_LOGO 117/90%, DSWAP 101/97%.
 Not applicable to the `.117`/MGRAPHIC drivers (no MSC startup); handled in S1.2.
+
+## §4 Animation formats (S2.2)
+
+**`.PAN`** (PLAYER.EXE): the whole file is one LZEXE-style bit stream (`tools/lzs.py`; control word is
+fetched while the 16th bit of the previous one is taken; match offset = `0x2000 - (hi5<<8|lo)`, long
+len byte 0/1 = chunk end, 1 = more). Decoded stream:
+`'Z', speed, n:u16, n × u16 cel sizes, 768 B VGA palette (6-bit)` then n cels `'B',0,1,0 + RLE`.
+`speed` = divisor of 60 (20 → 3 ticks/frame). `tab[0]` includes the header; cel i ends at Σtab[0..i].
+Cel RLE (`PLAYER 0000:1006`) writes a delta onto the 320×200 screen (di from 0): `00 n v` fill,
+`1..7F n` literal, `81..FF` skip n-80h, `80 w:u16` long op (w>0 skip, 0 end, 8000-BFFF literal run, C000-FFFF fill+byte).
+
+**`.SS`** (`MADSS1`, MPS_LOGO 006d:0112): `"MADSS1" 1A name[9]`, u32 size, u16 nframes(+1), u32, u16, u16,
+u8 mode, then nframes × `{u32 off, u16 flag, x, y, w-1, h-1}` (last record = end marker), u8 ncolours,
+ncolours × `{r,g,b,slot}` (6-bit), then sprite data at that base + off. Sprite RLE: row marker `FA` →
+literals (`FD n v` run, `FC` skip 1), other marker → (count,value) pairs; value `FC` = transparent;
+`FE` end of row, `FF` end of sprite. Pixel p maps to palette entry p-1.
