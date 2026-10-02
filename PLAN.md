@@ -79,7 +79,7 @@ Model: H = Haiku 4.5, S = Sonnet 5.5, O = Opus 5.5. Size: rough session length (
 |---|---|---|---|
 | S2.1 | `.PIC`/`.PAL`/`PALETTES.PAL` → PNG + one contact sheet; **U5 check** | S | S |
 
-_S2.1 status: decoder + PNGs done (`tools/picdec.py`, `tools/pic2png.py`, `work/pic/`); awaiting U5 (`work/pic/sheet.png`, `palettes.png`)._
+_S2.1 status: PIC/PAL decode done; palettes confirmed in U5 except the 256 cockpit pics (runtime-composed palette, deferred) and a few unconfirmed guesses (see FORMATS.md)._
 
 | S2.2 | `.PAN` animations and `LABSLOGO.SS` → PNG frames + contact sheet; **U5 check** against U3 captures | S | M |
 
