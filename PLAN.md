@@ -9,7 +9,7 @@ human and expensive for a model (looking at pictures, playing the game, driving 
 ## Status
 
 - **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code).
-- **Next:** S2.1 (Sonnet, PIC/PAL). User tasks that can start now: U1, U2, U3.
+- **Next:** S2.1 U5 check (PIC/PAL sheets in `work/pic/`), then S2.2. User tasks that can start now: U1, U2, U3.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -78,10 +78,13 @@ Model: H = Haiku 4.5, S = Sonnet 5.5, O = Opus 5.5. Size: rough session length (
 | Id | Task | Model | Size |
 |---|---|---|---|
 | S2.1 | `.PIC`/`.PAL`/`PALETTES.PAL` → PNG + one contact sheet; **U5 check** | S | S |
+
+_S2.1 status: decoder + PNGs done (`tools/picdec.py`, `tools/pic2png.py`, `work/pic/`); awaiting U5 (`work/pic/sheet.png`, `palettes.png`)._
+
 | S2.2 | `.PAN` animations and `LABSLOGO.SS` → PNG frames + contact sheet; **U5 check** against U3 captures | S | M |
 | S2.3 | 3D: `.3DX` objects (+ `STFLT`, `PHOTO`), `.3DG`/`.3DT`, `.WLD` layout → OBJ files + top-down theatre map PNGs; **U5 check** | O | L |
 | S2.4 | Sound: `.LOG` music format and driver API (from S1.2); AdLib render via Nuked-OPL3 (copy `../AcesOfThePacificEnhanced/third_party/nuked-opl3`) → `work/sound/*.wav`; `SPEECH.117`; **U5 listen** | S | M |
-| S2.5 | `ROSTER.FIL`, files written by SETUP/START (config, saves) → `FORMATS.md` | H | S |
+| S2.5 | `ROSTER.FIL`, files written by SETUP/START (config, saves) → `FORMATS.md` | H | done 2026-10-02 |
 
 ### Phase 3 — Specs (output: `port/spec/<module>.md`, gate: `tools/spec_coverage.py` 100 %)
 Module split is confirmed in S1.5; one session per module. Specs are written so that a Sonnet session
