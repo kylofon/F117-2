@@ -23,3 +23,6 @@ __pycache__/
 /port/spec/tables/
 /_ghidra/
 /docs/*.txt
+
+# Local HTML view of PLAN.md (python tools/plan_site.py)
+/site/
