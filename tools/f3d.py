@@ -4,7 +4,7 @@ Ground truth: VGAME 11EB:00D3 (object renderer), 0000:0994/0AF9/0C2C (loaders), 
 
   f3d.py check                  parse every .3DX, report byte coverage and odd cases
   f3d.py dump FILE.3DX [N]      text dump of object N (all if omitted)
-  f3d.py obj                    -> work/3d/obj/<BANK>/oNNN.obj + <BANK>.mtl (LOD 0, OBJ +z = south)
+  f3d.py obj                    -> work/3d/obj/<BANK>/oNNN.obj + <BANK>.mtl (LOD 0, model coords, +z = south)
   f3d.py sheets                 -> work/3d/sheet_<BANK>.png (top-down/oblique renders, LOD 0)
   f3d.py maps                   -> work/3d/map_<TH>.png (top-down theatre: terrain levels 4..1 + .WLD sites)
                                    + work/3d/maps_sheet.png (all nine, 512 px each)
@@ -148,7 +148,7 @@ def palette(name='ADV.PAL'):
     return [tuple(min(255, (p[3 * i + k] * 255 + 31) // 63) for k in range(3)) for i in range(256)]
 
 
-BASE, ALT, SHADE6F = (150, 140, 100), (90, 120, 70), (70, 100, 150)   # ground ops, see colour_map
+BASE, ALT, SHADE6F = (150, 145, 95), (50, 90, 160), (110, 115, 70)   # land, water, land 2 (colour_map)
 
 
 def colour_map(cols, pal):
@@ -156,7 +156,7 @@ def colour_map(cols, pal):
     hi FF solid lo; FB no fill; FC 50% stipple of lo; FE AND lo onto the backdrop (7Fh, 6Fh);
     FD OR lo (80h); other hi = 2x2 dither of lo/hi. The ground backdrop colour (drawn through the
     graphics driver, not found yet) decides what the AND/OR ops look like, so they are shown as fixed
-    colours: bit 7 clear (backdrop, AND 7Fh) = BASE, OR 80h = ALT, AND 6Fh = SHADE6F."""
+    colours: bit 7 clear (backdrop = land, AND 7Fh) = BASE, OR 80h = water (U5) = ALT, AND 6Fh = SHADE6F."""
     ct = []
     for c in range(256):
         w = cols[c]; lo, hi = w & 0xFF, w >> 8
@@ -220,12 +220,12 @@ def export_obj(b, ct):
         L = [f'# {b["name"]}.3DX object {i}  flags {ob["flags"]:02X}  LODs ' +
              ' '.join(f'{dist:04X}->{p:04X}' for dist, p in ob['lods']),
              f'# model {m["at"]:04X} radius {m["rad"]} parts {len(m["parts"])} planes {len(m["planes"])}'
-             f'{" bsp" if m["bsp"] else ""}; OBJ (x, y, z) = model (x, y, -z): x east, y up, z south',
+             f'{" bsp" if m["bsp"] else ""}; OBJ = model coords: x east, y up, z south',
              f'mtllib {b["name"]}.mtl']
         if 'global_verts' in m:
             L.append('# vertices index the shared table [4EB6]: ' + ' '.join(map(str, m['global_verts'])))
         for x, y, z, part in m['verts']:
-            L.append(f'v {x} {y} {-z}')
+            L.append(f'v {x} {y} {z}')
         for pi, els in enumerate(m['faces']):
             pl = m['planes'][pi] if pi < len(m['planes']) else None
             for j, (kind, ids, col, cond) in enumerate(els):
@@ -253,21 +253,21 @@ def export_obj(b, ct):
 
 # ---------------------------------------------------------------- renders
 def project_oblique(x, y, z):
-    return x - 0.5 * z, -y - 0.35 * z            # x east, y up, z north; viewer south-up
+    return x + 0.5 * z, -y + 0.35 * z            # x east, y up, z south; viewer south-up
 
 
 def render_model(m, ct, size, view='oblique'):
     polys = model_polys(m, ct, default_ok)
     pts = [v[:3] for v in m['verts']] or [(0, 0, 0)]
     if view == 'top':
-        pr = lambda x, y, z: (x, -z)
+        pr = lambda x, y, z: (x, z)
         polys = [p for p in polys if p[0] is None or p[0]['n'][1] > 0 or p[0]['n'] == (0, 0, 0)]
         key = lambda p: sum(v[1] for v in p[1]) / len(p[1])
     else:
         pr = project_oblique
         polys = [p for p in polys if p[0] is None or p[0]['n'] == (0, 0, 0) or
-                 p[0]['n'][1] * 1 + p[0]['n'][2] * -1 > 0]       # facing the (up, south) viewer
-        key = lambda p: sum(v[1] - v[2] for v in p[1]) / len(p[1])
+                 p[0]['n'][1] + p[0]['n'][2] > 0]       # facing the (up, south) viewer
+        key = lambda p: sum(v[1] + v[2] for v in p[1]) / len(p[1])
     P = [pr(*v) for v in pts]
     x0, x1 = min(p[0] for p in P), max(p[0] for p in P)
     y0, y1 = min(p[1] for p in P), max(p[1] for p in P)
@@ -375,7 +375,8 @@ def theatre_map(th, ct, px=2048):
                 for rx, ry, rz, ot in t.get((level, ty), []):
                     if ot >= len(b['objs']):
                         continue
-                    X = (cx * 0x1000 + 0x800 + rx) * s; Y = (cy * 0x1000 + 0x800 + ry) * s
+                    # terrain y runs north: t = (8000h - WLD y) * 32 (0000:77D9); image Y = WORLD - t
+                    X = (cx * 0x1000 + 0x800 + rx) * s; Y = WORLD - (cy * 0x1000 + 0x800 + ry) * s
                     ob = b['objs'][ot]
                     (solid if ob['flags'] & 0x80 else flat).append((level, X, Y, s, ot))
     for site in w['sites']:
@@ -389,7 +390,7 @@ def theatre_map(th, ct, px=2048):
         ps = [p for p in model_polys(m, ct, default_ok)
               if p[0] is None or p[0]['n'][1] > 0 or p[0]['n'] == (0, 0, 0)]
         for pl, vs, rgb in sorted(ps, key=lambda p: sum(v[1] for v in p[1]) / len(p[1])):
-            dr.polygon([((X + vx * s) * k, (Y - vz * s) * k) for vx, vy, vz in vs], fill=rgb)
+            dr.polygon([((X + vx * s) * k, (Y + vz * s) * k) for vx, vy, vz in vs], fill=rgb)   # model z = south
 
     for o in flat:
         draw(*o)
@@ -409,8 +410,8 @@ def theatre_map(th, ct, px=2048):
         name = w['names'][nm] if nm < len(w['names']) else '?'
         if name and name not in seen:
             seen.add(name); dr.text((X + 4, Y - 5), name, fill=(255, 255, 0))
-    for i, (rgb, txt) in enumerate([(BASE, 'backdrop / AND 7Fh (bit 7 clear)'), (ALT, 'OR 80h (bit 7 set)'),
-                                    (SHADE6F, 'AND 6Fh'), ((255, 255, 0), '.WLD site')]):
+    for i, (rgb, txt) in enumerate([(BASE, 'land: backdrop / AND 7Fh'), (ALT, 'water: OR 80h'),
+                                    (SHADE6F, 'AND 6Fh (land 2?)'), ((255, 255, 0), '.WLD site')]):
         dr.rectangle([8, 8 + 14 * i, 18, 18 + 14 * i], fill=rgb, outline=(0, 0, 0))
         dr.text((24, 8 + 14 * i), txt, fill=(0, 0, 0))
     dr.text((8, 70), f'{th}  north up, 1 px = {WORLD // px} units, level-3 cell = {0x10000 * px // WORLD} px',

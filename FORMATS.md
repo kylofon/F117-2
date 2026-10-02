@@ -32,7 +32,7 @@ byte coverage (2 trailing zero bytes).
 - Plane = `3×s16 normal (|n| = 4000h), s32 d`, visible when n·eye + d ≥ 0 (n = d = 0: always). Prefix
   words: `80pp` = following planes belong to part pp; `8100 b var b val` = next plane hidden unless
   var[var&1F] = val.
-- Vertex = `3×s16 (x, y up, z north)`, prefix words 8000h-800Fh select the part. nverts < 0 = |n| bytes
+- Vertex = `3×s16 (x east, y up, z south)` (right-handed), prefix words 8000h-800Fh select the part. nverts < 0 = |n| bytes
   indexing the shared table DS:4EB6 (unused by the shipped data). Parts at rest: vertices are plain
   model coordinates; part planes are pivot-relative.
 - Face list until FFh: `n<20h` polygon of n edge indices + colour (FFh = skip; the edge set is
@@ -46,21 +46,23 @@ byte coverage (2 trailing zero bytes).
   FB no fill; FC 50 % stipple; FE AND lo onto the backdrop (7Fh, 6Fh); FD OR lo (80h); other hi = 2×2
   dither lo/hi. VGAME never writes the DAC (it inherits START's palette); renders use `ADV.PAL`
   (ramps A0-FF match the shading; to confirm). The ground backdrop colour is not found yet (drawn via
-  MGRAPHIC), so AND/OR polygons are shown in fixed legend colours.
+  MGRAPHIC), so AND/OR polygons are shown in fixed legend colours. Backdrop (bit 7 clear) = land, OR 80h
+  = water (U5, CE).
 
 ## Terrain: .3DG / .3DT — `tools/f3d.py` (VGAME 0000:0C2C, 0AF9; lookup 0865; scenery 04DA, E7AC)
 Tile quadtree, 5 levels. A level-L cell is 1000h level units; world = level units × 64/16/4/1 for levels
 4/3/2/1 (0000:0804; level 0 = ×½, never has objects). The theatre is 100000h world units square
-(16×16 level-3 cells), x east, y south; `.WLD` units × 32 = world.
+(16×16 level-3 cells), x east, y **north**: terrain t = (8000h − WLD y) × 32, x = WLD x × 32 (terrain
+  query 0000:77D9; `.WLD` y runs south).
 - Tile type: level 4 = 8×8 table in VGAME DS:0A68+40h·theatre (theatre = START order LB PG NC CE VN ME
   KU CU KO), index = cell + 2 (inner 4×4 = the theatre, 10h/11h = fillers); level 3 = `.3DG` map;
   levels 2/1/0 = child table `[parent·16 + (y&3)·4 + (x&3)]`.
-- `.3DG` (1810 bytes): `w '22'`; 16 bytes (overwritten); 16×16 level-3 map (row = y); 3×512 child
+- `.3DG` (1810 bytes): `w '22'`; 16 bytes (overwritten); 16×16 level-3 map (row = t, row 0 = south); 3×512 child
   tables for levels 2, 1, 0 (32 types × 4×4).
 - `.3DT`: `w '11'`; 5 `w` type counts (32); 5×32 `w` record counts per (level, type); records
   level-major then type-major, `4w (x, y, z, obj)`: x/y relative to the cell centre (+800h), z up,
   obj low byte = bank-1 object (bit 7: mission override lookup 0FB1 in DS:B772, 5-byte entries).
-- Placement (E7AC): model (x, y, z) = (rec x, rec z, −rec y) relative to the camera, so model +z = north.
+- Placement (E7AC): model (x, y, z) = (rec x, rec z, −rec y) relative to the camera, so model +z = south.
 
 ## World layout: .WLD — `tools/f3d.py` (START 0000:54BB load, 5625 copy to the far buffer [E096]+7Ah)
 `w 'BN'`, `w nSites`, `w ?` (13h), `w ?` (24h); nSites × 16-byte sites; `w nUnits`; nUnits × 36 bytes;
