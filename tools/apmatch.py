@@ -1,6 +1,6 @@
-"""Cross-match functions between INTRO.EXE, PS.EXE and AP_flat.exe (shared Dynamix library + RTL).
+"""Cross-match functions between the F-117A EXEs (shared MicroProse library + compiler RTL).
 
-Every indexed function (tools/apindex.py) is disassembled with all immediates, displacements and
+Every indexed function (tools/f117index.py) is disassembled with all immediates, displacements and
 branch/call targets masked, so relocated segment words, DGROUP offsets and far-call offsets do not
 matter. Two functions match exactly when their masked instruction sequences are equal; otherwise the
 best partner above THRESHOLD by the share of shared 6-instruction windows (as tools/td2match.py of
@@ -12,7 +12,7 @@ functions of the other exes in the `name` column (first found: ap > ps > intro),
 port/symbols.csv as rows with owner `match:<exe>` for partners that match exactly or score >= 0.9
 (earlier `match:` rows are regenerated; hand-written rows always win).
 
-usage: apmatch.py                 (reads port/{intro,ps,ap}_functions.json, writes port/shared_matches.csv)
+usage: apmatch.py                 (reads port/<exe>_functions.json, writes port/shared_matches.csv)
 """
 import csv, hashlib, json, os, re, struct
 from collections import defaultdict
@@ -23,7 +23,7 @@ N = 6
 THRESHOLD = 0.6
 md = Cs(CS_ARCH_X86, CS_MODE_16)
 NUM = re.compile(r'0x[0-9a-f]+|\b\d+\b')
-EXES = ['ap', 'ps', 'intro']
+EXES = ['vgame', 'start', 'end', 'setup', 'player', 'dswap', 'mps_logo']
 
 
 def image(path):
@@ -85,31 +85,23 @@ for e in EXES:
     index[e] = ix
 
 rows = []
-used_ps = set()
-used_intro = set()
-for fn in progs['ap']:
-    if fn['n'] < 4:
-        continue
-    p, ps_sc, ps_ex = best(fn, 'ps')
-    i, in_sc, in_ex = best(fn, 'intro')
-    if p is None and i is None:
-        continue
-    if p:
-        used_ps.add(p['start'])
-    if i:
-        used_intro.add(i['start'])
-    rows.append(dict(ap=fn['start'], ps=p['start'] if p else '', intro=i['start'] if i else '',
-                     ps_score='%.2f' % ps_sc if p else '', intro_score='%.2f' % in_sc if i else '',
-                     exact=('ps ' if ps_ex else '') + ('intro' if in_ex else ''), insns=fn['n'],
-                     f=fn['f'], pf=p['f'] if p else None, inf=i['f'] if i else None))
-for fn in progs['ps']:
-    if fn['n'] < 4 or fn['start'] in used_ps:
-        continue
-    i, in_sc, in_ex = best(fn, 'intro')
-    if i is None:
-        continue
-    rows.append(dict(ap='', ps=fn['start'], intro=i['start'], ps_score='', intro_score='%.2f' % in_sc,
-                     exact='intro' if in_ex else '', insns=fn['n'], f=None, pf=fn['f'], inf=i['f']))
+used = set()
+for e in EXES:                                   # reference order: biggest program first
+    for fn in progs[e]:
+        if fn['n'] < 4 or (e, fn['start']) in used:
+            continue
+        grp = {e: (fn, 1.0, True)}
+        for o in EXES:
+            if o == e:
+                continue
+            x, sc, ex = best(fn, o)
+            if x is not None and (o, x['start']) not in used:
+                grp[o] = (x, sc, ex)
+        if len(grp) < 2:
+            continue
+        for o, (x, _, _) in grp.items():
+            used.add((o, x['start']))
+        rows.append(grp)
 
 
 def hint(*fs):
@@ -135,12 +127,14 @@ seeds = dict(names)
 used = {(k[0], v['name']) for k, v in names.items()}
 with open(os.path.join(ROOT, 'port', 'shared_matches.csv'), 'w', newline='') as fh:
     w = csv.writer(fh)
-    w.writerow(['ap', 'ps', 'intro', 'ps_score', 'intro_score', 'exact', 'insns', 'name', 'hint'])
-    for r in rows:
-        src = next(((e, seeds[(e, r[e])]) for e in EXES if (e, r[e]) in seeds), None)
+    w.writerow(EXES + [e + '_score' for e in EXES] + ['exact', 'insns', 'name', 'hint'])
+    for g in rows:
+        src = next(((e, seeds[(e, g[e][0]['start'])]) for e in EXES if e in g and (e, g[e][0]['start']) in seeds), None)
         nm = src[1]['name'] if src else ''
-        w.writerow([r['ap'], r['ps'], r['intro'], r['ps_score'], r['intro_score'], r['exact'].strip(),
-                    r['insns'], nm, hint(r['f'], r['pf'], r['inf'])])
+        w.writerow([g[e][0]['start'] if e in g else '' for e in EXES]
+                   + [('%.2f' % g[e][1]) if e in g else '' for e in EXES]
+                   + [' '.join(e for e in EXES if e in g and g[e][2] and len(g) > 1), max(x[0]['n'] for x in g.values()),
+                      nm, hint(*[g[e][0]['f'] for e in EXES if e in g])])
 # carry every hand-written name to its best partner in each other exe (pairwise, not through AP)
 by_start = {e: {x['start']: x for x in progs[e]} for e in EXES}
 for (e, addr), sr in sorted(seeds.items()):
@@ -161,7 +155,7 @@ for (e, addr), sr in sorted(seeds.items()):
         names[(o, x['start'])] = rr
         used.add((o, rr['name']))
         sym_rows.append(rr)
-order = {e: i for i, e in enumerate(['intro', 'ps', 'ap'])}
+order = {e: i for i, e in enumerate(EXES)}
 with open(sym, 'w', newline='', encoding='utf-8') as fh:
     w = csv.DictWriter(fh, ['exe', 'kind', 'address', 'name', 'type', 'owner', 'other_names', 'notes'])
     w.writeheader()
@@ -169,9 +163,6 @@ with open(sym, 'w', newline='', encoding='utf-8') as fh:
         w.writerow(rr)
 print('symbols.csv: %d rows, %d carried over by matching'
       % (len(sym_rows), sum(1 for x in sym_rows if x['owner'].startswith('match:'))))
-n3 = sum(1 for r in rows if r['ap'] and r['ps'] and r['intro'])
-print('%d rows: %d in all three, %d AP+PS only, %d AP+INTRO only, %d PS+INTRO only; exact AP=PS %d'
-      % (len(rows), n3, sum(1 for r in rows if r['ap'] and r['ps'] and not r['intro']),
-         sum(1 for r in rows if r['ap'] and r['intro'] and not r['ps']),
-         sum(1 for r in rows if not r['ap']), sum(1 for r in rows if 'ps' in r['exact'])))
-print('functions: ap %d, ps %d, intro %d' % tuple(len(progs[e]) for e in EXES))
+from collections import Counter
+print('%d groups; sizes %s' % (len(rows), dict(sorted(Counter(len(g) for g in rows).items()))))
+print('functions: ' + ', '.join('%s %d' % (e, len(progs[e])) for e in EXES))

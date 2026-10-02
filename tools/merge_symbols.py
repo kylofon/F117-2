@@ -1,6 +1,6 @@
-"""Merge port/spec/*_symbols.csv into port/symbols.csv (INTRO, PS, AP) and report conflicts.
+"""Merge port/spec/*_symbols.csv into port/symbols.csv (all F-117A EXEs) and report conflicts.
 
-Row key: (exe, kind, address). kind is `func` (address SSSS:OOOO, AP = AP_flat.exe addresses) or
+Row key: (exe, kind, address). kind is `func` (address SSSS:OOOO, image-relative segment:offset of that exe) or
 `global` (DS:xxxx in that exe's DGROUP, or SSSS:OOOO for a code/far-data segment variable; `data`
 is accepted as a synonym). When several specs name the same key, the owner with the highest
 priority wins (a module's own name beats one given in passing by another module); ties go to the
@@ -14,6 +14,7 @@ other_names lists the losing names) and port/symbol_conflicts.txt:
 import csv, glob, os, re
 from collections import defaultdict
 
+EXES = ('vgame', 'start', 'end', 'setup', 'player', 'dswap', 'mps_logo', 'misc', 'mgraphic', 'f117')
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SPEC = os.path.join(ROOT, 'port', 'spec')
 
@@ -51,7 +52,7 @@ def main():
                 kind = {'data': 'global', 'function': 'func', 'var': 'global'}.get(kind, kind)
                 name = re.sub(r'\W', '_', (r.get('name') or '').strip())
                 addr = norm_addr(kind, r.get('address') or '')
-                if exe not in ('intro', 'ps', 'ap') or kind not in ('func', 'global') or not addr or not name:
+                if exe not in EXES or kind not in ('func', 'global') or not addr or not name:
                     skipped.append('%s:%d %s' % (os.path.basename(path), n, ','.join((r.get(k) or '') for k in ('exe', 'kind', 'address', 'name'))))
                     continue
                 if kind == 'func' and addr.startswith('DS:'):
