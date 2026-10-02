@@ -21,15 +21,23 @@ def load_pal(path):
 allpals = open(f'{G}/PALETTES.PAL', 'rb').read()
 PALS = [pal6(allpals[i * 768:(i + 1) * 768]) for i in range(len(allpals) // 768)]
 THEATRES = ['LIBYA', 'PERSIAN', 'N_CAPE', 'C_EUROPE', 'VIETNAM', 'MID_EAST', 'KUWAIT', 'CUBA', 'KOREA']
+# START.EXE 0000:826C (palette n, clamp 8) pairs with the screen table at DS:0CBA (START 3641/35FC):
+SCREENS = ['AIR_ID', 'ARMSSCRN', 'BREFSCRN', 'FOLDER1', 'HANGSCRN', 'HOMESCRN', 'ORDRSCRN', 'ROSTSCRN', 'BREFICON']
+SPRITES = {'FOLDER2': 'FOLDER1', 'ORDRSPRT': 'ORDRSCRN', 'ROSTSPRT': 'ROSTSCRN', 'HANGSPRT': 'HANGSCRN'}  # guess
 EXTRA = {'LANDED2': 'LANDED1', 'LANDED3': 'LANDED1', 'LANDED4': 'LANDED1'}
 
 
 def choose(name):
     if os.path.exists(f'{G}/{name}.PAL'):
         return load_pal(f'{G}/{name}.PAL'), name + '.PAL'
-    if name in THEATRES:
-        i = THEATRES.index(name)
+    if name in THEATRES:          # maps are shown on the briefing screen
+        return PALS[2], 'PALETTES[2]'
+    if name in SCREENS:
+        i = SCREENS.index(name)
         return PALS[i], f'PALETTES[{i}]'
+    if name in SPRITES:
+        i = SCREENS.index(SPRITES[name])
+        return PALS[i], f'PALETTES[{i}]?'
     if name in EXTRA:
         return load_pal(f'{G}/{EXTRA[name]}.PAL'), EXTRA[name] + '.PAL'
     return load_pal(f'{G}/ADV.PAL'), 'ADV.PAL?'
