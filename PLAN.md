@@ -9,7 +9,7 @@ human and expensive for a model (looking at pictures, playing the game, driving 
 ## Status
 
 - **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code).
-- **Next:** S2.1 U5 check (PIC/PAL sheets in `work/pic/`), then S2.2. User tasks that can start now: U1, U2, U3.
+- **Next:** S2.2. User tasks that can start now: U1, U2, U3.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -79,7 +79,7 @@ Model: H = Haiku 4.5, S = Sonnet 5.5, O = Opus 5.5. Size: rough session length (
 |---|---|---|---|
 | S2.1 | `.PIC`/`.PAL`/`PALETTES.PAL` → PNG + one contact sheet; **U5 check** | S | S |
 
-_S2.1 status: PIC/PAL decode done; palettes confirmed in U5 except the 256 cockpit pics (runtime-composed palette, deferred) and a few unconfirmed guesses (see FORMATS.md)._
+_S2.1 status: DONE. PIC/PAL decoded; palettes confirmed in U5. Parked for the 3D/flight tasks: 256LEFT/PIT/REAR/RIGHT, ORDNANCE, REQUESTR (runtime-composed palettes; see FORMATS.md)._
 
 | S2.2 | `.PAN` animations and `LABSLOGO.SS` → PNG frames + contact sheet; **U5 check** against U3 captures | S | M |
 
