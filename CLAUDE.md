@@ -6,6 +6,8 @@ Faithful C/SDL3 port of MicroProse *F-117A Nighthawk Stealth Fighter 2.0* (1991)
 Token budget rules:
 - Work on ONE subtask per session (PLAN.md id, e.g. `S1.2`). Read only `PLAN.md` "Status" + that
   subtask, not the whole file. Update its status line, run `python tools/plan_site.py`, commit.
+  PLAN.md tables: status goes in the row's last cell (`done YYYY-MM-DD`, `U5 pending`); longer notes
+  go in the "Notes:" list under the table, never between rows (that breaks the table).
 - Never read large files whole. `Grep`/`rg` first, then `Read` with offset/limit. Specs, decomps and
   disassembly are always searched, never dumped.
 - Tools write to `work/` (or `port/`); print only a short summary (counts, first lines, errors).
