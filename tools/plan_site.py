@@ -1,14 +1,89 @@
-"""Render PLAN.md into site/index.html (git-ignored). Re-run after editing PLAN.md.
+﻿"""Render PLAN.md into site/index.html (git-ignored). Re-run after editing PLAN.md or after a session.
 
 The Markdown is embedded in the page and rendered in the browser with marked (cdnjs), so the page
 opens straight from disk (file://) with no server.
+
+Token usage comes from the Claude Code transcripts of this project
+(~/.claude/projects/<repo path with :\\/ -> ->/*.jsonl, subagent transcripts included). Each session is
+assigned to a subtask by an `S<n>.<m>` id in its first prompt, or by its first prompt matching the
+subtask's text in PLAN.md.
 """
+import collections
+import json
 import pathlib
+import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 md = (ROOT / "PLAN.md").read_text(encoding="utf-8")
 out = ROOT / "site" / "index.html"
 out.parent.mkdir(exist_ok=True)
+
+TRANSCRIPTS = pathlib.Path.home() / ".claude" / "projects" / re.sub(r"[:\\/]", "-", str(ROOT))
+MODEL_TAG = {"haiku": "H", "sonnet": "S", "opus": "O"}
+FIELDS = ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens", "output_tokens")
+
+
+def norm(s):
+    return re.sub(r"[^a-z0-9]+", " ", s.lower()).strip()
+
+
+SUBTASKS = {m[1]: m[2].strip() for m in re.finditer(r"^\|\s*(S\d+\.\d+)\s*\|\s*([^|]+)\|", md, re.M)}
+
+
+OVERRIDES = {"f5e96afb": "S0.1"}  # session id prefix -> subtask, for sessions whose prompt names none
+
+
+def subtask_of(prompt, sid=""):
+    if sid[:8] in OVERRIDES:
+        return OVERRIDES[sid[:8]]
+    m = re.search(r"\bS\d+\.\d+\b", prompt[:200])
+    if m:
+        return m[0]
+    p = norm(prompt)[:60]
+    for sid, text in SUBTASKS.items():
+        if p and (p in norm(text) or norm(text)[:60] in p):
+            return sid
+    return ""
+
+
+def first_prompt(path):
+    for line in path.open(encoding="utf-8"):
+        o = json.loads(line)
+        c = o.get("message", {}).get("content") if o.get("type") == "user" else None
+        if isinstance(c, list):
+            c = " ".join(b.get("text", "") for b in c if isinstance(b, dict) and b.get("type") == "text")
+        if c and not c.lstrip().startswith("<"):
+            return c
+    return ""
+
+
+def usage():
+    sessions = []
+    for main in sorted(TRANSCRIPTS.glob("*.jsonl")):
+        sid = main.stem
+        title_file = TRANSCRIPTS / sid / "custom-title.json"
+        title = json.loads(title_file.read_text(encoding="utf-8")).get("customTitle", "") if title_file.exists() else ""
+        prompt = first_prompt(main)
+        msgs = {}  # message id -> (model, usage, timestamp); a message is logged once per content block
+        for f in [main, *(TRANSCRIPTS / sid).rglob("*.jsonl")]:
+            for line in f.open(encoding="utf-8"):
+                o = json.loads(line)
+                m = o.get("message") if o.get("type") == "assistant" else None
+                if m and m.get("usage") and m.get("model", "").startswith("claude"):
+                    msgs[m.get("id") or o.get("uuid")] = (m["model"], m["usage"], o.get("timestamp", ""))
+        if not msgs:
+            continue
+        by_model = collections.defaultdict(lambda: dict.fromkeys(FIELDS, 0) | {"requests": 0})
+        for model, u, _ in msgs.values():
+            tag = next((t for k, t in MODEL_TAG.items() if k in model), model)
+            row = by_model[tag]
+            row["requests"] += 1
+            for k in FIELDS:
+                row[k] += u.get(k) or 0
+        stamps = sorted(t for _, _, t in msgs.values() if t)
+        sessions.append({"id": sid[:8], "subtask": subtask_of(prompt, sid), "title": title or prompt[:70],
+                         "start": stamps[0][:16].replace("T", " ") if stamps else "", "models": by_model})
+    return sessions
 
 PAGE = """<!doctype html>
 <html lang="en">
@@ -49,6 +124,12 @@ th { background:var(--code); font-weight:600; }
 .b.H { background:var(--h); } .b.S { background:var(--s); } .b.O { background:var(--o); }
 td.done { color:var(--done); font-weight:600; }
 .meta { color:var(--muted); font-size:12px; margin-bottom:20px; }
+.cards { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px; margin:12px 0 18px; }
+.card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:10px 12px; }
+.card .v { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+.card .k { color:var(--muted); font-size:12px; }
+td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.note { color:var(--muted); font-size:13px; }
 @media (max-width: 800px) { .wrap { grid-template-columns:1fr; } nav { position:static; max-height:none; } }
 </style>
 </head>
@@ -58,9 +139,11 @@ td.done { color:var(--done); font-weight:600; }
 <main>
 <div class="meta">Generated from PLAN.md by tools/plan_site.py</div>
 <div id="doc"></div>
+<section id="usage"></section>
 </main>
 </div>
 <script type="text/markdown" id="src">__MD__</script>
+<script type="application/json" id="usage-data">__USAGE__</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script>
 const src = document.getElementById('src').textContent;
@@ -74,8 +157,47 @@ doc.querySelectorAll('td').forEach(td => {
   if (/^[HSO]$/.test(t)) td.innerHTML = '<span class="b ' + t + '">' + t + '</span>';
   else if (/^done/.test(t)) td.classList.add('done');
 });
+// Token usage
+const sessions = JSON.parse(document.getElementById('usage-data').textContent);
+const F = ['input_tokens', 'cache_creation_input_tokens', 'cache_read_input_tokens', 'output_tokens'];
+const fmt = n => n >= 1e6 ? (n / 1e6).toFixed(2) + ' M' : n >= 1e3 ? (n / 1e3).toFixed(1) + ' k' : String(n);
+const esc = s => String(s).replace(/[<&"]/g, c => ({'<': '&lt;', '&': '&amp;', '"': '&quot;'})[c]);
+const badge = t => /^[HSO]$/.test(t) ? '<span class="b ' + t + '">' + t + '</span>' : esc(t);
+const zero = () => Object.fromEntries(F.concat('requests').map(k => [k, 0]));
+const add = (a, b) => { for (const k in a) a[k] += b[k] || 0; return a; };
+const total = zero(), perModel = {}, perTask = {};
+for (const s of sessions) {
+  const key = s.subtask || 'session ' + s.id;
+  const t = perTask[key] ??= {subtask: s.subtask, title: s.subtask ? '' : s.title, sessions: 0, models: new Set(), u: zero(), start: s.start};
+  t.sessions++;
+  for (const [m, u] of Object.entries(s.models)) {
+    add(total, u); add(perModel[m] ??= zero(), u); add(t.u, u); t.models.add(m);
+  }
+}
+const nums = u => F.map(k => '<td class="n">' + fmt(u[k]) + '</td>').join('');
+const head = first => '<tr>' + first + '<th class="n">Input</th><th class="n">Cache write</th><th class="n">Cache read</th><th class="n">Output</th></tr>';
+const taskRows = Object.values(perTask).sort((a, b) => (a.subtask || '~' + a.start).localeCompare(b.subtask || '~' + b.start, undefined, {numeric: true}))
+  .map(t => '<tr><td>' + esc(t.subtask || '—') + '</td><td>' + esc(t.title) + '</td><td class="n">' + t.sessions + '</td><td>' +
+    [...t.models].map(badge).join(' ') + '</td>' + nums(t.u) + '</tr>').join('');
+const modelRows = Object.entries(perModel).map(([m, u]) => '<tr><td>' + badge(m) + '</td><td class="n">' + u.requests + '</td>' + nums(u) + '</tr>').join('');
+const sessionRows = sessions.slice().sort((a, b) => a.start.localeCompare(b.start)).map(s => {
+  const u = Object.values(s.models).reduce(add, zero());
+  return '<tr><td>' + esc(s.start) + '</td><td>' + esc(s.subtask || '—') + '</td><td>' + esc(s.title) + '</td><td>' +
+    Object.keys(s.models).map(badge).join(' ') + '</td>' + nums(u) + '</tr>';
+}).join('');
+const card = (v, k) => '<div class="card"><div class="v">' + v + '</div><div class="k">' + k + '</div></div>';
+document.getElementById('usage').innerHTML = sessions.length ? (
+  '<h2>Token usage</h2><div class="cards">' + card(fmt(total.input_tokens), 'Input (uncached)') +
+  card(fmt(total.cache_creation_input_tokens), 'Cache write') + card(fmt(total.cache_read_input_tokens), 'Cache read') +
+  card(fmt(total.output_tokens), 'Output') + card(total.requests, 'Requests') + card(sessions.length, 'Sessions') + '</div>' +
+  '<p class="note">From the Claude Code transcripts of this project, subagents included. Sessions are matched to a subtask by an S-id or the subtask text in their first prompt. Totals include the session that is still running only up to the last page rebuild.</p>' +
+  '<h3>By subtask</h3><div class="tbl"><table>' + head('<th>Subtask</th><th>Session</th><th class="n">Sessions</th><th>Models</th>') + taskRows + '</table></div>' +
+  '<h3>By model</h3><div class="tbl"><table>' + head('<th>Model</th><th class="n">Requests</th>') + modelRows + '</table></div>' +
+  '<h3>Sessions</h3><div class="tbl"><table>' + head('<th>Start (UTC)</th><th>Subtask</th><th>Title</th><th>Models</th>') + sessionRows + '</table></div>'
+) : '';
+
 const toc = document.getElementById('toc');
-doc.querySelectorAll('h2, h3').forEach((h, i) => {
+document.querySelectorAll('main h2, main h3').forEach((h, i) => {
   h.id = 'h' + i;
   const a = document.createElement('a');
   a.href = '#' + h.id; a.textContent = h.textContent; a.className = h.tagName.toLowerCase();
@@ -87,5 +209,7 @@ doc.querySelectorAll('h2, h3').forEach((h, i) => {
 """
 
 # <script> content is raw text: only a closing tag inside it needs breaking up.
-out.write_text(PAGE.replace("__MD__", md.replace("</script", "<\\/script")), encoding="utf-8")
+data = json.dumps(usage()).replace("</", "<\\/")
+out.write_text(PAGE.replace("__MD__", md.replace("</script", "<\\/script")).replace("__USAGE__", data),
+               encoding="utf-8")
 print(f"wrote {out.relative_to(ROOT)}")
