@@ -8,8 +8,8 @@ human and expensive for a model (looking at pictures, playing the game, driving 
 
 ## Status
 
-- **Done:** S0.1 (repo).
-- **Next:** S1.1 (Haiku). User tasks that can start now: U1, U2, U3.
+- **Done:** S0.1 (repo), S1.1 (survey tool).
+- **Next:** S1.2 (Opus, overlay chain). User tasks that can start now: U1, U2, U3.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -68,7 +68,7 @@ Model: H = Haiku 4.5, S = Sonnet 5.5, O = Opus 5.5. Size: rough session length (
 ### Phase 1 — Executable map (output: `port/RE_GUIDE.md`, `port/*_functions.csv`, `port/symbols.csv`)
 | Id | Task | Model | Size |
 |---|---|---|---|
-| S1.1 | `tools/survey.py`: MZ headers, relocs, packer signatures (EXEPACK/LZEXE/PKLITE), compiler RTL strings, INT/port usage counts for every EXE/COM/.117 → `work/survey.txt`; unpack if packed; 20-line summary into `RE_GUIDE.md` §1 | H | S |
+| S1.1 | `tools/survey.py`: MZ headers, relocs, packer signatures (EXEPACK/LZEXE/PKLITE), compiler RTL strings, INT/port usage counts for every EXE/COM/.117 → `work/survey.txt`; unpack if packed; 20-line summary into `RE_GUIDE.md` §1 | H | done 2026-10-02 |
 | S1.2 | Overlay chain and driver protocol: how `F117.COM` loads/chains programs, shared memory area, exit/next-program codes, `MGRAPHIC.EXE` and `*.117` entry tables (all small files) → `RE_GUIDE.md` §2 | O | M |
 | S1.3 | Indexer `tools/f117index.py` from `tools/apindex.py`/`td3index.py` (compiler found in S1.1): segments, functions, DGROUP, strings, ints, ports → `port/<exe>_functions.csv` | S | M |
 | S1.4 | Ghidra: adapt `tools/ghidra/aotp_*.sh` → `f117_*.sh`, run headless in the background, decompiles to `port/decomp/` (ignored). Print only counts | H | S |
