@@ -86,7 +86,6 @@ def render_log(path, cmd, secs, maxticks=200000):
     D.call(1, cmd)
     hz = 1193182.0 / (D.pit[-2] | D.pit[-1] << 8 if len(D.pit) >= 2 else 65536)
     isr_off, isr_seg = struct.unpack('<HH', bytes(uc.mem_read(0x20, 4)))
-    D.log.clear()
     ticks = int(secs * hz)
     for k in range(ticks):
         D.t = int(k * OPL_RATE / hz)
@@ -104,7 +103,6 @@ def render(cmd, secs, hz, drv='ASOUND'):
     D = Drv('Game/%s.117' % drv)
     D.call(0, 0)                       # snd_init(0)
     D.call(1, cmd)                     # snd_cmd
-    D.log.clear()                      # drop init writes (chip reset is done by the renderer)
     idle, n = 0, 0
     for k in range(int(secs * hz)):
         D.t = int(k * OPL_RATE / hz)
