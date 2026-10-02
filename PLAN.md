@@ -85,6 +85,9 @@ _S2.1 status: decoder + PNGs done (`tools/picdec.py`, `tools/pic2png.py`, `work/
 
 _S2.2 status: decoders done (`tools/lzs.py`, `panlib.py`, `pan2png.py`, `ss2png.py`; output `work/pan/`); all 6 PAN cels and 81 LABSLOGO sprites decode to exact record boundaries. Awaiting U5: `work/pan/*_sheet.png` vs U3 captures 02_title1, 03_title2, 04_title3a, 05_credits, 01_mps_logo (+ cockpit/bunker). Formats in `port/RE_GUIDE.md` §4._
 | S2.3 | 3D: `.3DX` objects (+ `STFLT`, `PHOTO`), `.3DG`/`.3DT`, `.WLD` layout → OBJ files + top-down theatre map PNGs; **U5 check** | O | L |
+
+_S2.3 status: done except U5. `python tools/f3d.py all` → `work/3d/`: 989 OBJ (`obj/<BANK>/oNNN.obj`, LOD 0, + `.mtl`), `sheet_<BANK>.png` (oblique renders of every object), `map_<TH>.png` + `maps_sheet.png` (top-down terrain levels 4..1 + `.WLD` sites, north up). Formats in `FORMATS.md` (3D objects / Terrain / World layout); all 11 `.3DX` parse with 100 % byte coverage. Open: ground backdrop colour (AND/OR ground polygons use legend colours), flight palette = `ADV.PAL` (guess: VGAME never sets the DAC), level-4 table index = START theatre order._
+
 | S2.4 | Sound: `.LOG` music format and driver API (from S1.2); AdLib render via Nuked-OPL3 (copy `../AcesOfThePacificEnhanced/third_party/nuked-opl3`) → `work/sound/*.wav`; `SPEECH.117`; **U5 listen** | S | M |
 
 _S2.4 status: done except U5. `.LOG` = logo-jingle overlay, driver API + speech in RE_GUIDE §5; WAVs in `work/sound/` (`asound_log_logo`, `asound_cmd03/36-39` music, `speech_0-7`). Please listen and report (tempo assumes 300 Hz poll)._
