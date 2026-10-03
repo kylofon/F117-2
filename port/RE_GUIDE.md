@@ -221,9 +221,9 @@ PIT reload 4DAEh/5 = **300 Hz**) calls `snd_poll` (slot 103). `snd_cmd(n)` slot 
 `cs:0911`; all commands start OPL sequences that `snd_poll` advances. Detection in `snd_init`: AdLib timers
 (reg 4 ← 60h/80h/21h, status & E0h = C0h), PAS at port B8Ah/B8Bh and SB at 220h are probed for speech.
 Command numbers seen at call sites: START 2, 26-31, 33, 34; VGAME 0, 19, 23-25, 32, 40-45; END 2, 26, 28,
-36-39; PLAYER 2, 3. Rendered (`work/sound/asound_cmdNN.wav`): **3** 18 s tune (PLAYER intro), **36/37/38**
+36-39; PLAYER 2, 3. Rendered (`work/sound/asound_cmdNN.wav`): **3** 18 s multi-voice cue sequence (PLAYER intro soundtrack; user: sounds like several effects strung together, not a tune), **36/37/38**
 3.8/5.1/6.5 s jingles (END), **39** long looping tune, **11/12** 0.5-0.7 s effects, 6-10, 13-20, 26-35 short
-UI/effect blips; 0, 1, 2, 21-25, 40 write nothing (stop/state; 40 = `snd_cmd(40, seg)` sets the speech
+UI/effect blips; 0, 1, 2, 21-25, 40 write nothing (stop/pause/state; 2 = query: returns OR of the 7 voice-active flags; 40 = `snd_cmd(40, seg)` sets the speech
 buffer segment `[17E2]`); 41-45 = speech.
 (Rate caveat: tempo depends on the 300 Hz poll assumption; U5 listen.)
 
