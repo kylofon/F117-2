@@ -15,10 +15,27 @@ min(n,8)). Slots 0-8 follow START's screen table (DS:0CBA): 0 AIR_ID, 1 ARMSSCRN
 PLANES1-5 -> slot 0, CLIMBIN -> slot 8, WEAPONS1-3 -> slot 1 (slots 1 and 4 differ only in UI colours; 1 = ARMSSCRN chosen), own-named .PAL files (ADV, AWARDS, BREFSCRN,
 CEMETARY, DESK, ENDHANGR, FLAG, FLIGHT, LANDED1 (also LANDED2-4), RESCUE, SWAP, TASS), ORDRSPRT -> slot 6.
 Also confirmed: FOLDER2 (slot 3), ROSTSPRT (slot 7), HANGSPRT (slot 4), MEDALS (AWARDS.PAL).
-**Parked (no single palette fits, probably runtime-composed): ORDNANCE (loaded by VGAME, likely tied to the
-cockpit palette), REQUESTR (shown with ADV.PAL as placeholder).**
-**256LEFT/PIT/REAR/RIGHT (cockpit): none of the 21 palettes fits** - VGAME has no palette write of its own,
-so the flight palette is probably composed at run time (colour ramps in VGAME near image 0x1FD9A); later task.
+Cockpit 256LEFT/PIT/REAR/RIGHT and ORDNANCE (sprite page loaded by VGAME 0000:02FE) use the **flight
+palette** below; REQUESTR is a START sprite page loaded while ARMSSCRN is shown (START 0000:0963) -> slot 1
+(to confirm in U5).
+
+## Flight palette (VGAME, S2.6)
+VGAME writes the DAC itself: `set_dac(first, count, far rgb)` 14A2:000E (waits for retrace; a
+grey-scale path when BIOS 0489h bit 1), `get_dac(far buf)` 14A2:00C5. Data in DGROUP 1E23:
+- Three 256-entry palettes: **A** 164A, **B** 194A, **C** 1C4A. 1088:0006 copies one to 104A and
+  sets all 256: `[43AE]`=0 (normal) → B if `[3658]` else C; `[43AE]`=1 (debug key 0000:D2F0,
+  which also toggles `[3658]`) → C if `[3658]` else A. `[3658]` = comm[33h], set by START 0000:50AB:
+  1 if a target type is 4, else random (`[caca]+42h` set: 90 %, else 70 %); START also uses it for
+  the mission clock (hour + 18/06). B and C are dark (night), A is bright.
+- Climate byte DS:00EE[theatre] (LB PG NC CE VN ME KU CU KO = 6 6 2 2 2 6 6 2 2): ≠ 2 (desert) →
+  48-byte ramps over entries 70h-7Fh and A0h-AFh: A ← 1F4A, 1FDA; B ← 1F7A, 200A; C ← 1FAA, 203A.
+- `[365E]` = (`[C07A]` & C0h) ≠ 0 → entries 98h-9Fh ← 206A (green ramp, 8 colours; 1088:00A3);
+  1088:00BD sets them from 1212 (filled at run time). 0000:4857 also rebuilds 104A from C (`[3658]`)
+  or A through the near helper 0000:EA26 (not traced).
+- Quit requester (0000:1E9E): saves the DAC to 0D4A, sets 134A (= `ADV.PAL` exactly), shows `adv.pic`,
+  restores 0D4A.
+- Layout: 00-0F EGA colours, 14h-26h and 40h-4Fh cockpit greys, 60h-6Fh sky ramp, **70h-7Fh ground
+  ramp** (70h = horizon haze → 7Fh near), 98h-9Fh MFD, A0h-FFh 16-colour shading ramps, F0h-FFh water.
 
 ## 3D objects: .3DX — `tools/f3d.py` (VGAME 11EB:00D3 renderer, loader 0000:0994)
 Three banks; object id word = `bank<<8 | index`, bank segment at DS:B75E+2·bank: 0 = `STFLT.3DX`
@@ -49,10 +66,10 @@ byte coverage (2 trailing zero bytes).
 - Colour byte → word through table [7D50] (VGAME DGROUP 7D60, 7F60 = day, 8160, 8360 = low detail).
   Fill (1359:0AF7): hi FF solid lo (lo ≥ A0h shaded: lo − [4894], clamped to its 16-colour ramp);
   FB no fill; FC 50 % stipple; FE AND lo onto the backdrop (7Fh, 6Fh); FD OR lo (80h); other hi = 2×2
-  dither lo/hi. VGAME never writes the DAC (it inherits START's palette); renders use `ADV.PAL`
-  (ramps A0-FF match the shading; to confirm). The ground backdrop colour is not found yet (drawn via
-  MGRAPHIC), so AND/OR polygons are shown in fixed legend colours. Backdrop (bit 7 clear) = land, OR 80h
-  = water (U5, CE).
+  dither lo/hi. Palette: see Flight palette. **Ground backdrop** (0000:1600): 16 four-point bands in
+  colours 70h+i (horizon → near), or one flat colour 7Ch (0000:179A); AND/OR polygons recolour those
+  pixels: AND 7Fh keeps the ground ramp, AND 6Fh → 60h-6Fh, OR 80h → F0h-FFh (water, U5 CE). Renders
+  use band 7Ch.
 
 ## Terrain: .3DG / .3DT — `tools/f3d.py` (VGAME 0000:0C2C, 0AF9; lookup 0865; scenery 04DA, E7AC)
 Tile quadtree, 5 levels. A level-L cell is 1000h level units; world = level units × 64/16/4/1 for levels

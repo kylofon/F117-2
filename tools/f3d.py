@@ -140,31 +140,42 @@ def colour_tables():
     return {t: struct.unpack_from('<256H', img, DGROUP * 16 + t) for t in (0x7D60, 0x7F60, 0x8160, 0x8360)}
 
 
-def palette(name='ADV.PAL'):
-    """Flight palette: VGAME never programs the DAC, it inherits START's. ADV.PAL fits the engine
-    (16-entry shading ramps A0-FF: grey, green, blue-greys; 94h whitish lights); to confirm in U5.
-    (PALETTES.PAL holds START's UI-screen palettes, not per-theatre ones.)"""
-    p = open(f'{G}/{name}', 'rb').read()[:768]
+FLIGHT_PAL = {'A': 0x164A, 'B': 0x194A, 'C': 0x1C4A}   # VGAME DGROUP, 256 x RGB (6-bit) each
+# Desert patch (1088:0006, when climate DS:00EE[theatre] != 2): 16-colour ramps copied over entries
+# 70h-7Fh (ground) and A0h-AFh of each flight palette.
+DESERT = {'A': (0x1F4A, 0x1FDA), 'B': (0x1F7A, 0x200A), 'C': (0x1FAA, 0x203A)}
+BACKDROP = 0x7C   # ground: 16 bands 70h+i (0000:1736), flat 7Ch in the other mode (0000:179A)
+
+
+def palette(th='CE', which='A', raw=False):
+    """In-flight palette (VGAME 1088:0006 -> set_dac 14A2:000E, all 256 entries). Three palettes in
+    DGROUP: A (164A), B (194A), C (1C4A); START sets comm[33h] (mostly 1, random) and VGAME picks
+    B when it is 1, C when 0 (both night, C darker); A (bright) only via the debug key at 0000:D2F0.
+    Desert theatres (LB PG ME KU: climate byte 6) get the DESERT ramps. ADV.PAL = DGROUP 134A is
+    the quit-requester palette, not the flight one."""
+    img = vgame_image(); D = DGROUP * 16
+    p = bytearray(img[D + FLIGHT_PAL[which]:D + FLIGHT_PAL[which] + 768])
+    if img[D + 0xEE + THEATRES.index(th)] != 2:
+        for idx, src in zip((0x70, 0xA0), DESERT[which]):
+            p[3 * idx:3 * idx + 48] = img[D + src:D + src + 48]
+    if raw:
+        return bytes(p)
     return [tuple(min(255, (p[3 * i + k] * 255 + 31) // 63) for k in range(3)) for i in range(256)]
 
 
-BASE, ALT, SHADE6F = (150, 145, 95), (50, 90, 160), (110, 115, 70)   # land, water, land 2 (colour_map)
-
-
-def colour_map(cols, pal):
+def colour_map(cols, pal, bd=BACKDROP):
     """3DX colour byte -> RGB (None = not drawn) via a remap table word (fill 1359:0AF7, colour 1359:01D4):
-    hi FF solid lo; FB no fill; FC 50% stipple of lo; FE AND lo onto the backdrop (7Fh, 6Fh);
-    FD OR lo (80h); other hi = 2x2 dither of lo/hi. The ground backdrop colour (drawn through the
-    graphics driver, not found yet) decides what the AND/OR ops look like, so they are shown as fixed
-    colours: bit 7 clear (backdrop = land, AND 7Fh) = BASE, OR 80h = water (U5) = ALT, AND 6Fh = SHADE6F."""
+    hi FF solid lo; FB no fill; FC 50% stipple of lo over the backdrop; FE AND lo onto the backdrop
+    index (7Fh keeps the 70h-7Fh ground ramp, 6Fh -> 60h-6Fh); FD OR lo (80h -> F0h-FFh, water);
+    other hi = 2x2 dither of lo/hi. The backdrop is one ground band, bd (default 7Ch)."""
     ct = []
     for c in range(256):
         w = cols[c]; lo, hi = w & 0xFF, w >> 8
         if hi == 0xFF: ct.append(pal[lo])
         elif hi == 0xFB: ct.append(None)
-        elif hi == 0xFC: ct.append(tuple((a + b) // 2 for a, b in zip(pal[lo], BASE)))
-        elif hi == 0xFE: ct.append(BASE if lo | 0x80 == 0xFF else SHADE6F)
-        elif hi == 0xFD: ct.append(ALT)
+        elif hi == 0xFC: ct.append(tuple((a + b) // 2 for a, b in zip(pal[lo], pal[bd])))
+        elif hi == 0xFE: ct.append(pal[bd & lo])
+        elif hi == 0xFD: ct.append(pal[bd | lo])
         else: ct.append(tuple((a + b) // 2 for a, b in zip(pal[lo], pal[hi])))
     return ct
 
@@ -359,13 +370,13 @@ SCALE = {4: 64, 3: 16, 2: 4, 1: 1}                # world units per level unit (
 WORLD = 0x100000                                    # 16 level-3 cells of 0x1000 level units
 
 
-def theatre_map(th, ct, px=2048):
+def theatre_map(th, ct, pal, px=2048):
     ti = THEATRES.index(th)
     img = vgame_image()
     l4 = img[DGROUP * 16 + 0xA68 + 64 * ti:DGROUP * 16 + 0xA68 + 64 * ti + 64]
     b = load_bank(f'{G}/{th}.3DX'); g = load_3dg(th); t = load_3dt(th); w = load_wld(th)
     k = px / WORLD
-    im = Image.new('RGB', (px, px), BASE); dr = ImageDraw.Draw(im)
+    im = Image.new('RGB', (px, px), pal[BACKDROP]); dr = ImageDraw.Draw(im)
     flat, solid = [], []
     for level in (4, 3, 2, 1):
         s = SCALE[level]; n = WORLD // (0x1000 * s)
@@ -410,12 +421,13 @@ def theatre_map(th, ct, px=2048):
         name = w['names'][nm] if nm < len(w['names']) else '?'
         if name and name not in seen:
             seen.add(name); dr.text((X + 4, Y - 5), name, fill=(255, 255, 0))
-    for i, (rgb, txt) in enumerate([(BASE, 'land: backdrop / AND 7Fh'), (ALT, 'water: OR 80h'),
-                                    (SHADE6F, 'AND 6Fh (land 2?)'), ((255, 255, 0), '.WLD site')]):
-        dr.rectangle([8, 8 + 14 * i, 18, 18 + 14 * i], fill=rgb, outline=(0, 0, 0))
-        dr.text((24, 8 + 14 * i), txt, fill=(0, 0, 0))
+    for i, (rgb, txt) in enumerate([(pal[BACKDROP], f'ground backdrop {BACKDROP:02X}h / AND 7Fh'),
+                                    (pal[BACKDROP | 0x80], 'OR 80h (water)'),
+                                    (pal[BACKDROP & 0x6F], 'AND 6Fh'), ((255, 255, 0), '.WLD site')]):
+        dr.rectangle([8, 8 + 14 * i, 18, 18 + 14 * i], fill=rgb, outline=(255, 255, 255))
+        dr.text((24, 8 + 14 * i), txt, fill=(255, 255, 255))
     dr.text((8, 70), f'{th}  north up, 1 px = {WORLD // px} units, level-3 cell = {0x10000 * px // WORLD} px',
-            fill=(0, 0, 0))
+            fill=(255, 255, 255))
     im.save(f'{O}/map_{th}.png')
     return len(flat), len(solid)
 
@@ -471,7 +483,9 @@ def main():
     if a[0] == 'dump':
         cmd_dump(a[1], int(a[2]) if len(a) > 2 else None); return
     cols = colour_tables()[0x7F60]
-    ct = lambda name: colour_map(cols, palette())
+    which = next((x[4:] for x in a if x.startswith('pal=')), 'A')   # flight palette A/B/C
+    pl = lambda name: palette(name if name in THEATRES else 'CE', which)
+    ct = lambda name: colour_map(cols, pl(name))
     if a[0] in ('obj', 'all'):
         print('obj:', sum(export_obj(load_bank(f), ct(bank_name(f))) for f in banks()), 'files')
     if a[0] in ('sheets', 'all'):
@@ -481,7 +495,7 @@ def main():
     if a[0] in ('maps', 'all'):
         sh = Image.new('RGB', (3 * 512, 3 * 528), (0, 0, 0)); dr = ImageDraw.Draw(sh)
         for i, th in enumerate(THEATRES):
-            print('map', th, 'flat/solid objects', theatre_map(th, ct(th)))
+            print('map', th, 'flat/solid objects', theatre_map(th, ct(th), pl(th)))
             x, y = (i % 3) * 512, (i // 3) * 528
             sh.paste(Image.open(f'{O}/map_{th}.png').resize((512, 512), Image.LANCZOS), (x, y + 16))
             dr.text((x + 4, y + 2), f'{th} (theatre {i})', fill=(255, 255, 255))

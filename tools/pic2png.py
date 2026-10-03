@@ -1,10 +1,13 @@
 """All .PIC (+ .PAL / PALETTES.PAL) -> work/pic/*.png, work/pic/sheet.png, work/pic/palettes.png.
 Palette choice per PIC: own .PAL; theatre maps -> PALETTES.PAL index (START/END string order);
-LANDED2-4 -> LANDED1.PAL; everything else -> ADV.PAL (guess, marked '?' on the sheet)."""
+LANDED2-4 -> LANDED1.PAL; cockpit (256*) and ORDNANCE -> VGAME flight palette B (also saved as
+<name>_A/_C.png); REQUESTR -> PALETTES[1] (START 0000:0963 loads it while ARMSSCRN is shown);
+everything else -> ADV.PAL (guess, marked '?' on the sheet)."""
 import glob, os, sys
 sys.path.insert(0, os.path.dirname(__file__))
 from PIL import Image, ImageDraw
 from picdec import decode
+import f3d
 
 G, O = 'Game', 'work/pic'
 os.makedirs(O, exist_ok=True)
@@ -27,10 +30,17 @@ SPRITES = {'FOLDER2': 'FOLDER1', 'ORDRSPRT': 'ORDRSCRN', 'ROSTSPRT': 'ROSTSCRN',
 EXTRA = {'LANDED2': 'LANDED1', 'LANDED3': 'LANDED1', 'LANDED4': 'LANDED1'}
 # guesses (U5): cockpit/climb -> FLIGHT, medals -> AWARDS
 GUESS = {'MEDALS': 'AWARDS'}  # confirmed
-GUESS_IDX = {'CLIMBIN': 8, '256LEFT': 8, '256PIT': 8, '256REAR': 8, '256RIGHT': 8, 'PLANES1': 0, 'PLANES2': 0, 'PLANES3': 0, 'PLANES4': 0, 'PLANES5': 0, 'WEAPONS1': 1, 'WEAPONS2': 1, 'WEAPONS3': 1, 'ORDNANCE': 6}
+FLIGHT = ['256LEFT', '256PIT', '256REAR', '256RIGHT', 'ORDNANCE']   # drawn by VGAME (S2.6)
+GUESS_IDX = {'CLIMBIN': 8, 'REQUESTR': 1, 'PLANES1': 0, 'PLANES2': 0, 'PLANES3': 0, 'PLANES4': 0, 'PLANES5': 0, 'WEAPONS1': 1, 'WEAPONS2': 1, 'WEAPONS3': 1}
+
+
+def flight(which):
+    return pal6(f3d.palette('CE', which, raw=True))
 
 
 def choose(name):
+    if name in FLIGHT:
+        return flight('B'), 'flight B'
     if os.path.exists(f'{G}/{name}.PAL'):
         return load_pal(f'{G}/{name}.PAL'), name + '.PAL'
     if name in THEATRES:          # maps are shown on the briefing screen
@@ -63,6 +73,9 @@ for f in sorted(glob.glob(f'{G}/*.PIC')):
     pal, pname = choose(name)
     im = render(data, pal)
     im.save(f'{O}/{name}.png')
+    if name in FLIGHT:
+        for w in 'AC':
+            render(data, flight(w)).save(f'{O}/{name}_{w}.png')
     tiles.append((name, pname, im))
     print(f'{name:10} {pname}')
 
@@ -79,6 +92,7 @@ sheet.save(f'{O}/sheet.png')
 # palettes: every .PAL and each PALETTES.PAL slot as a 16x16 swatch grid
 pals = [(os.path.basename(p), load_pal(p)) for p in sorted(glob.glob(f'{G}/*.PAL')) if not p.endswith('PALETTES.PAL')]
 pals += [(f'PALETTES[{i}]', p) for i, p in enumerate(PALS)]
+pals += [(f'flight {w} {th}', pal6(f3d.palette(th, w, raw=True))) for th in ('CE', 'LB') for w in 'ABC']
 S, C = 8, 4
 ps = Image.new('RGB', (C * (16 * S + 8), ((len(pals) + C - 1) // C) * (16 * S + 20)), (32, 32, 32))
 pd = ImageDraw.Draw(ps)

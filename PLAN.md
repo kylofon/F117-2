@@ -15,6 +15,7 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 |---|---|---|---|
 | U5 | Open `work\pan\*_sheet.png` next to your captures `01_mps_logo`, `02_title1`, `03_title2`, `04_title3a`, `05_credits` (+ cockpit/bunker); reply `OK` or what differs | S2.2 | 10 min |
 | U5 | Listen to `work\sound\*.wav` (`asound_log_logo`, `asound_cmd03/36-39`, `speech_0-7`); reply `OK` or what is wrong (tempo assumes a 300 Hz poll) | S2.4 | 10 min |
+| U5 | Open `work\3d\maps_sheet.png`, `work\3d\sheet_*.png` (day palette A) and `work\pic\256PIT.png`, `256LEFT/REAR/RIGHT`, `ORDNANCE` (night palette B; `_A`/`_C` variants), `REQUESTR.png`, `palettes.png` (last 6 = flight A/B/C for CE and LB). Compare cockpit with your in-flight captures; reply `OK` or what looks wrong (also: is the water blue, desert ground tan in LB/PG?) | S2.6 | 10 min |
 | U1 | Manual PDF → `docs\manual.pdf` (+ `pdftotext`), see U1 below | all | 10 min |
 | U2, U3 | DOSBox-X setup and reference captures, if not done yet (U2/U3 below); S2.2 compares against them | S2.2, later | 45 min |
 
@@ -94,12 +95,13 @@ Model: H = Haiku 4.5, S = Sonnet 5.5, O = Opus 5.5. Size: rough session length (
 | S2.3 | 3D: `.3DX` objects (+ `STFLT`, `PHOTO`), `.3DG`/`.3DT`, `.WLD` layout → OBJ files + top-down theatre map PNGs; **U5 check** | O | done 2026-10-02 (colours → S2.6) |
 | S2.4 | Sound: `.LOG` music format and driver API (from S1.2); AdLib render via Nuked-OPL3 (copy `../AcesOfThePacificEnhanced/third_party/nuked-opl3`) → `work/sound/*.wav`; `SPEECH.117`; **U5 listen** | S | U5 pending |
 | S2.5 | `ROSTER.FIL`, files written by SETUP/START (config, saves) → `FORMATS.md` | H | done 2026-10-02 |
-| S2.6 | Flight palette and ground backdrop: how VGAME/START compose the in-flight palette (VGAME never writes the DAC; colour ramps near VGAME image 1FD9Ah; time of day/theatre?) and which colour the ground backdrop under the AND 7Fh/6Fh / OR 80h polygons gets; then fix `tools/f3d.py` (`palette`, `colour_map`) and the parked cockpit/ORDNANCE/REQUESTR PICs; **U5 check** sheets + cockpit vs U3 in-flight captures | O | M |
+| S2.6 | Flight palette and ground backdrop: how VGAME/START compose the in-flight palette (VGAME never writes the DAC; colour ramps near VGAME image 1FD9Ah; time of day/theatre?) and which colour the ground backdrop under the AND 7Fh/6Fh / OR 80h polygons gets; then fix `tools/f3d.py` (`palette`, `colour_map`) and the parked cockpit/ORDNANCE/REQUESTR PICs; **U5 check** sheets + cockpit vs U3 in-flight captures | O | U5 pending |
 
 Notes:
 - S2.1 status: DONE. PIC/PAL decoded; palettes confirmed in U5. Parked for the 3D/flight tasks: 256LEFT/PIT/REAR/RIGHT, ORDNANCE, REQUESTR (runtime-composed palettes; see FORMATS.md).
 - S2.2 status: decoders done (`tools/lzs.py`, `panlib.py`, `pan2png.py`, `ss2png.py`; output `work/pan/`); all 6 PAN cels and 81 LABSLOGO sprites decode to exact record boundaries. Awaiting U5: `work/pan/*_sheet.png` vs U3 captures 02_title1, 03_title2, 04_title3a, 05_credits, 01_mps_logo (+ cockpit/bunker). Formats in `port/RE_GUIDE.md` §4.
 - S2.3 status: DONE (geometry; maps confirmed in U5). `python tools/f3d.py all` → `work/3d/`: 989 OBJ (`obj/<BANK>/oNNN.obj`, LOD 0, + `.mtl`), `sheet_<BANK>.png`, `map_<TH>.png` + `maps_sheet.png` (north up). Formats in `FORMATS.md` (3D objects / Terrain / World layout); all 11 `.3DX` parse with 100 % byte coverage. Colours are wrong (`ADV.PAL` guess, legend colours for ground ops) → S2.6.
+- S2.6 status: done except U5. VGAME does write the DAC (14A2:000E): three flight palettes A/B/C in DGROUP (B/C = night, picked by comm[33h]; A = debug), desert ramp patch per theatre, ground backdrop = bands 70h-7Fh; FORMATS.md "Flight palette". `tools/f3d.py` (`palette(th, which)`, `colour_map` on backdrop 7Ch; `pal=B`/`pal=C` arg, default A) and `tools/pic2png.py` (cockpit/ORDNANCE → flight B, + `_A`/`_C` files; REQUESTR → PALETTES[1]) regenerated.
 - S2.4 status: done except U5. `.LOG` = logo-jingle overlay, driver API + speech in RE_GUIDE §5; WAVs in `work/sound/` (`asound_log_logo`, `asound_cmd03/36-39` music, `speech_0-7`). Please listen and report (tempo assumes 300 Hz poll).
 
 ### Phase 3 — Specs (output: `port/spec/<module>.md`, gate: `tools/spec_coverage.py` 100 %)
