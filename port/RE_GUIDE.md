@@ -225,7 +225,7 @@ Command numbers seen at call sites: START 2, 26-31, 33, 34; VGAME 0, 19, 23-25, 
 3.8/5.1/6.5 s jingles (END), **39** long looping tune, **11/12** 0.5-0.7 s effects, 6-10, 13-20, 26-35 short
 UI/effect blips; 0, 1, 2, 21-25, 40 write nothing (stop/pause/state; 2 = query: returns OR of the 7 voice-active flags; 40 = `snd_cmd(40, seg)` sets the speech
 buffer segment `[17E2]`); 41-45 = speech.
-(U5: logo OK; 300 Hz poll was too fast -> 60 Hz, re-listen pending.)
+(U5 OK: logo, 36-39 at 60 Hz, speech. cmd 3 sounded too slow at 60 Hz; accepted at a fixed 120 Hz poll — PLAYER's real rate was not determined.)
 
 **Speech** (`SPEECH.117`, 26 408 B = 8 clips) is loaded by VGAME at startup (`0000:0110`) and handed over by
 cmd 40. Format: unsigned 8-bit PCM, **8000 Hz** (cmd 41-45 handlers `cs:096D..` load AX=1F40h). On AdLib it is

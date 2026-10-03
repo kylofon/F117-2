@@ -33,13 +33,16 @@ def speech():
         pcm_wav('work/sound/speech_%d.wav' % i, d[SPEECH_CLIPS[i]:SPEECH_CLIPS[i + 1]])
 
 
+CMD_HZ = {3: 120}       # PLAYER intro soundtrack: fixed 120 Hz poll (U5-approved); others follow the ISR rule
+
+
 def main():
     D = drvemu.render_log('Game/ASOUND.LOG', 2, 8)      # logo jingle (MPS_LOGO, sound-driver letter A)
     wav('asound_log_logo', D.log)
     print('asound_log_logo  %d writes' % len(D.log))
     speech()
     for c in range(46):
-        D = drvemu.render(c, 90)
+        D = drvemu.render(c, 90, hz=CMD_HZ.get(c))
         if D.log:
             wav('asound_cmd%02d' % c, D.log)
             print('asound_cmd%02d  %5d writes  %.1f s' % (c, len(D.log), D.log[-1][0] / drvemu.OPL_RATE))

@@ -99,17 +99,21 @@ def render_log(path, cmd, secs, maxticks=200000):
     return D
 
 
-def render(cmd, secs, hz=60, drv='ASOUND'):
+def render(cmd, secs, hz=None, drv='ASOUND'):
     """Poll rate follows the game's timer ISR (START 0000:8E6D): snd_poll returns -1 -> PIT back to the 60 Hz
     base, > 0 -> base/5 (300 Hz), 0 -> unchanged. Idle polls return -1, so music runs at 60 Hz."""
     D = Drv('Game/%s.117' % drv)
     D.call(0, 0)                       # snd_init(0)
     D.call(1, cmd)                     # snd_cmd
+    fixed = hz is not None
+    hz = hz or 60
     idle, n, t = 0, 0, 0.0
     while t < secs:
         D.t = int(t * OPL_RATE)
         r = D.call(3)                  # snd_poll
-        if r == 0xFFFF:
+        if fixed:
+            pass
+        elif r == 0xFFFF:
             hz = 60
         elif r & 0x8000 == 0 and r:
             hz = 300
