@@ -13,11 +13,12 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 
 | Task | What to do | For | Time |
 |---|---|---|---|
+| U-player | Run original PLAYER (DOSBox: `F117.COM` start up to the title animations) and tell me: (1) do the title/credit frames play at about 60 ticks/s or noticeably faster (70 Hz)? (2) does the first frame fade in from black over ~5 s? Reply with what you see. | S3.4 | 3 min |
 | U-font | Open `work/s32/fonts_sheet.png` (7 bitmap fonts, run `python tools/mgfont.py` to regenerate): are the glyphs clean (no shifted/garbled rows)? Reply OK or describe. | S3.2 | 2 min |
 
 ## Status
 
-- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec).
+- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.4 (front-end spec).
 - **Next:** S3.3 (sound spec). Your tasks: **User to-do** above.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
@@ -99,6 +100,7 @@ Notes:
 - S2.3 status: DONE (geometry; maps confirmed in U5). `python tools/f3d.py all` → `work/3d/`: 989 OBJ (`obj/<BANK>/oNNN.obj`, LOD 0, + `.mtl`), `sheet_<BANK>.png`, `map_<TH>.png` + `maps_sheet.png` (north up). Formats in `FORMATS.md` (3D objects / Terrain / World layout); all 11 `.3DX` parse with 100 % byte coverage. Colours are wrong (`ADV.PAL` guess, legend colours for ground ops) → S2.6.
 - S2.6 status: DONE (U5 OK 2026-10-03). VGAME does write the DAC (14A2:000E): three flight palettes A/B/C in DGROUP (B/C = night, picked by comm[33h]; A = debug), desert ramp patch per theatre, ground backdrop = bands 70h-7Fh; FORMATS.md "Flight palette". `tools/f3d.py` (`palette(th, which)`, `colour_map` on backdrop 7Ch; `pal=B`/`pal=C` arg, default A) and `tools/pic2png.py` (cockpit/ORDNANCE → flight B, + `_A`/`_C` files; REQUESTR → PALETTES[1]) regenerated; all confirmed in U5.
 - S2.4: done. `.LOG` = logo-jingle overlay; driver API, speech, poll-rate rule in RE_GUIDE §5. WAVs in `work/sound/` (U5 listened: logo, 36-39, speech OK; cmd 3 = PLAYER intro cue sequence rendered at a fixed 120 Hz poll, user-chosen).
+- S3.4 status: DONE (U-player pending). `port/spec/frontend.md` + `frontend_symbols.csv` (56 rows, `python tools/frontend_syms.py`); `tools/dsann.py` = fndis with DGROUP string annotations. SETUP screen/flow and comm fields, MPS_LOGO (SS loader palette base 31, delays in 18.2 Hz ticks, 146 ticks = 8 s, key completes the animation instantly), PLAYER (tick callback, 5 s fade-in, snd_cmd 3/0/2, exit on any input), DSWAP (port = return 1), MISC (6 entries) all verified. Open: PLAYER tick rate 60 vs 70 Hz, fade look (U-player); SETUP quirk comm+30h always 0.
 - S3.2 status: DONE (U-font pending). `port/spec/video.md` + `video_symbols.csv` (94 rows, `python tools/video_syms.py`); `tools/mgfont.py` decodes the 7 fonts embedded in MGRAPHIC. All 84 driver slots read; text/sprite/poly/line algorithms specified; program-side PIC decoder mapped (START 86A8-8A31 = END 47FF.. = DSWAP 0AAB.. = VGAME 11CE). Open: shake unit, DAC-13 flash (runtime look).
 - S3.1 status: DONE. `port/spec/platform.md` + `platform_symbols.csv` (517 rows over all 7 programs, `python tools/platform_syms.py`; `tools/fndis.py` = per-function disassembly). Library = MSC 5/6 small-model RTL + MicroProse layer (fatal-on-error DOS wrappers, joystick/mouse, retrace-calibrated PIT timer, Ctrl-Break hook); END holds it all at `0000:3E45..5F63` (read in full). Open: sound cadence 60 Hz vs calibrated 70 Hz class 4 (spec §4/§9). Hand-offs: 59 shared rows unnamed in `work/s31/unassigned.txt` (video/shell); `tools/spec_coverage.py` still has the Aces layout -> S3.10.
 
@@ -110,7 +112,7 @@ can port a function from its section alone.
 | S3.1 | platform: RTL, startup, memory, timer, keyboard, joystick, files, overlay chain | S | done 2026-10-03 |
 | S3.2 | video: `MGRAPHIC` driver API, blitters, PIC/PAN decoding, fonts | S | done 2026-10-03 · U-font pending |
 | S3.3 | sound: driver API, music sequencer, AdLib device | S | M |
-| S3.4 | front end: `MPS_LOGO`, `SETUP`, `PLAYER`, `DSWAP`, `MISC`, title/credits | S | M |
+| S3.4 | front end: `MPS_LOGO`, `SETUP`, `PLAYER`, `DSWAP`, `MISC`, title/credits | S | done 2026-10-03 · U-player pending |
 | S3.5 | shell (`START`): roster, theatres, briefing, arming, ID quiz | S | L |
 | S3.6 | sim flow (`VGAME`): main loop, mission state, HUD, cockpit, MFDs, view modes | S | L |
 | S3.7 | render3d: transform, clipping, polygons, terrain, sky, sorting | O | L |
