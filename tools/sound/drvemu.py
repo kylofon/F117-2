@@ -99,25 +99,32 @@ def render_log(path, cmd, secs, maxticks=200000):
     return D
 
 
-def render(cmd, secs, hz, drv='ASOUND'):
+def render(cmd, secs, hz=60, drv='ASOUND'):
+    """Poll rate follows the game's timer ISR (START 0000:8E6D): snd_poll returns -1 -> PIT back to the 60 Hz
+    base, > 0 -> base/5 (300 Hz), 0 -> unchanged. Idle polls return -1, so music runs at 60 Hz."""
     D = Drv('Game/%s.117' % drv)
     D.call(0, 0)                       # snd_init(0)
     D.call(1, cmd)                     # snd_cmd
-    idle, n = 0, 0
-    for k in range(int(secs * hz)):
-        D.t = int(k * OPL_RATE / hz)
-        D.call(3)                      # snd_poll
+    idle, n, t = 0, 0, 0.0
+    while t < secs:
+        D.t = int(t * OPL_RATE)
+        r = D.call(3)                  # snd_poll
+        if r == 0xFFFF:
+            hz = 60
+        elif r & 0x8000 == 0 and r:
+            hz = 300
+        t += 1.0 / hz
         idle = idle + 1 if len(D.log) == n else 0
         n = len(D.log)
         if idle > 2 * hz:              # nothing written for 2 s: sound finished
             break
-    D.t = int(k * OPL_RATE / hz)
+    D.t = int(t * OPL_RATE)
     return D
 
 
 if __name__ == '__main__':
     cmd = int(sys.argv[1]); secs = float(sys.argv[2]) if len(sys.argv) > 2 else 30
-    hz = float(sys.argv[3]) if len(sys.argv) > 3 else 300
+    hz = float(sys.argv[3]) if len(sys.argv) > 3 else 60
     D = render(cmd, secs, hz)
     out = 'work/sound/asound_cmd%02d.opl' % cmd
     with open(out, 'wb') as f:

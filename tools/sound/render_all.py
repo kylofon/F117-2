@@ -39,7 +39,7 @@ def main():
     print('asound_log_logo  %d writes' % len(D.log))
     speech()
     for c in range(46):
-        D = drvemu.render(c, 60, 300)
+        D = drvemu.render(c, 90)
         if D.log:
             wav('asound_cmd%02d' % c, D.log)
             print('asound_cmd%02d  %5d writes  %.1f s' % (c, len(D.log), D.log[-1][0] / drvemu.OPL_RATE))

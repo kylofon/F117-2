@@ -217,7 +217,7 @@ one `0D1A` step per voice) every 3rd, then every 5th tick. Per-voice byte stream
 grammar is **not decoded** — the port can run the original sequencer (S3.3) or emulate it as `tools/sound/drvemu.py` does.
 
 **`?SOUND.117` (in-game; ASOUND shown)** is polled: the game's own timer ISR (START `0000:8E6D`,
-PIT reload 4DAEh/5 = **300 Hz**) calls `snd_poll` (slot 103). `snd_cmd(n)` slot 101 dispatches 0..2Dh via
+PIT reload 4DAEh) calls `snd_poll` (slot 103) and steers its own rate from the result: -1 -> 60 Hz base (idle polls return -1, so music runs at **60 Hz**), >0 -> base/5 = 300 Hz, 0 -> unchanged. One poll = one tick of every voice. `snd_cmd(n)` slot 101 dispatches 0..2Dh via
 `cs:0911`; all commands start OPL sequences that `snd_poll` advances. Detection in `snd_init`: AdLib timers
 (reg 4 ← 60h/80h/21h, status & E0h = C0h), PAS at port B8Ah/B8Bh and SB at 220h are probed for speech.
 Command numbers seen at call sites: START 2, 26-31, 33, 34; VGAME 0, 19, 23-25, 32, 40-45; END 2, 26, 28,
@@ -225,7 +225,7 @@ Command numbers seen at call sites: START 2, 26-31, 33, 34; VGAME 0, 19, 23-25, 
 3.8/5.1/6.5 s jingles (END), **39** long looping tune, **11/12** 0.5-0.7 s effects, 6-10, 13-20, 26-35 short
 UI/effect blips; 0, 1, 2, 21-25, 40 write nothing (stop/pause/state; 2 = query: returns OR of the 7 voice-active flags; 40 = `snd_cmd(40, seg)` sets the speech
 buffer segment `[17E2]`); 41-45 = speech.
-(Rate caveat: tempo depends on the 300 Hz poll assumption; U5 listen.)
+(U5: logo OK; 300 Hz poll was too fast -> 60 Hz, re-listen pending.)
 
 **Speech** (`SPEECH.117`, 26 408 B = 8 clips) is loaded by VGAME at startup (`0000:0110`) and handed over by
 cmd 40. Format: unsigned 8-bit PCM, **8000 Hz** (cmd 41-45 handlers `cs:096D..` load AX=1F40h). On AdLib it is
