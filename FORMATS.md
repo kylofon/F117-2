@@ -17,7 +17,7 @@ CEMETARY, DESK, ENDHANGR, FLAG, FLIGHT, LANDED1 (also LANDED2-4), RESCUE, SWAP, 
 Also confirmed: FOLDER2 (slot 3), ROSTSPRT (slot 7), HANGSPRT (slot 4), MEDALS (AWARDS.PAL).
 Cockpit 256LEFT/PIT/REAR/RIGHT and ORDNANCE (sprite page loaded by VGAME 0000:02FE) use the **flight
 palette** below; REQUESTR is a START sprite page loaded while ARMSSCRN is shown (START 0000:0963) -> slot 1
-(to confirm in U5).
+(confirmed in U5).
 
 ## Flight palette (VGAME, S2.6)
 VGAME writes the DAC itself: `set_dac(first, count, far rgb)` 14A2:000E (waits for retrace; a
