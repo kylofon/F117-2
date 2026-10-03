@@ -136,7 +136,7 @@ segment, or prints "Insufficient memory for MCGA graphics" and exits. F117.COM c
 | 101 | `snd_cmd(n)`: n ≤ 2Dh (46 commands) via `cs:0911`, larger ignored; VGAME 17, START 15, END 15 sites |
 | 102 | `snd_shutdown()`: uninstall, silence, DOS time ← RTC (F117.COM at quit only) |
 | 103 | `snd_poll()`: runs an update, returns status `[17DC]` |
-| 104 | `snd_stop()`: returns 0 |
+| 104 | `snd_noise()`: effect-unit pitch randomiser (called after each poll in the fast rate; **not** stop, corrected in S3.3: `port/spec/sound.md` §2) |
 
 Command numbers and the `.LOG` music format: S2.4.
 
@@ -217,7 +217,7 @@ one `0D1A` step per voice) every 3rd, then every 5th tick. Per-voice byte stream
 grammar is **not decoded** — the port can run the original sequencer (S3.3) or emulate it as `tools/sound/drvemu.py` does.
 
 **`?SOUND.117` (in-game; ASOUND shown)** is polled: the game's own timer ISR (START `0000:8E6D`,
-PIT reload 4DAEh) calls `snd_poll` (slot 103) and steers its own rate from the result: -1 -> 60 Hz base (idle polls return -1, so music runs at **60 Hz**), >0 -> base/5 = 300 Hz, 0 -> unchanged. One poll = one tick of every voice. `snd_cmd(n)` slot 101 dispatches 0..2Dh via
+PIT reload 4DAEh) calls `snd_poll` (slot 103) and steers its own rate from the result: -1 -> 60 Hz base (idle polls return -1; **correction S3.3: the ISR period is one video frame (70 Hz in mode 13h), not 60 Hz; see `port/spec/sound.md` §3**), >0 -> base/5 = 300 Hz, 0 -> unchanged. One poll = one tick of every voice. `snd_cmd(n)` slot 101 dispatches 0..2Dh via
 `cs:0911`; all commands start OPL sequences that `snd_poll` advances. Detection in `snd_init`: AdLib timers
 (reg 4 ← 60h/80h/21h, status & E0h = C0h), PAS at port B8Ah/B8Bh and SB at 220h are probed for speech.
 Command numbers seen at call sites: START 2, 26-31, 33, 34; VGAME 0, 19, 23-25, 32, 40-45; END 2, 26, 28,
