@@ -16,8 +16,8 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 
 ## Status
 
-- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code).
-- **Next:** S2.2. Your tasks: **User to-do** above.
+- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec).
+- **Next:** S3.2 (video spec). Your tasks: **User to-do** above.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -98,13 +98,14 @@ Notes:
 - S2.3 status: DONE (geometry; maps confirmed in U5). `python tools/f3d.py all` → `work/3d/`: 989 OBJ (`obj/<BANK>/oNNN.obj`, LOD 0, + `.mtl`), `sheet_<BANK>.png`, `map_<TH>.png` + `maps_sheet.png` (north up). Formats in `FORMATS.md` (3D objects / Terrain / World layout); all 11 `.3DX` parse with 100 % byte coverage. Colours are wrong (`ADV.PAL` guess, legend colours for ground ops) → S2.6.
 - S2.6 status: DONE (U5 OK 2026-10-03). VGAME does write the DAC (14A2:000E): three flight palettes A/B/C in DGROUP (B/C = night, picked by comm[33h]; A = debug), desert ramp patch per theatre, ground backdrop = bands 70h-7Fh; FORMATS.md "Flight palette". `tools/f3d.py` (`palette(th, which)`, `colour_map` on backdrop 7Ch; `pal=B`/`pal=C` arg, default A) and `tools/pic2png.py` (cockpit/ORDNANCE → flight B, + `_A`/`_C` files; REQUESTR → PALETTES[1]) regenerated; all confirmed in U5.
 - S2.4: done. `.LOG` = logo-jingle overlay; driver API, speech, poll-rate rule in RE_GUIDE §5. WAVs in `work/sound/` (U5 listened: logo, 36-39, speech OK; cmd 3 = PLAYER intro cue sequence rendered at a fixed 120 Hz poll, user-chosen).
+- S3.1 status: DONE. `port/spec/platform.md` + `platform_symbols.csv` (517 rows over all 7 programs, `python tools/platform_syms.py`; `tools/fndis.py` = per-function disassembly). Library = MSC 5/6 small-model RTL + MicroProse layer (fatal-on-error DOS wrappers, joystick/mouse, retrace-calibrated PIT timer, Ctrl-Break hook); END holds it all at `0000:3E45..5F63` (read in full). Open: sound cadence 60 Hz vs calibrated 70 Hz class 4 (spec §4/§9). Hand-offs: 59 shared rows unnamed in `work/s31/unassigned.txt` (video/shell); `tools/spec_coverage.py` still has the Aces layout -> S3.10.
 
 ### Phase 3 — Specs (output: `port/spec/<module>.md`, gate: `tools/spec_coverage.py` 100 %)
 Module split is confirmed in S1.5; one session per module. Specs are written so that a Sonnet session
 can port a function from its section alone.
 | Id | Module | Model | Size |
 |---|---|---|---|
-| S3.1 | platform: RTL, startup, memory, timer, keyboard, joystick, files, overlay chain | S | M |
+| S3.1 | platform: RTL, startup, memory, timer, keyboard, joystick, files, overlay chain | S | done 2026-10-03 |
 | S3.2 | video: `MGRAPHIC` driver API, blitters, PIC/PAN decoding, fonts | S | M |
 | S3.3 | sound: driver API, music sequencer, AdLib device | S | M |
 | S3.4 | front end: `MPS_LOGO`, `SETUP`, `PLAYER`, `DSWAP`, `MISC`, title/credits | S | M |

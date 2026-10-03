@@ -1,0 +1,518 @@
+exe,kind,address,name,type,owner,other_names,notes
+vgame,func,0000:1b60,break_hook_install,void(void),platform,dos_setvect,"saves vector INT 1Bh (read from IVT 0:006C) in [2609], installs break_isr (INT 21/25)"
+vgame,func,0000:1b83,break_hook_remove,void(void),platform,dos_setvect_2,restores INT 1Bh from [2609]
+vgame,func,0000:1b94,ivt_read,unsigned long(int off /*SI*/),platform,,"reads the vector at 0:SI -> BX=off, AX=seg"
+vgame,func,0000:1ba0,break_isr,void interrupt(void),platform,,"INT 1Bh handler: [2608] = 1 (polled by the game loop, which then exits)"
+vgame,func,0000:1d76,timer_calibrate,void(void),platform,,"measures PIT counts per vertical retrace (16 samples via pit_read), derives the retrace rate (4..6 -> 56..70 Hz class else fallback 5) and the PIT reload [50D4]/[50D2], tick divisor [50D8]"
+vgame,func,0000:1e60,bios_timer,unsigned(void),platform,bios_timer,"INT 1A/00, returns the low word of the BIOS tick count"
+vgame,func,0000:ebb4,c0_start,void(void),platform,,"MSC c0: DOS>=2 check, SS=DGROUP, stack size from PSP[2], INT 21/4A shrink, BSS clear (5438..7250), _cinit, main(argc,argv,envp) at 0000:0010, exit(); carries the divide-error ISR at 4E8A = _amsg_exit(3) target"
+vgame,func,0000:ec9e,rtl_cinit,void(void),platform,,"saves INT 0 vector, installs the divide handler, runs init tables (_initterm 5038/5047), parses env ""_C_FILE_INFO="" into handle flags, queries INT 21/4400 for the 3 std handles"
+vgame,func,0000:ed6c,exit,void(int code),platform,,"doexit(0): atexit/term tables, flushall, _ctermsub, INT 21/4C. 4F91 = _exit (quick), 4F99 = _cexit, 4FA3 = _c_exit (same body, CL flags)"
+vgame,func,0000:ed73,rtl_exit_quick,void(int code),platform,,_exit: doexit(1) entry (alias of the exit body)
+vgame,func,0000:ed7b,rtl_cexit,void(void),platform,,"_cexit: doexit(0x100): run terminators, return to caller"
+vgame,func,0000:ed85,rtl_c_exit,void(void),platform,dos_exit,_c_exit: doexit(0x101)
+vgame,func,0000:eded,rtl_ctermsub,void(void),platform,dos_setvect_3,"restore INT 0 vector, optional cs:[5154] vector, math/overlay shutdown call [5348]"
+vgame,func,0000:ee1a,rtl_initterm,"void(void(**start)(void), void(**end)(void))",platform,,"calls near function pointers from end-1 down to start (SI/DI), skips NULL"
+vgame,func,0000:ee29,rtl_initterm_far,void(...),platform,,same for far pointer table (4 bytes per entry)
+vgame,func,0000:ee3c,rtl_fclose_core,int(FILE *f),platform,,"flushes and closes a stream (uses fflush f7BC, _freebuf, close); likely MSC fclose body"
+vgame,func,0000:eeea,rtl_fsopen,"FILE *(char *name, char *mode, int shflag)",platform,,finds a free stream (f880) and calls _openfile (f6D6)
+vgame,func,0000:ef12,fopen,"FILE *(char *name, char *mode)",platform,,"rtl_fsopen(name, mode, 0)"
+vgame,func,0000:ef26,fread,"unsigned(void *buf, unsigned size, unsigned n, FILE *f)",platform,,"MSC fread (buffered, direct _read for large blocks)"
+vgame,func,0000:f006,strcat,"char *(char *d, char *s)",platform,,MSC strcat (scasb + movs)
+vgame,func,0000:f046,strcpy,"char *(char *d, char *s)",platform,,MSC strcpy
+vgame,func,0000:f078,strlen,unsigned(char *s),platform,,MSC strlen
+vgame,func,0000:f094,rtl_ltoa_head,internal,platform,,long/ulong -> string helper head (radix 10 test); part of itoa/ltoa
+vgame,func,0000:f0ba,dos_kbhit,int(void),platform,dos_kbhit,INT 21/0B
+vgame,func,0000:f0e0,rtl_dosret_ah,internal,platform,,INT 21 helper: DH=8 function in AH of [926C]; used by getch-style input
+vgame,func,0000:f108,int86,"int(int intno, union REGS *in, union REGS *out)",platform,,"builds ""CD nn CB"" on the stack and calls it (INT 25h/26h variant keeps the flags word); out.cflag = CF; error -> _dosmaperr"
+vgame,func,0000:f29a,movedata,"void(unsigned sseg, unsigned soff, unsigned dseg, unsigned doff, unsigned n)",platform,,rep movsb with ds:si -> es:di
+vgame,func,0000:f2d6,memcpy,"void *(void *d, void *s, unsigned n)",platform,,MSC memcpy (word copy)
+vgame,func,0000:f302,abs,int(int),platform,,
+vgame,func,0000:f310,srand,void(unsigned seed),platform,,[5158:515A] = seed
+vgame,func,0000:f322,rand,int(void),platform,,seed = seed*343FDh + 269EC3h; returns (seed>>16)&7FFF
+vgame,func,0000:f348,dos_allocmem,unsigned(unsigned bytes),platform,dos_allocmem,INT 21/48 (PLAYER/MPS_LOGO share it)
+vgame,func,0000:f360,bios_keyboard,int(int cmd),platform,bios_keyboard,INT 16h (MPS_LOGO/PLAYER copy of MISC slot 90/91)
+vgame,func,0000:f384,dos_freemem,int(unsigned seg),platform,dos_freemem,INT 21/49
+vgame,func,0000:f392,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,MSC long divide (C operator `/` on longs)
+vgame,func,0000:f42c,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,MSC long multiply (operator `*`)
+vgame,func,0000:f45e,rtl_aFlshl,"long(long ax, cl)",platform,,"shl dx:ax, cl (operator `<<` on long)"
+vgame,func,0000:f46a,rtl_aFlshr,"long(long ax, cl)",platform,,"sar dx:ax, cl (operator `>>` on long)"
+vgame,func,0000:f476,rtl_lshl_mem,"void(long *p, int n)",platform,,*p <<= n
+vgame,func,0000:f50e,rtl_aFulshr,"long(long ax, cl)",platform,,"shr dx:ax, cl (unsigned long `>>`)"
+vgame,func,0000:f51a,rtl_FF_MSGBANNER,void(void),platform,,"writes message 252 (""\r\nrun-time error ""), calls hook [515C], writes message 255"
+vgame,func,0000:f540,rtl_nullcheck,int(void),platform,,"xor-sums DS:0..41h and compares with 55h (""NULL assignment"" check at exit); mismatch prints the banner"
+vgame,func,0000:f562,rtl_NMSG_TEXT,char *(int msgno),platform,,looks msgno up in the table at DS:535E
+vgame,func,0000:f58d,rtl_NMSG_WRITE,void(int msgno),platform,dos_write,INT 21/40 to handle 2
+vgame,func,0000:f5ea,rtl_dosmaperr,void(int doserr),platform,,"AL = DOS error -> _doserrno [512D], errno [5122] via table 515E"
+vgame,func,0000:f618,rtl_filbuf,int(FILE *f),platform,,refill a read buffer
+vgame,func,0000:f6ac,rtl_freebuf,void(FILE *f),platform,,frees the stream buffer
+vgame,func,0000:f6d6,rtl_openfile,"FILE *(char *name, char *mode, int shflag, FILE *f)",platform,,"parses the mode string r/w/a, +, b/t and calls _open"
+vgame,func,0000:f7bc,fflush,int(FILE *f),platform,,f == NULL -> flushall
+vgame,func,0000:f836,rtl_flushall,int(int mode),platform,,walks the FILE table (8 bytes each from 5172 to [52B2])
+vgame,func,0000:f880,rtl_getstream,FILE *(void),platform,,first unused FILE in the table at 9288 (8 bytes each)
+vgame,func,0000:f8b4,rtl_close,int(int fd),platform,dos_close,"INT 21/3E, error -> _dosmaperr"
+vgame,func,0000:f8d4,lseek,"long(int fd, long off, int whence)",platform,dos_lseek,INT 21/42; sets/handles EOF flag in _osfile (end of text file)
+vgame,func,0000:f94e,rtl_read,"int(int fd, void *buf, unsigned n)",platform,,"MSC _read: INT 21/3F, text mode CR LF translation, Ctrl-Z"
+vgame,func,0000:fa98,unlink,int(char *name),platform,dos_unlink,INT 21/41
+vgame,func,0000:faa6,rtl_getbuf,void(FILE *f),platform,,allocates a 200h stream buffer (malloc) or falls back to the 1-byte buffer
+vgame,func,0000:fae8,rtl_sopen,"int(char *name, int oflag, int shflag, int pmode)",platform,,sharing-flag entry that jumps into rtl_open (fb0A)
+vgame,func,0000:fb02,rtl_open,"int(char *name, int oflag, int pmode)",platform,,"MSC _open: INT 21/3D, /3C (O_CREAT) /3E /3F /40 /42 /43 /44 (device test)"
+vgame,func,0000:fc93,rtl_umask_attr,int(int pmode),platform,,(~umask) & pmode -> DOS attribute (read-only bit)
+vgame,func,0000:fca4,rtl_write,"int(int fd, void *buf, unsigned n)",platform,dos_lseek_2,"MSC _write: text-mode LF -> CR LF through a stack buffer (5D1D flushes it with INT 21/40), Ctrl-Z handling, appends via INT 21/4202"
+vgame,func,0000:fd55,rtl_write_flush,internal,platform,dos_write_2,sub-entry of rtl_write (flush the translate buffer)
+vgame,func,0000:fde6,rtl_chkstk,void(void),platform,,AX = frame size; stack overflow -> _amsg_exit(0) (4E9A)
+vgame,func,0000:fdfe,stackavail,unsigned(void),platform,,[531E] stack limit - SP
+vgame,func,0000:fe14,rtl_nfree,void(void *p),platform,,marks the near-heap block free and lowers the rover
+vgame,func,0000:fe35,rtl_nmalloc,void *(unsigned n),platform,,"near heap: search (5E0A), then grow (5E86), search again"
+vgame,func,0000:fe5e,rtl_nh_search,internal,platform,,"first-fit walk of the heap, coalesces free neighbours (sets CF on failure)"
+vgame,func,0000:feda,rtl_nh_grow,internal,platform,,extends the heap via 5F12 in 4 KB-rounded steps
+vgame,func,0000:ff66,rtl_nh_setblock,internal,platform,dos_setblock,INT 21/4A resize of the DGROUP block
+vgame,func,10a8:0cb7,joy_read_raw,void(void),platform,,"game port 201h: write, count loops until axis bits fall (CX max 65535, interrupts off); [23EC]/[23EE] = X/Y counts of stick A, FFFFh on timeout"
+vgame,func,10a8:0cff,joy_scale,void(int axis /*SI*/),platform,,"raw count -> byte [23F4+axis]: 0..7F below centre, 80..FF above; tracks min/max in the calibration table [23C4..23E4]"
+vgame,func,1199:000c,dos_open,"int(char *name, int mode)",platform,dos_open,INT 21/3D; on error prints message and exits (fatal tail 41CA); resets disk-buffer pos [1EDF]=200h
+vgame,func,1199:006a,dos_creat,"int(char *name, int attr)",platform,dos_creat,INT 21/3C; same fatal tail as dos_open
+vgame,func,1199:0157,dos_buf_fill,void(void),platform,dos_read,reads 200h bytes from handle [1EE1] into the disk buffer DS:1C77 (used by the PIC/PAN readers)
+vgame,func,14a2:000e,pal_write_vsync,"void(void far *rgb, int first, int count)",video,,writes DAC 3C8/3C9 during retrace (3DAh); [0:0489] bit1 set (VGA flag) uses the scaled 6-bit path
+start,func,0000:40a4,mem_alloc_chk,unsigned(unsigned bytes),platform,,
+start,func,0000:40cf,mem_free_chk,void(unsigned seg),platform,,
+start,func,0000:800a,dos_allocmem,unsigned(unsigned bytes),platform,,
+start,func,0000:8030,dos_freemem,int(unsigned seg),platform,dos_freemem_2,
+start,func,0000:804e,fcb_find,int(void),platform,,
+start,func,0000:8075,dos_open,"int(char *name, int mode)",platform,dos_open,
+start,func,0000:80cc,dos_creat,"int(char *name, int attr)",platform,dos_creat,
+start,func,0000:8123,dos_close,void(int fd),platform,dos_close_2,
+start,func,0000:8144,dos_read,"int(int fd, unsigned n, void *buf)",platform,dos_read_2,
+start,func,0000:816f,dos_read_far,"int(int fd, unsigned n, unsigned off, unsigned seg)",platform,dos_read_3,
+start,func,0000:81c6,dos_buf_fill,void(void),platform,dos_read,
+start,func,0000:81e7,dos_buf_setfd,void(int fd),platform,,
+start,func,0000:81ff,dos_write_far,"int(int fd, unsigned n, unsigned off, unsigned seg, unsigned add)",platform,,
+start,func,0000:829a,gfx_line,"void(int *page, int x1, int y1, int x2, int y2, int colour)",video,,
+start,func,0000:8364,pal_set,void(void *pal),video,,
+start,func,0000:8378,pal_write_vsync,"void(void far *rgb, int first, int count)",video,,
+start,func,0000:8427,pal_apply_queue,void(void),video,bios_vga_palette,
+start,func,0000:845a,joy_poll,void(void),platform,,
+start,func,0000:8469,joy_read_raw,void(void),platform,,
+start,func,0000:84b1,joy_scale,void(int axis /*SI*/),platform,,
+start,func,0000:851a,joy_set_calib,void(void far *tbl),platform,,
+start,func,0000:8530,mouse_button,int(int n),platform,,
+start,func,0000:8545,mouse_poll,void(void),platform,mouse_reset,
+start,func,0000:8573,mouse_init,void(void),platform,mouse_reset_2,
+start,func,0000:85a7,mouse_set_pos,void(void),platform,mouse_reset_3,
+start,func,0000:85db,break_hook_remove,void(void),platform,dos_setvect_2,
+start,func,0000:85f8,break_isr,void interrupt(void),platform,,
+start,func,0000:8607,bios_timer,unsigned(void),platform,bios_timer,
+start,func,0000:860e,ovl_bind,void(unsigned seg),platform,,
+start,func,0000:8667,dos_freemem_chk,void(unsigned seg),platform,,
+start,func,0000:8b3e,mem_zero,"void(void *dst, unsigned n)",platform,,
+start,func,0000:8b55,mem_zero_w,"void(void *dst, unsigned nwords)",platform,,
+start,func,0000:8b6c,mem_copy,"void(void *src, void *dst, unsigned n)",platform,,
+start,func,0000:8b86,mem_copy_w,"void(void *src, void *dst, unsigned nwords)",platform,,
+start,func,0000:8ba0,mem_fill,"void(void *dst, int val, unsigned n)",platform,,
+start,func,0000:8bba,mem_fill_w,"void(void *dst, int val, unsigned nwords)",platform,,
+start,func,0000:8bea,dist_approx,"int(int x1, int y1, int x2, int y2)",platform,,
+start,func,0000:8ca8,timer_install,void(void),platform,,
+start,func,0000:8ce6,timer_remove,void(void),platform,dos_setvect_4,
+start,func,0000:8dd8,timer_calibrate,void(void),platform,,
+start,func,0000:8ead,pit_read,unsigned(void),platform,,
+start,func,0000:8edc,c0_start,void(void),platform,,
+start,func,0000:8fc6,rtl_cinit,void(void),platform,,
+start,func,0000:9094,exit,void(int code),platform,,
+start,func,0000:909b,rtl_exit_quick,void(int code),platform,,
+start,func,0000:90a3,rtl_cexit,void(void),platform,,
+start,func,0000:90ad,rtl_c_exit,void(void),platform,dos_exit,
+start,func,0000:9115,rtl_ctermsub,void(void),platform,dos_setvect_3,
+start,func,0000:9142,rtl_initterm,"void(void(**start)(void), void(**end)(void))",platform,,
+start,func,0000:9151,rtl_initterm_far,void(...),platform,,
+start,func,0000:9164,rtl_fclose_core,int(FILE *f),platform,,
+start,func,0000:9212,rtl_fsopen,"FILE *(char *name, char *mode, int shflag)",platform,,
+start,func,0000:923a,fopen,"FILE *(char *name, char *mode)",platform,,
+start,func,0000:924e,fread,"unsigned(void *buf, unsigned size, unsigned n, FILE *f)",platform,,
+start,func,0000:9430,printf,"int(char *fmt, ...)",platform,,
+start,func,0000:946c,strcat,"char *(char *d, char *s)",platform,,
+start,func,0000:94ac,strcpy,"char *(char *d, char *s)",platform,,
+start,func,0000:94de,strlen,unsigned(char *s),platform,,
+start,func,0000:94fa,rtl_ltoa_head,internal,platform,,
+start,func,0000:9520,int86,"int(int intno, union REGS *in, union REGS *out)",platform,,
+start,func,0000:959e,sprintf,"int(char *buf, char *fmt, ...)",platform,,
+start,func,0000:95f4,movedata,"void(unsigned sseg, unsigned soff, unsigned dseg, unsigned doff, unsigned n)",platform,,
+start,func,0000:9612,memcpy,"void *(void *d, void *s, unsigned n)",platform,,
+start,func,0000:96ae,abs,int(int),platform,,
+start,func,0000:96bc,srand,void(unsigned seed),platform,,
+start,func,0000:96ce,rand,int(void),platform,,
+start,func,0000:96f4,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,
+start,func,0000:978e,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,
+start,func,0000:97c0,rtl_aFlshl,"long(long ax, cl)",platform,,
+start,func,0000:97cc,rtl_aFlshr,"long(long ax, cl)",platform,,
+start,func,0000:97d8,rtl_lshl_mem,"void(long *p, int n)",platform,,
+start,func,0000:97f4,rtl_aFulshr,"long(long ax, cl)",platform,,
+start,func,0000:9800,rtl_FF_MSGBANNER,void(void),platform,,
+start,func,0000:9826,rtl_nullcheck,int(void),platform,,
+start,func,0000:9848,rtl_NMSG_TEXT,char *(int msgno),platform,,
+start,func,0000:9873,rtl_NMSG_WRITE,void(int msgno),platform,dos_write,
+start,func,0000:98d0,rtl_dosmaperr,void(int doserr),platform,,
+start,func,0000:98fe,rtl_filbuf,int(FILE *f),platform,,
+start,func,0000:9992,rtl_flsbuf,"int(int c, FILE *f)",platform,,
+start,func,0000:9a72,rtl_freebuf,void(FILE *f),platform,,
+start,func,0000:9a9c,rtl_openfile,"FILE *(char *name, char *mode, int shflag, FILE *f)",platform,,
+start,func,0000:9b82,rtl_stbuf,int(FILE *f),platform,,
+start,func,0000:9bf3,rtl_ftbuf,"void(int flag, FILE *f)",platform,,
+start,func,0000:9c32,fflush,int(FILE *f),platform,,
+start,func,0000:9cac,rtl_flushall,int(int mode),platform,,
+start,func,0000:9d06,rtl_output,"int(FILE *f, char *fmt, va_list)",platform,,
+start,func,0000:a110,rtl_output_getint,internal,platform,,
+start,func,0000:a118,rtl_output_getlong,internal,platform,,
+start,func,0000:a124,rtl_output_getstr,internal,platform,,
+start,func,0000:a141,rtl_output_putc,internal,platform,,
+start,func,0000:a16a,rtl_output_write,internal,platform,,
+start,func,0000:a188,rtl_output_pad,internal,platform,,
+start,func,0000:a1a4,rtl_output_digits,internal,platform,,
+start,func,0000:a1dc,rtl_getstream,FILE *(void),platform,,
+start,func,0000:a210,rtl_close,int(int fd),platform,dos_close,
+start,func,0000:a230,rtl_read,"int(int fd, void *buf, unsigned n)",platform,,
+start,func,0000:a31a,rtl_write,"int(int fd, void *buf, unsigned n)",platform,dos_lseek_2,
+start,func,0000:a4b8,unlink,int(char *name),platform,dos_unlink,
+start,func,0000:a4c6,rtl_chkstk,void(void),platform,,
+start,func,0000:a4de,rtl_getbuf,void(FILE *f),platform,,
+start,func,0000:a520,lseek,"long(int fd, long off, int whence)",platform,dos_lseek,
+start,func,0000:a59a,rtl_sopen,"int(char *name, int oflag, int shflag, int pmode)",platform,,
+start,func,0000:a5b4,rtl_open,"int(char *name, int oflag, int pmode)",platform,,
+start,func,0000:a745,rtl_umask_attr,int(int pmode),platform,,
+start,func,0000:a756,stackavail,unsigned(void),platform,,
+start,func,0000:a770,rtl_nfree,void(void *p),platform,,
+start,func,0000:a791,rtl_nmalloc,void *(unsigned n),platform,,
+start,func,0000:a7ba,rtl_nh_search,internal,platform,,
+start,func,0000:a836,rtl_nh_grow,internal,platform,,
+start,func,0000:a8c2,rtl_nh_setblock,internal,platform,dos_setblock,
+start,func,0000:a913,rtl_nh_lastfree,internal,platform,,
+end,func,0000:2ba0,mem_alloc_chk,unsigned(unsigned bytes),platform,,"dos_allocmem; < 10h paragraphs returned -> printf(""Insufficient system memory - A..."") and quit (3F44 exit path)"
+end,func,0000:2bcb,mem_free_chk,void(unsigned seg),platform,,"dos_freemem; non-zero -> printf(""Buffer dealloc error"") and quit"
+end,func,0000:3e45,rand_n,int(int n),platform,,(rand() * n) >> 15 via lmul/lshr; random number 0..n-1
+end,func,0000:3fa4,dos_allocmem,unsigned(unsigned bytes),platform,,"INT 21/48, paragraphs = ceil(bytes/16); returns segment (AX unchanged on CF: caller tests)"
+end,func,0000:3fca,dos_freemem,int(unsigned seg),platform,dos_freemem_2,INT 21/49; 0 on success
+end,func,0000:400f,dos_open,"int(char *name, int mode)",platform,dos_open,INT 21/3D; on error prints message and exits (fatal tail 41CA); resets disk-buffer pos [1EDF]=200h
+end,func,0000:4066,dos_creat,"int(char *name, int attr)",platform,dos_creat,INT 21/3C; same fatal tail as dos_open
+end,func,0000:40bd,dos_close,void(int fd),platform,dos_close_2,INT 21/3E; error -> fatal print + exit
+end,func,0000:40de,dos_read,"int(int fd, unsigned n, void *buf)",platform,dos_read_2,INT 21/3F into DS:buf; error -> fatal
+end,func,0000:4109,dos_read_far,"int(int fd, unsigned n, unsigned off, unsigned seg)",platform,dos_read_3,INT 21/3F into seg:off
+end,func,0000:4160,dos_buf_fill,void(void),platform,dos_read,reads 200h bytes from handle [1EE1] into the disk buffer DS:1C77 (used by the PIC/PAN readers)
+end,func,0000:4181,dos_buf_setfd,void(int fd),platform,,[1EE1] = fd; dos_buf_fill()
+end,func,0000:4199,dos_write_far,"int(int fd, unsigned n, unsigned off, unsigned seg, unsigned add)",platform,,"INT 21/40 from seg:(off+add); error -> fatal. Contains the shared fatal tail 41CA: mode 3, print message + optional DOS error digit, exit 4C00"
+end,func,0000:4206,gfx_line,"void(int *page, int x1, int y1, int x2, int y2, int colour)",video,,"Bresenham line into page seg [55D0+2*page], clip x<320 y<168 (A8h), row offsets table DS:2234"
+end,func,0000:42be,pal_set_default,void(void),video,bios_vga_palette_2,INT 10/1012: loads 256 DAC entries from DS:1F25
+end,func,0000:42d0,pal_set,void(void *pal),video,,"es=ds; pal_write_vsync(ptr, 0, 256)"
+end,func,0000:42e4,pal_write_vsync,"void(void far *rgb, int first, int count)",video,,writes DAC 3C8/3C9 during retrace (3DAh); [0:0489] bit1 set (VGA flag) uses the scaled 6-bit path
+end,func,0000:4393,pal_apply_queue,void(void),video,bios_vga_palette,"sets [50CC]=0, waits for the timer ISR flag, then applies queued DAC changes (INT 10/1012, 6-byte records at DS:1EE8, count [1F24])"
+end,func,0000:43c6,joy_poll,void(void),platform,,"joy_read_raw() then joy_scale(0), joy_scale(1)"
+end,func,0000:43d5,joy_read_raw,void(void),platform,,"game port 201h: write, count loops until axis bits fall (CX max 65535, interrupts off); [23EC]/[23EE] = X/Y counts of stick A, FFFFh on timeout"
+end,func,0000:441d,joy_scale,void(int axis /*SI*/),platform,,"raw count -> byte [23F4+axis]: 0..7F below centre, 80..FF above; tracks min/max in the calibration table [23C4..23E4]"
+end,func,0000:448e,joy_set_calib,void(void far *tbl),platform,,copies 20 words (40 bytes) to the calibration table DS:23C4 (comm block +48h)
+end,func,0000:44a4,mouse_button,int(int n),platform,,returns [23F8] (n=0 left) or [23F9] (right)
+end,func,0000:44b9,mouse_poll,void(void),platform,mouse_reset,"INT 33/03: [7214]=x/2, [7216]=y, [23F8]/[23F9] = left/right pressed"
+end,func,0000:44e7,mouse_init,void(void),platform,mouse_reset_2,"INT 33/00, range x 0..280h y 0..C7h (07/08), ratio 8:16 (0F), position (04) from [7214],[7216]"
+end,func,0000:451b,mouse_set_pos,void(void),platform,mouse_reset_3,"INT 33/04 with x = [7214]*2, y = [7216]"
+end,func,0000:452c,dist_approx,"int(int x1, int y1, int x2, int y2)",platform,,"|dx|,|dy| -> max + min/4"
+end,func,0000:4557,break_hook_install,void(void),platform,dos_setvect,"saves vector INT 1Bh (read from IVT 0:006C) in [2609], installs break_isr (INT 21/25)"
+end,func,0000:457a,break_hook_remove,void(void),platform,dos_setvect_2,restores INT 1Bh from [2609]
+end,func,0000:458b,ivt_read,unsigned long(int off /*SI*/),platform,,"reads the vector at 0:SI -> BX=off, AX=seg"
+end,func,0000:4597,break_isr,void interrupt(void),platform,,"INT 1Bh handler: [2608] = 1 (polled by the game loop, which then exits)"
+end,func,0000:45a6,bios_timer,unsigned(void),platform,bios_timer,"INT 1A/00, returns the low word of the BIOS tick count"
+end,func,0000:45ad,ovl_bind,void(unsigned seg),platform,,fills the 5-byte JMP FAR stubs from the driver header at seg (RE_GUIDE 2.3): stub = table + 5*(hdr[1C]+i); table is DS:23FA in END
+end,func,0000:4606,dos_freemem_chk,void(unsigned seg),platform,,INT 21/49; on failure prints a message (INT 21/09) and exits 4C00
+end,func,0000:4ade,mem_zero,"void(void *dst, unsigned n)",platform,,"rep stosb, zero fill, near"
+end,func,0000:4af5,mem_zero_w,"void(void *dst, unsigned nwords)",platform,,rep stosw 0
+end,func,0000:4b0c,mem_copy,"void(void *src, void *dst, unsigned n)",platform,,"rep movsb; NOTE argument order src, dst"
+end,func,0000:4b26,mem_copy_w,"void(void *src, void *dst, unsigned nwords)",platform,,rep movsw
+end,func,0000:4b40,mem_fill,"void(void *dst, int val, unsigned n)",platform,,"rep stosb but AL is cleared first (xor al,al): ALWAYS fills 0, val ignored (original quirk)"
+end,func,0000:4b5a,mem_fill_w,"void(void *dst, int val, unsigned nwords)",platform,,rep stosw with val
+end,func,0000:4b72,str_copy_far,"void(char *dst, char far *src)",platform,,copies up to and including the NUL; ES must equal DS (caller)
+end,func,0000:4b8c,timer_install,void(void),platform,,"sets [50D8]=1,[50E2]=1,[50CE:50D0]=0, calls timer_calibrate, saves INT 8 in cs:4C51 and installs timer_isr (cs:4BEC); [50CB]=1"
+end,func,0000:4bca,timer_remove,void(void),platform,dos_setvect_4,"PIT ch0 back to mode 3 count 0 (18.2 Hz), restores INT 8; [50CB]=0"
+end,func,0000:4cbc,timer_calibrate,void(void),platform,,"measures PIT counts per vertical retrace (16 samples via pit_read), derives the retrace rate (4..6 -> 56..70 Hz class else fallback 5) and the PIT reload [50D4]/[50D2], tick divisor [50D8]"
+end,func,0000:4da3,pit_read,unsigned(void),platform,,"waits for a vertical retrace edge on 3DAh, latches and reads PIT channel 0 (40h/43h); 0 on timeout"
+end,func,0000:4dd2,c0_start,void(void),platform,,"MSC c0: DOS>=2 check, SS=DGROUP, stack size from PSP[2], INT 21/4A shrink, BSS clear (5438..7250), _cinit, main(argc,argv,envp) at 0000:0010, exit(); carries the divide-error ISR at 4E8A = _amsg_exit(3) target"
+end,func,0000:4ebc,rtl_cinit,void(void),platform,,"saves INT 0 vector, installs the divide handler, runs init tables (_initterm 5038/5047), parses env ""_C_FILE_INFO="" into handle flags, queries INT 21/4400 for the 3 std handles"
+end,func,0000:4f8a,exit,void(int code),platform,,"doexit(0): atexit/term tables, flushall, _ctermsub, INT 21/4C. 4F91 = _exit (quick), 4F99 = _cexit, 4FA3 = _c_exit (same body, CL flags)"
+end,func,0000:4f91,rtl_exit_quick,void(int code),platform,,_exit: doexit(1) entry (alias of the exit body)
+end,func,0000:4f99,rtl_cexit,void(void),platform,,"_cexit: doexit(0x100): run terminators, return to caller"
+end,func,0000:4fa3,rtl_c_exit,void(void),platform,dos_exit,_c_exit: doexit(0x101)
+end,func,0000:500b,rtl_ctermsub,void(void),platform,dos_setvect_3,"restore INT 0 vector, optional cs:[5154] vector, math/overlay shutdown call [5348]"
+end,func,0000:5038,rtl_initterm,"void(void(**start)(void), void(**end)(void))",platform,,"calls near function pointers from end-1 down to start (SI/DI), skips NULL"
+end,func,0000:5047,rtl_initterm_far,void(...),platform,,same for far pointer table (4 bytes per entry)
+end,func,0000:505a,printf,"int(char *fmt, ...)",platform,,"stdout (FILE at 517A): _stbuf, _output(5678), _ftbuf"
+end,func,0000:5096,lseek,"long(int fd, long off, int whence)",platform,dos_lseek,INT 21/42; sets/handles EOF flag in _osfile (end of text file)
+end,func,0000:5110,strcat,"char *(char *d, char *s)",platform,,MSC strcat (scasb + movs)
+end,func,0000:5150,strcpy,"char *(char *d, char *s)",platform,,MSC strcpy
+end,func,0000:5182,strlen,unsigned(char *s),platform,,MSC strlen
+end,func,0000:519e,int86,"int(int intno, union REGS *in, union REGS *out)",platform,,"builds ""CD nn CB"" on the stack and calls it (INT 25h/26h variant keeps the flags word); out.cflag = CF; error -> _dosmaperr"
+end,func,0000:521c,sprintf,"int(char *buf, char *fmt, ...)",platform,,"string FILE (flags 42h, cnt 7FFFh) + _output + NUL"
+end,func,0000:5272,movedata,"void(unsigned sseg, unsigned soff, unsigned dseg, unsigned doff, unsigned n)",platform,,rep movsb with ds:si -> es:di
+end,func,0000:5290,memcpy,"void *(void *d, void *s, unsigned n)",platform,,MSC memcpy (word copy)
+end,func,0000:52bc,abs,int(int),platform,,
+end,func,0000:52ca,srand,void(unsigned seed),platform,,[5158:515A] = seed
+end,func,0000:52dc,rand,int(void),platform,,seed = seed*343FDh + 269EC3h; returns (seed>>16)&7FFF
+end,func,0000:5302,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,MSC long divide (C operator `/` on longs)
+end,func,0000:539c,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,MSC long multiply (operator `*`)
+end,func,0000:53ce,rtl_aFlshr,"long(long ax, cl)",platform,,"sar dx:ax, cl (operator `>>` on long)"
+end,func,0000:53da,rtl_FF_MSGBANNER,void(void),platform,,"writes message 252 (""\r\nrun-time error ""), calls hook [515C], writes message 255"
+end,func,0000:5400,rtl_nullcheck,int(void),platform,,"xor-sums DS:0..41h and compares with 55h (""NULL assignment"" check at exit); mismatch prints the banner"
+end,func,0000:5422,rtl_NMSG_TEXT,char *(int msgno),platform,,looks msgno up in the table at DS:535E
+end,func,0000:544d,rtl_NMSG_WRITE,void(int msgno),platform,dos_write,INT 21/40 to handle 2
+end,func,0000:54a4,rtl_dosmaperr0,void(int doserr),platform,,AH=0 entry of _dosmaperr
+end,func,0000:54aa,rtl_dosmaperr,void(int doserr),platform,,"AL = DOS error -> _doserrno [512D], errno [5122] via table 515E"
+end,func,0000:54d8,rtl_flsbuf,"int(int c, FILE *f)",platform,,"MSC _flsbuf (flag bits at FILE+6, handle at FILE+7, _osfile at 5212 index)"
+end,func,0000:55b8,rtl_stbuf,int(FILE *f),platform,,temporary buffer for stdout/stderr/stdprn (buffers at 52B4/52B6/52B8)
+end,func,0000:5629,rtl_ftbuf,"void(int flag, FILE *f)",platform,,
+end,func,0000:5678,rtl_output,"int(FILE *f, char *fmt, va_list)",platform,,"printf engine (state machine). Internals in the same frame: 5A82 get int arg, 5A8A get long arg, 5A96 get string arg, 5AB3 putc, 5ADC write string, 5AFA write padding, 5B16 ultoa digits"
+end,func,0000:5a82,rtl_output_getint,internal,platform,,sub-entry of rtl_output (uses its stack frame)
+end,func,0000:5a8a,rtl_output_getlong,internal,platform,,sub-entry of rtl_output
+end,func,0000:5a96,rtl_output_getstr,internal,platform,,sub-entry of rtl_output
+end,func,0000:5ab3,rtl_output_putc,internal,platform,,sub-entry of rtl_output
+end,func,0000:5adc,rtl_output_write,internal,platform,,sub-entry of rtl_output
+end,func,0000:5afa,rtl_output_pad,internal,platform,,sub-entry of rtl_output
+end,func,0000:5b16,rtl_output_digits,internal,platform,,"sub-entry of rtl_output (long -> digits, base in CX)"
+end,func,0000:5b4e,rtl_chkstk,void(void),platform,,AX = frame size; stack overflow -> _amsg_exit(0) (4E9A)
+end,func,0000:5b66,rtl_getbuf,void(FILE *f),platform,,allocates a 200h stream buffer (malloc) or falls back to the 1-byte buffer
+end,func,0000:5ba8,fflush,int(FILE *f),platform,,f == NULL -> flushall
+end,func,0000:5c22,rtl_flushall,int(int mode),platform,,walks the FILE table (8 bytes each from 5172 to [52B2])
+end,func,0000:5c6c,rtl_write,"int(int fd, void *buf, unsigned n)",platform,dos_lseek_2,"MSC _write: text-mode LF -> CR LF through a stack buffer (5D1D flushes it with INT 21/40), Ctrl-Z handling, appends via INT 21/4202"
+end,func,0000:5d1d,rtl_write_flush,internal,platform,dos_write_2,sub-entry of rtl_write (flush the translate buffer)
+end,func,0000:5daa,malloc,void *(unsigned n),platform,,jmp _nmalloc
+end,func,0000:5dae,stackavail,unsigned(void),platform,,[531E] stack limit - SP
+end,func,0000:5dc0,rtl_nfree,void(void *p),platform,,marks the near-heap block free and lowers the rover
+end,func,0000:5de1,rtl_nmalloc,void *(unsigned n),platform,,"near heap: search (5E0A), then grow (5E86), search again"
+end,func,0000:5e0a,rtl_nh_search,internal,platform,,"first-fit walk of the heap, coalesces free neighbours (sets CF on failure)"
+end,func,0000:5e86,rtl_nh_grow,internal,platform,,extends the heap via 5F12 in 4 KB-rounded steps
+end,func,0000:5f12,rtl_nh_setblock,internal,platform,dos_setblock,INT 21/4A resize of the DGROUP block
+end,func,0000:5f63,rtl_nh_lastfree,internal,platform,,finds the last block before the 0xFFFE sentinel
+setup,func,0000:0a70,rand_n,int(int n),platform,,
+setup,func,0000:0ba2,ovl_bind,void(unsigned seg),platform,,
+setup,func,0000:0c35,break_hook_install,void(void),platform,dos_setvect,
+setup,func,0000:0c58,break_hook_remove,void(void),platform,dos_setvect_2,
+setup,func,0000:0c69,ivt_read,unsigned long(int off /*SI*/),platform,,
+setup,func,0000:0c75,break_isr,void interrupt(void),platform,,
+setup,func,0000:0c84,fcb_find,int(void),platform,,
+setup,func,0000:0dc7,dos_open,"int(char *name, int mode)",platform,dos_open,
+setup,func,0000:0e1e,dos_creat,"int(char *name, int attr)",platform,dos_creat,
+setup,func,0000:0e75,dos_close,void(int fd),platform,dos_close_2,
+setup,func,0000:0e97,dos_read,"int(int fd, unsigned n, void *buf)",platform,dos_read_2,
+setup,func,0000:0ec2,dos_read_far,"int(int fd, unsigned n, unsigned off, unsigned seg)",platform,dos_read_3,
+setup,func,0000:0f19,dos_buf_fill,void(void),platform,dos_read,
+setup,func,0000:0f3a,dos_buf_setfd,void(int fd),platform,,
+setup,func,0000:0f52,dos_write_far,"int(int fd, unsigned n, unsigned off, unsigned seg, unsigned add)",platform,,
+setup,func,0000:0fc0,timer_install,void(void),platform,,
+setup,func,0000:0ffe,timer_remove,void(void),platform,dos_setvect_4,
+setup,func,0000:111a,timer_calibrate,void(void),platform,,
+setup,func,0000:11af,pit_read,unsigned(void),platform,,
+setup,func,0000:1516,c0_start,void(void),platform,,
+setup,func,0000:1600,rtl_cinit,void(void),platform,,
+setup,func,0000:16ce,exit,void(int code),platform,,
+setup,func,0000:16d5,rtl_exit_quick,void(int code),platform,,
+setup,func,0000:16dd,rtl_cexit,void(void),platform,,
+setup,func,0000:16e7,rtl_c_exit,void(void),platform,dos_exit,
+setup,func,0000:174f,rtl_ctermsub,void(void),platform,dos_setvect_3,
+setup,func,0000:177c,rtl_initterm,"void(void(**start)(void), void(**end)(void))",platform,,
+setup,func,0000:178b,rtl_initterm_far,void(...),platform,,
+setup,func,0000:179e,srand,void(unsigned seed),platform,,
+setup,func,0000:17b0,rand,int(void),platform,,
+setup,func,0000:17d6,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,
+setup,func,0000:1870,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,
+setup,func,0000:1942,rtl_aFlshr,"long(long ax, cl)",platform,,
+setup,func,0000:196e,rtl_FF_MSGBANNER,void(void),platform,,
+setup,func,0000:1994,rtl_nullcheck,int(void),platform,,
+setup,func,0000:19b6,rtl_setargv,void(void),platform,,
+setup,func,0000:1b44,rtl_setenvp,void(void),platform,,
+setup,func,0000:1bc2,rtl_NMSG_TEXT,char *(int msgno),platform,,
+setup,func,0000:1c22,malloc,void *(unsigned n),platform,,
+setup,func,0000:1c4a,rtl_nh_grow,internal,platform,,
+setup,func,0000:1cd6,rtl_nh_setblock,internal,platform,dos_setblock,
+setup,func,0000:1d27,rtl_nh_lastfree,internal,platform,,
+setup,func,0000:1d48,rtl_nfree,void(void *p),platform,,
+setup,func,0000:1d69,rtl_nmalloc,void *(unsigned n),platform,,
+setup,func,0000:1d92,rtl_nh_search,internal,platform,,
+setup,func,0237:005c,joy_read_raw,void(void),platform,,
+setup,func,0237:00a4,joy_scale,void(int axis /*SI*/),platform,,
+setup,func,0237:0127,joy_set_calib,void(void far *tbl),platform,,
+player,func,0000:0f32,mouse_button,int(int n),platform,,
+player,func,0000:0f6c,ovl_bind,void(unsigned seg),platform,,
+player,func,0000:0fc5,dos_freemem_chk,void(unsigned seg),platform,,
+player,func,0000:1096,c0_start,void(void),platform,,
+player,func,0000:1180,rtl_cinit,void(void),platform,,
+player,func,0000:124e,exit,void(int code),platform,,
+player,func,0000:1255,rtl_exit_quick,void(int code),platform,,
+player,func,0000:125d,rtl_cexit,void(void),platform,,
+player,func,0000:1267,rtl_c_exit,void(void),platform,dos_exit,
+player,func,0000:12cf,rtl_ctermsub,void(void),platform,dos_setvect_3,
+player,func,0000:12fc,rtl_initterm,"void(void(**start)(void), void(**end)(void))",platform,,
+player,func,0000:130b,rtl_initterm_far,void(...),platform,,
+player,func,0000:131e,printf,"int(char *fmt, ...)",platform,,
+player,func,0000:135a,rtl_ltoa_head,internal,platform,,
+player,func,0000:1380,dos_kbhit,int(void),platform,dos_kbhit,
+player,func,0000:13a6,rtl_dosret_ah,internal,platform,,
+player,func,0000:13ce,int86,"int(int intno, union REGS *in, union REGS *out)",platform,,
+player,func,0000:14a0,dos_allocmem,unsigned(unsigned bytes),platform,dos_allocmem,
+player,func,0000:14e0,dos_freemem,int(unsigned seg),platform,dos_freemem,
+player,func,0000:14ee,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,
+player,func,0000:1588,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,
+player,func,0000:15ba,rtl_FF_MSGBANNER,void(void),platform,,
+player,func,0000:15e0,rtl_nullcheck,int(void),platform,,
+player,func,0000:1602,rtl_setargv,void(void),platform,,
+player,func,0000:1790,rtl_setenvp,void(void),platform,,
+player,func,0000:180e,rtl_NMSG_TEXT,char *(int msgno),platform,,
+player,func,0000:1839,rtl_NMSG_WRITE,void(int msgno),platform,dos_write,
+player,func,0000:1896,rtl_dosmaperr,void(int doserr),platform,,
+player,func,0000:18c4,fprintf,"int(FILE *f, char *fmt, ...)",platform,,
+player,func,0000:18fa,rtl_stbuf,int(FILE *f),platform,,
+player,func,0000:196b,rtl_ftbuf,"void(int flag, FILE *f)",platform,,
+player,func,0000:19aa,fflush,int(FILE *f),platform,,
+player,func,0000:1a24,rtl_flushall,int(int mode),platform,,
+player,func,0000:1a7e,rtl_output,"int(FILE *f, char *fmt, va_list)",platform,,
+player,func,0000:1e88,rtl_output_getint,internal,platform,,
+player,func,0000:1e90,rtl_output_getlong,internal,platform,,
+player,func,0000:1e9c,rtl_output_getstr,internal,platform,,
+player,func,0000:1eb9,rtl_output_putc,internal,platform,,
+player,func,0000:1ee2,rtl_output_write,internal,platform,,
+player,func,0000:1f00,rtl_output_pad,internal,platform,,
+player,func,0000:1f1c,rtl_output_digits,internal,platform,,
+player,func,0000:1fd0,rtl_chkstk,void(void),platform,,
+player,func,0000:1fe8,malloc,void *(unsigned n),platform,,
+player,func,0000:200c,rtl_flsbuf,"int(int c, FILE *f)",platform,,
+player,func,0000:20ec,rtl_write,"int(int fd, void *buf, unsigned n)",platform,dos_lseek_2,
+player,func,0000:219d,rtl_write_flush,internal,platform,dos_write_2,
+player,func,0000:22c2,rtl_getbuf,void(FILE *f),platform,,
+player,func,0000:2304,lseek,"long(int fd, long off, int whence)",platform,dos_lseek,
+player,func,0000:237e,stackavail,unsigned(void),platform,,
+player,func,0000:2390,rtl_nfree,void(void *p),platform,,
+player,func,0000:23b1,rtl_nmalloc,void *(unsigned n),platform,,
+player,func,0000:23da,rtl_nh_grow,internal,platform,,
+player,func,0000:2466,rtl_nh_setblock,internal,platform,dos_setblock,
+player,func,0000:24b7,rtl_nh_lastfree,internal,platform,,
+player,func,0000:263e,rtl_nh_search,internal,platform,,
+player,func,026b:0272,timer_calibrate,void(void),platform,,
+player,func,026b:0307,pit_read,unsigned(void),platform,,
+dswap,func,0000:0494,mem_alloc_chk,unsigned(unsigned bytes),platform,,
+dswap,func,0000:04bf,mem_free_chk,void(unsigned seg),platform,,
+dswap,func,0000:04e0,dos_allocmem,unsigned(unsigned bytes),platform,,
+dswap,func,0000:0506,dos_freemem,int(unsigned seg),platform,dos_freemem_2,
+dswap,func,0000:0523,break_hook_install,void(void),platform,dos_setvect,
+dswap,func,0000:0546,break_hook_remove,void(void),platform,dos_setvect_2,
+dswap,func,0000:0557,ivt_read,unsigned long(int off /*SI*/),platform,,
+dswap,func,0000:0563,break_isr,void interrupt(void),platform,,
+dswap,func,0000:0599,dos_open,"int(char *name, int mode)",platform,dos_open,
+dswap,func,0000:05f0,dos_creat,"int(char *name, int attr)",platform,dos_creat,
+dswap,func,0000:0647,dos_close,void(int fd),platform,dos_close_2,
+dswap,func,0000:0668,dos_read,"int(int fd, unsigned n, void *buf)",platform,dos_read_2,
+dswap,func,0000:0693,dos_read_far,"int(int fd, unsigned n, unsigned off, unsigned seg)",platform,dos_read_3,
+dswap,func,0000:06ea,dos_buf_fill,void(void),platform,dos_read,
+dswap,func,0000:070b,dos_buf_setfd,void(int fd),platform,,
+dswap,func,0000:0723,dos_write_far,"int(int fd, unsigned n, unsigned off, unsigned seg, unsigned add)",platform,,
+dswap,func,0000:0790,gfx_line,"void(int *page, int x1, int y1, int x2, int y2, int colour)",video,,
+dswap,func,0000:0848,pal_set_default,void(void),video,bios_vga_palette_2,
+dswap,func,0000:085a,ovl_bind,void(unsigned seg),platform,,
+dswap,func,0000:08b3,dos_freemem_chk,void(unsigned seg),platform,,
+dswap,func,0000:0c7e,c0_start,void(void),platform,,
+dswap,func,0000:0d68,rtl_cinit,void(void),platform,,
+dswap,func,0000:0e36,exit,void(int code),platform,,
+dswap,func,0000:0e3d,rtl_exit_quick,void(int code),platform,,
+dswap,func,0000:0e45,rtl_cexit,void(void),platform,,
+dswap,func,0000:0e4f,rtl_c_exit,void(void),platform,dos_exit,
+dswap,func,0000:0eb7,rtl_ctermsub,void(void),platform,dos_setvect_3,
+dswap,func,0000:0ee4,rtl_initterm,"void(void(**start)(void), void(**end)(void))",platform,,
+dswap,func,0000:0ef3,rtl_initterm_far,void(...),platform,,
+dswap,func,0000:0f06,rtl_fsopen,"FILE *(char *name, char *mode, int shflag)",platform,,
+dswap,func,0000:0f2e,fopen,"FILE *(char *name, char *mode)",platform,,
+dswap,func,0000:0f42,printf,"int(char *fmt, ...)",platform,,
+dswap,func,0000:0f7e,lseek,"long(int fd, long off, int whence)",platform,dos_lseek,
+dswap,func,0000:0ffc,int86,"int(int intno, union REGS *in, union REGS *out)",platform,,
+dswap,func,0000:107a,sprintf,"int(char *buf, char *fmt, ...)",platform,,
+dswap,func,0000:1136,rtl_FF_MSGBANNER,void(void),platform,,
+dswap,func,0000:115c,rtl_nullcheck,int(void),platform,,
+dswap,func,0000:117e,rtl_setargv,void(void),platform,,
+dswap,func,0000:130c,rtl_setenvp,void(void),platform,,
+dswap,func,0000:138a,rtl_NMSG_TEXT,char *(int msgno),platform,,
+dswap,func,0000:13b5,rtl_NMSG_WRITE,void(int msgno),platform,dos_write,
+dswap,func,0000:1412,rtl_dosmaperr,void(int doserr),platform,,
+dswap,func,0000:1440,rtl_flsbuf,"int(int c, FILE *f)",platform,,
+dswap,func,0000:1520,rtl_openfile,"FILE *(char *name, char *mode, int shflag, FILE *f)",platform,,
+dswap,func,0000:1606,rtl_stbuf,int(FILE *f),platform,,
+dswap,func,0000:1677,rtl_ftbuf,"void(int flag, FILE *f)",platform,,
+dswap,func,0000:16c6,rtl_output,"int(FILE *f, char *fmt, va_list)",platform,,
+dswap,func,0000:1ad0,rtl_output_getint,internal,platform,,
+dswap,func,0000:1ad8,rtl_output_getlong,internal,platform,,
+dswap,func,0000:1ae4,rtl_output_getstr,internal,platform,,
+dswap,func,0000:1b01,rtl_output_putc,internal,platform,,
+dswap,func,0000:1b2a,rtl_output_write,internal,platform,,
+dswap,func,0000:1b48,rtl_output_pad,internal,platform,,
+dswap,func,0000:1b64,rtl_output_digits,internal,platform,,
+dswap,func,0000:1b9c,rtl_getstream,FILE *(void),platform,,
+dswap,func,0000:1c24,rtl_chkstk,void(void),platform,,
+dswap,func,0000:1c3c,malloc,void *(unsigned n),platform,,
+dswap,func,0000:1c60,rtl_getbuf,void(FILE *f),platform,,
+dswap,func,0000:1ca2,fflush,int(FILE *f),platform,,
+dswap,func,0000:1d1c,rtl_flushall,int(int mode),platform,,
+dswap,func,0000:1d66,rtl_sopen,"int(char *name, int oflag, int shflag, int pmode)",platform,,
+dswap,func,0000:1d80,rtl_open,"int(char *name, int oflag, int pmode)",platform,,
+dswap,func,0000:1f11,rtl_umask_attr,int(int pmode),platform,,
+dswap,func,0000:1f22,rtl_write,"int(int fd, void *buf, unsigned n)",platform,dos_lseek_2,
+dswap,func,0000:1fd3,rtl_write_flush,internal,platform,dos_write_2,
+dswap,func,0000:2064,stackavail,unsigned(void),platform,,
+dswap,func,0000:2076,rtl_nfree,void(void *p),platform,,
+dswap,func,0000:2097,rtl_nmalloc,void *(unsigned n),platform,,
+dswap,func,0000:20c0,rtl_nh_grow,internal,platform,,
+dswap,func,0000:214c,rtl_nh_setblock,internal,platform,dos_setblock,
+dswap,func,0000:219d,rtl_nh_lastfree,internal,platform,,
+dswap,func,0000:21be,rtl_nh_search,internal,platform,,
+mps_logo,func,0146:010e,rtl_cinit,void(void),platform,,
+mps_logo,func,0146:01d3,exit,void(int code),platform,,
+mps_logo,func,0146:01da,rtl_exit_quick,void(int code),platform,,
+mps_logo,func,0146:01e2,rtl_cexit,void(void),platform,,
+mps_logo,func,0146:01ec,rtl_c_exit,void(void),platform,dos_exit,
+mps_logo,func,0146:0256,rtl_ctermsub,void(void),platform,dos_setvect_3,
+mps_logo,func,0146:0283,rtl_initterm_far,void(...),platform,,
+mps_logo,func,0146:03b6,fread,"unsigned(void *buf, unsigned size, unsigned n, FILE *f)",platform,,
+mps_logo,func,0146:05a0,printf,"int(char *fmt, ...)",platform,,
+mps_logo,func,0146:05de,strcat,"char *(char *d, char *s)",platform,,
+mps_logo,func,0146:061e,strcpy,"char *(char *d, char *s)",platform,,
+mps_logo,func,0146:070c,dos_allocmem,unsigned(unsigned bytes),platform,dos_allocmem,
+mps_logo,func,0146:0724,bios_keyboard,int(int cmd),platform,bios_keyboard,
+mps_logo,func,0146:0748,dos_freemem,int(unsigned seg),platform,dos_freemem,
+mps_logo,func,0146:0756,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,
+mps_logo,func,0146:07f0,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,
+mps_logo,func,0146:08cc,rtl_setargv,void(void),platform,,
+mps_logo,func,0146:0a5e,rtl_setenvp,void(void),platform,,
+mps_logo,func,0146:0adc,rtl_NMSG_TEXT,char *(int msgno),platform,,
+mps_logo,func,0146:0b66,rtl_dosmaperr,void(int doserr),platform,,
+mps_logo,func,0146:0b94,fprintf,"int(FILE *f, char *fmt, ...)",platform,,
+mps_logo,func,0146:0bcc,rtl_filbuf,int(FILE *f),platform,,
+mps_logo,func,0146:0c62,rtl_flsbuf,"int(int c, FILE *f)",platform,,
+mps_logo,func,0146:0d46,rtl_freebuf,void(FILE *f),platform,,
+mps_logo,func,0146:0d72,rtl_openfile,"FILE *(char *name, char *mode, int shflag, FILE *f)",platform,,
+mps_logo,func,0146:0e5a,rtl_stbuf,int(FILE *f),platform,,
+mps_logo,func,0146:0ecd,rtl_ftbuf,"void(int flag, FILE *f)",platform,,
+mps_logo,func,0146:0f0c,fflush,int(FILE *f),platform,,
+mps_logo,func,0146:0f88,rtl_flushall,int(int mode),platform,,
+mps_logo,func,0146:0fe4,rtl_output,"int(FILE *f, char *fmt, va_list)",platform,,
+mps_logo,func,0146:13ef,rtl_output_getint,internal,platform,,
+mps_logo,func,0146:13f7,rtl_output_getlong,internal,platform,,
+mps_logo,func,0146:1403,rtl_output_getstr,internal,platform,,
+mps_logo,func,0146:1420,rtl_output_putc,internal,platform,,
+mps_logo,func,0146:144a,rtl_output_write,internal,platform,,
+mps_logo,func,0146:1468,rtl_output_pad,internal,platform,,
+mps_logo,func,0146:1484,rtl_output_digits,internal,platform,,
+mps_logo,func,0146:14bc,rtl_getstream,FILE *(void),platform,,
+mps_logo,func,0146:14f0,rtl_close,int(int fd),platform,dos_close,
+mps_logo,func,0146:15fa,rtl_write,"int(int fd, void *buf, unsigned n)",platform,dos_lseek_2,
+mps_logo,func,0146:16ae,rtl_write_flush,internal,platform,dos_write_2,
+mps_logo,func,0146:173a,rtl_ltoa_head,internal,platform,,
+mps_logo,func,0146:1776,memcpy,"void *(void *d, void *s, unsigned n)",platform,,
+mps_logo,func,0146:17a2,unlink,int(char *name),platform,dos_unlink,
+mps_logo,func,0146:17d6,rtl_getbuf,void(FILE *f),platform,,
+mps_logo,func,0146:181a,lseek,"long(int fd, long off, int whence)",platform,dos_lseek,
+mps_logo,func,0146:1894,rtl_sopen,"int(char *name, int oflag, int shflag, int pmode)",platform,,
+mps_logo,func,0146:18ae,rtl_open,"int(char *name, int oflag, int pmode)",platform,,
+mps_logo,func,0146:1a3f,rtl_umask_attr,int(int pmode),platform,,
+mps_logo,func,0146:1b6a,rtl_nfree,void(void *p),platform,,
+mps_logo,func,0146:1b8b,rtl_nmalloc,void *(unsigned n),platform,,
+mps_logo,func,0146:1bb4,rtl_nh_grow,internal,platform,,
+mps_logo,func,0146:1c40,rtl_nh_setblock,internal,platform,dos_setblock,
+mps_logo,func,0146:1c91,rtl_nh_lastfree,internal,platform,,
+mps_logo,func,0146:1e2e,rtl_nh_search,internal,platform,,
