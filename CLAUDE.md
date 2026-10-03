@@ -15,7 +15,7 @@ Token budget rules:
   write the PNG / contact sheet, then ask the user what they see.
 - Reuse before writing: `../AcesOfThePacific/aotpport/` (host, mem, VGA, loader), `tools/` here.
   Copy files with the shell; do not read them into context unless they must change.
-- Wide searches → `Explore` agent on Haiku. Do not re-derive facts already in `port/RE_GUIDE.md`,
+- Wide searches → the `scout` agent (Haiku). Do not re-derive facts already in `port/RE_GUIDE.md`,
   `FORMATS.md` or `port/spec/`.
 - Ground truth when a spec is unclear: `python tools/x86dis.py Game/<EXE> dis SSSS:OOOO LEN`.
 - Game data is never committed (`Game/` is a junction to the ignored `F-117ANi/`).
