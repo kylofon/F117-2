@@ -1,11 +1,11 @@
-﻿"""Render PLAN.md into site/index.html (git-ignored). Re-run after editing PLAN.md or after a session.
+"""Render PLAN.md into site/index.html (git-ignored). Re-run after editing PLAN.md or after a session.
 
 The Markdown is embedded in the page and rendered in the browser with marked (cdnjs), so the page
-opens straight from disk (file://) with no server.
+opens straight from disk (file://) with no server. A `## User to-do` section in PLAN.md is shown first.
 
 Token usage comes from the Claude Code transcripts of this project
 (~/.claude/projects/<repo path with :\\/ -> ->/*.jsonl, subagent transcripts included). Each session is
-assigned to a subtask by an `S<n>.<m>` id in its first prompt, or by its first prompt matching the
+assigned to a subtask by an `S<n>.<m>` / `S<n>F.<m>` id in its first prompt, or by its first prompt matching the
 subtask's text in PLAN.md.
 """
 import collections
@@ -18,7 +18,7 @@ md = (ROOT / "PLAN.md").read_text(encoding="utf-8")
 out = ROOT / "site" / "index.html"
 out.parent.mkdir(exist_ok=True)
 
-TRANSCRIPTS = pathlib.Path.home() / ".claude" / "projects" / re.sub(r"[:\\/]", "-", str(ROOT))
+TRANSCRIPTS = pathlib.Path.home() / ".claude" / "projects" / re.sub(r"[:\\/ ]", "-", str(ROOT))
 MODEL_TAG = {"haiku": "H", "sonnet": "S", "opus": "O"}
 FIELDS = ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens", "output_tokens")
 
@@ -27,7 +27,7 @@ def norm(s):
     return re.sub(r"[^a-z0-9]+", " ", s.lower()).strip()
 
 
-SUBTASKS = {m[1]: m[2].strip() for m in re.finditer(r"^\|\s*(S\d+\.\d+)\s*\|\s*([^|]+)\|", md, re.M)}
+SUBTASKS = {m[1]: m[2].strip() for m in re.finditer(r"^\|\s*(S\d+[A-Z]?\.\d+)\s*\|\s*([^|]+)\|", md, re.M)}
 
 
 OVERRIDES = {"f5e96afb": "S0.1"}  # session id prefix -> subtask, for sessions whose prompt names none
@@ -36,7 +36,7 @@ OVERRIDES = {"f5e96afb": "S0.1"}  # session id prefix -> subtask, for sessions w
 def subtask_of(prompt, sid=""):
     if sid[:8] in OVERRIDES:
         return OVERRIDES[sid[:8]]
-    m = re.search(r"\bS\d+\.\d+\b", prompt[:200])
+    m = re.search(r"\bS\d+[A-Z]?\.\d+\b", prompt[:200])
     if m:
         return m[0]
     p = norm(prompt)[:60]
@@ -157,6 +157,27 @@ doc.querySelectorAll('td').forEach(td => {
   if (/^[HSO]$/.test(t)) td.innerHTML = '<span class="b ' + t + '">' + t + '</span>';
   else if (/^done/.test(t)) td.classList.add('done');
 });
+// "User to-do" is the first table: move that section under the title, and add a row for every
+// subtask whose status cell says "U<n> pending" but which the to-do section does not mention yet.
+const todoH = [...doc.querySelectorAll('h2')].find(h => /^user to-do/i.test(h.textContent.trim()));
+if (todoH) {
+  const part = [todoH];
+  for (let n = todoH.nextElementSibling; n && n.tagName !== 'H2'; n = n.nextElementSibling) part.push(n);
+  const todo = part.map(e => e.tagName === 'TABLE' ? e : e.querySelector('table')).find(Boolean);
+  const listed = part.map(e => e.textContent).join(' ');
+  if (todo) doc.querySelectorAll('tr').forEach(tr => {
+    if (todo.contains(tr) || tr.cells.length < 3) return;
+    const id = tr.cells[0].textContent.trim(), m = tr.cells[tr.cells.length - 1].textContent.match(/\\b(U\\d+) pending/);
+    if (!m || !/^S\\d+[A-Z]?\\.\\d+$/.test(id) || listed.includes(id)) return;
+    const row = todo.insertRow(-1), cols = todo.rows[0].cells.length;
+    const text = tr.cells[1].textContent.trim();
+    [m[1], 'Check the result of ' + id + ': ' + (text.length > 90 ? text.slice(0, 90) + '…' : text) + ' (auto-added)', id]
+      .concat(Array(Math.max(0, cols - 3)).fill('')).slice(0, cols).forEach(v => row.insertCell().textContent = v);
+  });
+  const h1 = doc.querySelector('h1');
+  h1 ? h1.after(...part) : doc.prepend(...part);
+}
+
 // Token usage
 const sessions = JSON.parse(document.getElementById('usage-data').textContent);
 const F = ['input_tokens', 'cache_creation_input_tokens', 'cache_read_input_tokens', 'output_tokens'];

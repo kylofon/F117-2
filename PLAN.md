@@ -6,10 +6,22 @@ separate **F-117A Enhanced** repo built on it. Token efficiency is a first-class
 one session each, the cheapest model that can do the job, and the user doing whatever is cheap for a
 human and expensive for a model (looking at pictures, playing the game, driving DOSBox).
 
+## User to-do
+
+What the agents need from you now, most urgent first. Agents add a row when they hand you a task and
+remove it when it is done; subtasks marked `U<n> pending` are added automatically on the plan page.
+
+| Task | What to do | For | Time |
+|---|---|---|---|
+| U5 | Open `work\pan\*_sheet.png` next to your captures `01_mps_logo`, `02_title1`, `03_title2`, `04_title3a`, `05_credits` (+ cockpit/bunker); reply `OK` or what differs | S2.2 | 10 min |
+| U5 | Listen to `work\sound\*.wav` (`asound_log_logo`, `asound_cmd03/36-39`, `speech_0-7`); reply `OK` or what is wrong (tempo assumes a 300 Hz poll) | S2.4 | 10 min |
+| U1 | Manual PDF → `docs\manual.pdf` (+ `pdftotext`), see U1 below | all | 10 min |
+| U2, U3 | DOSBox-X setup and reference captures, if not done yet (U2/U3 below); S2.2 compares against them | S2.2, later | 45 min |
+
 ## Status
 
 - **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code).
-- **Next:** S2.2. User tasks that can start now: U1, U2, U3.
+- **Next:** S2.2. Your tasks: **User to-do** above.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 

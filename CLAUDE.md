@@ -8,6 +8,8 @@ Token budget rules:
   subtask, not the whole file. Update its status line, run `python tools/plan_site.py`, commit.
   PLAN.md tables: status goes in the row's last cell (`done YYYY-MM-DD`, `U5 pending`); longer notes
   go in the "Notes:" list under the table, never between rows (that breaks the table).
+  When you need something from the user (U-check, capture, dump, decision), add a row to the
+  `## User to-do` table at the top of PLAN.md; remove rows that are done.
 - Never read large files whole. `Grep`/`rg` first, then `Read` with offset/limit. Specs, decomps and
   disassembly are always searched, never dumped.
 - Tools write to `work/` (or `port/`); print only a short summary (counts, first lines, errors).
