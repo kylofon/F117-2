@@ -13,7 +13,6 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 
 | Task | What to do | For | Time |
 |---|---|---|---|
-| U2, U3 | DOSBox-X setup and reference captures, if not done yet (U2/U3 below); S2.2 compares against them | S2.2, later | 45 min |
 
 ## Status
 
@@ -95,7 +94,7 @@ Model: H = Haiku 4.5, S = Sonnet 5.5, O = Opus 5.5. Size: rough session length (
 
 Notes:
 - S2.1 status: DONE. PIC/PAL decoded; palettes confirmed in U5. Parked for the 3D/flight tasks: 256LEFT/PIT/REAR/RIGHT, ORDNANCE, REQUESTR (runtime-composed palettes; see FORMATS.md).
-- S2.2 status: decoders done (`tools/lzs.py`, `panlib.py`, `pan2png.py`, `ss2png.py`; output `work/pan/`); all 6 PAN cels and 81 LABSLOGO sprites decode to exact record boundaries. Awaiting U5: `work/pan/*_sheet.png` vs U3 captures 02_title1, 03_title2, 04_title3a, 05_credits, 01_mps_logo (+ cockpit/bunker). Formats in `port/RE_GUIDE.md` §4.
+- S2.2 status: decoders done (`tools/lzs.py`, `panlib.py`, `pan2png.py`, `ss2png.py`; output `work/pan/`); all 6 PAN cels and 81 LABSLOGO sprites decode to exact record boundaries. U5 OK 2026-10-03: `work/pan/*_sheet.png` vs U3 captures 02_title1, 03_title2, 04_title3a, 05_credits, 01_mps_logo (+ cockpit/bunker). Formats in `port/RE_GUIDE.md` §4.
 - S2.3 status: DONE (geometry; maps confirmed in U5). `python tools/f3d.py all` → `work/3d/`: 989 OBJ (`obj/<BANK>/oNNN.obj`, LOD 0, + `.mtl`), `sheet_<BANK>.png`, `map_<TH>.png` + `maps_sheet.png` (north up). Formats in `FORMATS.md` (3D objects / Terrain / World layout); all 11 `.3DX` parse with 100 % byte coverage. Colours are wrong (`ADV.PAL` guess, legend colours for ground ops) → S2.6.
 - S2.6 status: DONE (U5 OK 2026-10-03). VGAME does write the DAC (14A2:000E): three flight palettes A/B/C in DGROUP (B/C = night, picked by comm[33h]; A = debug), desert ramp patch per theatre, ground backdrop = bands 70h-7Fh; FORMATS.md "Flight palette". `tools/f3d.py` (`palette(th, which)`, `colour_map` on backdrop 7Ch; `pal=B`/`pal=C` arg, default A) and `tools/pic2png.py` (cockpit/ORDNANCE → flight B, + `_A`/`_C` files; REQUESTR → PALETTES[1]) regenerated; all confirmed in U5.
 - S2.4: done. `.LOG` = logo-jingle overlay; driver API, speech, poll-rate rule in RE_GUIDE §5. WAVs in `work/sound/` (U5 listened: logo, 36-39, speech OK; cmd 3 = PLAYER intro cue sequence rendered at a fixed 120 Hz poll, user-chosen).
