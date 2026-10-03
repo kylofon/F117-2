@@ -14,7 +14,6 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 | Task | What to do | For | Time |
 |---|---|---|---|
 | U5 | Open `work\pan\*_sheet.png` next to your captures `01_mps_logo`, `02_title1`, `03_title2`, `04_title3a`, `05_credits` (+ cockpit/bunker); reply `OK` or what differs | S2.2 | 10 min |
-| U5 | Listen to `work\sound\*.wav` (`asound_log_logo`, `asound_cmd03/36-39`, `speech_0-7`); reply `OK` or what is wrong (tempo assumes a 300 Hz poll) | S2.4 | 10 min |
 | U1 | Manual PDF → `docs\manual.pdf` (+ `pdftotext`), see U1 below | all | 10 min |
 | U2, U3 | DOSBox-X setup and reference captures, if not done yet (U2/U3 below); S2.2 compares against them | S2.2, later | 45 min |
 
