@@ -1,0 +1,322 @@
+exe,kind,address,name,type,owner,other_names,notes
+start,func,0000:0010,ui_main,void ui_main(void),shell,,"shell main: init, (removed quiz call), pilot save, arming roll, ready room, save temp.wld, exit(0Ch/0Dh by site[E062].hi&2)"
+start,func,0000:008d,roster_home_card_draw,void(void),shell,,"hook of homescrn: rank+surname, theatre, war, mission type, skill, crash, flight model, rating"
+start,func,0000:020f,ui_ready_room,void(void),shell,,"homescrn loop, 5 hotspots (tbl 6F42) -> orders 5BF0 / briefing 0FA3 / arming 0963 / roster 623E / hangar 038C"
+start,func,0000:02ba,roster_difficulty_rating,int(void),shell,,"(w60[theatre]+w54[type]+w58[skill]+w5C[crash])/3 - flight_model + 2, max 10"
+start,func,0000:0311,ui_hangar_hook,void(void),shell,,"hook of hangscrn: loads hangsprt to page 3, clean copy to page 4, frame 0"
+start,func,0000:038c,ui_hangar_launch,int(void),shell,,hangar/climbin screen + 'ready for your mission?' dialog; returns 1 = launch
+start,func,0000:0448,ui_hangar_anim,int(void),shell,,"18-frame hangar strip animation from tables 006A/0106/0136/0148, abortable"
+start,func,0000:057b,ui_nop_a,void(void),shell,,ret stub (C init table)
+start,func,0000:057c,ui_nop_b,void(void),shell,,ret stub (C init table)
+start,func,0000:057e,quiz_draw,void(void),shell,,DEAD in this build: air_id quiz screen (aircraft picture + 18 names)
+start,func,0000:0703,quiz_run,void(void),shell,,"DEAD (call patched out by 3 NOPs at 001D): ID quiz, sets comm+22h"
+start,func,0000:0786,quiz_hover_hook,void(void),shell,,hover colours for tbl 6BC6
+start,func,0000:07ee,arm_screen_draw,void(void),shell,,"hook of armsscrn: bays, unavailable weapons, payload lbs, fuel"
+start,func,0000:0963,arm_screen_run,int(void),shell,,"arming loop (tbl 6C5A); returns 0 back, 5 go to hangar"
+start,func,0000:0b01,arm_hover_hook,void(void),shell,,hover colours + weapon info for tbl 6C5A
+start,func,0000:0bd4,arm_show_weapon_info,int(int row),shell,,"weapon picture, name plate and description; 20 = clear"
+start,func,0000:0d65,arm_draw_bay,"void(int slot,int wid)",shell,,draw bay frame + weapon icon at bay box position
+start,func,0000:0e23,arm_roll_unavailable,void(void),shell,,randomly flag up to 4 weapons unavailable (DS:D878)
+start,func,0000:0e96,arm_draw_fuel,void(void),shell,,fuel lbs = 10000 (if mission) + 1900 per fuel tank bay
+start,func,0000:0f4e,brief_setup,void(void),shell,,"enter briefing: reset modes, load brefscrn and theatre map, brief_new_mission"
+start,func,0000:0fa3,brief_screen_run,int(void),shell,,"briefing map loop (tbl 6D1E); returns 0 back, 3 to arming"
+start,func,0000:11db,brief_hover_hook,void(void),shell,,"hover hint text, colours and site popup for tbl 6D1E"
+start,func,0000:1308,brief_new_mission,void(void),shell,,"show brefscrn, decode mission if D2A2==0 (40F0), build site buttons, animated redraw"
+start,func,0000:141d,brief_redraw,void(char done),shell,,clean map -> icons -> route -> ranges/hostile -> blit to screen
+start,func,0000:149c,brief_draw_route,char(char done),shell,,"draw depart/target/target/land markers, texts, animated lines and T/P/S/L labels"
+start,func,0000:183a,brief_draw_ranges,void(void),shell,,"radar/SAM range rings per site button, palette-coloured"
+start,func,0000:196a,brief_draw_site_icons,int(char done),shell,,site icon sprites at site button centres
+start,func,0000:1ab6,brief_draw_hostile,void(void),shell,,hostile concentration icons from 16x16 grid CAD8 (original loop-counter bug)
+start,func,0000:1b37,brief_hint_text,void(int h),shell,,help line under the map for button h (0x64/0x65 = hostile result)
+start,func,0000:1c2f,brief_site_info,void(int n),shell,,airbase/radar data popup for site button n
+start,func,0000:1f3f,brief_build_site_buttons,void(void),shell,,"build dynamic site buttons (DS:6D62), B286/B287 pairs, B2E6, 6D21"
+start,func,0000:20d6,brief_orders_screen,void(void),shell,,"mission orders pages (FOLDER1/FOLDER2), see shell.md part E"
+start,func,0000:24f7,brief_draw_target_summary,"void(TextCtx *c, int which)",shell,,"which 0/1 = primary/secondary: heading + intro paragraph (1F24 table) + OBJECTIVE: + objective text; caller 20d6"
+start,func,0000:25d9,brief_format_date,"char *(char *buf)",shell,,"sprintf(buf,""%s %d, %d"") of the campaign date from pilot record (theatre +38h, days +36h) and date tables 882/88C/896/8A8/8C2"
+start,func,0000:2651,brief_format_objective,"void(ObjRec *rec, char *out)",shell,,"builds the one-line objective sentence for mission-objective record (E05E+12h*n); switch on type byte of 11DE table (8 kinds)"
+start,func,0000:2864,ui_load_file_far,"unsigned(char *name, unsigned off, unsigned seg)",shell,,"open + read up to FFFFh bytes to seg:off + close; returns bytes read"
+start,func,0000:289a,ui_load_file_near,"unsigned(char *name, void *buf)",shell,,"open + read up to FFFFh bytes to near buf + close"
+start,func,0000:28ce,ui_anim_start,"int(int src_page, RectTbl *tbl, uint8_t *seq, int nsteps)",shell,,"starts the button-highlight animation (returns 0 and ignores if one is running)"
+start,func,0000:2901,ui_anim_step,"int(void)",shell,,"per-tick step; acts every 8th call; returns remaining steps"
+start,func,0000:2a7e,ui_anim_active,"int(void)",shell,,"returns [B2F4] remaining steps"
+start,func,0000:2a84,ui_text_centered,"void(TextCtx *c, char *s, int cx, int y)",shell,,"draws s centred on cx (text_width/2) at y via slot 5"
+start,func,0000:2ab4,ui_popup_restore_box,"void(Box *b, int x, int y)",shell,,"copies saved background (page 2 at 0,h+4; size b->w,b->h at +6/+8) back to pages 1 and 0 at x,y"
+start,func,0000:2b06,ui_wait_ticks,"void(int n)",shell,,"n x pal_apply_queue (each waits one timer tick)"
+start,func,0000:2b1b,ui_popup_text,"void(char *s, int x, int y, int font, int centre, int wrap_w)",shell,,"framed text popup on pages 1+0; saves background in page 2; geometry in B2F6/B2F8/B2FC/B302; undo with ui_popup_restore"
+start,func,0000:2cb4,ui_draw_frame,"void(TextCtx *c, int x, int y, int w, int h)",shell,,"bevelled panel: 4 corner tiles from page 2 (0..3,0..3), edges colours E0/E6/E1/E5, fill E2 (U)"
+start,func,0000:2df2,ui_draw_button,"int(char *s, int cx, int y, int colour)",shell,,"font 1 button: frame (w=textw+8,h=16) centred on cx + shadowed text; returns w"
+start,func,0000:2e50,map_draw_range_ring,"void(int wx, int wy, int radius, int colour, int solid)",shell,,"circle of given world radius on the ONC map page 1 (dc18); dotted if solid==0"
+start,func,0000:2f4c,map_draw_route_line,"int(int x1, int y1, int x2, int y2, int skip)",shell,,"animated 6-bit DDA line on page 1 (+ screen); polls ui_wait_skip(1) each step until Space; returns skip flag"
+start,func,0000:3070,pal_fade_in,"void(int speed)",shell,,"pal_fade(pal64e3, 0, 100h, speed)"
+start,func,0000:3088,pal_fade_out,"void(int speed)",shell,,"pal_fade(pal64e3, 100h, 0, speed)"
+start,func,0000:30a0,pal_fade,"void(uint8_t *pal, int from, int to, int speed)",shell,,"quadratic brightness fade of 768-byte palette; stops timer ISR during the fade"
+start,func,0000:31ad,pal_fade_calibrate,"void(uint8_t *buf)",shell,,"counts pal_set calls in 4 BIOS ticks into [B304]"
+start,func,0000:31fa,map_place_label,"void(char *s, Pt *p1, Pt *p2, Pt *p3)",shell,,"draws s near world point p1 choosing an offset away from the segments to p2/p3 (page 1 ctx dc18)"
+start,func,0000:3301,ui_sin_mul,"int(unsigned ang, int r)",shell,,"r*sin(ang)/16384 (ang 16-bit full circle) = fixmul_q14(sin16(ang), r)"
+start,func,0000:3318,ui_cos_mul,"int(unsigned ang, int r)",shell,,"ui_sin_mul(ang+4000h, r)"
+start,func,0000:332e,ui_dialog_draw,"void(Dialog *d, int x, int y)",shell,,"measures + draws message dialog with 1 or 2 buttons; fills d->w,h and the button hit rects (+0Eh..+1Ch)"
+start,func,0000:3517,pal_queue_push,"void(int first, void *rgb, int count)",shell,,"appends {first,rgb,count} to the DAC update queue 64A6 (count byte 64E2, max 10); applied by pal_apply_queue (8427)"
+start,func,0000:3548,pal_queue_push_click,"void(int first, void *rgb, int count)",shell,,"pal_queue_push + snd_cmd(1Ah); no callers"
+start,func,0000:3567,ui_text,"void(TextCtx *c, char *s, int x, int y)",shell,,"c->x=x; c->y=y; slot 5 text_noclip"
+start,func,0000:3588,ui_popup_restore,"void(void)",shell,,"undo of ui_popup_text/ui_dialog_draw background: page 2 -> pages 1 and 0 using B2F6/B2F8/B2FC/B302"
+start,func,0000:35fc,ui_load_screen_pic,"void(int name_idx, int page_slot)",shell,,"loads ""<CBA[name_idx]>.pic"" into the file buffer, decodes into page seg CAB0[slot] with pic_to_seg_b (no palette)"
+start,func,0000:3641,ui_show_screen,"void(int name_idx, void (*overlay)(void))",shell,,"fade out, load pic into page 1, blit to screen, run overlay, fade in, screen_on"
+start,func,0000:3693,ui_sprite_draw,"void(SpriteCtx *c, int x, int y, unsigned seg)",shell,,"slot 22 sprite_scaled at natural size (dw,dh = words 0 and 2 of seg:0)"
+start,func,0000:36c4,ui_text_shadow,"void(TextCtx *c, char *s, int x, int y)",shell,,"if c->bg != -1 draws s three times in c->bg at (x+1,y),(x,y+1),(x+1,y+1) then normally at x,y"
+start,func,0000:373c,ui_text_width,"int(TextCtx *c, char *s)",shell,,"sum of slot 47 font_char_width over s (font = c->font)"
+start,func,0000:3776,ui_text_wrap,"int(TextCtx *c, char *s, int x, int y, int width, int line_h, int centre)",shell,,"word wrap + draw (page -1 = measure only); returns widest line; c->y ends at the next line"
+start,func,0000:38ac,ui_menu_loop,"int(MenuDesc *m)",shell,,"modal input loop; returns button index 1..n, 63h cancel(ignored by dialog), 100h+hotkey"
+start,func,0000:393d,ui_hit_test,"int(Rect *rects, int n)",shell,,"1-based index of the 8-byte rect {x0,y0,x1,y1} containing the cursor (E08A,E08C), else 0"
+start,func,0000:3989,ui_cursor_erase,"void(void)",shell,,"blit_rect page1 -> page0 over the old cursor box (E08E,E090,E092 x E093)"
+start,func,0000:39b3,ui_order_desc,"void(unsigned *p)",shell,,"if p[2] > p[0] swap p[0],p[2] (unsigned)"
+start,func,0000:39d5,ui_order_asc,"void(unsigned *p)",shell,,"if p[2] < p[0] swap p[0],p[2] (unsigned)"
+start,func,0000:39f7,ui_poll_input,"int(MenuDesc *m)",shell,,"one poll of joystick/mouse/keyboard, moves + redraws the cursor; returns 0/1/2/62h/key"
+start,func,0000:3cea,ui_dialog_run,"int(Dialog *d, int x, int y)",shell,,"modal dialog: draw, place cursor on button 1, ui_menu_loop until not 63h, restore; returns 1/2/100h+key"
+start,func,0000:3da2,ui_dialog_hover,"void(void)",shell,,"menu callback (cb field of every dialog descriptor): highlights the hovered button by swapping DAC E7/E8 colours"
+start,func,0000:3e20,ui_cursor_init,"void(unsigned sprite_seg)",shell,,"E088=seg, E092/E093 = byte0/byte2 of sprite, E094=E095=2, cursor pos and old pos = 0,0"
+start,func,0000:3e5e,ui_check_break,"void(void)",shell,,"if [73F2] (break hook installed) call fatal_exit(0) (76D1)"
+start,func,0000:3e6d,ui_kbd_flush,"void(void)",shell,,"while a key is waiting: kbd_get (slots 90/91); no callers"
+start,func,0000:3e84,ui_cursor_set_pos,"void(int x, int y)",shell,,"E08A=x,E08C=y; mouse_set_pos if mouse present"
+start,func,0000:3ea5,ui_wait_click,"int(void)",shell,,"wait for button0/Enter (1) or button1/Esc (2); Alt-Q -> quit prompt"
+start,func,0000:3f33,ui_wait_input,"int(int ticks)",shell,,"wait up to ticks (0 = ~forever): 0 none, 1 button0/Enter, 2 button1/Esc, 3 Space; waits for button release first"
+start,func,0000:405f,ui_wait_skip,"int(int ticks)",shell,,"ui_wait_input + click sound; returns 1 only for Space"
+start,func,0000:40f0,mission_site_setup,"void(void)",shell,,"after theatre/pilot choice: copies pilot theatre fields, calls theatre_load(5466) + 4239, option bytes CAD2..5, scans map flag 10h, randomly flags sites 40h/80h; caller 1308"
+start,func,0000:4239,mission_generate,void mission_generate(void),shell,,"mission generator: picks targets, templates, units, loadout, times"
+start,func,0000:512e,wld_site_at_pos,"int wld_site_at_pos(int x,int y,int slot)",shell,,"snap to terrain cell, find/create site"
+start,func,0000:51e8,wld_site_of_type,"int wld_site_of_type(int slot,int type)",shell,,"find terrain object of type, find/create site"
+start,func,0000:5282,arm_pick_weapon,int arm_pick_weapon(int target_class),shell,,"best weapon row in DS:1D86, random tie"
+start,func,0000:532a,wld_site_dist,"int wld_site_dist(int a,int b)",shell,,dist_approx_xy of two sites
+start,func,0000:5356,mission_unit_init,"void mission_unit_init(int unit,int site)",shell,,init 36-byte unit record at site
+start,func,0000:5413,dist_approx_xy,"int dist_approx_xy(int dx,int dy)",shell,,max+min/2 saturated 7FFF
+start,func,0000:5466,wld_load_theatre,void wld_load_theatre(const char *prefix),shell,,"loads .wld, .3dG (7D71), .3dT (7E88)"
+start,func,0000:54bb,wld_read_file,void wld_read_file(const char *path),shell,,"fread .WLD into DGROUP tables, builds name pointer table"
+start,func,0000:5625,wld_export_to_comm,void wld_export_to_comm(void),shell,,pack world state into comm+7Ah
+start,func,0000:5743,mission_bearing,"unsigned mission_bearing(int dx,int dy)",shell,,"16-bit bearing, 0=+dy 4000=+dx"
+start,func,0000:585c,wld_pack_get,"void wld_pack_get(void *dst,int size,int count)",shell,,copy from far cursor B392:B390 to DS
+start,func,0000:588d,wld_pack_put,"void wld_pack_put(void *src,int size,int count)",shell,,copy DS to far cursor B392:B390
+start,func,0000:58be,map_site_grid_ref,char *map_site_grid_ref(int site),shell,,"grid ref of site x,y for current theatre"
+start,func,0000:58df,map_grid_ref,"char *map_grid_ref(int x,int y,int theatre)",shell,,ONC-style chart ref in DS:B394
+start,func,0000:59d8,mission_clamp_hi,"int mission_clamp_hi(int v,int lo,int hi)",shell,,v if lo<=v<=hi else hi
+start,func,0000:59fe,brief_clock_string,"void brief_clock_string(char *buf,int ticks)",shell,,"HH:MM from ticks (30 per minute), night offset from comm+33"
+start,func,0000:5a8a,ui_orders_draw,void ui_orders_draw(void),shell,,"orders screen setup callback (hotspot enable, palette, markers)"
+start,func,0000:5bf0,ui_orders_screen,int ui_orders_screen(void),shell,,"orders screen menu loop (theatre, war level, mission type, Fly)"
+start,func,0000:5e6f,ui_orders_hover,void ui_orders_hover(void),shell,,menu idle callback: hover colours and tooltips
+start,func,0000:5ffa,ui_tooltip_clear,void ui_tooltip_clear(void),shell,,restore tooltip panel
+start,func,0000:6045,ui_tooltip_show,void ui_tooltip_show(const char *text),shell,,draw wrapped tooltip text
+start,func,0000:60dc,ui_theatre_name_draw,void ui_theatre_name_draw(void),shell,,"draw current theatre name at (D4,7C)"
+start,func,0000:615c,roster_screen_draw,void roster_screen_draw(void),shell,,"roster screen callback: 10 lines, highlight, delete hint"
+start,func,0000:623e,roster_screen_run,int roster_screen_run(void),shell,,"Roster screen main loop: show rostscrn, pick pilot / Delete = rename / Done; saves roster on exit. Called from 029D."
+start,func,0000:63fb,roster_hover_cb,void roster_hover_cb(void),shell,,menu hover callback of roster_menu (DS:704E): row colours + info panel
+start,func,0000:64e5,roster_draw_info,void roster_draw_info(int slot),shell,,"bottom info panel: rank+surname, best/last mission, option strings, medals (CMH DFC AFC SS AM PH)"
+start,func,0000:6861,roster_draw_row,"void roster_draw_row(int slot,int y)",shell,,"draws one roster row into page 1: rank+name, score (x=224 right), missions (x=246 right), status centred; code is duplicated in the binary"
+start,func,0000:6a7c,ui_str_last_word,char *ui_str_last_word(char *s),shell,,pointer to the part after the last space (surname)
+start,func,0000:6ab3,roster_edit_name,int roster_edit_name(int slot),shell,,"Delete key on a row: type a new pilot name (prefix '2nd Lt ', max 29 chars, Esc cancels); resets the record and copies it to the active pilot"
+start,func,0000:6d07,roster_startup_sync,void roster_startup_sync(void),shell,,"called once after shell_init: load roster, fix +3C, roster<->active copy depending on first-run word, save silently"
+start,func,0000:6db8,roster_options_screen,void roster_options_screen(void),shell,,"pilot options panel: opponent level (+3E), landing (+40), aircraft (+42); Done / right click cancel"
+start,func,0000:71ad,roster_options_hover_cb,void roster_options_hover_cb(void),shell,,hover callback of opt_menu (DS:6FFA): DAC 0xF5-i red/normal
+start,func,0000:7218,roster_load,void roster_load(void),shell,,"fopen Roster.Fil rb (unchecked), read word B39C + 10 x 0x50 into D892"
+start,func,0000:7272,roster_save,void roster_save(int show_err),shell,,write Roster.Fil unless fcb_find()==0 (original floppy volume label F117A-SF); error boxes 72EA/729D if show_err
+start,func,0000:7312,shell_init,void shell_init(void),shell,,"program start: comm setup, bind MISC/MGRAPHIC/sound drivers, buffers, gfx init, sprites, timer, joystick/mouse, srand"
+start,func,0000:7387,shell_comm_setup,void shell_comm_setup(void),shell,,"sets DS:CBD8 (->0000:04F2), CAC0 (->04F4), E096/E098 comm far ptr, CACA/CACC active pilot = comm+1272h"
+start,func,0000:73ce,shell_gfx_init,void shell_gfx_init(void),shell,,"alloc 24000 B scratch (dup of 7312), mode13/screen_off first time, 5 pages + 5 TextCtx at DC02, load PALETTES.PAL (6912 B)"
+start,func,0000:74b1,shell_sprites_init,void shell_sprites_init(void),shell,,"load requestr.pic to page 2, sprite pool, 10 sprite_grab, cursor sprite D32E"
+start,func,0000:7611,ui_quit_prompt,void ui_quit_prompt(void),shell,,"Alt-Q: show adv.pic + adv.pal, Y exits, any other key restores the screen"
+start,func,0000:76c0,ui_rand_mod,unsigned ui_rand_mod(unsigned n),shell,,rand() % n
+start,func,0000:76d1,shell_exit,void shell_exit(int code),shell,,"snd stop, free buffer, remove hooks, text mode if code<=1, 'Not enough memory!' if code==1, exit(code)"
+start,func,0000:7744,map_nearest_object,"struct ObjHit *map_nearest_object(long wx,long wy)",shell,,"nearest class!=0 terrain object around (wx=wld_x*32, wy=(0x8000-wld_y)*32), levels 1-2, 3x3 cells; result struct DS:CA8E"
+start,func,0000:7904,map_pick_object,struct ObjHit *map_pick_object(int obj_id),shell,,"random terrain record with obj==id (class 0x10: level-3 scan, else levels 1-2 scan); result struct DS:CA8E"
+start,func,0000:7c05,map_level_scale,"long map_level_scale(int level,long v)",shell,,"world units to level units: L0 <<1, L1 v, L2 >>2, L3 >>4, L4 >>6"
+start,func,0000:7c56,map_tile_type,"int map_tile_type(int level,int x,int y)",shell,,"tile type lookup in the 5-level .3DG tables, -1 out of range"
+start,func,0000:7d71,map_load_3dg,int map_load_3dg(char *name),shell,,load XX.3dG into BAA0/B9A0/B7A0/B5A0/B3A0 (zero/identity if missing)
+start,func,0000:7e88,map_load_3dt,int map_load_3dt(char *name),shell,,"load XX.3dT records into pool BAB0 (7-byte records), pointer table C85C, counts F00/F0A"
+start,func,0000:826c,pal_select,"void(int n)",shell,,"library: copies palette n (n clamped to 8, 768 bytes each) from far [D092] (palettes.pal) into pal_cur 64E3; used by ui_show_screen"
+start,func,0000:8c15,ui_fixmul_q14,"int(int a, int b)",shell,,"library: (a*b*4)>>16 rounded (a is Q14)"
+start,func,0000:8c6c,ui_cos16,"int(unsigned ang)",shell,,"library: sin16(ang+4000h)"
+start,func,0000:8c7c,ui_sin16,"int(unsigned ang)",shell,,"library: sin of 16-bit angle, Q14"
+start,func,0000:8c88,ui_sin_interp,"int(BX ang)",shell,,"library: sine from 256-entry table at DS:ABF8 with linear interpolation (BX=angle, returns BX Q14)"
+start,data,DS:0042,str_temp_wld,char[9],shell,,mission file name 'temp.wld'
+start,data,DS:0054,tbl_diff_mission_type,byte[4],shell,,"difficulty weights 5,7,0,0"
+start,data,DS:0058,tbl_diff_skill,byte[4],shell,,"difficulty weights 0,3,5,8"
+start,data,DS:005c,tbl_diff_crash,byte[4],shell,,"difficulty weights 0,3,6,0"
+start,data,DS:0060,tbl_diff_theatre,byte[9],shell,,"difficulty weights per theatre 0,2,5,6,3,3,4,2,5"
+start,data,DS:006a,tbl_hangar_rects,word[13][6],shell,,"hangsprt strip records sx,sy,dx,dy,w,h"
+start,data,DS:0106,tbl_hangar_rects2,word[4][6],shell,,upper strip records
+start,data,DS:0136,tbl_hangar_frames,s8[18],shell,,frame index list for strip 1 (FF none)
+start,data,DS:0148,tbl_hangar_frames2,s8[18],shell,,frame index list for strip 2 (FF none)
+start,data,DS:01c4,tbl_weapon_knockout,byte[16],shell,,candidate weapon ids for random unavailability
+start,data,DS:01d6,tbl_bay_x,word[8],shell,,bay box x per flight_model*4+slot
+start,data,DS:01e6,tbl_bay_y,word[8],shell,,bay box y per flight_model*4+slot
+start,data,DS:0232,tbl_wpn_pic_sx,word[10],shell,,weapon picture source x
+start,data,DS:0246,tbl_wpn_pic_sy,word[10],shell,,weapon picture source y
+start,data,DS:882,date_start_month,uint8_t[],shell,,"start month per theatre"
+start,data,DS:88C,date_start_day,uint8_t[],shell,,"start day per theatre"
+start,data,DS:896,date_year,int[],shell,,"start year per theatre (1986,1984,1985,1986,1994,1989,1991,1995,1997,2119)"
+start,data,DS:8A8,month_names,char *[13],shell,,"Jan..Dec"
+start,data,DS:8C2,days_in_month,uint8_t[13],shell,,"0,31,28,31,30,31,30,31,31,30,31,30,31 (no leap)"
+start,data,DS:0cba,tbl_pic_names,char*[33],shell,,picture name pointers (air_id .. climbin)
+start,data,DS:CBA,screen_name_tbl,char *[],shell,,"names air_id armsscrn brefscrn folder1 hangscrn homescrn ordrscrn rostscrn ... (.pic)"
+start,data,DS:D6A,theatre_suffix_tbl,char *[],shell,,"lb pg nc ce vn me (file suffix per theatre)"
+start,data,DS:0D6A,theatre_prefix_ptrs,word[9],shell,,prefix string pointers lb pg nc ce vn me ku cu ko
+start,data,DS:0D7C,brief_time_tot,char[6],shell,,time over target string
+start,data,DS:0D82,brief_time_tot15,char[6],shell,,TOT plus 15 min string
+start,data,DS:0D88,brief_time_launch,char[6],shell,,launch time string
+start,data,DS:0D8E,brief_grid_special,char[5],shell,,grid ref of special site
+start,data,DS:0DD8,theatre_colour_tbl,byte[9],shell,,theatre to DAC colour index
+start,data,DS:0DE2,theatre_hotspot_tbl,byte[10],shell,,hotspot 1..9 to theatre
+start,data,DS:0DEC,ui_marker_x,word[7],shell,,marker x table
+start,data,DS:0DFA,ui_marker_y,word[7],shell,,marker y table
+start,data,DS:0e40,status_names,char*[3],shell,,"Active,Retired,KIA"
+start,data,DS:0ea8,opt_marker_x,byte[10],shell,,option marker x offset per id (+192)
+start,data,DS:0eb2,opt_marker_y,byte[10],shell,,option marker y offset per id (+40)
+start,data,DS:0f00,map_type_count,word[5],shell,,3DT tile types per level
+start,data,DS:0f0a,map_rec_count,word[5][32],shell,,"3DT record count per (level,type)"
+start,data,DS:1054,map_cell_step,int[5 centred],shell,,d*0x1000 for d=-2..2 (index 1054+2d)
+start,data,DS:105a,map_nb_dx,int[9],shell,,neighbour dx table of map_nearest_object
+start,data,DS:106c,map_nb_dy,int[9],shell,,neighbour dy table
+start,data,DS:107e,map_level_size,word[5],shell,,"1024,256,64,16,4"
+start,data,DS:11ac,rgb_white,byte[3],shell,,6-bit RGB 3F3F3F
+start,data,DS:11af,rgb_red,byte[3],shell,,6-bit RGB 3F0000
+start,data,DS:11bb,rgb_cyan,byte[3],shell,,6-bit RGB 153F3F (range ring colour)
+start,data,DS:11be,rgb_hover,byte[3],shell,,6-bit RGB 3F322B hover highlight
+start,data,DS:11c1,rgb_red2,byte[3],shell,,6-bit RGB 3F0000
+start,data,DS:11c4,rgb_normal,byte[3],shell,,6-bit RGB 393C3B normal button colour
+start,data,DS:11c7,rgb_highlight,byte[3],shell,,6-bit RGB 3E291B active/hover colour
+start,data,DS:11ca,rgb_disabled,byte[3],shell,,6-bit RGB 2A2A2A disabled weapon
+start,data,DS:11D0,pal_rgb_idle,byte[3],shell,,idle button colour
+start,data,DS:11d6,rgb_dark,byte[3],shell,,6-bit RGB 1D1D1D
+start,data,DS:11DA,mission_templates,word[82][6],shell,,mission templates 12 B
+start,data,DS:11DE,objective_tbl,"struct 12 bytes",shell,,"objective type table: byte0 kind 1..8; word at +4 flags (20h unloading, 02h deadline); word at +6 == -2 fighter patrol"
+start,data,DS:15B2,mission_waypoints,int[8],shell,,"mid, target, second, anchor2 x/y"
+start,data,DS:15c6,tbl_radar_types,struct[14],shell,,"radar type: name[8], +8 max range, +10 factor, +12 flags (bit0 Doppler)"
+start,data,DS:1708,tbl_fighter_types,struct[32],shell,,fighter designation strings
+start,data,DS:171A,mission_aircraft_tbl,struct[32],shell,,"enemy aircraft type table, name at +0Eh"
+start,data,DS:1aa8,tbl_sam_types,struct[18],shell,,"SAM/weapon type: name[8], +8 missile range km"
+start,data,DS:1d78,tbl_rank_names,char*[7],shell,,rank prefixes
+start,data,DS:1D86,arm_suit_tbl,byte[16][16],shell,,weapon suitability by target class
+start,data,DS:1ec5,tbl_bay_quantity,byte[20],shell,,bay quantity by weapon row (1-based)
+start,data,DS:1EC6,mission_qty_tbl,byte[17],shell,,quantity by loadout id
+start,data,DS:1EE4,mission_threat_remap,word[17][2],shell,,threat level remap A(+0) B(+2)
+start,data,DS:1F24,objective_text_tbl,char *[],shell,,"intro paragraph per objective id"
+start,data,DS:64a6,pal_queue,rec[6],shell,,"palette change queue (first,rgb_ptr,count)"
+start,data,DS:64e2,pal_queue_count,byte,shell,,entries in the palette queue
+start,data,DS:64e3,pal_buffer,byte[768],shell,,palette buffer 6-bit RGB
+start,data,DS:6bc6,btn_quiz,table,shell,,"quiz buttons: hook 0786, 18 entries"
+start,data,DS:6c5a,btn_arming,table,shell,,"arming buttons: hook 0B01, 24 entries"
+start,data,DS:6d1e,btn_brief,table,shell,,"briefing buttons: hook 11DB, key 20h, 8 fixed + dynamic (6D22..), count byte 6D21"
+start,data,DS:6f42,btn_home,table,shell,,"ready room hotspots, 5 entries"
+start,data,DS:6F6E,ui_orders_menu,struct,shell,,orders hotspot menu 17 entries
+start,data,DS:6ffa,opt_menu,Menu,shell,,"hover 71AD, key 0, count 11 (10 real rects)"
+start,data,DS:704e,roster_menu,Menu,shell,,"hover 63FB, key 0x62 (Delete/BS), 11 rects (10 rows + Done)"
+start,data,DS:70AA,dlg_change_orders,Dialog,shell,,"Changing pilot orders will cancel your scheduled mission. OK/No Way!"
+start,data,DS:710D,dlg_change_pilot,Dialog,shell,,"Changing pilots will cancel your scheduled mission. OK/No Way!"
+start,data,DS:715F,dlg_deceased,Dialog,shell,,"deceased officers dialog (OK)"
+start,data,DS:7200,dlg_need_briefing,dialog,shell,,'You need to receive a mission briefing first.' [OK]
+start,data,DS:7244,dlg_retired,Dialog,shell,,"This officer has retired... (OK)"
+start,data,DS:729D,dlg_orig_disk,Dialog,shell,,"Original disk in drive. Roster file will not be saved. (OK)"
+start,data,DS:72EA,dlg_write_protect,Dialog,shell,,"Disk is write protected. Roster file will not be saved. (OK)"
+start,data,DS:7338,dlg_clearance,Dialog,shell,,"security clearance dialog (OK)"
+start,data,DS:73a8,dlg_ready,dialog,shell,,'Are you ready for your mission?' [Yes][Not yet]
+start,data,DS:92fa,tbl_skill_names,char*[4],shell,,"Green, Regular, Veteran, Elite"
+start,data,DS:931e,opponent_names,char*[4],shell,,Green/Regular/Veteran/Elite Opponents
+start,data,DS:936a,tbl_aircraft_names,char*[20],shell,,quiz aircraft names
+start,data,DS:94ac,tbl_flight_model_names,char*[2],shell,,"MicroProse F117A, Lockheed F117A"
+start,data,DS:94d0,tbl_crash_names,char*[3],shell,,"No Crashes, Easy, Realistic"
+start,data,DS:94f0,landing_names,char*[3],shell,,"No Crashes,Easy Landings,Realistic Landings"
+start,data,DS:9522,tbl_mission_type_names,char*[4],shell,,Air Missions .. Strike Training
+start,data,DS:9abe,tbl_theatre_names,char*[6],shell,,Libya .. Middle East
+start,data,DS:a155,tbl_war_names,char*[3],shell,,"Cold War, Limited War, Conventional War"
+start,data,DS:a587,tbl_weapon_desc,char*[20],shell,,weapon description strings
+start,data,DS:b270,quiz_button_map,byte[18],shell,,quiz button -> aircraft index
+start,data,DS:b282,quiz_answer,word,shell,,correct aircraft index
+start,data,DS:b284,brief_range_mode,byte,shell,,"0 average, 1 max radar range"
+start,data,DS:b285,brief_mode_active,byte,shell,,highlighted mode button
+start,data,DS:b286,brief_site_pairs,byte[2][n],shell,,site A / site B index per site button
+start,data,DS:b2e6,brief_site_btn_count,word,shell,,number of dynamic site buttons
+start,data,DS:b2e8,brief_mode,byte,shell,,"1 radar, 2 SAM, 3 hostile"
+start,data,DS:B2EA,ui_anim_tick,uint8_t,shell,,"animation call counter; step runs when (counter & 7)==0"
+start,data,DS:B2EC,ui_anim_x,int,shell,,"last drawn highlight bounding box x"
+start,data,DS:B2EE,ui_anim_y,int,shell,,"last bbox y"
+start,data,DS:B2F0,ui_anim_w,int,shell,,"last bbox width"
+start,data,DS:B2F2,ui_anim_h,int,shell,,"last bbox height"
+start,data,DS:B2F4,ui_anim_left,uint8_t,shell,,"remaining animation steps (0 = idle)"
+start,data,DS:b2f6,ui_msgbox_rect,word[4],shell,,"message box rect: x at b2f6, y at b2f8, w at b2fc, h at b302 (not contiguous)"
+start,data,DS:B2F8,ui_popup_y,int,shell,,"popup top (clamped 0..200-h)"
+start,data,DS:B2FA,ui_anim_src_page,uint8_t,shell,,"source page number of highlight rects"
+start,data,DS:B2FC,ui_popup_w,int,shell,,"popup width"
+start,data,DS:B2FE,ui_anim_seq,uint8_t *,shell,,"cursor into (first,count) byte-pair sequence"
+start,data,DS:B300,ui_anim_rects,Rect12 *,shell,,"base of 12-byte rect records {sx,sy,dx,dy,w,h}"
+start,data,DS:B302,ui_popup_h,int,shell,,"popup height"
+start,data,DS:B304,pal_fade_calls,uint8_t,shell,,"pal_set calls per 4 BIOS ticks, 0 = not yet calibrated"
+start,data,DS:B306,ui_last_key,int,shell,,"previous poll key (edge trigger for Enter/Esc)"
+start,data,DS:B308,ui_menu_cur,MenuDesc,shell,,"copy of the active dialog descriptor from +0Ah (84h bytes): cb, hotkey byte (B30A), count byte (B30B), rects from B30C"
+start,data,DS:B38C,mission_war_level,int,shell,,copy of pilot+3Ah
+start,data,DS:B38E,mission_theatre,int,shell,,copy of pilot+38h
+start,data,DS:B390,wld_pack_off,int,shell,,export cursor offset
+start,data,DS:B392,wld_pack_seg,int,shell,,export cursor segment
+start,data,DS:B394,map_grid_buf,char[5],shell,,grid reference result
+start,data,DS:B39A,ui_tooltip_frozen,byte,shell,,tooltip pulse done flag
+start,data,DS:b39c,roster_selected,word,shell,,selected roster index (ROSTER.FIL header word)
+start,data,DS:b3a0,map_tile_l0,byte[512],shell,,level 0 child tile table
+start,data,DS:b5a0,map_tile_l1,byte[512],shell,,level 1 child tile table
+start,data,DS:b7a0,map_tile_l2,byte[512],shell,,level 2 child tile table
+start,data,DS:b9a0,map_tile_l3,byte[256],shell,,level 3 16x16 map
+start,data,DS:baa0,map_tile_l4,byte[16],shell,,level 4 4x4 table
+start,data,DS:bab0,map_rec_pool,byte[3500],shell,,"3DT records, 7 bytes each (x,y,z words + obj byte)"
+start,data,DS:c85c,map_rec_ptr,word[5][32],shell,,"near ptr to first record of (level,type)"
+start,data,DS:ca8e,map_hit,struct,shell,,"ObjHit result: obj w, dist w, x dw, y dw, rec w, level/index/cx/cy bytes"
+start,data,DS:cab0,ui_page_seg,word[5],shell,,MGRAPHIC page segments
+start,data,DS:CABA,ui_sprite_seg,int,shell,,sprite page segment
+start,data,DS:CABC,mission_special_unit,int,shell,,"special unit index, -1 none"
+start,data,DS:CABE,mission_difficulty,int,shell,,copy of pilot+3Eh
+start,data,DS:cac0,ptr_gfx_init_flag,far ptr,shell,,-> 0000:04F4
+start,data,DS:caca,ptr_pilot,far ptr,shell,,active pilot record = comm+1272h
+start,data,DS:CACE,wld_nthreat_sites,int,shell,,leading sites carrying threat level
+start,data,DS:cad8,map_hostile_grid,byte[256],shell,,"16x16 hostile concentration grid, bit 0x10"
+start,data,DS:cbd8,ptr_first_run_flag,far ptr,shell,,-> 0000:04F2
+start,data,DS:CBDC,mission_special_site,int,shell,,special unit site
+start,data,DS:cbde,wld_sites,rec[16],shell,,site table (see spec_a section 5)
+start,data,DS:d092,palettes_ptr,far ptr,shell,,far ptr to loaded PALETTES.PAL (6912 B)
+start,data,DS:d096,ui_hover_prev,byte,shell,,previously hovered button (all hover hooks)
+start,data,DS:D29A,mission_anchor_x,long,shell,,anchor x world
+start,data,DS:d2a2,mission_loaded,byte,shell,,1 = mission decoded/scheduled
+start,data,DS:D2A6,wld_tbl_category,byte[128],shell,,target category by object type (15h excluded)
+start,data,DS:D326,mission_anchor_y,long,shell,,anchor y world
+start,data,DS:d32e,spr_cursor,word,shell,,mouse cursor sprite seg 11x16
+start,data,DS:D336,file_buf_off,unsigned,shell,,"far file buffer offset (0)"
+start,data,DS:D338,file_buf_seg,unsigned,shell,,"far file buffer segment (= E086)"
+start,data,DS:D33A,map_flag10_any,uint8_t,shell,,"1 if any cell of the 16x16 map at CAD8 has bit 10h"
+start,data,DS:d33c,wld_site_count,word,shell,,number of sites
+start,data,DS:D33E,wld_tbl_b,byte[128],shell,,"loaded, unused in 4239..6200"
+start,data,DS:D3BE,wld_units,struct[36],shell,,unit table 36 B each
+start,data,DS:D7F6,wld_tbl_weapon_class,byte[128],shell,,low nibble weapon class by object type
+start,data,DS:D876,mission_flight_ticks,int,shell,,flight time estimate in ticks
+start,data,DS:d878,arm_unavail,byte[20],shell,,"weapon unavailable flags; [0],[1] = flight model"
+start,data,DS:d879,pilot_model_copy_b,byte,shell,,copy of pilot+0x42 written when leaving roster (reader unknown)
+start,data,DS:D88C,wld_id,int,shell,,WLD id BN
+start,data,DS:D890,wld_nunits,int,shell,,number of units
+start,data,DS:d892,roster_pilots,struct[10],shell,,10 pilot records x 0x50
+start,data,DS:d894,roster_names,rec[80],shell,,"roster table +2 (pilot name), record stride 50h"
+start,data,DS:dc02,ui_ctx_page0,TextCtx,shell,,draw/text context for page 0
+start,data,DS:dc18,ui_ctx_page1,TextCtx,shell,,"draw/text context for page 1 (dc1c fg, dc1e bg, dc24 font)"
+start,data,DS:DC26,cursor_ymin,int,shell,,"cursor y lower bound"
+start,data,DS:DC28,cursor_ymax,int,shell,,"cursor y upper bound"
+start,data,DS:DC2A,cursor_xmin,int,shell,,"cursor x lower bound"
+start,data,DS:DC2C,cursor_xmax,int,shell,,"cursor x upper bound"
+start,data,DS:DC2E,win_text,TextCtx,shell,,"22-byte text context (page 2 scratch; font at DC3A set per call)"
+start,data,DS:dc70,wld_loc_names,char*[],shell,,location name pointers
+start,data,DS:DD70,wld_names,char[750],shell,,NUL separated names
+start,data,DS:E05E,objective_rec,"ObjRec[2] (12h bytes)",shell,,"primary/secondary mission objective records; target idx at +2 (E060/E072), objective id +8, ONC grid string +0Ah"
+start,data,DS:e060,mission_target1_site,word,shell,,site index target 1
+start,data,DS:e062,mission_start_site,word,shell,,site index departure base
+start,data,DS:e072,mission_target2_site,word,shell,,site index target 2
+start,data,DS:e074,mission_land_site,word,shell,,site index landing base
+start,data,DS:E084,wld_first_nontarget,int,shell,,first non-target site index
+start,data,DS:E086,file_buf_seg2,unsigned,shell,,"same segment, used as PIC decoder source"
+start,data,DS:E088,cursor_sprite_seg,unsigned,shell,,"segment of cursor sprite"
+start,data,DS:e08a,ui_cursor_x,word,shell,,cursor x (e08c = y)
+start,data,DS:E08C,cursor_y,int,shell,,"cursor y"
+start,data,DS:E08E,cursor_old_x,int,shell,,"last drawn cursor x"
+start,data,DS:E090,cursor_old_y,int,shell,,"last drawn cursor y"
+start,data,DS:E092,cursor_w,uint8_t,shell,,"cursor width (sprite byte 0)"
+start,data,DS:E093,cursor_h,uint8_t,shell,,"cursor height (sprite byte 2)"
+start,data,DS:e096,ptr_comm,far ptr,shell,,comm block
