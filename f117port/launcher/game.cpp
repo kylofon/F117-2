@@ -21,34 +21,6 @@ wxString FindFile(const wxString& dir, const wxString& name) {
     return wxString();
 }
 
-// Runs args[0] with the others as its arguments in `cwd`, without waiting for it.
-bool Start(const std::vector<wxString>& args, const wxString& cwd, bool silent, wxString& error) {
-    std::vector<std::wstring> wide;
-    for (const wxString& a : args) wide.push_back(a.ToStdWstring());
-    std::vector<const wchar_t*> argv;
-    for (const std::wstring& w : wide) argv.push_back(w.c_str());
-    argv.push_back(nullptr);
-
-    wxExecuteEnv env;  // the program inherits the launcher's environment
-    env.cwd = cwd;
-    if (silent) {
-        // Sound off: SDL opens its silent audio driver, the game runs as with a sound card.
-        wxGetEnvMap(&env.env);
-        env.env["SDL_AUDIO_DRIVER"] = "dummy";
-    }
-    long pid;
-    {
-        wxLogNull quiet;  // wxExecute would show its own error box
-        pid = wxExecute(argv.data(), wxEXEC_ASYNC, nullptr, &env);
-    }
-    if (pid == 0) {
-        error = wxString::Format("Couldn't start %s.\n\n%s", wxFileName(args[0]).GetFullName(),
-                                 wxSysErrorMsgStr(wxSysErrorCode()));
-        return false;
-    }
-    return true;
-}
-
 }  // namespace
 
 bool FilePresent(const wxString& dir, const wxString& name) { return !dir.empty() && !FindFile(dir, name).empty(); }
@@ -85,26 +57,9 @@ wxString DefaultProgram() {
     return name.GetFullPath();
 }
 
-wxString DefaultDosbox() {
-    wxFileName dir(LauncherDir(), wxEmptyString);
-    for (int up = 0; up < 5; ++up) {
-        for (const char* sub : {"", "DOSBOX"}) {
-            wxFileName candidate(dir);
-            if (*sub) candidate.AppendDir(sub);
-            candidate.SetFullName("DOSBox.exe");
-            if (candidate.FileExists()) return candidate.GetFullPath();
-        }
-        if (dir.GetDirCount() == 0) break;
-        dir.RemoveLastDir();
-    }
-    return wxString();
-}
-
 bool LaunchGame(const GameOptions& o, wxString& error) {
     if (!wxFileName::FileExists(o.program)) {
-        error = wxString::Format("The game's program isn't there:\n\n%s\n\nThe port isn't built yet; "
-                                 "Play original starts the 1991 game in DOSBox.",
-                                 o.program);
+        error = wxString::Format("The game's program isn't there:\n\n%s", o.program);
         return false;
     }
     std::vector<wxString> args{o.program,
@@ -112,15 +67,29 @@ bool LaunchGame(const GameOptions& o, wxString& error) {
                                "--scale", wxString::Format("%d", o.scale),
                                "--aspect", o.aspect43 ? "4:3" : "1:1"};
     if (o.fullscreen) args.push_back("--fullscreen");
-    return Start(args, wxFileName(o.program).GetPath(), !o.sound, error);
-}
 
-bool LaunchOriginal(const wxString& dosbox, const wxString& gameDir, wxString& error) {
-    if (!wxFileName::FileExists(dosbox)) {
-        error = wxString::Format("DOSBox isn't there:\n\n%s", dosbox);
+    std::vector<std::wstring> wide;
+    for (const wxString& a : args) wide.push_back(a.ToStdWstring());
+    std::vector<const wchar_t*> argv;
+    for (const std::wstring& w : wide) argv.push_back(w.c_str());
+    argv.push_back(nullptr);
+
+    wxExecuteEnv env;  // an empty variable map: the game inherits the launcher's environment
+    env.cwd = wxFileName(o.program).GetPath();
+    if (!o.sound) {
+        // Sound off: SDL opens its silent audio driver, the game runs as with a sound card.
+        wxGetEnvMap(&env.env);
+        env.env["SDL_AUDIO_DRIVER"] = "dummy";
+    }
+    long pid;
+    {
+        wxLogNull quiet;  // wxExecute would show its own error box
+        pid = wxExecute(argv.data(), wxEXEC_ASYNC, nullptr, &env);
+    }
+    if (pid == 0) {
+        error = wxString::Format("Couldn't start %s.\n\n%s", wxFileName(o.program).GetFullName(),
+                                 wxSysErrorMsgStr(wxSysErrorCode()));
         return false;
     }
-    // The folder is C: and F117.COM runs, as in the original's install.
-    std::vector<wxString> args{dosbox, "-c", "mount c \"" + gameDir + "\"", "-c", "c:", "-c", "F117"};
-    return Start(args, wxFileName(dosbox).GetPath(), false, error);
+    return true;
 }

@@ -13,7 +13,7 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 
 | Task | What to do | For | Time |
 |---|---|---|---|
-| U-player | Run original PLAYER (build the launcher, `f117port/launcher/README.md`, then **Play original (DOSBox)**; watch the title animations) and tell me: (1) do the title/credit frames play at about 60 ticks/s or noticeably faster (70 Hz)? (2) does the first frame fade in from black over ~5 s? Reply with what you see. | S3.4 | 3 min |
+| U-player | Run original PLAYER (DOSBox-X as in U2, then `F117`; watch the title animations) and tell me: (1) do the title/credit frames play at about 60 ticks/s or noticeably faster (70 Hz)? (2) does the first frame fade in from black over ~5 s? Reply with what you see. | S3.4 | 3 min |
 | U-sound | Listen to `work/sound/asound_cmd03_steered.wav` (PLAYER intro soundtrack, new poll-rate rule: 70 Hz idle, 280 Hz while an effect runs) and `asound_cmd36/37/38/39_steered.wav`; compare with the old `asound_cmd03.wav` / `asound_cmd36..39.wav`. Reply: do the steered ones sound right (tempo, no odd speed-ups)? If you can, check original PLAYER in DOSBox: does the intro music run in jumps of speed? | S3.3 | 5 min |
 
 ## Status
@@ -136,7 +136,7 @@ S5.9 sound. Model: S for 5.1–5.5, 5.8, 5.9; O for 5.6, 5.7. Each ends with a U
 ### Phase 6 — Release, then Enhanced
 | Id | Task | Model |
 |---|---|---|
-| S6.1 | Launcher (copy from Aces Enhanced), README, CHANGELOG, v0.1.0 zip | H | launcher done early 2026-10-06 (`f117port/launcher`: Play + Play original in DOSBox); README/CHANGELOG/zip pending |
+| S6.1 | Launcher (copy from Aces Enhanced), README, CHANGELOG, v0.1.0 zip | H | launcher done early 2026-10-06 (`f117port/launcher`, aligned with the TD3 launcher: dialog, Play only); README/CHANGELOG/zip pending |
 | S6.2 | New `F117Enhanced` repo: native-resolution / widescreen / 60 fps 3D view, longer view distance | O plan, S port |
 
 ## User tasks (cheap for you, expensive for a model)

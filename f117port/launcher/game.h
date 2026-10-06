@@ -1,4 +1,4 @@
-// game.h -- what a game folder must hold, where f117 and DOSBox are, and starting them.
+// game.h -- what a game folder must hold, where f117 is, and starting it.
 #pragma once
 
 #include <wx/string.h>
@@ -9,8 +9,6 @@ wxString LauncherDir();
 // Where things are by default: "Game" and f117(.exe) beside the launcher.
 wxString DefaultGameDir();
 wxString DefaultProgram();
-// DOSBox.exe beside the launcher or in a DOSBOX folder up to four levels above it; empty if there is none.
-wxString DefaultDosbox();
 
 // Whether `dir` holds the file `name` (as written, or in upper or lower case).
 bool FilePresent(const wxString& dir, const wxString& name);
@@ -28,8 +26,5 @@ struct GameOptions {
     bool sound = true;        // false: SDL_AUDIO_DRIVER=dummy
 };
 
-// Starts the port. On failure returns false and says why in `error`.
+// Starts the game. On failure returns false and says why in `error`.
 bool LaunchGame(const GameOptions& options, wxString& error);
-
-// Starts the original 1991 game (F117.COM) in DOSBox with the game folder as C:, to compare the port with.
-bool LaunchOriginal(const wxString& dosbox, const wxString& gameDir, wxString& error);

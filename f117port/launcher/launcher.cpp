@@ -5,14 +5,11 @@
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/choice.h>
-#include <wx/dialog.h>
 #include <wx/dirdlg.h>
 #include <wx/filedlg.h>
 #include <wx/filename.h>
 #include <wx/hyperlink.h>
-#include <wx/menu.h>
 #include <wx/msgdlg.h>
-#include <wx/panel.h>
 #include <wx/settings.h>
 #include <wx/sizer.h>
 #include <wx/statbmp.h>
@@ -37,8 +34,6 @@ namespace {
 const char* const WEBSITE = "https://kkania.com";
 const char* const SUPPORT = "https://buymeacoffee.com/krzysztofkania";
 const char* const SECTION = "Game";
-
-const int ID_ABOUT = wxID_HIGHEST + 1;
 
 const int MIN_SCALE = 1, MAX_SCALE = 6, DEFAULT_SCALE = 3;
 
@@ -80,65 +75,23 @@ wxTextCtrl* PathRow(wxWindow* parent, wxFlexGridSizer* grid, const wxString& lab
 
 }  // namespace
 
-LauncherFrame::LauncherFrame()
-    : wxFrame(nullptr, wxID_ANY, APP_TITLE, wxDefaultPosition, wxDefaultSize,
-              wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxMAXIMIZE_BOX)) {
+LauncherDialog::LauncherDialog()
+    : wxDialog(nullptr, wxID_ANY, APP_TITLE, wxDefaultPosition, wxDefaultSize,
+               wxDEFAULT_DIALOG_STYLE | wxMINIMIZE_BOX) {
     SetIcons(AppIcons());
-    topmost_ = settings::GetInt("Preferences", "AlwaysOnTop", 0) != 0;
-    if (topmost_) SetWindowStyleFlag(GetWindowStyleFlag() | wxSTAY_ON_TOP);
-
-    auto* all = new wxBoxSizer(wxVERTICAL);
-    all->Add(CreateMainPage(this), 1, wxEXPAND);
-    SetSizer(all);
-    CreateMenus();
-
-    // Settings from the last run.
-    wxString dir = settings::GetString(SECTION, "GameFolder", "");
-    wxString program = settings::GetString(SECTION, "Program", "");
-    wxString dosbox = settings::GetString(SECTION, "Dosbox", "");
-    folder_->ChangeValue(dir.empty() ? DefaultGameDir() : dir);
-    program_->ChangeValue(program.empty() ? DefaultProgram() : program);
-    dosbox_->ChangeValue(dosbox.empty() ? DefaultDosbox() : dosbox);
-    aspect_->SetSelection(settings::GetInt(SECTION, "Aspect43", 1) != 0 ? 0 : 1);
-    FillScales();
-    scale_->SetSelection(
-        wxMax(MIN_SCALE, wxMin(MAX_SCALE, settings::GetInt(SECTION, "Scale", DEFAULT_SCALE))) - MIN_SCALE);
-    fullscreen_->SetValue(settings::GetInt(SECTION, "Fullscreen", 0) != 0);
-    sound_->SetValue(settings::GetInt(SECTION, "Sound", 1) != 0);
-    loading_ = false;
-    UpdateState();
-
-    Bind(wxEVT_ACTIVATE, [this](wxActivateEvent& event) {
-        if (event.GetActive()) UpdateState();  // files may have been copied in meanwhile
-        event.Skip();
-    });
-    Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent&) {
-        Save();
-        Destroy();
-    });
-
-    SetClientSize(all->GetMinSize());
-    if (!settings::RestoreWindowPosition(SECTION, this)) Centre();
-}
-
-wxWindow* LauncherFrame::CreateMainPage(wxWindow* parent) {
-    auto* page = new wxPanel(parent);
     const int margin = FromDIP(12), gap = FromDIP(8), small = FromDIP(4);
 
     // Game files
-    auto* filesBox = new wxStaticBoxSizer(wxVERTICAL, page, "Game files");
+    auto* filesBox = new wxStaticBoxSizer(wxVERTICAL, this, "Game files");
     wxWindow* fb = filesBox->GetStaticBox();
     auto* filesGrid = new wxFlexGridSizer(2, gap, gap);
     filesGrid->AddGrowableCol(1);
     wxButton* browseFolder = nullptr;
     wxButton* browseProgram = nullptr;
-    wxButton* browseDosbox = nullptr;
     folder_ = PathRow(fb, filesGrid, "&Folder:",
                       "The folder with the original game's files (F117.COM, START.EXE, VGAME.EXE and the rest).",
                       &browseFolder);
-    program_ = PathRow(fb, filesGrid, "&Program:", "f117, the port.", &browseProgram);
-    dosbox_ = PathRow(fb, filesGrid, "&DOSBox:",
-                      "DOSBox.exe, to run the original 1991 game for comparison (Play original).", &browseDosbox);
+    program_ = PathRow(fb, filesGrid, "&Program:", "f117, the game.", &browseProgram);
     auto* statusRow = new wxBoxSizer(wxHORIZONTAL);
     statusIcon_ = new wxStaticBitmap(fb, wxID_ANY, wxArtProvider::GetBitmapBundle(wxART_WARNING, wxART_MENU));
     statusNote_ = new wxStaticText(fb, wxID_ANY, wxEmptyString);
@@ -149,16 +102,15 @@ wxWindow* LauncherFrame::CreateMainPage(wxWindow* parent) {
     filesBox->Add(GreyText(fb, "The game saves its pilot roster and preferences in this folder,\n"
                                "so it must be writable (not under Program Files)."),
                   0, wxALL, gap);
-    for (wxTextCtrl* field : {folder_, program_, dosbox_})
+    for (wxTextCtrl* field : {folder_, program_})
         field->Bind(wxEVT_TEXT, [this](wxCommandEvent&) {
             if (!loading_) UpdateState();
         });
     browseFolder->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { BrowseFolder(); });
     browseProgram->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { BrowseProgram(); });
-    browseDosbox->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { BrowseDosbox(); });
 
     // Options
-    auto* optionsBox = new wxStaticBoxSizer(wxVERTICAL, page, "Options");
+    auto* optionsBox = new wxStaticBoxSizer(wxVERTICAL, this, "Options");
     wxWindow* ob = optionsBox->GetStaticBox();
     auto* grid = new wxFlexGridSizer(2, gap, gap);
     grid->Add(new wxStaticText(ob, wxID_ANY, "&Aspect:"), 0, wxALIGN_CENTER_VERTICAL);
@@ -183,65 +135,53 @@ wxWindow* LauncherFrame::CreateMainPage(wxWindow* parent) {
 
     // Buttons
     auto* buttons = new wxBoxSizer(wxHORIZONTAL);
-    play_ = new wxButton(page, wxID_ANY, "&Play");
-    original_ = new wxButton(page, wxID_ANY, "Play &original (DOSBox)");
-    original_->SetToolTip("Runs the 1991 game itself in DOSBox, to compare the port with.");
-    auto* close = new wxButton(page, wxID_CLOSE, "Close");
+    auto* about = new wxButton(this, wxID_ABOUT, "&About");
+    play_ = new wxButton(this, wxID_ANY, "&Play");
+    auto* close = new wxButton(this, wxID_CLOSE, "Close");
+    buttons->Add(about);
     buttons->AddStretchSpacer();
     buttons->Add(play_, 0, wxRIGHT, gap);
-    buttons->Add(original_, 0, wxRIGHT, gap);
     buttons->Add(close);
     play_->SetDefault();
+    SetEscapeId(wxID_CLOSE);
+    about->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { About(); });
     play_->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { Play(); });
-    original_->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { PlayOriginal(); });
     close->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { Close(); });
 
     auto* all = new wxBoxSizer(wxVERTICAL);
     all->Add(filesBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, margin);
     all->Add(optionsBox, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, margin);
     all->Add(buttons, 0, wxEXPAND | wxALL, margin);
-    page->SetSizer(all);
-    return page;
+    SetSizer(all);
+
+    // Settings from the last run.
+    wxString dir = settings::GetString(SECTION, "GameFolder", "");
+    wxString program = settings::GetString(SECTION, "Program", "");
+    folder_->ChangeValue(dir.empty() ? DefaultGameDir() : dir);
+    program_->ChangeValue(program.empty() ? DefaultProgram() : program);
+    aspect_->SetSelection(settings::GetInt(SECTION, "Aspect43", 1) != 0 ? 0 : 1);
+    FillScales();
+    scale_->SetSelection(
+        wxMax(MIN_SCALE, wxMin(MAX_SCALE, settings::GetInt(SECTION, "Scale", DEFAULT_SCALE))) - MIN_SCALE);
+    fullscreen_->SetValue(settings::GetInt(SECTION, "Fullscreen", 0) != 0);
+    sound_->SetValue(settings::GetInt(SECTION, "Sound", 1) != 0);
+    loading_ = false;
+    UpdateState();
+
+    Bind(wxEVT_ACTIVATE, [this](wxActivateEvent& event) {
+        if (event.GetActive()) UpdateState();  // files may have been copied in meanwhile
+        event.Skip();
+    });
+    Bind(wxEVT_CLOSE_WINDOW, [this](wxCloseEvent&) {
+        Save();
+        Destroy();
+    });
+
+    Fit();
+    if (!settings::RestoreWindowPosition(SECTION, this)) Centre();
 }
 
-void LauncherFrame::CreateMenus() {
-    auto* file = new wxMenu;
-    file->Append(wxID_PREFERENCES, wxString::FromUTF8("&Preferences…"));
-    file->AppendSeparator();
-    file->Append(wxID_EXIT, "E&xit\tAlt+F4");
-
-    auto* bar = new wxMenuBar;
-    bar->Append(file, "&File");
-#ifndef __WXMSW__
-    auto* about = new wxMenu;
-    about->Append(ID_ABOUT, wxString::FromUTF8("&About ") + APP_TITLE + wxString::FromUTF8("…"));
-    bar->Append(about, "A&bout");
-#endif
-    SetMenuBar(bar);
-#ifdef __WXMSW__
-    // A top-level About item that acts straight away, which wxWidgets menus
-    // can't express; MSWWindowProc handles its command.
-    const HMENU native = static_cast<HMENU>(bar->GetHMenu());
-    AppendMenuW(native, MF_STRING, ID_ABOUT, L"A&bout");
-    DrawMenuBar(static_cast<HWND>(GetHWND()));
-#endif
-
-    Bind(wxEVT_MENU, [this](wxCommandEvent&) { Close(); }, wxID_EXIT);
-    Bind(wxEVT_MENU, [this](wxCommandEvent&) { Preferences(); }, wxID_PREFERENCES);
-    Bind(wxEVT_MENU, [this](wxCommandEvent&) { About(); }, ID_ABOUT);
-}
-
-#ifdef __WXMSW__
-WXLRESULT LauncherFrame::MSWWindowProc(WXUINT msg, WXWPARAM wParam, WXLPARAM lParam) {
-    if (msg == WM_COMMAND && LOWORD(wParam) == ID_ABOUT && lParam == 0) {
-        CallAfter([this] { About(); });
-        return 0;
-    }
-    return wxFrame::MSWWindowProc(msg, wParam, lParam);
-}
-#endif
-
-void LauncherFrame::FillScales() {
+void LauncherDialog::FillScales() {
     const int pick = scale_->GetSelection();
     const int h = aspect_->GetSelection() == 1 ? 200 : 240;
     scale_->Clear();
@@ -249,32 +189,31 @@ void LauncherFrame::FillScales() {
     scale_->SetSelection(pick >= 0 ? pick : DEFAULT_SCALE - MIN_SCALE);
 }
 
-void LauncherFrame::UpdateState() {
-    const wxString dir = folder_->GetValue(), program = program_->GetValue(), dosbox = dosbox_->GetValue();
+void LauncherDialog::UpdateState() {
+    const wxString dir = folder_->GetValue(), program = program_->GetValue();
     const bool haveProgram = wxFileName::FileExists(program);
-    const bool haveDosbox = wxFileName::FileExists(dosbox);
     const wxString missing = MissingGameFile(dir);
     wxString note;
     if (!missing.empty())
         note = wxString::Format("This folder needs the game's files: %s is missing.", missing);
     else if (!haveProgram)
-        note = wxString::Format("%s isn't there (the port isn't built yet).", wxFileName(program).GetFullName());
+        note = wxString::Format("%s isn't there.", wxFileName(program).GetFullName());
     else
         note = "Found the game's files.";
-    statusIcon_->Show(!(haveProgram && missing.empty()));
+    const bool ok = haveProgram && missing.empty();
+    statusIcon_->Show(!ok);
     statusNote_->SetLabel(note);
-    play_->Enable(haveProgram && missing.empty());
-    original_->Enable(haveDosbox && missing.empty());
-    play_->GetParent()->Layout();
+    play_->Enable(ok);
+    Layout();
 }
 
-void LauncherFrame::BrowseFolder() {
+void LauncherDialog::BrowseFolder() {
     wxDirDialog dialog(this, "Choose the folder with the game's files", folder_->GetValue(),
                        wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
     if (dialog.ShowModal() == wxID_OK) folder_->SetValue(dialog.GetPath());  // raises wxEVT_TEXT
 }
 
-void LauncherFrame::BrowseProgram() {
+void LauncherDialog::BrowseProgram() {
     wxFileName current(program_->GetValue());
 #ifdef __WXMSW__
     const char* const filter = "Programs (*.exe)|*.exe|All files (*.*)|*.*";
@@ -286,19 +225,7 @@ void LauncherFrame::BrowseProgram() {
     if (dialog.ShowModal() == wxID_OK) program_->SetValue(dialog.GetPath());  // raises wxEVT_TEXT
 }
 
-void LauncherFrame::BrowseDosbox() {
-    wxFileName current(dosbox_->GetValue());
-#ifdef __WXMSW__
-    const char* const filter = "Programs (*.exe)|*.exe|All files (*.*)|*.*";
-#else
-    const char* const filter = "All files|*";
-#endif
-    wxFileDialog dialog(this, "Choose DOSBox", current.GetPath(), current.GetFullName(), filter,
-                        wxFD_OPEN | wxFD_FILE_MUST_EXIST);
-    if (dialog.ShowModal() == wxID_OK) dosbox_->SetValue(dialog.GetPath());  // raises wxEVT_TEXT
-}
-
-void LauncherFrame::Play() {
+void LauncherDialog::Play() {
     Save();
     GameOptions options;
     options.program = wxFileName(program_->GetValue()).GetFullPath();
@@ -311,21 +238,13 @@ void LauncherFrame::Play() {
     if (!LaunchGame(options, error)) wxMessageBox(error, APP_TITLE, wxOK | wxICON_ERROR, this);
 }
 
-void LauncherFrame::PlayOriginal() {
-    Save();
-    wxString error;
-    if (!LaunchOriginal(dosbox_->GetValue(), wxFileName(folder_->GetValue()).GetFullPath(), error))
-        wxMessageBox(error, APP_TITLE, wxOK | wxICON_ERROR, this);
-}
-
-void LauncherFrame::Save() {
+void LauncherDialog::Save() {
     // A folder or program left at its default is stored empty, so it follows the launcher if it moves.
-    const wxString dir = folder_->GetValue(), program = program_->GetValue(), dosbox = dosbox_->GetValue();
+    const wxString dir = folder_->GetValue(), program = program_->GetValue();
     settings::SetString(SECTION, "GameFolder",
                         wxFileName(dir).SameAs(wxFileName(DefaultGameDir())) ? wxString() : dir);
     settings::SetString(SECTION, "Program",
                         wxFileName(program).SameAs(wxFileName(DefaultProgram())) ? wxString() : program);
-    settings::SetString(SECTION, "Dosbox", dosbox == DefaultDosbox() ? wxString() : dosbox);
     settings::SetInt(SECTION, "Aspect43", aspect_->GetSelection() != 1 ? 1 : 0);
     settings::SetInt(SECTION, "Scale", scale_->GetSelection() + MIN_SCALE);
     settings::SetInt(SECTION, "Fullscreen", fullscreen_->GetValue() ? 1 : 0);
@@ -333,32 +252,7 @@ void LauncherFrame::Save() {
     settings::SaveWindowPosition(SECTION, this);
 }
 
-void LauncherFrame::Preferences() {
-    wxDialog dialog(this, wxID_ANY, "Preferences");
-    auto* all = new wxBoxSizer(wxVERTICAL);
-    auto* topmost = new wxCheckBox(&dialog, wxID_ANY, "Always on &top");
-    topmost->SetValue(topmost_);
-    topmost->SetToolTip("Keep the launcher above other windows.");
-    all->Add(topmost, 0, wxALL, dialog.FromDIP(12));
-    all->Add(dialog.CreateStdDialogButtonSizer(wxOK | wxCANCEL), 0, wxEXPAND | wxLEFT | wxRIGHT | wxBOTTOM,
-             dialog.FromDIP(12));
-    dialog.SetSizerAndFit(all);
-    dialog.SetMinSize(wxSize(dialog.FromDIP(300), -1));
-    dialog.Fit();
-    dialog.CentreOnParent();
-    topmost->SetFocus();
-    if (dialog.ShowModal() != wxID_OK) return;
-    if (topmost->GetValue() != topmost_) SetTopmost(topmost->GetValue());
-}
-
-void LauncherFrame::SetTopmost(bool on) {
-    topmost_ = on;
-    const long style = GetWindowStyleFlag();
-    SetWindowStyleFlag(on ? style | wxSTAY_ON_TOP : style & ~wxSTAY_ON_TOP);
-    settings::SetInt("Preferences", "AlwaysOnTop", on ? 1 : 0);
-}
-
-void LauncherFrame::About() {
+void LauncherDialog::About() {
     const wxString title = wxString("About ") + APP_TITLE;
     const wxString heading = wxString(APP_TITLE) + " " + APP_VERSION_TEXT;
     const wxString blurb = "Starts f117, the SDL3 port of F-117A Nighthawk Stealth Fighter 2.0 (MicroProse, 1991).";

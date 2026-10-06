@@ -1,5 +1,5 @@
 // settings.h -- settings kept between runs in settings.ini: under
-// %APPDATA%\Aces of the Pacific on Windows, and ~/.config/aces-of-the-pacific on Linux.
+// %APPDATA%\F-117A Nighthawk on Windows, and ~/.config/f117a-nighthawk on Linux.
 // Every change is written straight away.
 #pragma once
 
