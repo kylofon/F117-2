@@ -15,7 +15,6 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 |---|---|---|---|
 | U-player | Run original PLAYER (DOSBox: `F117.COM` start up to the title animations) and tell me: (1) do the title/credit frames play at about 60 ticks/s or noticeably faster (70 Hz)? (2) does the first frame fade in from black over ~5 s? Reply with what you see. | S3.4 | 3 min |
 | U-sound | Listen to `work/sound/asound_cmd03_steered.wav` (PLAYER intro soundtrack, new poll-rate rule: 70 Hz idle, 280 Hz while an effect runs) and `asound_cmd36/37/38/39_steered.wav`; compare with the old `asound_cmd03.wav` / `asound_cmd36..39.wav`. Reply: do the steered ones sound right (tempo, no odd speed-ups)? If you can, check original PLAYER in DOSBox: does the intro music run in jumps of speed? | S3.3 | 5 min |
-| U-font | Open `work/s32/fonts_sheet.png` (7 bitmap fonts, run `python tools/mgfont.py` to regenerate): are the glyphs clean (no shifted/garbled rows)? Reply OK or describe. | S3.2 | 2 min |
 
 ## Status
 
@@ -104,7 +103,7 @@ Notes:
 - S3.3 status: DONE (U-sound pending). `port/spec/sound.md` + `sound_symbols.csv` (~120 rows, hand-written). The AdLib sequencer of `ASOUND.117` (state 0) and of `ASOUND.LOG` is fully decoded and re-implemented in `tools/sound/asnd.py` (`Game`, `Logo`): 40/40 commands and the logo jingle are write-for-write identical to the real drivers under Unicorn (`asnd.py verify|verifylog`). Corrections to RE_GUIDE §5: slot 104 is `snd_noise` (not stop); the in-game poll rate is the ISR rule (1 poll per video frame = 70 Hz idle, 4x while effect units run), not 60 Hz. Not specified: ISOUND/RSOUND/NSOUND, SB/PAS states, speech via SB. `python tools/sound/asnd.py steer CMD` renders the steered wavs.
 - S3.5 status: DONE. `port/spec/shell.md` (4 reader parts + 20D6) + `shell_symbols.csv` (321 rows, merged from `work/s35/syms_*.csv`). Corrects RE_GUIDE 2.4: comm = DS:E096, pilot = DS:CACA, DS:CBD8 -> 04F2. ID quiz is dead code (call NOPed). Mission generator = `0000:4239`. Open (U in spec): site flags 0x40/0x80, comm+22h/30h meaning, 82 mission templates at DS:11DA not tabulated, unit placement P9 (4C3D-4E0B) to port from disasm; original bugs listed in part D/A (brief_draw_hostile loop counters, double alloc, volume-label check -> always allow roster save).
 - S3.4 status: DONE (U-player pending). `port/spec/frontend.md` + `frontend_symbols.csv` (56 rows, `python tools/frontend_syms.py`); `tools/dsann.py` = fndis with DGROUP string annotations. SETUP screen/flow and comm fields, MPS_LOGO (SS loader palette base 31, delays in 18.2 Hz ticks, 146 ticks = 8 s, key completes the animation instantly), PLAYER (tick callback, 5 s fade-in, snd_cmd 3/0/2, exit on any input), DSWAP (port = return 1), MISC (6 entries) all verified. Open: PLAYER tick rate 60 vs 70 Hz, fade look (U-player); SETUP quirk comm+30h always 0.
-- S3.2 status: DONE (U-font pending). `port/spec/video.md` + `video_symbols.csv` (94 rows, `python tools/video_syms.py`); `tools/mgfont.py` decodes the 7 fonts embedded in MGRAPHIC. All 84 driver slots read; text/sprite/poly/line algorithms specified; program-side PIC decoder mapped (START 86A8-8A31 = END 47FF.. = DSWAP 0AAB.. = VGAME 11CE). Open: shake unit, DAC-13 flash (runtime look).
+- S3.2 status: DONE (fonts confirmed by user 2026-10-06). `port/spec/video.md` + `video_symbols.csv` (94 rows, `python tools/video_syms.py`); `tools/mgfont.py` decodes the 7 fonts embedded in MGRAPHIC. All 84 driver slots read; text/sprite/poly/line algorithms specified; program-side PIC decoder mapped (START 86A8-8A31 = END 47FF.. = DSWAP 0AAB.. = VGAME 11CE). Open: shake unit, DAC-13 flash (runtime look).
 - S3.1 status: DONE. `port/spec/platform.md` + `platform_symbols.csv` (517 rows over all 7 programs, `python tools/platform_syms.py`; `tools/fndis.py` = per-function disassembly). Library = MSC 5/6 small-model RTL + MicroProse layer (fatal-on-error DOS wrappers, joystick/mouse, retrace-calibrated PIT timer, Ctrl-Break hook); END holds it all at `0000:3E45..5F63` (read in full). Open: sound cadence 60 Hz vs calibrated 70 Hz class 4 (spec §4/§9). Hand-offs: 59 shared rows unnamed in `work/s31/unassigned.txt` (video/shell); `tools/spec_coverage.py` still has the Aces layout -> S3.10.
 
 ### Phase 3 — Specs (output: `port/spec/<module>.md`, gate: `tools/spec_coverage.py` 100 %)
@@ -113,7 +112,7 @@ can port a function from its section alone.
 | Id | Module | Model | Size |
 |---|---|---|---|
 | S3.1 | platform: RTL, startup, memory, timer, keyboard, joystick, files, overlay chain | S | done 2026-10-03 |
-| S3.2 | video: `MGRAPHIC` driver API, blitters, PIC/PAN decoding, fonts | S | done 2026-10-03 · U-font pending |
+| S3.2 | video: `MGRAPHIC` driver API, blitters, PIC/PAN decoding, fonts | S | done 2026-10-03 |
 | S3.3 | sound: driver API, music sequencer, AdLib device | S | done 2026-10-03 (U-sound pending) |
 | S3.4 | front end: `MPS_LOGO`, `SETUP`, `PLAYER`, `DSWAP`, `MISC`, title/credits | S | done 2026-10-03 · U-player pending |
 | S3.5 | shell (`START`): roster, theatres, briefing, arming, ID quiz | S | done 2026-10-03 |

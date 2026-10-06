@@ -92,7 +92,7 @@ bytes-per-glyph-row+1 (always 1 → 8 px), `p-5` fixed width (0 = proportional),
 | 5 | 32..127 | proportional | 6 | 1 | 0 | |
 | 6 | 32..127 | proportional | 8 | 1 | 1 | |
 
-(Font 0/2 draw `fixed`-wide glyphs; advance = fixed + spacing. U-check *(U-font)*: `work/s32/fonts_sheet.png`.)
+(Font 0/2 draw `fixed`-wide glyphs; advance = fixed + spacing. U-check (confirmed): `work/s32/fonts_sheet.png`.)
 
 **Algorithm** (`text_init` 03E8, `draw` 061A):
 
@@ -309,7 +309,7 @@ does not reach). Slot 42 (`blit_rect`) is by far the most used call.
 
 ## 12 Open items
 
-* `U-font` (pending): `work/s32/fonts_sheet.png` — are the 7 fonts correct (no shifted/garbled rows)?
+* Fonts confirmed by the user (2026-10-06).
 * Shake unit (slot 46) and the DAC 13 flash colours need a runtime look *(U)*; harmless to postpone to the enhancement phase.
 * `cs:11DC` is a never-set patch point; the port treats flip as always enabled.
 * Text clipping variants (§3) are verified from the code only; no screen using them has been identified yet.
