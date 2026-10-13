@@ -7,6 +7,7 @@
  *
  * All fields are little-endian words unless a type says otherwise. Writers are listed in HANDOFFS.md. */
 #include "mem.h"
+#include "symbols_start.h"      /* generated (tools/gen_symbols.py): START_DS_<name> */
 
 #define COMM_PARAS 0x140u                    /* 5120 bytes */
 #define COMM_SIZE  (COMM_PARAS * 16u)
@@ -57,6 +58,7 @@ typedef struct Comm {
 #pragma pack(pop)
 
 _Static_assert(sizeof(Comm) == COMM_SIZE, "comm block is 5120 bytes");
+_Static_assert(START_DS_ptr_comm == 0xE096, "START keeps the comm far pointer at DS:E096 (HANDOFFS 2)");
 _Static_assert(__builtin_offsetof(Comm, snd_driver) == 0x0D, "comm+0D");
 _Static_assert(__builtin_offsetof(Comm, seg_mgraphic) == 0x1A, "comm+1A");
 _Static_assert(__builtin_offsetof(Comm, mission_state) == 0x26, "comm+26");

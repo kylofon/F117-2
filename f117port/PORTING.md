@@ -88,3 +88,42 @@ ctest runs the chain with the placeholders (`chain`), counts ticks over a second
 report (`check_missing_files`). Developer aids (environment, `host.h`): `F117_SNAPSHOT_DIR` (+ `F117_SNAPSHOT_MS`) saves
 presented frames as PNG, `F117_KEYS` scripts XT key presses, `F117_TRACE=1` logs program switches. Throwaway
 verification programs go in your scratch area; do not create HTML pages.
+
+## Symbol pipeline (`src/gen/`)
+
+The names and addresses of the original come from the specs, not from memory. Pipeline:
+
+1. Spec symbol CSVs, `port/spec/<module>_symbols.csv` (hand-written, one per spec).
+2. `python tools/merge_symbols.py` writes `port/symbols.csv` (all specs, one table).
+3. `python tools/gen_symbols.py` writes `src/gen/symbols_<image>.h`: setup, mps_logo, player, start, vgame, end, dswap,
+   and the driver images asound117, mgraphic, misc, asound_log.
+4. `python tools/gen_module_headers.py` writes `src/gen/module_<spec>.h`: platform, video, sound, frontend, shell,
+   simflow, render3d, flight, debrief.
+
+The generated headers are committed. Re-run steps 2-4 after any change to a spec symbols CSV (or to `port/symbols.csv`)
+and commit the output with it. `ctest` runs `gen_symbols_current` and `gen_module_headers_current`, which regenerate in
+memory and fail when a committed header is stale; `python tools/gen_symbols.py --check` says the same without a build.
+
+Naming rules:
+
+* DGROUP globals are `<IMAGE>_DS_<name>` (the DS offset; use with `DSB/DSW/DSS/DSL`). Code-segment variables are
+  `<IMAGE>_CS_<name>` (offset) and `<IMAGE>_CSSEG_<name>` (segment). `<IMAGE>` is the image name in capitals.
+* Functions have no macro: the symbols header has an index line (address, C name, owner, spec section); the prototype
+  is in the module header under the same C name.
+* A name used at several addresses in one image gets the address as a suffix: `_OOOO` for a DS offset, `_SSSS_OOOO` for
+  a segment:offset (`mat_mul_0000_E578`, `edge_L_22A1`). The generator prints every rename.
+* A name that is not a C identifier gets a leading underscore (`3dt_records` becomes `_3dt_records`). A function whose
+  name is a C keyword or a common libc name gets `_fn` (`exit` becomes `exit_fn`), so it cannot clash with a system
+  header.
+* A name that several modules document (each spec describes its own copy of a routine, e.g. `dos_read`) is declared once,
+  in the first module in the generator's order with a plain C signature. The other modules' headers say so in a comment.
+* Rows the spec marks `dead` (in the notes or the type column) are not ported: they are DEAD in the index and listed at
+  the end of their module header.
+* A prototype whose type column is not plain C is `void name(void); /* TODO signature: ... */`. Fix the type column in
+  the spec's symbols CSV, then re-run the pipeline. Do not edit a generated header by hand.
+
+Every port function's comment cites its spec section and its original address, for example
+`/* 0000:E578 mat_mul: spec simflow.md "0000:e578 mat_mul" */`. The index line in `symbols_<image>.h` has the same two
+facts, so `grep` on the address finds both.
+
+This port runs one image at a time, so the Aces shared-library layout (`symbols_layout.h`) is not generated.

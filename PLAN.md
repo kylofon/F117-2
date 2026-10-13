@@ -23,8 +23,8 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 
 ## Status
 
-- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.3 (sound spec), S3.4 (front-end spec), S3.5 (shell spec), S3.6 (sim flow spec), S3.7 (render3d spec), S3.8 (flight/weapons/AI/detection/damage spec), S3.9 (debrief spec), S3.10 (hand-offs, coverage gate, symbols merge; closing pass: coverage 100 %, all conflicts settled), S4.1 (`f117port/` skeleton: CMake, SDL3 host, mem, VGA, OPL, chain loop with placeholder programs).
-- **Next:** S4.2. Your tasks: **User to-do** above.
+- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.3 (sound spec), S3.4 (front-end spec), S3.5 (shell spec), S3.6 (sim flow spec), S3.7 (render3d spec), S3.8 (flight/weapons/AI/detection/damage spec), S3.9 (debrief spec), S3.10 (hand-offs, coverage gate, symbols merge; closing pass: coverage 100 %, all conflicts settled), S4.1 (`f117port/` skeleton: CMake, SDL3 host, mem, VGA, OPL, chain loop with placeholder programs), S4.2 (generated symbol and module headers in `f117port/src/gen/`, symbol pipeline in `PORTING.md`).
+- **Next:** S5.1. Your tasks: **User to-do** above.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -138,7 +138,7 @@ can port a function from its section alone.
 | Id | Task | Model | Size |
 |---|---|---|---|
 | S4.1 | Copy `../AcesOfThePacific/aotpport` skeleton (CMake, SDL3 host, mem, VGA, OPL); drop EMS/VROOMM; chain loop = `F117.COM`; placeholder programs run the whole chain headless | S | M | done 2026-10-13 · U-skeleton pending |
-| S4.2 | Generated `symbols_*.h`, module headers (`tools/gen_symbols.py`, `gen_module_headers.py`), `PORTING.md` | H | S |
+| S4.2 | Generated `symbols_*.h`, module headers (`tools/gen_symbols.py`, `gen_module_headers.py`), `PORTING.md` | H | S | done 2026-10-13 |
 
 Notes:
 - S4.1 status (2026-10-13): `f117port/` builds with no warnings (`-Wall -Wextra`) and `ctest` passes 3/3 (`chain`, `tick_rate`,
@@ -152,6 +152,14 @@ Notes:
   exact rational period (`VGA_FRAME_NS_NUM/DEN`, avoids the 64-bit overflow after 12 minutes that `t * 25175000` would have), and the sound poll
   is NOT on the audio thread (S3.3: it is part of the timer ISR, so it runs from the tick on the main thread). Not done here (S5.1): unpacking and
   loading the program images into `mem[]`, DGROUP set-up, the keyboard ISR, the timer ISR body.
+- S4.2 status (2026-10-13): `f117port/src/gen/` holds 11 generated `symbols_<image>.h` (2672 CSV rows: 7 programs plus the
+  driver images asound117, mgraphic, misc, asound_log; 122 rows marked dead; 0 rows skipped; 118 identifiers renamed, mostly
+  libc names `_fn`, plus the 7 names used at several addresses) and 9 `module_<spec>.h` (964 prototypes, of which 554 are
+  TODO signatures: the type column is not plain C; 53 names that several specs document are declared once). `comm.h` includes
+  `symbols_start.h` and asserts `START_DS_ptr_comm == 0xE096`. CMake: `src/gen` on the include path; ctest 5/5 (new:
+  `gen_symbols_current`, `gen_module_headers_current`, which fail on a stale header). Build: no warnings. `PORTING.md` has the
+  "Symbol pipeline" section. Known gaps: the spec section is found for about 80% of functions (asound117 only 15 of 89;
+  its spec names them by offset in other text); the TODO signatures are the S5 owners' work, fixed in the spec CSVs.
 
 ### Phase 5 — Port, module by module (one session per module or half-module)
 Order: S5.1 platform → S5.2 video → S5.3 front end/title (**U4 first visible milestone**) → S5.4 shell

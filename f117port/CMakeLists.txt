@@ -25,7 +25,9 @@ foreach(m ${F117_MODULES})
 endforeach()
 
 add_executable(f117 ${F117_SOURCES})
-target_include_directories(f117 PRIVATE src)
+# src/gen holds the generated headers (symbols_<image>.h, module_<spec>.h; PORTING.md "Symbol pipeline"), committed
+# and checked by the gen_*_current tests below. Both "x.h" and "gen/x.h" resolve.
+target_include_directories(f117 PRIVATE src src/gen)
 target_link_libraries(f117 PRIVATE SDL3::SDL3 nuked_opl3)
 if(MSVC)
     target_compile_options(f117 PRIVATE /W3)
@@ -54,6 +56,15 @@ add_test(NAME tick_rate COMMAND f117 --headless --tick-test 1000)
 set_tests_properties(tick_rate PROPERTIES PASS_REGULAR_EXPRESSION "ticks in 1000 ms: (6[4-9]|7[0-2]) ")
 add_test(NAME check_missing_files COMMAND f117 --check --game-dir ${CMAKE_CURRENT_BINARY_DIR})
 set_tests_properties(check_missing_files PROPERTIES WILL_FAIL TRUE)
+
+# The generated headers are current: the generators re-run in memory and fail on any difference (tools/gen_*.py).
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME gen_symbols_current COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../tools/gen_symbols.py --check)
+    add_test(NAME gen_module_headers_current COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../tools/gen_module_headers.py --check)
+else()
+    message(WARNING "Python 3 not found: the gen_*_current tests are not registered")
+endif()
 
 # The launcher ("F-117A Nighthawk"): the game folder, the display and sound options; built beside
 # f117.exe. It needs wxWidgets 3.2 (MSYS2: mingw-w64-x86_64-wxwidgets3.2-msw) and a C++17 compiler.
