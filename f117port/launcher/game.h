@@ -13,6 +13,9 @@ wxString DefaultProgram();
 // Whether `dir` holds the file `name` (as written, or in upper or lower case).
 bool FilePresent(const wxString& dir, const wxString& name);
 
+// Whether `path` is a DOS program (such as the original game's START.EXE) rather than one this system can run.
+bool IsDosProgram(const wxString& path);
+
 // The first of the game's own files missing from `dir` (F117.COM, the programs and the MGRAPHIC / MISC
 // drivers), or empty if they are all there.
 wxString MissingGameFile(const wxString& dir);

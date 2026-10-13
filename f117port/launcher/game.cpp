@@ -1,6 +1,7 @@
 // game.cpp -- the files the game needs and starting it.
 #include "game.h"
 
+#include <wx/ffile.h>
 #include <wx/filename.h>
 #include <wx/log.h>
 #include <wx/stdpaths.h>
@@ -22,6 +23,19 @@ wxString FindFile(const wxString& dir, const wxString& name) {
 }
 
 }  // namespace
+
+bool IsDosProgram(const wxString& path) {
+    // An MZ file without a PE header at e_lfanew (0x3C): the original game's own programs (START.EXE, F117.COM...).
+    wxLogNull quiet;
+    wxFFile file(path, "rb");
+    if (!file.IsOpened()) return false;
+    unsigned char head[0x40] = {};
+    if (file.Read(head, sizeof head) != sizeof head) return path.Lower().EndsWith(".com");
+    if (head[0] != 'M' || head[1] != 'Z') return path.Lower().EndsWith(".com");
+    const unsigned long pe = head[0x3C] | head[0x3D] << 8 | head[0x3E] << 16 | static_cast<unsigned long>(head[0x3F]) << 24;
+    unsigned char sig[4] = {};
+    return !file.Seek(pe) || file.Read(sig, 4) != 4 || sig[0] != 'P' || sig[1] != 'E' || sig[2] != 0 || sig[3] != 0;
+}
 
 bool FilePresent(const wxString& dir, const wxString& name) { return !dir.empty() && !FindFile(dir, name).empty(); }
 

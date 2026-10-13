@@ -191,11 +191,16 @@ void LauncherDialog::FillScales() {
 
 void LauncherDialog::UpdateState() {
     const wxString dir = folder_->GetValue(), program = program_->GetValue();
-    const bool haveProgram = wxFileName::FileExists(program);
+    const bool exists = wxFileName::FileExists(program);
+    const bool dos = exists && IsDosProgram(program);
+    const bool haveProgram = exists && !dos;
     const wxString missing = MissingGameFile(dir);
     wxString note;
     if (!missing.empty())
         note = wxString::Format("This folder needs the game's files: %s is missing.", missing);
+    else if (dos)
+        note = wxString::Format("%s is the original DOS game, not the port: choose f117.exe.",
+                                wxFileName(program).GetFullName());
     else if (!haveProgram)
         note = wxString::Format("%s isn't there.", wxFileName(program).GetFullName());
     else
