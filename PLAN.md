@@ -137,6 +137,21 @@ Order: S5.1 platform → S5.2 video → S5.3 front end/title (**U4 first visible
 → S5.5 sim flow with a static 3D view → S5.6 render3d → S5.7 flight/weapons/AI → S5.8 debrief →
 S5.9 sound. Model: S for 5.1–5.5, 5.8, 5.9; O for 5.6, 5.7. Each ends with a U6 playtest request.
 
+Notes:
+- S5.6 render3d test plan (golden frames, 2026-10-13). The leaf routines are already bit-exact against the original
+  (`port/notes/s37/R7*_emu.py`, 0 mismatches, re-run by the user); the six routines that call the object renderer
+  (DF08, 04DA, DCC0, BD8F, 9ACA, 0CED) are only read. S5.6 closes that gap with whole-frame comparisons:
+  1. The S5.6 agent works out the run-time address of `r3d_scene_draw` (`0000:03CE`, VGAME load segment = PSP+10h)
+     and asks for U4 dumps: `BP` at its entry -> `MEMDUMPBIN 0000:0000 B0000` (`<scene>_in.bin`, includes A000), then
+     step over the call -> the same dump (`<scene>_out.bin`). Scenes: (a) day, low over the airfield, (b) night, low
+     over scenery, (c) target in the TV camera window, (d) a large polygon crossing the screen edge, (e) close to a
+     rotating radar dish. 5 scenes x 2 dumps, about 20 min of U4.
+  2. Before porting: run `03CE` itself under Unicorn from each `_in` dump (extend `port/notes/s37/R7*_emu.py`; stub
+     the INT and driver calls) and check it reproduces the `_out` off-screen page. That validates the dumps and the
+     harness, and the untested routines can then be diffed function by function.
+  3. After porting: `f117 --render-test <scene>_in.bin` loads DGROUP from the dump, calls the port's `r3d_scene_draw`
+     with the same arguments and compares the off-screen page byte for byte with `_out` (a ctest per scene).
+
 ### Phase 6 — Release, then Enhanced
 | Id | Task | Model |
 |---|---|---|

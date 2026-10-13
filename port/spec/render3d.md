@@ -169,6 +169,8 @@ specifications of the leaf routines and are the oracle for the port's unit tests
 BC12, BCD7), `R7f_ref.py` (B85D, BA13, BA67). Harnesses `*_emu.py` run the real code under Unicorn (`pip install
 unicorn`, read `work/unpacked/VGAME.EXE` at run time; no game data is stored in the repo).
 Not emulated (they call the object renderer): DF08, 04DA, DCC0, BD8F, 9ACA, 0CED: line-by-line pseudocode, (V).
+Whole-frame test for those (golden frames from DOSBox-X dumps around `03CE`, Unicorn replay, then the port's `--render-test`):
+PLAN.md Phase 5 Notes, S5.6 render3d test plan.
 
 ## 9 Suggested port layout (Phase 5)
 
