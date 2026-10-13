@@ -75,6 +75,9 @@ for slot, off, nm, sig, note in [
 ]:
     a('misc', off, nm, sig, 'slot %d: %s' % (slot, note))
 out = os.path.join(ROOT, 'port', 'spec', 'frontend_symbols.csv')
+import sys
+if os.path.exists(out) and '--force' not in sys.argv:
+    sys.exit('refusing to overwrite %s: it now also holds the S3.10 twin rows and the S3.10b closing-pass rows (hand edited); use --force only to rebuild the first 56 rows' % out)
 with open(out, 'w', newline='') as f:
     w = csv.writer(f)
     w.writerow(['exe', 'kind', 'address', 'name', 'type', 'owner', 'other_names', 'notes'])

@@ -322,13 +322,13 @@ vgame,data,DS:00a2,ordnance_xy,u16[2*n],simflow,,"x,y of weapon name strips in o
 vgame,data,DS:00ee,climate_tbl,u8[9],loader,,06 06 02 02 02 06 06 02 02 per theatre
 vgame,data,DS:011a,drv_slots,stub[106],lib,,5-byte EAh far-jump stubs patched by drv_bind; lcall 1E23:011A+5*slot
 vgame,data,DS:034a,view_sensor_terrain,word,simflow,,Alt-W: sensor view uses real terrain path (04da) and prints zoom label
-vgame,data,DS:0510,bank1_objid,u16[],loader,obj_model_map;scenery_id_map,"object id word per bank-1 index (0100|i, extras 0200|photo)"
+vgame,data,DS:0510,r3d_scenery_map,u16[],loader,bank1_objid;obj_model_map;scenery_id_map,"object id word per bank-1 index (0100|i, extras 0200|photo)"
 vgame,data,DS:0610,bank1_count,u16,loader,name_next_free,objects in the theatre .3DX
 vgame,data,DS:0614,3dt_type_count,u16[5],loader,,tile types per level (.3dT header)
-vgame,data,DS:061e,3dt_rec_count,u16[5][32],loader,terr_rec_count,"records per (level,type)"
+vgame,data,DS:061e,terr_rec_count,u16[5][32],loader,3dt_rec_count,"records per (level,type)"
 vgame,data,DS:075e,3dg_magic,u16,loader,,.3dG first word
 vgame,data,DS:0d1c,adi_ctx_ptr,ptr,simflow,,-> ADI ctx 0x0D06
-vgame,data,DS:0d22,view_band_w,word[17],simflow,hz_band_tab,0 2 3 4 6 8 11 15 20 27 36 48 64 87 119 164 0: band heights for 1961/19ea
+vgame,data,DS:0d22,hz_sky_offs,word[17],simflow,view_band_w;hz_band_tab,0 2 3 4 6 8 11 15 20 27 36 48 64 87 119 164 0: band heights for 1961/19ea
 vgame,data,DS:0d47,climate,u8,loader,,climate byte of the theatre; 2 keeps the default palette ramps
 vgame,data,DS:0d4a,pal_saved,u8[768],simflow,,DAC saved by pal_save
 vgame,data,DS:104a,pal_active,u8[768],simflow,,active flight palette (RGB 6-bit)
@@ -371,7 +371,7 @@ vgame,data,DS:28c2,hud_bl_ret,BlitCtx,simflow,,Blit ctx B1: reticle bitmap
 vgame,data,DS:28e0,hud_bl_b2,BlitCtx,simflow,,"Blit ctx B2: initialised, unused by hud_draw_front"
 vgame,data,DS:28fe,hud_bl_b3,BlitCtx,simflow,,"Blit ctx B3: initialised, unused by hud_draw_front"
 vgame,data,DS:291c,hud_layout,word[],simflow,,Layout block 291C..2948 written by hud_layout_init
-vgame,data,DS:294a,hud_style,byte,simflow,hud_level;hud_mode,0/1/2 key v
+vgame,data,DS:294a,hud_mode,byte,simflow,hud_style;hud_level,0/1/2 key v
 vgame,data,DS:294b,hud_style,byte,simflow,fov_zoom;hud_small;hud_style;hud_hide;r3d_lens_narrow;hud_off,"HUD hidden toggle, 0 at init"
 vgame,data,DS:294c,hud_alt_rem,word,simflow,,Altitude mod 1000
 vgame,data,DS:2952,hud_strip_row,word,simflow,,Tick strip start row
@@ -485,7 +485,7 @@ vgame,data,DS:43ae,pal_debug,u16,simflow,pal_changed,debug palette toggle (0 nor
 vgame,data,DS:43b0,day_flag,u16,simflow,hud_colour_alt;is_day;panel_light_alt,1 = day ([3658]==0)
 vgame,data,DS:43b2,tv_opt,word,simflow,sensor_flir,F6 option
 vgame,data,DS:43b4,view_dir_selected,word,simflow,,set 1 by LOOK; cleared by 753f
-vgame,data,DS:43b6,alt_a_flag,byte,simflow,,Alt-A toggle read by 1088:0120 (U)
+vgame,data,DS:43b6,r3d_haze_on,byte,simflow,alt_a_flag,Alt-A toggle read by 1088:0120 (U)
 vgame,data,DS:43b8,frame_delay_ticks,int,simflow,fps_penalty,Argument of frame_delay in 03ce
 vgame,data,DS:43ba,kbd_sens,word,simflow,,Insert: 0..2 -> stick scale (n+1)/3
 vgame,data,DS:43bc,fire_debounce,word,simflow,,4 frames after weapon release key
@@ -504,12 +504,12 @@ vgame,data,DS:4672,lamp_colours,u16[5][8],simflow,lamp_colors;lamp_cols,lamp col
 vgame,data,DS:46c2,store_sel,u16,simflow,glide_state,selected store 0..3
 vgame,data,DS:46d8,lamp_tab,u16[37][6],simflow,lamp_rects;cockpit_button_tab,lamp rects
 vgame,data,DS:46e2,lamp_states,12 B records,simflow,,Cockpit lamp states (d83e)
-vgame,data,DS:49e0,scope_x,word,simflow,proj_sx;r3d_sx,result x of 90b9 / ILS x
-vgame,data,DS:49e8,scope_y,word,simflow,proj_sy;r3d_sy,result y of 90b9 / ILS y
-vgame,data,DS:85e2,page0_seg,u16,simflow,,A000h
+vgame,data,DS:49e0,r3d_sx,word,simflow,scope_x;proj_sx,result x of 90b9 / ILS x
+vgame,data,DS:49e8,r3d_sy,word,simflow,scope_y;proj_sy,result y of 90b9 / ILS y
+vgame,data,DS:85e2,gfx_pages,u16,simflow,page0_seg,A000h
 vgame,data,DS:85e4,page1_seg,u16,simflow,,page 1 segment
 vgame,data,DS:85e6,page2_seg,u16,simflow,,page 2 segment (comm[20h])
-vgame,data,DS:85ea,cur_seg,u16,simflow,r3d_draw_seg;r3d_dseg,current draw segment copy
+vgame,data,DS:85ea,gfx_seg,u16,simflow,cur_seg;r3d_draw_seg;r3d_dseg,current draw segment copy
 vgame,data,DS:94ea,log_count,u16,simflow,event_count,event log records
 vgame,data,DS:94ec,blob_cursor,u32,simflow,,far cursor into comm+7Ah
 vgame,data,DS:9504,hud_photo_prev,int,simflow,,hud_photo_mode of the previous frame
@@ -575,12 +575,12 @@ vgame,data,DS:c5d8,num_buf,char[],simflow,,number scratch
 vgame,data,DS:c602,fall_alt,word,simflow,unit_boom_z,Falling body altitude
 vgame,data,DS:c604,obj_class_tbl,u8[128],simflow,obj_class;obj_class_tab,START D7F6 table indexed by object type
 vgame,data,DS:c684,fpm_y,word,simflow,,flight path marker y
-vgame,data,DS:c688,lzw_table,u8[6144],loader,r3d_v3d,"LZW dictionary (prefix u16, char u8) x 2048"
+vgame,data,DS:c688,r3d_vtx3d,u8[6144],loader,lzw_table;r3d_v3d,"LZW dictionary (prefix u16, char u8) x 2048 (also the PIC decoder LZW dictionary while a picture loads, VGAME 11CE)"
 vgame,data,DS:de88,flight_time_est,u16,simflow,deadline_s;deadline_tick;deadline,START D876 flight time estimate (ticks)
 vgame,data,DS:de8c,window_prev,word,simflow,,Older window counter (never read)
 vgame,data,DS:de8e,blob_dir,u16,simflow,,"1 = import, 0 = export"
 vgame,data,DS:de90,key_code,u16,simflow,key_word,key read this frame
-vgame,data,DS:de92,scope_outside,word,simflow,proj_depth;r3d_depth,-1 when point outside the scope window
+vgame,data,DS:de92,r3d_depth,word,simflow,scope_outside;proj_depth,-1 when point outside the scope window
 vgame,data,DS:de94,mfd_x0,word,simflow,map_xmin,left MFD x0 74
 vgame,data,DS:de96,mfd_y0,word,simflow,map_ymin,left MFD y0 110
 vgame,data,DS:de98,view_tgt_x,long,simflow,,Look-at X

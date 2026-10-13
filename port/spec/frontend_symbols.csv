@@ -57,31 +57,153 @@ misc,func,0007:0029,joy_button_misc,int joy_button(int n),frontend,,slot 93: por
 misc,func,0007:0018,kbd_locks_clear,void kbd_locks_clear(void),frontend,,slot 94: 0040:0017 &= F0h (slots 94 and 95 are the same routine)
 setup,func,0000:0582,ui_text,"void(TextCtx *c, char *s, int x, int y)",frontend,,"(= START 0000:3567, byte-shape copy; partner in shell_symbols.csv)"
 setup,func,0000:0bfb,dos_freemem_chk,void(unsigned seg),frontend,,"(= PLAYER 0000:0fc5, near copy 0.938)"
-setup,func,0000:0cb2,ui_load_file_near,"unsigned(char *name, void *buf)",frontend,,"(= START 0000:289a, byte-shape copy; partner in shell_symbols.csv)"
-setup,func,0000:0ce5,ui_load_file_far,"unsigned(char *name, unsigned off, unsigned seg)",frontend,,"(= START 0000:2864, byte-shape copy; partner in shell_symbols.csv)"
-setup,func,0000:0d1b,save_file_far,"unsigned save_file_far(char *name, ...)",frontend,,"(= END 0000:10c1, byte-shape copy; partner in debrief_symbols.csv)"
-setup,func,0000:1c46,free,void(void *p),frontend,,"(= VGAME 0000:fde2, byte-shape copy; partner in simflow_symbols.csv)"
+setup,func,0000:0cb2,ui_load_file_near,"unsigned(char *name, void *buf)",frontend,,"dead: (= START 0000:289a, byte-shape copy; partner in shell_symbols.csv)"
+setup,func,0000:0ce5,ui_load_file_far,"unsigned(char *name, unsigned off, unsigned seg)",frontend,,"dead: (= START 0000:2864, byte-shape copy; partner in shell_symbols.csv)"
+setup,func,0000:0d1b,save_file_far,"unsigned save_file_far(char *name, ...)",frontend,,"dead: (= END 0000:10c1, byte-shape copy; partner in debrief_symbols.csv)"
+setup,func,0000:1c46,nmalloc,void *nmalloc(unsigned n),frontend,,3-byte entry: jmp rtl_nmalloc 1D69 (S3.10 mapped it as free: corrected S3.10b)
 setup,func,0237:003a,joy_set_centre_axis,SI axis,frontend,,"(= VGAME 10a8:0c95, byte-shape copy; partner in flight_symbols.csv)"
 player,func,0000:1376,ltoa,"char *(long v,char *buf,int radix)",frontend,,"(= VGAME 0000:f0b0, byte-shape copy; partner in simflow_symbols.csv)"
-player,func,0000:1890,rtl_dosmaperr_al,void(unsigned char al),frontend,,"(= VGAME 0000:f5e4, byte-shape copy; partner in simflow_symbols.csv)"
-player,func,0000:222a,free,void(void *p),frontend,,"(= VGAME 0000:fde2, byte-shape copy; partner in simflow_symbols.csv)"
+player,func,0000:1890,rtl_dosmaperr_al,void(unsigned char al),frontend,,"(= VGAME 0000:f5e4, byte-shape copy; partner in simflow_symbols.csv) [verified S3.10b: xor ah,ah; call rtl_dosmaperr (same callee in this program); ret]"
+player,func,0000:222a,nmalloc,void *nmalloc(unsigned n),frontend,,3-byte entry: jmp rtl_nmalloc 23B1 (S3.10 mapped it as free: corrected S3.10b)
 dswap,func,0000:033e,ui_load_file_far,"unsigned(char *name, unsigned off, unsigned seg)",frontend,,"(= START 0000:2864, byte-shape copy; partner in shell_symbols.csv)"
 dswap,func,0000:0374,ui_load_file_near,"unsigned(char *name, void *buf)",frontend,,"(= START 0000:289a, byte-shape copy; partner in shell_symbols.csv)"
 dswap,func,0000:03a7,load_pic,"void load_pic(char *name, int page)",frontend,,"(= END 0000:100d, byte-shape copy; partner in debrief_symbols.csv)"
 dswap,func,0000:03d3,load_pic_seg_a,"void load_pic_seg_a(char *name, unsigned seg)",frontend,,"(= END 0000:1039, byte-shape copy; partner in debrief_symbols.csv)"
-dswap,func,0000:03fb,load_pic_seg_a,"void load_pic_seg_a(char *name, unsigned seg)",frontend,,"(= END 0000:1039, byte-shape copy; partner in debrief_symbols.csv)"
+dswap,func,0000:03fb,load_pic_seg_c,"void load_pic_seg_c(char *name, unsigned seg)",frontend,,"(= END 0000:1061 load_pic_seg_c; calls pic_to_seg_c 0A42; S3.10 had mapped it to load_pic_seg_a, corrected S3.10b)"
 dswap,func,0000:0423,load_pic_seg_c_at,"void load_pic_seg_c_at(char *name, unsigned seg, long pos)",frontend,,"(= END 0000:1089, byte-shape copy; partner in debrief_symbols.csv)"
 dswap,func,0000:045b,save_file_far,"unsigned save_file_far(char *name, ...)",frontend,,"(= END 0000:10c1, byte-shape copy; partner in debrief_symbols.csv)"
 dswap,func,0000:08f4,pic_to_page,"void pic_to_page(int fh, int page)",frontend,,"(= START 0000:86a8, byte-shape copy; partner in video_symbols.csv)"
 dswap,func,0000:0966,pic_to_seg_a,"void pic_to_seg_a(int fh, unsigned seg)",frontend,,"(= START 0000:871a, byte-shape copy; partner in video_symbols.csv)"
 dswap,func,0000:09ce,pic_to_seg_b,"void pic_to_seg_b(int fh, unsigned seg)",frontend,,"(= START 0000:8782, byte-shape copy; partner in video_symbols.csv)"
-dswap,func,0000:0a42,pic_to_seg_a,"void pic_to_seg_a(int fh, unsigned seg)",frontend,,"(= START 0000:871a, byte-shape copy; partner in video_symbols.csv)"
-dswap,func,0000:0aaa,ui_nop_a,void(void),frontend,,"(= START 0000:057b, byte-shape copy; partner in shell_symbols.csv)"
+dswap,func,0000:0a42,pic_to_seg_c,"void pic_to_seg_c(int fh, unsigned seg)",frontend,,"(= START 0000:87f6 pic_to_seg_c; driver slots 52 and 54 like pic_to_seg_c, not 51/55 like pic_to_seg_a; S3.10 had picked the first masked-identical partner, corrected S3.10b)"
+dswap,func,0000:0aaa,pic_hook_nop,void pic_hook_nop(void),frontend,,"1-byte ret called at the start of every pic_to_* decoder, = START 885E (S3.10 mapped it to ui_nop_a: corrected S3.10b)"
 dswap,func,0000:0aab,pic_row,void pic_row(int row),frontend,,"(= START 0000:885f, byte-shape copy; partner in video_symbols.csv)"
 dswap,func,0000:0ad5,pic_begin,void pic_begin(void),frontend,,"(= START 0000:8889, byte-shape copy; partner in video_symbols.csv)"
 dswap,func,0000:0b20,lzw_reset,void lzw_reset(void),frontend,,"(= START 0000:88d4, byte-shape copy; partner in video_symbols.csv)"
 dswap,func,0000:0b56,rle90_fill,void rle90_fill(unsigned n),frontend,,"(= START 0000:890a, byte-shape copy; partner in video_symbols.csv)"
 dswap,func,0000:0bcf,lzw_next,int lzw_next(void),frontend,,"(= START 0000:8983, byte-shape copy; partner in video_symbols.csv)"
-dswap,func,0000:0ff8,free,void(void *p),frontend,,"(= VGAME 0000:fde2, byte-shape copy; partner in simflow_symbols.csv)"
-dswap,func,0000:140c,rtl_dosmaperr_al,void(unsigned char al),frontend,,"(= VGAME 0000:f5e4, byte-shape copy; partner in simflow_symbols.csv)"
-dswap,func,0000:2060,free,void(void *p),frontend,,"(= VGAME 0000:fde2, byte-shape copy; partner in simflow_symbols.csv)"
+dswap,func,0000:0ff8,atoi,int atoi(char *s),frontend,,3-byte entry: jmp atol 1BD0 (S3.10 mapped it as free: corrected S3.10b)
+dswap,func,0000:140c,rtl_dosmaperr_al,void(unsigned char al),frontend,,"(= VGAME 0000:f5e4, byte-shape copy; partner in simflow_symbols.csv) [verified S3.10b: xor ah,ah; call rtl_dosmaperr (same callee in this program); ret]"
+dswap,func,0000:2060,nmalloc,void *nmalloc(unsigned n),frontend,,3-byte entry: jmp rtl_nmalloc 2097 (S3.10 mapped it as free: corrected S3.10b)
+dswap,func,0000:0219,dswap_exit,void dswap_exit(int code),frontend,,"screen_off (slot 69), free [2BF4] disk buffer, break_hook_remove, exit(code); code 0 only on the two fatal memory errors (frontend.md 8.1)"
+dswap,func,0000:031f,set_text_mode3,void set_text_mode3(void),frontend,,dead: int86(10h) AX=0003; only caller is the dead break_check 030A
+dswap,func,0000:10d0,dos_getdisk,int dos_getdisk(void),frontend,,INT 21h/19h: AL+1 (1 = A:)
+dswap,func,0000:10d8,dos_setdisk,int dos_setdisk(int drive1),frontend,,dead: INT 21h/0Eh then /19h; 0 when the current drive is drive1 else -1
+dswap,func,0000:10f4,bios_disk,"unsigned bios_disk(int cmd, DiskReq *r)",frontend,,"INT 13h: AH=cmd DL=drive; cmd>=2: DH head, CX cyl/sector packed, AL count, ES:BX far buffer; returns AX"
+dswap,func,0000:1120,dos_select_disk,"int dos_select_disk(int drive1, int *nlogical)",frontend,,INT 21h/0Eh DL=drive1-1; *nlogical = AL; returns 0
+dswap,func,0000:1bd0,atol,long atol(char *s),frontend,,"blanks/tabs, sign, digits, 32-bit accumulate without overflow check; 0FF8 is the atoi entry"
+dswap,func,0000:030a,break_check,void break_check(void),frontend,,"dead: unindexed; if [00C8] (set by break_isr) then break_hook_remove, set_text_mode3, exit(0); nobody calls it"
+setup,func,0000:0562,ui_text_far,"void(TextCtx *c, char far *s, int x, int y)",frontend,,"dead: c->x=x; c->y=y; ui_text_far_buf (library text routine, slots 5/47 unbound in SETUP)"
+setup,func,0000:05a3,ui_text_far_buf,"void(TextCtx *c, char far *s)",frontend,,"dead: copies the far string to a 200-byte stack buffer, MGRAPHIC slot 5 text_noclip"
+setup,func,0000:05ce,ui_text_wrap_far,"int(TextCtx *c, char far *s, int width, int x, int y, int line_h)",frontend,,"dead: older word-wrap variant of START ui_text_wrap, far string, no centre option"
+setup,func,0000:070a,ui_text_wrap,"int(TextCtx *c, char *s, int width, int x, int y, int line_h)",frontend,,dead: near-string variant of 05CE
+setup,func,0000:0811,ui_text_width,"int(TextCtx *c, char *s)",frontend,,dead: near twin of START ui_text_width 373C (sum of slot 47 font_char_width)
+setup,func,0000:0851,fmt_long_commas,"void(long v, char *out)",frontend,,"dead: 6 digits with a comma after the thousands, high digits of >= 1e6 lost"
+setup,func,0000:0979,fmt_int_commas,"void(int v, char *out)",frontend,,dead: 16-bit variant of fmt_long_commas
+setup,func,0000:0b83,ovl_load_tail,unsigned(void) /* epilogue of ovl_load */,frontend,,"exit epilogue of ovl_load 0A9F (jumped to from 0B77): DS=ES=024C, AX=[0786]; unwinds the frame when [078E]==0; 0B9D = fatal INT 21h/4C"
+setup,func,0000:0d53,file_open,"int(char *name, int mode)",frontend,,dead: wrapper of dos_open 0DC7
+setup,func,0000:0d65,file_creat,"int(char *name, int attr)",frontend,,dead: wrapper of dos_creat 0E1E (the only file-creating code in SETUP)
+setup,func,0000:0d77,file_close,void(int fd),frontend,,dead: wrapper of dos_close 0E75
+setup,func,0000:0d85,file_read,"int(int fd, void *buf, unsigned n)",frontend,,dead: wrapper of dos_read 0E97
+setup,func,0000:0d98,file_read_far,"int(int fd, unsigned off, unsigned seg, unsigned n)",frontend,,dead: wrapper of dos_read_far 0EC2
+setup,func,0000:0dae,file_write_far,"int(int fd, unsigned off, unsigned seg, unsigned n, ...)",frontend,,dead: wrapper of dos_write_far 0F52
+setup,func,0000:11e6,outp,"void outp(int port, int val)",frontend,,"dead: out dx, al"
+setup,func,0000:11f4,strupr,char *strupr(char *s),frontend,,dead: in-place a-z upper-case (role of VGAME F2B8)
+setup,func,0000:1214,str_equal,"int str_equal(char *a, char *b)",frontend,,dead; bug: never advances the pointers (loops forever on equal non-empty strings)
+setup,func,0000:1244,strcpy,"char *strcpy(char *dst, char *src)",frontend,,"byte loop, returns the last byte copied (not dst); role of START 94AC (semantic twin)"
+setup,func,0000:125f,str_copy_to_far,"void(char far *dst, char *src)",frontend,,"copies the near string to the far comm block (comm+0, comm+0D)"
+setup,func,0000:1276,str_copy_far,"void(char *dst, char far *src)",frontend,,dead: role of END 4B72
+setup,func,0000:1291,strlen,unsigned strlen(char *s),frontend,,dead: role of VGAME F078
+setup,func,0000:12ad,strcat,"char *strcat(char *d, char *s)",frontend,,dead: role of VGAME F006
+setup,func,0000:12d5,strchr,"char *strchr(char *s, int c)",frontend,,dead: first occurrence or 0
+setup,func,0000:12f8,memset_near,"void(char *d, int c, unsigned n)",frontend,,dead: rep stosb
+setup,func,0000:130c,memset_far,"void(char far *d, int c, unsigned n)",frontend,,dead: rep stosb
+setup,func,0000:1322,memcpy_near,"void(char *d, char *s, unsigned n)",frontend,,"dead: byte loop, n=0 copies 65536"
+setup,func,0000:1340,memcpy_far_src,"void(char *d, char far *s, unsigned n)",frontend,,dead: rep movsb
+setup,func,0000:135c,wordcmp,"int(void *a, void *b, unsigned n)",frontend,,dead; bug: pointers advance one byte per word
+setup,func,0000:1387,bios_int4,"int bios_int4(int intno, Regs4 *in, Regs4 *out)",frontend,,INT 10h/21h/16h/1Ah only (else -1); AX..DX in/out; SETUP uses it for the mode set and text_gotoxy
+setup,func,0000:13ec,itoa_radix,"int(int v, char *buf, int radix)",frontend,,"dead: radix 10 (1429), 16 (1454, four digits, digits above 9 wrong), 2 (149C)"
+setup,func,0000:1429,itoa_dec,"int(void) /* BX=buf, [bp+4]=v */",frontend,,"dead: signed decimal body of itoa_radix, returns the digit count"
+setup,func,0000:1454,itoa_hex4,"int(void) /* BX=buf, [bp+4]=v */",frontend,,"dead: four hex digits, adds only 30h (A-F come out as :;<=>?), returns 4"
+setup,func,0000:149c,itoa_bin16,"int(void) /* BX=buf, [bp+4]=v */",frontend,,"dead: 16 binary digits MSB first, returns 16"
+setup,func,0000:18a2,rtl_aFlrem,"long rtl_aFlrem(long a, long b) /*pascal*/",frontend,,dead: signed long remainder (sibling of rtl_aFldiv 17D6)
+setup,func,0000:194e,ldiv_assign,"void(long *p, long d) /*pascal*/",frontend,,dead: *p /= d through rtl_aFldiv
+setup,func,0000:1bed,rtl_NMSG_WRITE,void(int msgno),frontend,,"(= VGAME 0000:f58d rtl_NMSG_WRITE, head only: first 24 instructions identical)"
+setup,func,0000:1e4f,stub_1e4f,void far(void),frontend,,dead: far stub calling 1F51
+setup,func,0000:1f51,data_1f51,void,frontend,,"dead: 4 bytes F9 42 5F CF, data not code"
+player,func,0000:03fe,ring_make_room,int ring_make_room(void),frontend,,"1 when 0C000h bytes can be decoded at the write position A, wrapping the unread tail to the buffer start when needed; 0 when the tail blocks (frontend.md 8.3.1)"
+player,func,0000:0520,video_get_mode,int video_get_mode(void),frontend,,"INT 10h AH=0Fh, returns AL"
+player,func,0000:0540,video_set_mode,void video_set_mode(int mode),frontend,,INT 10h AH=00h
+player,func,0000:0560,break_isr,void interrupt break_isr(void),frontend,,"INT 1Bh/23h handler: DS=02A3, [2092]=3 (role of platform break_isr)"
+player,func,0000:05d0,break_hooks_restore,void break_hooks_restore(void),frontend,,"dos_setvect(1Bh,[1E76]); dos_setvect(23h,[208E]) (role of break_hook_remove)"
+player,func,0000:05f6,huge_copy,"void huge_copy(uint32_t src, uint32_t dst, unsigned n)",frontend,,"forward byte copy between linear addresses (seg=L>>4, off=L&15)"
+player,func,0000:0664,huge_peek_word,unsigned huge_peek_word(uint32_t lin),frontend,,word at a linear address
+player,func,0000:0908,dbg_reset,void(void),frontend,,dead: [1E56]=1DF2 (debug line buffer)
+player,func,0000:0910,dbg_putc,void(int c),frontend,,dead: append a character
+player,func,0000:092a,dbg_puts,void(char *s),frontend,,dead: append a string
+player,func,0000:0954,dbg_pad,"void(int v, int width)",frontend,,dead: spaces while tbl[width--] > v (table DS:0172)
+player,func,0000:0984,dbg_put_dec,void(long v),frontend,,"dead: ltoa radix 10, advance"
+player,func,0000:09b8,dbg_put_hex,void(long v),frontend,,"dead: ltoa radix 16, advance"
+player,func,0000:09ee,dbg_put_dec_pad,"void(int v, int width)",frontend,,dead: padded decimal
+player,func,0000:0a20,dbg_status_line,void(char far *row),frontend,,dead: ring buffer status line to text video memory
+player,func,0000:0b84,bits_refill,void /* SI=read ptr */,frontend,,"refills the 4 KB file buffer DS:01B8 (1000h bytes, INT 21h/3Fh), carries the pending byte"
+player,func,0000:0ba2,bits_open,int bits_open(char *name),frontend,,"INT 21h/3Dh, resets the bit reader; 1 = ok"
+player,func,0000:0bcd,bits_close,int bits_close(void),frontend,,INT 21h/3Eh; 1 = ok
+player,func,0000:0bdc,bits_eof,int bits_eof(void),frontend,,"returns [11BE], the end-of-file flag set by pan_decode_chunk"
+player,func,0000:0de4,fade_measure,void fade_measure(void),frontend,,counts DAC data writes between two retraces -> [13D2]
+player,func,0000:0e65,fade_slice,void fade_slice(void),frontend,,next [13D0] colours of the faded palette: (v*factor+8000h)>>16; factor += step per full 256-colour pass
+player,func,0000:0f1a,joy_button,int joy_button(int n),frontend,,((inp(201h)>>(n+4))&1)^1; local copy of MISC slot 93
+player,func,0000:0f47,mouse_poll_buttons,void(void),frontend,,"(near twin of START 8545 mouse_poll without the coordinates): INT 33h/3, [19DA]=left, [19DB]=right"
+player,func,0000:144c,strchr,"char *strchr(char *s, int c)",frontend,,pointer to the first c or 0
+player,func,0000:1476,rtl_assert_fail,"void(char *expr, char *file, int line)",frontend,,"fprintf(stderr,""Assertion failed: %s, file %s, line %d""), fflush, abort (copy: MPS_LOGO 0146:06dc)"
+player,func,0000:14b8,dos_getvect,void far *dos_getvect(int n),frontend,,INT 21h/35h
+player,func,0000:14ca,dos_setvect,"int dos_setvect(int n, void far *h)",frontend,,INT 21h/25h
+player,func,0000:1f54,abort,void abort(void),frontend,,"rtl_NMSG_WRITE(10), raise(22), rtl_exit_quick(3) (copy: MPS_LOGO 0146:1756); 1F70.. is the unsplit ltoa core"
+player,func,0000:223a,raise,int raise(int sig),frontend,,"MSC raise: SIGINT via INT 23h, table lookup 257B, SIG_DFL/SIG_IGN/handler (copy: MPS_LOGO 0146:1adc)"
+player,func,0000:24de,signal,"void far *signal(int sig, void far *h)",frontend,,dead: MSC signal (copy: MPS_LOGO 0146:1cb8); nobody calls it
+player,func,0000:257b,rtl_sig_lookup,"void /* AL=sig -> BX=slot, CF */",frontend,,six-entry signal table lookup (copy: MPS_LOGO 0146:1d66)
+player,func,0000:25c7,rtl_sig_unwind,void,frontend,,dead: tail of the INT 23h signal handler (exact copy: MPS_LOGO 0146:1db6)
+player,func,026b:000a,timer_install,void far timer_install(void),frontend,,"platform timer 4: flag [1A1C], divisor [1A0E]=[1A16]=1, accumulator 0, timer_calibrate, INT 8 -> ISR 026B:01A3"
+player,func,026b:004d,timer_remove,void far timer_remove(void),frontend,,"PIT ch0 mode 3 count 0, restore INT 8"
+player,func,026b:0336,timer_step,void far timer_step(void),frontend,,"per-tick work called by the ISR: class 4 drops every 7th tick (no tick_callback, no sound poll) -> 60.08 ticks/s at 70 Hz; else tick_callback + snd_poll steering [1A0E]/[1A08]"
+mps_logo,func,0000:0000,file_copy_w,long far(...),frontend,,dead: far-call veneer of 0045:01FE
+mps_logo,func,0000:0030,huge_fread_w,long far(...),frontend,,dead: far-call veneer of huge_fread 0045:0116 (element size 1)
+mps_logo,func,0045:000e,huge_norm,"void far *huge_norm(unsigned off, unsigned seg)",frontend,,seg += off>>4; off &= 0Fh when off > 0Fh; DX:AX
+mps_logo,func,0045:003a,strpos,"int strpos(char *hay, char *needle)",frontend,,"1-based index through strstr, 0 when absent (ss_load looks for ""."")"
+mps_logo,func,0045:008e,strcpy_to_seg,"void strcpy_to_seg(unsigned off, unsigned seg, char *src)",frontend,,copies a near string to seg:off (ss_load name copy)
+mps_logo,func,0045:01fe,file_copy,"long file_copy(FILE *src, FILE *dst, long n)",frontend,,dead: copies n bytes through the 512-byte buffer DS:0C76 (fread/fwrite)
+mps_logo,func,006d:0678,ss_draw_rle,"void /* DS:SI data, ES:DI dest, BX width */",frontend,,"RLE row loop of ss_draw (fall-through of 05BE): FF end, FE end of row, row marker FA = literal mode (FC skip, FD n v run), else pair mode (count,value; value FC skips); count 0 = 256 pixels"
+mps_logo,func,00da:000e,ovl_call,void /* thunk trampoline */,frontend,,overlay call trampoline for the 7-byte thunks {E8 rel16; dw off; dw seg}: pops the return address as the ljmp operand
+mps_logo,func,00da:0088,ovl_thunk_9,void,frontend,,dead: thunk table slots 9 (data)
+mps_logo,func,00da:00b9,ovl_thunk_10,void,frontend,,dead: thunk table slots 10 (data)
+mps_logo,func,00da:0129,ovl_thunk_20,void,frontend,,dead: thunk table slots 20..21 (data)
+mps_logo,func,00da:043d,ovl_read_file,unsigned /* BX=segment -> BX */,frontend,,"INT 21h/3D00h open [0082], one read of up to 8000h bytes to BX:0, close; BX = first free segment"
+mps_logo,func,00da:0533,mouse_set_hot,"void far(int hx, int hy, int shape)",frontend,,"dead: [01AC],[01AE],[01AA]"
+mps_logo,func,00da:054a,mouse_set_pos,void far(long pos),frontend,,dead: INT 33h AX=4 with CX = x << [01B0]
+mps_logo,func,00da:05c1,mouse_hide,void far(int arg),frontend,,"dead: clears [007B], calls thunk slot 9"
+mps_logo,func,00da:0602,mouse_call,"int *far mouse_call(int fn, int bx, int cx, int dx)",frontend,,"dead: INT 33h wrapper, results in [01B6..01BC]"
+mps_logo,func,00da:0636,ovl_call_after,void,frontend,,dead in practice: cursor-redraw step of the guarded path of ovl_call ([007B] is never set)
+mps_logo,func,00da:0668,mouse_set_cursor,void far(void far *shape),frontend,,dead: [01B2:01B4] = shape
+mps_logo,func,0146:0016,c0_start,void(void),frontend,,"(= END 4DD2 c0_start, large-model variant): DOS check, stack, setenvp/setargv/cinit, main = 0006:0072, exit"
+mps_logo,func,0146:0296,rtl_chkstk,void far(int need),frontend,,"(= PLAYER 1FD0 rtl_chkstk, large-model variant)"
+mps_logo,func,0146:02ba,rtl_fclose_core,int(FILE *f),frontend,,"(= START 9164 rtl_fclose_core, large-model variant)"
+mps_logo,func,0146:0374,rtl_fsopen,"FILE *(char *name, char *mode, int shflag)",frontend,,"(= START 9212 rtl_fsopen, large-model variant)"
+mps_logo,func,0146:03a0,fopen,"FILE *(char *name, char *mode)",frontend,,"(= START 923A fopen, large-model variant)"
+mps_logo,func,0146:049a,fwrite,"unsigned fwrite(void *buf, unsigned size, unsigned n, FILE *f)",frontend,,"dead: reached only from the dead file_copy; (= START 932E fwrite, large-model variant)"
+mps_logo,func,0146:0650,strcmp,"int strcmp(char *a, char *b)",frontend,,"0 equal else -1/+1 unsigned; ss_load compares the ""MADSS1"" signature and the series name"
+mps_logo,func,0146:067c,strstr,"char *strstr(char *hay, char *needle)",frontend,,pointer or 0; empty needle returns hay
+mps_logo,func,0146:06dc,rtl_assert_fail,"void(char *expr, char *file, int line)",frontend,,"(= PLAYER 1476 rtl_assert_fail, large-model variant)"
+mps_logo,func,0146:0822,hmemcpy,"void far *hmemcpy(void far *dst, void far *src, unsigned n)",frontend,,copy that adds 1000h to a segment on offset wrap; returns dst
+mps_logo,func,0146:0880,rtl_FF_MSGBANNER,void far(void),frontend,,"(= START 9800, large-model variant)"
+mps_logo,func,0146:08a8,rtl_nullcheck,int far(void),frontend,,"(= START 9826, large-model variant)"
+mps_logo,func,0146:0b07,rtl_NMSG_WRITE,void far(int msgno),frontend,,"(= START 9873, large-model variant)"
+mps_logo,func,0146:1510,rtl_read,"int far(int fd, void *buf, unsigned n)",frontend,,"(= START A230 rtl_read, large-model variant)"
+mps_logo,func,0146:1756,abort,void far abort(void),frontend,,"(= PLAYER 1F54 abort, large-model variant)"
+mps_logo,func,0146:17b0,malloc,void *far malloc(unsigned n),frontend,,"(= SETUP 1C22 malloc, large-model variant)"
+mps_logo,func,0146:1a50,stackavail,unsigned far stackavail(void),frontend,,"(= START A756 stackavail, large-model variant)"
+mps_logo,func,0146:1a64,nmalloc,void *far nmalloc(unsigned n),frontend,,5-byte entry: ljmp 0146:1B8B rtl_nmalloc
+mps_logo,func,0146:1a6a,free,void far free(void *p),frontend,,5-byte entry: ljmp 0146:1B6A rtl_nfree; 1A6F.. is the unsplit ltoa core
+mps_logo,func,0146:1adc,raise,int far raise(int sig),frontend,,"(= PLAYER 223A raise, large-model variant)"
+mps_logo,func,0146:1cb8,signal,"void far *far signal(int sig, void far *h)",frontend,,"dead: (= PLAYER 24DE signal, large-model variant)"
+mps_logo,func,0146:1d66,rtl_sig_lookup,void far,frontend,,"(= PLAYER 257B, large-model variant)"
+mps_logo,func,0146:1db6,rtl_sig_unwind,void far,frontend,,dead: (= PLAYER 25C7 exact)

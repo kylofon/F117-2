@@ -55,9 +55,9 @@ Hand-off fields (comm = far pointer `DS:E548`, the 5120-byte block of F117.COM; 
 | comm | dir | meaning |
 |---|---|---|
 | 1Ah 1Ch 1Eh 20h | R | MGRAPHIC / sound / MISC driver segments; off-screen page segment (page 2, `[E558]`) |
-| 26h | W | mission state: START 3, mission init 1 (flying), eject 2, normal end 3 |
+| 26h | W | mission state: START 3, mission init 1 (flying), eject 2, normal end 3. 1 is never changed by a crash path, so END reads 1 as "crashed" (corrected 2026-10-13, see HANDOFFS C1/C2) |
 | 28h | W | end code (`4926`): 0 landed, 1 stranded, 2 terrain collision, 5 hard landing, 6 fatal crash, 7 abort (no result written) |
-| 2Ch 30h | W | kills counter (ground targets + aircraft); bit0 training/cheat flag |
+| 2Ch 30h | W | 2Ch = enemy missiles launched at the player (SAM "firing" + air-to-air "fired by"), **not kills** (corrected 2026-10-13, see HANDOFFS section 8 question 3); 30h bit0 = training/cheat (non-scoring) flag |
 | 32h | R | low byte -> `[98DE]` range-scale shift (threat range table `d76b`, scope zoom) |
 | 33h | R | night flag -> `[3658]`, `[43B0] = day` |
 | 34h 36h | W | damage bit mask `[3632]` / damage points `[C5C8]` |
@@ -212,7 +212,7 @@ Everything funnels into `mission_end(code)` (`0000:4926`, owner simflow; sets `[
   `comm+74h = [C0A4]` (final x in level units), `comm+76h = [C0B2]` (final y in level units, y runs south), `comm+34h = [3632]`, `comm+36h = [C5C8]`;
   finally `mission_log(type=8, arg=0)` (499E) appends the "end" record to the event log.
 * `comm+26h`: START writes 3; mission init (39C4:3B0F) writes 1 (flying); the eject code (`D028`) writes 2 and sets `[C06E]=1`; normal end writes 3. (U: END's use.)
-* `comm+2Ch` is incremented per destroyed ground target (`5433`) and per destroyed aircraft (`6586`), `comm+30h |= 1` when the training/cheat toggle `[9B05]^=10h` ends up on (`CE08`, U).
+* `comm+2Ch` is incremented per enemy missile launched at the player (`5433` SAM site "firing", `6586` air-to-air "fired by"; it was misread as a kill counter, (corrected 2026-10-13, see HANDOFFS section 8 question 3)), `comm+30h |= 1` when the training/cheat toggle `[9B05]^=10h` ends up on (`CE08`, U).
 * `comm+34h` (= `[3632]`) is a 16-bit damage bit mask (74F6 sets one random bit 0..7 per hit event), `comm+36h` (= `[C5C8]`, initial 2) the damage count (U: both consumed by END).
 * Callers and codes: 20BD `7` (quit requester, "Y"); 23FF `0`; 414E `0` after the "Safe Landing" message ("Cargo delivered" is the other message, strings 2E4E/2E5E) when the landing
   dwell counter `[3D9A]` exceeds `16/[3660]`; 41B6 `1` (after 0x78 ticks and a full-screen text); 41F8 `2` (screen off, 0x78 ticks); 2B65 `5` (after 0x3C ticks); D01E `6` (eject branch). Meaning of
@@ -639,7 +639,7 @@ Port: keyboard state -> the same two bytes; the tap/double-tap magnitude (5Ah th
 * **Site** (16 B at B2A2, count C0B4) / **unit** (36 B at C13E, count DED0): see shell.md; VGAME field `site+0Eh` (object id word) is overwritten by 4B57.
 * **Event log record** (6 B at BA2A): `{u16 tick; u8 x>>7; u8 y>>7; u8 type; u8 arg}`, terminator type 0.
 * **Mission slot** (18 B at E2D8 and E2EA): `+0 kind, +2 target site, +4 anchor/departure site, +6 flags (+7 = PHOTO prop index), +8 template, +A grid ref`.
-* **comm fields touched by VGAME**: `1Ah 1Ch 1Eh` driver segs (r), `20h` page seg (r), `26h` mission state (w), `28h` end code (w), `2Ch` kill/target counter (w, inc), `30h` bit0 (w), `32h` (r -> [98DE]), `33h` night (r), `34h/36h` damage (w), `38h..3Eh` loadout ids (r), `40h..46h` loadout qty (r), `48h` joystick calibration (r/w 40 B), `72h` bit0 joystick (r), `74h/76h` final position (w), `7Ah` world blob (r then w).
+* **comm fields touched by VGAME**: `1Ah 1Ch 1Eh` driver segs (r), `20h` page seg (r), `26h` mission state (w), `28h` end code (w), `2Ch` enemy-missile-launch counter (w, inc; not kills), `30h` bit0 (w), `32h` (r -> [98DE]), `33h` night (r), `34h/36h` damage (w), `38h..3Eh` loadout ids (r), `40h..46h` loadout qty (r), `48h` joystick calibration (r/w 40 B), `72h` bit0 joystick (r), `74h/76h` final position (w), `7Ah` world blob (r then w).
 * **TextCtx** per video.md section 3 (24 bytes): `3FCC` page 0 (clip rows 0..90), `3FE4` page 1, `3FFC` page 2 (rows 0..199), `402C` ordnance ctx (clip 0xA9..0xF5, rows from 6E).
 
 
@@ -832,7 +832,7 @@ if (([9B04]&1) && pitch_in <= 0 && spd > [B00A] && cm < 2 && abs(fm_roll) < 0x30
 if (crash != 0) {                       /* EJECTION sequence: cba0 key Shift-F10 (5D00, handler D02E) sets crash = 1 (and [DEA2],[DEC6] = position, [DECA] = alt_s + 8, comm+26h = 2 survived / end_mission(6) too violent); counts frames */
     roll_in = 0x40;  pitch_in = (abs(fm_roll) > 0x4000) ? 0x10 : -8;       /* tumble */
     crash++;  [DECA] += fx_clamp_wrap(0x20 - crash, -96/rate, 128/rate);    /* [DECA] = height of the ejected pilot: rises while crash < 32, then falls; Esc zeroes it (only useful in the falling phase) */
-    if ((int)[DECA] < 0) { [DECA] = 0; if (([98E2] & 7) == 0) end_mission(0); }   /* [98E2] = frame counter; 4926(0) = "killed" -> sets E552, comm+28h = 0 */
+    if ((int)[DECA] < 0) { [DECA] = 0; if (([98E2] & 7) == 0) end_mission(0); }   /* [98E2] = frame counter; 4926(0) = the ejected pilot reached the ground: sets E552, comm+28h = 0 (comm+26h stays 2, END shows rescue or captured; "killed" was wrong, (corrected 2026-10-13, see HANDOFFS C3)) */
     if (alt_s == 0 && [3D68] == -1) {            /* crash dive reached sea level */
         spd = 0; thr_cmd = 0; [C0B0] = 0; [3D68] = 0;  [C0A0] = [B2A4] = [C0A4]; [C0AA] = [B2A6] = [C0B2];  [9D0C] = 0xFFF0;  snd_cue(5, 2); }
     if ((crash & 0xFF00) == 0 && (crash & 0xFC) == 0x10 && ([3D60] & 3) == 1) {      /* crash value 16..19 on a frame with (3D60 & 3) == 1: the abandoned aircraft dives and explodes */
@@ -845,7 +845,7 @@ thr += tdiv(tdiv(thr_cmd - thr, 4), rate);  if (thr < thr_cmd) thr++;  if (thr_c
 if (([3D60] % (2*rate)) == 0 && thr_cmd != 0) fuel += tdiv(thr_cmd*thr_cmd, -1000) - ((dmg_flags & 0x20) ? dmg_level : 0) - 2;   /* 0x20 = fuel leak */
 if ((int)fuel <= 0) { thr = 0; fuel = 0; }               /* flame-out */
 ```
-`[3D60]` is the global frame counter (39C4). `end_mission(n)` = `4926(n)`: sets `[E552] = 1` (leave the frame loop) and `comm+28h = n` (n = 0 killed, 5 crash landing, 7 quit without result) - R4 owns it.
+`[3D60]` is the global frame counter (39C4). `end_mission(n)` = `4926(n)`: sets `[E552] = 1` (leave the frame loop) and `comm+28h = n` (n = 0 landed, or the ejected pilot reached the ground; 1 stranded, 2 terrain, 5 hard landing, 6 fatal crash, 7 quit without result; "0 killed" was wrong, (corrected 2026-10-13, see HANDOFFS C3)) - R4 owns it.
 
 ### 2.6 G load and the G string (P7) (V)
 ```c

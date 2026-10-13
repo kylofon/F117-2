@@ -44,7 +44,7 @@ Every EXEC is `INT 21h/4B00h` (inherited environment, FCBs = own PSP:5C/6C); ret
 | 2 | `MPS_LOGO.EXE` | `" X"`, X = `comm[0Dh] & 5Fh` (sound driver letter) | **2** → `INT 10h` mode 3, exit; else kept in `cs:06F9` |
 | 3 | overlays (§2.2) | | sound `comm+0Dh` → `comm[1Ch]`, call its entry 0 `(0,0,0)`; `MISC.EXE` → `comm[1Eh]`; graphics `comm+00h` → `comm[1Ah]`; `comm[20h]` = graphics entry 0 `(2)` |
 | 4 | `PLAYER.EXE` | `" title-1 title-2 title-3a credit c-pit bunker"` | only if MPS_LOGO returned 0; ignored (SS:SP not reloaded after this EXEC) |
-| L | `DSWAP.EXE` | `" 0"` | 0 → quit |
+| L | `DSWAP.EXE` | `" 0"` | 0 → quit (DSWAP returns 0 only after a fatal memory error, otherwise 1; corrected 2026-10-13, see HANDOFFS C7) |
 | | `START.EXE` | empty | kept; 0 → quit |
 | | `DSWAP.EXE` | `" 1"` | 0 → quit |
 | | `PLAYER.EXE` | `" title-2"` | only if START returned **0Ch** |
@@ -154,17 +154,21 @@ END, DSWAP; SETUP keeps `comm:120E`). Census of fixed offsets (`es:[bx+N]` after
 | 001C | w | F117.COM | sound driver segment |
 | 001E | w | F117.COM | MISC segment |
 | 0020 | w | F117.COM | off-screen page segment (MGRAPHIC slot 0) |
-| 0022 | w | SETUP (=1), START | ? |
+| 0022 | w | SETUP (=1); the dead START quiz | clearance flag: always 1 in a real run; 0 would force theatre 0 and `pilot+3C \|= 2` (corrected 2026-10-13, see HANDOFFS G3) |
 | 0024 | w | SETUP (=0), calibration | joystick calibration byte; START passes it to MGRAPHIC slot 60 on first run |
-| 0026-002E | w | SETUP/START/VGAME | options (0026 = 1 after SETUP; 002A ← SETUP `[0776]`) — S3.5 |
-| 0030 | w | SETUP | joystick in use (`[0FD4]`) |
+| 0026 | w | SETUP (1), START (3), VGAME | **mission state**: START 3, VGAME writes 1 at mission start, 2 on eject, 3 on a normal landing; END reads 1 as crashed (corrected 2026-10-13, see HANDOFFS C1) |
+| 0028 | w | START (0), VGAME | end code (0 landed / ejected pilot on the ground, 1 2 5 6 crash kinds) (corrected 2026-10-13, see HANDOFFS C3) |
+| 002A | w | SETUP (`[0776]` = 0) | unused |
+| 002C | w | START (0), VGAME | enemy missiles launched at the player (not kills) (corrected 2026-10-13, see HANDOFFS section 8 question 3) |
+| 002E | w | START | estimated fuel in lbs = 12 x route score (corrected 2026-10-13, see HANDOFFS C10) |
+| 0030 | w | START, VGAME | non-scoring flag: START sets `pilot+3C > 1`, VGAME Alt-T ORs 1, END counts a mission only when 0. SETUP's initial 0 is overwritten by START (corrected 2026-10-13, see HANDOFFS C4) |
 | 0032 | w | SETUP | adapter: FFFFh unset, 3 = MCGA (driver name starts with `M`), else 2 |
 | 0033-003E | b/w | START, VGAME, END | game options/state — S3.5/S3.6 |
 | 0048 | struct | SETUP | joystick calibration data (far pointer to the calibrate routine; VGAME too) |
-| 0070 | w | SETUP (=0) | ? |
+| 0070 | w | SETUP (=0) | unused: no program reads it (corrected 2026-10-13, see HANDOFFS G2) |
 | 0072 | b | SETUP | bit 0 = joystick (answered Y), bit 1 = mouse driver (INT 33h/0 = FFFFh) |
 | 0074, 0076 | w | VGAME → END | mission result — S3.6/S3.9 |
-| 1272 | 80 B | START | **active pilot record** (50h bytes per pilot, copied at `START:6D46`; `ROSTER.FIL` = 802 = 2 + 10·80, to confirm in S2.5); read/updated by VGAME and END (1272-12C1) |
+| 1272 | 80 B | START | **active pilot record** (50h bytes per pilot, copied at `START:6D46`; `ROSTER.FIL` = 802 = 2 + 10·80, to confirm in S2.5); read by VGAME (never written: all 26 accesses through `DS:98F4` are loads), updated by START and END (corrected 2026-10-13, see HANDOFFS C5) (1272-12C1) |
 
 BIOS words next to the pointer: **`0000:04F2`** = 1 from F117.COM; START does its one-time setup
 (pilot record copy, intro) while it is non-zero, then clears it. **`0000:04F4`** = 0 from F117.COM;

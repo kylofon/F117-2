@@ -7,6 +7,9 @@ exe,kind,address,...). Skips what the port does not reimplement: the Borland RTL
 PS/AP 0000 also hold volume.c and AP 0000 the DAC code, which platform/video list themselves), the
 VROOMM overlay manager (AP 36f6) and the VROOMM stub thunks (AP 3c59-3ea0).
 
+A function that is linked in but unreachable is covered by an index-level row whose notes start with "dead"
+(S3.10b, frontend.md section 8); it counts as covered and is tallied separately ("of which dead").
+
 Writes work/coverage/<exe>_uncovered.txt (one line per missing function: address, size, source
 file, first strings) and prints a per-segment summary of missing functions.
 """
@@ -40,6 +43,9 @@ def skipped(exe, seg):
     return False
 
 
+DEAD = defaultdict(set)  # exe -> addresses whose covering row is marked dead
+
+
 def covered_set():
     cov = defaultdict(dict)  # exe -> addr -> owner
     for path in glob.glob(os.path.join(ROOT, 'port', 'spec', '*_symbols.csv')):
@@ -52,6 +58,8 @@ def covered_set():
                 exe = (r.get('exe') or '').strip().lower()
                 if a and exe:
                     cov[exe].setdefault(a, spec)
+                    if (r.get('notes') or '').strip().lower().startswith('dead'):
+                        DEAD[exe].add(a)
     return cov
 
 
@@ -78,6 +86,9 @@ def main():
                 fh.write('%s %6s %-28s %s\n' % (a, r['size'], r.get('source', '')[:28], (r.get('strings') or '')[:80]))
         print('%s: %d/%d covered, %d missing -> %s' % (exe, total - len(missing), total, len(missing), out))
         print('   by spec: ' + ', '.join('%s %d' % kv for kv in sorted(owners.items())))
+        ndead = sum(1 for _, r in [(norm(r['start']), r) for r in rows] if _ in DEAD[exe])
+        if ndead:
+            print('   of which dead (unreachable, index-level rows): %d' % ndead)
         segs = Counter(a[:4] for a, _ in missing)
         print('   missing by segment: ' + ' '.join('%s:%d' % kv for kv in sorted(segs.items())))
 

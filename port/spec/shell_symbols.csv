@@ -154,8 +154,6 @@ start,data,DS:896,date_year,int[],shell,,"start year per theatre (1986,1984,1985
 start,data,DS:8A8,month_names,char *[13],shell,,"Jan..Dec"
 start,data,DS:8C2,days_in_month,uint8_t[13],shell,,"0,31,28,31,30,31,30,31,31,30,31,30,31 (no leap)"
 start,data,DS:0cba,tbl_pic_names,char*[33],shell,,picture name pointers (air_id .. climbin)
-start,data,DS:CBA,screen_name_tbl,char *[],shell,,"names air_id armsscrn brefscrn folder1 hangscrn homescrn ordrscrn rostscrn ... (.pic)"
-start,data,DS:D6A,theatre_suffix_tbl,char *[],shell,,"lb pg nc ce vn me (file suffix per theatre)"
 start,data,DS:0D6A,theatre_prefix_ptrs,word[9],shell,,prefix string pointers lb pg nc ce vn me ku cu ko
 start,data,DS:0D7C,brief_time_tot,char[6],shell,,time over target string
 start,data,DS:0D82,brief_time_tot15,char[6],shell,,TOT plus 15 min string
@@ -320,10 +318,16 @@ start,data,DS:E090,cursor_old_y,int,shell,,"last drawn cursor y"
 start,data,DS:E092,cursor_w,uint8_t,shell,,"cursor width (sprite byte 0)"
 start,data,DS:E093,cursor_h,uint8_t,shell,,"cursor height (sprite byte 2)"
 start,data,DS:e096,ptr_comm,far ptr,shell,,comm block
-start,func,0000:885e,stub_ret_02c0,void(void),shell,,"(= VGAME 0000:02c0, byte-shape copy; partner in simflow_symbols.csv)"
+start,func,0000:885e,pic_hook_nop,void pic_hook_nop(void),shell,,1-byte ret called once at the start of every pic_to_* decoder (S3.10 mapped it to a VGAME stub: corrected S3.10b)
 start,func,0000:8aa0,edge_table_clear,void edge_table_clear(void),shell,,"(= END 0000:4a40, byte-shape copy; partner in debrief_symbols.csv)"
 start,func,0000:8ad1,fill_rows2_near,void fill_rows2_near(...),shell,,"(= VGAME 1001:02ba, byte-shape copy; partner in render3d_symbols.csv)"
 start,func,0000:9516,ltoa,"char *(long v,char *buf,int radix)",shell,,"(= VGAME 0000:f0b0, byte-shape copy; partner in simflow_symbols.csv)"
-start,func,0000:98ca,rtl_dosmaperr_al,void(unsigned char al),shell,,"(= VGAME 0000:f5e4, byte-shape copy; partner in simflow_symbols.csv)"
-start,func,0000:a768,free,void(void *p),shell,,"(= VGAME 0000:fde2, byte-shape copy; partner in simflow_symbols.csv)"
-start,func,0000:a76c,free,void(void *p),shell,,"(= VGAME 0000:fde2, byte-shape copy; partner in simflow_symbols.csv)"
+start,func,0000:98ca,rtl_dosmaperr_al,void(unsigned char al),shell,,"(= VGAME 0000:f5e4, byte-shape copy; partner in simflow_symbols.csv) [verified S3.10b: xor ah,ah; call rtl_dosmaperr (same callee in this program); ret]"
+start,func,0000:a768,nmalloc,void *nmalloc(unsigned n),shell,,3-byte entry: jmp rtl_nmalloc A791 (S3.10 mapped it as free: corrected S3.10b); its neighbour A76C really is free (jmp rtl_nfree A770)
+start,func,0000:a76c,free,void(void *p),shell,,"(= VGAME 0000:fde2, byte-shape copy; partner in simflow_symbols.csv) [verified S3.10b: jmp rtl_nfree A770]"
+start,func,0000:8bd2,mem_copy_far_w,"void(void far *src, void far *dst, unsigned nwords)",shell,,dead: rep movsw between far pointers; no reference
+start,func,0000:932e,fwrite,"unsigned fwrite(void *buf, unsigned size, unsigned n, FILE *f)",shell,,"stdio fwrite (= MPS_LOGO 0146:049a, small-model variant); caller roster_save 7272"
+start,func,0000:963e,memset,"void *memset(void *d, int c, unsigned n)",shell,,"byte fill with rep stosw (odd start handled), returns d; caller 7D71"
+start,func,0000:9694,isprint,int isprint(int c),shell,,mask 57h (upper|lower|digit|punct|blank) through the shared ctype tail 96A1; caller roster_edit_name 6AB3
+start,func,0000:96a1,ctype_test,"int /* AL=mask, [bp+4]=c */",shell,,shared tail of the isXXX stubs 9680..969E: AL & _ctype[c+1] (table DS:B051)
+start,func,0000:a3cb,rtl_write_flush,void /* register entry */,shell,,"(= VGAME fd55 rtl_write_flush, head; the index merges the unsplit ltoa core A457 into this block)"

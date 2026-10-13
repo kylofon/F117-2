@@ -46,9 +46,9 @@ written by VGAME's `mission_log`), so the scoring rules live here, not in VGAME.
 | off | size | written by | meaning for END |
 |---|---|---|---|
 | 1A, 1C, 1E | w | F117.COM | MGRAPHIC / sound / MISC driver segments (`ovl_bind` x3 in `init`) |
-| 26 | w | START (3), VGAME init (1), VGAME eject (2), VGAME normal landing (3) | **how the flight ended**: 1 = crashed / killed, 2 = ejected, 3 = landed safely. END dispatches on this (settles simflow open item 1) |
+| 26 | w | START (3), VGAME init (1), VGAME eject (2), VGAME normal landing (3) | **how the flight ended**: 1 = crashed / killed, 2 = ejected, 3 = landed safely. END dispatches on this (settles simflow open item 1). VGAME writes 1 at mission start (`39C4:3B0F`) and no crash path changes it (corrected 2026-10-13, see HANDOFFS C1/C2) |
 | 28 | w | VGAME `mission_end(code)` | crash cause 0..6, see 1.2. 0 together with `26==2` = ejection survived |
-| 2C | w | VGAME | ground + air kills counter; `< 3` selects the "quiet mission" quips |
+| 2C | w | VGAME | enemy missiles launched at the player (SAM firing + air-to-air launches, VGAME `5433` / `6586`), **not kills** (corrected 2026-10-13, see HANDOFFS section 8 question 3); `< 3` selects the "quiet mission" quips |
 | 2E | w | START mission generator | route cost (12 x route score); score bonus bands in 4.3 |
 | 30 | w | START (`pilot.3C > 1`) and VGAME Alt-T | **non-scoring flag** (training mission / training toggle was used). Many branches, see 1.4 |
 | 33 | b | START | 1 = night mission (clock base 18:00:00 instead of 06:00:00) |

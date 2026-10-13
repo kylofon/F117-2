@@ -60,7 +60,7 @@ video helpers use the names of `platform_symbols.csv` / `video_symbols.csv`).
   `2B1B(str,x,y,font,center,width)` message box with wrapped text; `3F33(ticks)` / `405F(ticks)` wait with abort (0 = timeout,
   1 = Enter/click, 2 = Esc, 3 = space; 405F adds the click sound); `2B06(n)` wait n retraces; `3693(ctx,x,y,sprseg)` = sprite_scaled wrapper (slot 22);
   `3567(ctx,str,x,y)` text at x,y (slot 5); `3776(ctx,str,x,y,maxw,line_h,center)` wrapped text (maxw = line width limit in pixels, center = 1 centres each line in maxw; ctx.page == -1 = measure only, returns the widest line); `8A32` gfx_fill_rect; `3CEA(tbl,x,y)` modal
-  dialog (descriptor `{text,label1,label2,x,y, button table...}`); `5625(name)` (reader c) walks the mission state structures with `588D(ptr,size,count)` (U: this is the save of the mission to TEMP.WLD for VGAME; direction to be confirmed); `40F0` generates a mission
+  dialog (descriptor `{text,label1,label2,x,y, button table...}`); `5625(name)` (reader c) walks the mission state structures with `588D(ptr,size,count)` (it copies them into `comm+7Ah` only; the `name` argument is never read and START never creates TEMP.WLD, (corrected 2026-10-13, see HANDOFFS C6); was: U: save of the mission to TEMP.WLD for VGAME; direction to be confirmed); `40F0` generates a mission
   (decode of the orders); `76C0(n)` = rand() % n; `76D1(code)` shutdown + exit(code); `6A7C(name)` pointer to the last
   word of a name.
 
@@ -181,7 +181,7 @@ Button table DS:6BC6 (hook 0786, 18 entries, 3 columns x 6 rows): x 30-124 / 125
 Weapon ids (rows 1..18 -> id 0..17): 0 short-range IR AAM, 1 medium-range AAM, 2 radar-homing (HARM-like), 3 direct anti-ship, 4 sea-skimming anti-ship, 5 fire-and-forget optical/IR,
 6 laser-guided glide bomb, 7 retarded cluster bomb, 8 runway bomb, 9 free-fall bomb, 10 retarded large-area bomb, 11 LG cluster bomb, 12 free-fall incendiary, 13 LG fuel-air, 14 retarded incendiary,
 15 retarded mine cluster, 16 recon pallet, 17 fuel tank (+1900 lbs), 18 special equipment container, 19 = empty bay. Description strings: DS:A587 table (20 pointers).
-Bays: `comm+38h + 2*i` (i = 0..3) = weapon id (word), `comm+40h + 2*i` = quantity (word, from byte table DS:1EC5[row]: `0,4,3,1,2,1,2,2,2,2,3,3,2,2,2,2,1,1,1,1`), `comm+2Eh` = payload lbs (U: updated outside this section).
+Bays: `comm+38h + 2*i` (i = 0..3) = weapon id (word), `comm+40h + 2*i` = quantity (word, from byte table DS:1EC5[row]: `0,4,3,1,2,1,2,2,2,2,3,3,2,2,2,2,1,1,1,1`), `comm+2Eh` = estimated fuel in lbs (`12 x route score`, written by the mission generator at `4F51`; shown here and in the briefing as "Est. Fuel required"; "payload" was wrong, (corrected 2026-10-13, see HANDOFFS C10)).
 Number of bays = `(2 - pilot.flight_model)*2` (4 or 2). Bay box positions: DS:01D6 (x) and DS:01E6 (y), index `flight_model*4 + slot`: (126,8),(254,8),(254,89),(126,89) for model 0; (126,8),(254,8) for model 1.
 
 ### 0000:07EE `arm_screen_draw` void(void) -- hook of `ui_show_screen(1 armsscrn, 0x7EE)` (V)
@@ -189,7 +189,7 @@ Number of bays = `(2 - pilot.flight_model)*2` (4 or 2). Bay box positions: DS:01
 * For i in 0..3: if `D2A2 == 0` or `i >= (2-flight_model)*2`: `comm[38h+2i] = 0x13` (empty).
 * For i in 0..15: if `D878[i] != 0` (unavailable): palette colour `255-i` := DS:11CA (grey) (copy to DS:67E0-3i) and `39B3(entry i of DS:6C5E)` (disable button); else `39D5(entry i)` (enable).
 * `D096 = 0`; `35FC(15 weapons3, page 2)`, `35FC(13 weapons1, page 3)`, `35FC(14 weapons2, page 4)`.
-* For i in 0..(bays-1): `arm_draw_bay(i, comm[38h+2i])`. If `D2A2 == 0`: `comm+2Eh = 0`. font 3, fg 15: `sprintf("%d lbs.", comm+2Eh)` at (118,57), `blit_rect(1,118,57,0,118,57,44,5)`.
+* For i in 0..(bays-1): `arm_draw_bay(i, comm[38h+2i])`. If `D2A2 == 0`: `comm+2Eh = 0`. font 3, fg 15: `sprintf("%d lbs.", comm+2Eh)` (the fuel estimate, (corrected 2026-10-13, see HANDOFFS C10)) at (118,57), `blit_rect(1,118,57,0,118,57,44,5)`.
 * `arm_draw_fuel()`; cursor to (271,148) (button 23).
 
 ### 0000:0963 `arm_screen_run` int(void) (V)
@@ -332,7 +332,7 @@ Rebuilds the dynamic button entries (DS:6D62, 8 B each) and `B286/B287`: for eve
 ## Open items
 1. `DS:0030`/comm+30h: START writes `pilot.mission_type > 1` there at exit; RE_GUIDE says SETUP puts the joystick flag in +30h. Check which program reads it (VGAME training flag vs joystick) in S3.6.
 2. Palette colours: exact meaning of RGB triples (naming above is from the numbers); page 2 content in the quiz and in message boxes (`requestr.pic` frame art vs save-under buffer) (U).
-3. `comm+2Eh` (payload lbs) is displayed but not computed in this section (probably computed by `40F0`/mission code or by VGAME); `DS:1EC5` is "quantity" by inference.
+3. `comm+2Eh` (the fuel estimate in lbs, not a payload; computed by the mission generator at `4F51` as `12 x route score`, (corrected 2026-10-13, see HANDOFFS C10)) is displayed but not computed in this section; `DS:1EC5` is "quantity" by inference.
 4. Site flag bits +8/+9 named by use only; 0x08 in `1F3F`/`196A` (special sprite E09A and partner rule) needs a mission-data look (U).
 5. `ui_hangar_anim` return value and the exact final calls (see section 2) -- unused by the caller.
 6. `ui_ready_room`: which homescrn objects the 5 hotspots are (U-check on screen; mapping by dispatch is verified).
@@ -521,7 +521,7 @@ Caller 149C also uses it (route page). Max output about 0x58 bytes.
 file buffer D338:D336), 73CE (palettes.pal). 289A `ui_load_file_near(name, buf)` same with `dos_read(fd, 0xFFFF, buf)` (caller 7611, near).
 
 ### 35FC `ui_load_screen_pic(int name_idx, int page_slot)` (V)
-`sprintf(tmp, "%s.pic", screen_name_tbl[name_idx])` (names DS:CBA: air_id armsscrn brefscrn folder1 hangscrn homescrn ordrscrn rostscrn ...);
+`sprintf(tmp, "%s.pic", tbl_pic_names[name_idx])` (names DS:CBA: air_id armsscrn brefscrn folder1 hangscrn homescrn ordrscrn rostscrn ...);
 `ui_load_file_far(tmp, D336, D338)`; `pic_to_seg_b(E086, page_seg_tbl[page_slot])` (CAB0 words; D338 == E086 == buffer segment, offset 0). Does NOT touch the palette.
 
 ### 3641 `void ui_show_screen(int name_idx, void (*overlay)(void))` (V)
@@ -654,7 +654,7 @@ Points `{?, x(+2), y(+4)}` in world units; pixel `(x/146, y/195)`. Pixel coords:
 ## 6  Mission preparation (40F0) and memory wrappers
 
 ### 40F0 `void mission_site_setup(void)` (V; caller 1308)
-1. `[CABE] = pilot+3E; [B38E] = pilot+38 (theatre); [B38C] = pilot+3A`; `theatre_load(theatre_suffix_tbl[theatre])` (5466, reader c: loads `<suffix>.wld/.3dG/.3dT`); then `4239()` (the 3.8 KB generator: reader c/d section b.txt); `[CAD2..CAD5] = comm+38, +3A, +3C, +3E` (bytes; option/difficulty bytes).
+1. `[CABE] = pilot+3E; [B38E] = pilot+38 (theatre); [B38C] = pilot+3A`; `theatre_load(theatre_prefix_ptrs[theatre])` (5466, reader c: loads `<suffix>.wld/.3dG/.3dT`); then `4239()` (the 3.8 KB generator: reader c/d section b.txt); `[CAD2..CAD5] = comm+38, +3A, +3C, +3E` (bytes; option/difficulty bytes).
 2. `[D33A] = 1` if any byte of the 16x16 map `CAD8[row*16+col]` has bit 10h (all 256 cells scanned), else 0.
 3. For `i = 0..[D33C]` (inclusive, an off-by-one in the original): `site[i].flags &= 0x3F` (clear 40h/80h).
 4. `k = rand() % 3`; while `k != 0`: `j = rand() % [D33C]`; if `j != [E060]` and `j != [E072]` and `site[j].w6 != 0` and `!(site[j].flags & 0x0400)` and `!(site[j].flags & 0x0100)`: `site[j].flags |= 0x40; k--`.
@@ -763,10 +763,10 @@ Theatre index (pilot+38h, also DS:B38E) 0..8, file prefix table DS:0D6A -> `lb p
 | +38h | theatre 0..8 (copied to DS:B38E by 40F0) | 5D44, 4239 |
 | +3Ah | war level 0..2 (copied to DS:B38C): 0 Cold War, 1 Limited War, 2 Conventional War (tooltips for hotspots 10..12, DS:A187/A214/A2C4) | 5DA7, 4239 |
 | +3Ch | mission type 0..3 = hotspot-13: bit0 = ground strike, bit1 = training. 0 Air-to-Air, 1 Ground Strike, 2 Air-to-Air Training, 3 Ground Strike Training (tooltips DS:956C/95F7/9676/96FF) | 5DC9, 4239 |
-| +3Eh | difficulty-like value (copied to DS:CABE); 4239 uses `cabe-5`, `4-cabe`, `rand(5)+cabe` => 0..4 (U which UI sets it; written by the roster/pilot code, not in this range) | 40F0, 4239 |
+| +3Eh | enemy skill / opponent level **0..3** (Green, Regular, Veteran, Elite; copied to DS:CABE). The only writer is the pilot options screen: `6FEB` stores `button - 1` for the four skill buttons 1..4 ((corrected 2026-10-13, see HANDOFFS C8)); 4239 uses `cabe-5`, `4-cabe`, `rand(5)+cabe` as its own expressions | 40F0, 4239 |
 | +42h | non-zero = pilot restricted (hotspots 13/14 = real missions disabled, weapon search starts at row 2, site flag 0x200 excluded) (U exact meaning: rookie/training-only?) | 5A8A, 5282, 4239 |
 
-comm fields written/read here: +22h (nonzero = all theatres unlocked and real missions enabled; 0 -> only theatre 4 hotspot allowed? see 5BF0),
+comm fields written/read here: +22h (clearance: SETUP sets 1 and only the dead quiz clears it, so it is always 1 in a real run; 0 would force `pilot+38h = 0` and `pilot+3Ch \|= 2` at `6328` / `6D91`: (corrected 2026-10-13, see HANDOFFS G3)),
 +33h (night flag 0/1), +2Eh (route cost = 12*route score), +38h/+3Ah/+3Ch/+3Eh (4 loadout/weapon ids), +40h..+46h (4 words, quantity per id),
 +72h (bit0 joystick, bit1 mouse; test in 38AC/3E84), +7Ah (world export buffer, see 5625).
 
@@ -1418,3 +1418,19 @@ Sound commands seen: 0x1B (option click), 0x21 (name type-in tick), 0x1A (menu c
 | CA8E..CA9F | struct | ObjHit result | 7744, 7904 |
 | D33C | word | count of cached object entries (c.txt 512E table at CBE0) | c.txt |
 
+
+
+# Part E: closing pass (S3.10b, 2026-10-13): the last 6 uncovered functions of START
+
+`shell_symbols.csv` now has a row for every indexed START function (267 of 267). The six below are C runtime / library pieces.
+Method and the dead-code test: `frontend.md` section 8. Corrections to the S3.10 twin rows of START (`885E`, `A768`) are in
+`frontend.md` 8.5.
+
+| Addr | Name | Class | Description |
+|---|---|---|---|
+| `8BD2` | `mem_copy_far_w` | dead | `void mem_copy_far_w(void far *src, void far *dst, unsigned nwords)`: `rep movsw`. No call, no address-taken reference anywhere in START |
+| `932E` | `fwrite` | live (RTL) | `unsigned fwrite(void *buf, unsigned size, unsigned n, FILE *f)`, the MSC stdio routine (near twin of MPS_LOGO `0146:049A`; the two differ only in the large-model call/return forms). The one caller is `roster_save` (`7272`, writes `ROSTER.FIL`). Behaviour: `total = size * n`; copies into the stream buffer while it has room; once a whole buffer (or more) remains it flushes the stream and writes the largest multiple of the buffer size straight to the handle (`rtl_write`, `A31A`); the remainder goes through `rtl_flsbuf` (`9992`) byte by byte; a short write sets the error bit `20h`. Returns the number of complete items written (`n` when everything was written). Port: C `fwrite` |
+| `963E` | `memset` | live (RTL) | `void *memset(void *d, int c, unsigned n)`: fills with `rep stosw` after a leading `stosb` for an odd start address and a trailing `stosb` for an odd count; returns `d`; `n = 0` returns at once. One caller (`7D71`). Port: C `memset` |
+| `9694` | `isprint` | live (RTL) | `int isprint(int c)`: `AL = 57h` (`_UPPER\|_LOWER\|_DIGIT\|_PUNCT\|_BLANK`), then the shared tail `96A1`. Caller: `roster_edit_name` (`6AB3`, which characters a typed pilot name accepts). Port: C `isprint` for ASCII (the table holds only ASCII classes; characters above 7Fh are 0) |
+| `96A1` | `ctype_test` | live (RTL) | shared tail of the MSC `isXXX` stubs at `9680..969E` (masks `80h` xdigit, `08h` space, `10h` punct, `07h` alnum, `57h` print, `17h` graph, `20h` cntrl; the other stubs are not indexed and unused by START): `return mask & _ctype[c + 1]` with the table at `DS:B050` (indexed by `c` at `B051`). The indexer decodes the bytes as `and al,[bx-4FAFh]`, which is the same instruction |
+| `A3CB` | `rtl_write_flush` | live (RTL) | the line-buffer flush of `rtl_write` (= VGAME `FD55`): writes `[DX, DI)` to the handle `[bp+4]` with `INT 21h/40h`, adds the count to `[bp-2]`; on a short or failed write unwinds the frame and returns the count or sets the DOS error (`ah = 9` / `1C00h` on a full disk unless the text-mode Ctrl-Z rule applies). The block also contains the unsplit `ltoa` core `A457..A4B6` (same routine as PLAYER `1F70`) |

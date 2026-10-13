@@ -67,7 +67,7 @@ vgame,data,DS:3652,ap_alt,u16,flight,ap_alt_hold,autopilot target
 vgame,data,DS:3654,enemy_skill,word,detect,sim_skill;skill,pilot+3Eh 0..3
 vgame,data,DS:3656,war_level,word,detect,sim_war_level,pilot+3Ah 0..2
 vgame,data,DS:3662,wstore_tab,struct[26 B]*20,weapons,wpn_store_tab,"store catalogue: short name[10], long name[12], proto type @+0x16, icon @+0x18"
-vgame,data,DS:3678,wpn_table,rec26[],weapons,,"store table +0x16: projectile type (-1 camera, -2 fuel tank, 0 guns)"
+vgame,data,DS:3678,wpn_table_type,rec26[],weapons,wpn_table,"store table +0x16: projectile type (-1 camera, -2 fuel tank, 0 guns)"
 vgame,data,DS:39aa,cm_slots,4x12 B,weapons,cm_marks;decoy_tab,"countermeasure records 4 x 12 B {x, y, -, type, timer, -}: slot 0 decoy, 1..3 flare/chaff; [39B2] = decoy timer (flight.md 5.5)"
 vgame,data,DS:39b2,decoy_timer,w,weapons,,timer of countermeasure record 0: != 0 = decoy alive (missiles and hunters aim at it)
 vgame,data,DS:3a5a,smoke_last,w,ai,,"index of the newest smoke record (5730, 1e9e, 479c)"
