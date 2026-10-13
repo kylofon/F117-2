@@ -1,0 +1,135 @@
+exe,kind,address,name,type,owner,other_names,notes
+vgame,func,0000:0d08,terr_find_scenery_at,"hit_t *terr_find_scenery_at(long x,long y_inv)",damage,,"[flight.md 6.3] nearest destroyable scenery object around a world point: levels 1-2, 3x3 tiles, Manhattan, override table, hit record DS:BA14 (full pseudocode)"
+vgame,func,0000:0f31,terr_set_scenery_state,"void terr_set_scenery_state(hit_t *h,byte newid)",damage,,[flight.md 6.4] store a new id for the hit scenery object: override table DS:B772 (wreck ids) or tile record byte +6; sets bit 7
+vgame,func,0000:1e9e,sim_input_flight,void(void),flight,,"[flight.md 2.1] per-frame: key read+dispatch, stick, player aircraft model (attitude/speed/alt/fuel/G/eject), history ring"
+vgame,func,0000:2c6e,fm_rotate_apply,"void(int*A,int*B)",flight,,[flight.md 2.2] fm_mat = A x B via 2DDC; every 8th sets dirty
+vgame,func,0000:2c9e,fm_mat_to_euler,void(void),flight,,[flight.md 2.2] matrix -> yaw/pitch/roll
+vgame,func,0000:2e43,fm_mat_from_euler,void(void),flight,,"[flight.md 2.2] e26b(2D94,yaw,pitch,roll); clear dirty"
+vgame,func,0000:43ee,sim_key_and_signature,void(void),detect,,"[flight.md 3.1] cba0(key) then the radar signature [3D5C]: speed, bank, bay +24, ECM +16, MicroProse altitude term / Lockheed +20 when [9B04]==0"
+vgame,func,0000:4512,wpn_release_countermeasure,void(int type),weapons,,"[flight.md 5.5] Release flare/chaff/decoy: decrement 3636[type], fill slot R[] at 39AA, timers, message ""<name> released"", sound 0xF"
+vgame,func,0000:461c,wpn_cm_tick,void(void),weapons,,[flight.md 5.5] tick ONLY the first busy countermeasure slot (then return); decoy lamp 7
+vgame,func,0000:465b,wpn_gun_update,void(void),weapons,,"[flight.md 5.6] Move gun bullets (E44E, 12 B) and spawn on fire button: ammo 3650, vel from heading/pitch, sound 6"
+vgame,func,0000:4f2a,hud_threat_update,void(void),detect,,"[flight.md 3.4] Stealth bars from 3D5C, staggered site scheduler calling 516d, threat arrow 8548/863c; 3D6A--"
+vgame,func,0000:516d,det_site_radar_update,void(int site),detect,,"[flight.md 3.3] Per-site radar scan: 5460 signal, bars, ""detected"" msg, level build-up, ""Radar ID"" msg, SAM launch into DS:3C0C slot site&7"
+vgame,func,0000:5460,det_radar_signal,"int(int x,int y,int z,int rtype,int*bearing,int*dist)",detect,,"[flight.md 3.2] Radar formula: (maxr-D)*cell*(2*skill+factor+1)/maxr, aspect/Doppler factor, altitude cone, halved for Lockheed model; D=dist>>6"
+vgame,func,0000:5588,det_radar_warning,void(void),detect,,"[flight.md 3.5] [3D92]=2*[3660] warning lamp timer; snd_cmd 8 via d6bf(8,1)"
+vgame,func,0000:559a,det_alert_network,void(void),detect,,"[flight.md 3.5] Alert: [3D62]=[B286], last known player pos/alt/heading, raise every radar level to floor 16*(war+skill-1)"
+vgame,func,0000:5730,ai_update_units,void(void),ai,,"[flight.md 4.1] per-step AI of all units: modes hunt(1)/RTB+land(2)/patrol+formation(3), combat table DS:3A8C, cannon, terrain pull-up, integration, landing/roll-out, endurance, scramble, staggered 62d0 (full pseudocode)"
+vgame,func,0000:62d0,ai_unit_radar,void(int u),ai,,"[flight.md 4.4] Aircraft radar via 5460, level build-up, ""Visual ID - X"" msg, air-to-air missile launch ""W fired by X"", lock tone snd 7"
+vgame,func,0000:65d4,ai_unit_takeoff,"void(int u,int site)",ai,,"[flight.md 4.5] Place unit on airbase (carrier z=0x8C), flags|=0x403, endurance, msg ""<site> - <type> taking off"""
+vgame,func,0000:671a,wpn_proj_update_all,void(void),weapons,,"[flight.md 5.3] per-step update of the 12 projectile slots (0-7 enemy, 8-11 player): seeker/decoys, steering, move, impact, proximity burst, messages"
+vgame,func,0000:711f,wpn_seeker_check,"int(int slot,int tx,int ty,int tz,int cls)",weapons,,[flight.md 5.4] 22.5 deg cone / rear-aspect test of projectile vs point; sets [94F4] dist [94F6] bearing; tz unused
+vgame,func,0000:71b4,dmg_unit_kill,void(int u),damage,,"[flight.md 6.2] marks unit u dead (flags 0x20), logs event 3/0x83, name to 9876, sound 5, mission_target_done(0) for primary air target"
+vgame,func,0000:72a4,dmg_object_destroy,void(int o),damage,,"[flight.md 6.2] destroys ground object o: flag 0x80, wreck shape, mission target k (kind 2) done, event log 1/0xC/2, sound 5"
+vgame,func,0000:7470,mission_target_done,int(int j),damage,,[flight.md 6.2] primary/secondary target achieved: sets 9B05 0x40/0x20 and 2E7C 1/2/3; 9876 = Primary target or Second. target; logs 0x8B/0x4B for kinds 3/4
+vgame,func,0000:74f6,dmg_player_blast,void(void),damage,,[flight.md 6.1] skill+1 random bits into [3632] damage mask and [C5C8]++; lamps 10..16 refresh; [98EE]=1; sound 4; no-op in training
+vgame,func,0000:753f,wpn_release,void(void),weapons,,"[flight.md 5.2] fire key: checks roll/bay/altitude, takes a store from the selected bay, fills a free projectile slot 8-11 or transfers fuel; messages Bay closed etc."
+vgame,func,0000:780a,dmg_wobj_destroyable,int(int o),damage,,[flight.md 6.2] 1 if the world object found in [9F10] is not yet the wreck shape (C0AC or DEA4 by class)
+vgame,func,0000:8bab,wpn_suit,"int wpn_suit(int wpn,int site)",weapons,,[flight.md 5.4] weapon suitability DS:386A[wpn*16 + class[site type]]
+vgame,func,0000:bad1,obj_find_at,"int(int x,int y)",weapons,wobj_register,[flight.md 5.4] terrain object at world point -> site index (>=1) / 0 = scratch site 0 filled / -1 none (R6 name obj_find_at)
+vgame,func,0000:bb86,wpn_site_dist,int(int site),weapons,,"[flight.md 5.4] bbb4 with site record DS:B2A4+16*site (x,y), bearing wanted"
+vgame,func,0000:bb9e,wpn_unit_dist,int(int unit),weapons,,"[flight.md 5.4] bbb4 with unit record DS:C140+36*unit (x,y), no bearing"
+vgame,func,0000:bbb4,obj_dist_bearing,"int(int x_u,int y_u,int want_bearing)",weapons,,"[flight.md 5.4] [94FE]=dist2d(c987), [9502]=atan2(c9d6) if flag; relative to player [C0A4],[C0B2]; returns dist"
+vgame,func,0000:bbed,fm_bomb_dive_angle,int(void),flight,,[flight.md 2.3] (((0x4000-|[2DF0]|)<<12)/(([2DF4]+0x1000)&0xFFFF))-0x4000 ; FFBOMB dive floor
+vgame,func,0000:bc77,obj_cls_soft,int(int o),weapons,,"[flight.md 5.4] C604[type]&15 in {9,11,12,13}"
+vgame,func,0000:bcac,obj_cls_ship,int(int o),weapons,,"[flight.md 5.4] C604[type]&15 in {12,13}"
+vgame,func,0000:cb72,input_button,int(int n),flight,,[flight.md 2.4] key pulse 43BE+2n plus joy_button(n)
+vgame,func,0000:e578,mat_mul,"void(A,B,C)",flight,,[flight.md 2.2] 3x3 Q15 C=AxB; bit-exact spec: render3d.md Part 1 (E578)
+vgame,func,10a8:0c87,joy_recenter,void(void),flight,,"[flight.md 2.4] raw read, min=max=centre=raw"
+vgame,func,10a8:0c95,joy_set_centre_axis,SI axis,flight,,[flight.md 2.4] centre/min/max[si]=raw[si]
+vgame,func,10a8:0ca8,joy_poll,void(void),flight,,"[flight.md 2.4] raw read + joy_scale X,Y -> 2CD2/2CD3"
+vgame,func,1181:0008,keypad_stick_install,void(void),flight,,"[flight.md 2.4] NumLock off, clear state, 2CD6/2CD7=80h, save INT 9, install keypad_stick_isr"
+vgame,func,1181:0058,keypad_stick_remove,void(void),flight,,[flight.md 2.4] restore INT 9 from cs:0187
+vgame,func,1181:0072,keypad_stick_isr,void interrupt(void),flight,,"[flight.md 2.4] INT 9: keypad/arrow keys -> virtual stick bytes 2CD6/2CD7 (80h centre; 5Ah tap, 7Fh double tap), drops repeated identical keys in the BIOS buffer, chains to BIOS"
+vgame,label,0000:23a8,fm_eject_sequence,label,flight,,crash/eject block (C06E != 0)
+vgame,label,0000:2b6f,fm_history_store,label,flight,,16-entry ring + sway
+vgame,data,DS:2d14,gload_tab,u8[128],flight,,16/cos(bank) table
+vgame,data,DS:2d94,fm_mat,int16[9],flight,ac_matrix,aircraft matrix Q15
+vgame,data,DS:2da6,fm_rot_yaw,int16[9],flight,,yaw increment matrix
+vgame,data,DS:2db8,fm_rot_pitch,int16[9],flight,,pitch increment matrix
+vgame,data,DS:2dca,fm_rot_roll,int16[9],flight,,roll increment matrix
+vgame,data,DS:2ddc,fm_mat_tmp,int16[9],flight,,product scratch
+vgame,data,DS:2dee,fm_yaw,u16,flight,heading,yaw 0x10000=360deg
+vgame,data,DS:2df0,fm_pitch,int16,flight,,pitch
+vgame,data,DS:2df2,fm_roll,u16,flight,,roll
+vgame,data,DS:2df4,fm_alt_s,u16,flight,alt_world,compressed altitude
+vgame,data,DS:2df6,fm_alt,u16,flight,alt_ft;altitude_tape,raw altitude
+vgame,data,DS:2dfb,fm_mat_dirty,u8,flight,,rebuild matrix from angles
+vgame,data,DS:2dfe,thr_cmd,int16,flight,throttle,throttle 0..100
+vgame,data,DS:2e80,det_radar_types,"struct{char name[8];word maxr,factor;byte flags,pad;}[23]",detect,,Radar type table 14B; flags bit0 Doppler bit1 omni; same as START 15C6
+vgame,data,DS:2fc2,actype_tab,struct[32 B]*29,ai,ai_aircraft_types;unit_type_tab,aircraft type table: name[18] then 7 words (+0x12 speed ... +0x1A model +0x1C far model +0x1E kills)
+vgame,data,DS:3632,damage_mask,word,damage,dmg_bits;dmg_mask,"Bit per damaged subsystem; bit 6 decoy launcher, bit 4 bay doors"
+vgame,data,DS:3634,fuel,word,flight,,Fuel 10000 at start; <5000 near landing base triggers speech 45
+vgame,data,DS:3636,store_count,word[4],weapons,,"[1] flares 12, [2] chaff 18, [3] decoys 3 (static init)"
+vgame,data,DS:363e,wpn_slots,"struct{u16 id,qty}[4]",weapons,bay_table;bay_tab,loadout copied from comm[38h..46h]
+vgame,data,DS:3650,gun_ammo,word,weapons,gun_rounds,Gun ammo 0..1000
+vgame,data,DS:3652,ap_alt,u16,flight,ap_alt_hold,autopilot target
+vgame,data,DS:3654,enemy_skill,word,detect,sim_skill;skill,pilot+3Eh 0..3
+vgame,data,DS:3656,war_level,word,detect,sim_war_level,pilot+3Ah 0..2
+vgame,data,DS:3662,wstore_tab,struct[26 B]*20,weapons,wpn_store_tab,"store catalogue: short name[10], long name[12], proto type @+0x16, icon @+0x18"
+vgame,data,DS:3678,wpn_table,rec26[],weapons,,"store table +0x16: projectile type (-1 camera, -2 fuel tank, 0 guns)"
+vgame,data,DS:39aa,cm_slots,4x12 B,weapons,cm_marks;decoy_tab,"countermeasure records 4 x 12 B {x, y, -, type, timer, -}: slot 0 decoy, 1..3 flare/chaff; [39B2] = decoy timer (flight.md 5.5)"
+vgame,data,DS:39b2,decoy_timer,w,weapons,,timer of countermeasure record 0: != 0 = decoy alive (missiles and hunters aim at it)
+vgame,data,DS:3a5a,smoke_last,w,ai,,"index of the newest smoke record (5730, 1e9e, 479c)"
+vgame,data,DS:3a8c,ai_manoeuvre_tbl,short[3][8][8],ai,,Combat roll command table indexed [skill row][aspect octant][bearing octant]
+vgame,data,DS:3c0c,wpn_tab,wpn_t[],weapons,tracks;wpn_slots;proj_tab;wpn_enemy_slots,"projectile slots 12 x 28 B (0..7 enemy, 8..11 player): simflow Part 6 2.4"
+vgame,data,DS:3d5c,signature,word,detect,det_player_signature,Radar signature value
+vgame,data,DS:3d62,alert_timer,word,ai,ai_alert_timer timer_3d62,"network alert, 250*rate on alert, -1 per step; > [9F64] = fresh (first 50 s)"
+vgame,data,DS:3d64,sel_air_target,int,ai,tgt_unit;air_target;sel_unit,"Selected air target index, -1 none"
+vgame,data,DS:3d66,sel_ground_target,int,ai,tgt_site;gnd_target;sel_site;sel_gnd_target,"Selected ground target index, -1 none"
+vgame,data,DS:3d6a,alert_blink,word,detect,lock_state;announce_timer;det_ring_timer,"threat ring animation counter: rate when a radar sees the player, -1 per step in 4f2a"
+vgame,data,DS:3d6c,det_bar_color,word,detect,,"Threat bar colour (0x2A/0x29/0x11 sites, 0x0B/0x0F aircraft)"
+vgame,data,DS:3d76,scen_find_any,w,damage,,1 in the image: 0d08 finds objects whose 07E0 flags are 0 too; cleared by 4b57
+vgame,data,DS:3d8e,chaff_lamp_timer,word,weapons,,Chaff indicator steps left (lamp 0xE)
+vgame,data,DS:3d90,flare_lamp_timer,word,weapons,,Flare indicator steps left (lamp 0xF)
+vgame,data,DS:3d92,aux_lamp_timer,word,weapons,det_warn_timer,"radar warning lamp (0x18) steps left, 2*rate (5588)"
+vgame,data,DS:43c0,key_release_latch,w,weapons,,Enter: button 1 latch read by cb72(1) in the cba0 tail (fire)
+vgame,data,DS:94f0,ai_cur_type,word,ai,,Aircraft type of unit being processed (5730/62d0)
+vgame,data,DS:94f2,ai_engaged_now,word,ai,,Count of fighters in mode 1 within 0x400 this pass
+vgame,data,DS:94f4,seeker_dist,short,weapons,,distance result of 711F
+vgame,data,DS:94f6,seeker_bearing,short,weapons,,bearing result of 711F
+vgame,data,DS:94fe,tgt_dist,int,weapons,obj_dist,bbb4 result: 2D distance
+vgame,data,DS:9502,tgt_bearing,int,weapons,obj_bearing,bbb4 result: bearing (atan2) if requested
+vgame,data,DS:98d0,g_text,char[],flight,hud_gtext,G string
+vgame,data,DS:98dc,g16,int16,flight,g_load,load factor x16
+vgame,data,DS:98de,range_shift,word,detect,detail_level;scope_detail;r3d_detail,comm+32h low byte; shift in d76b range table
+vgame,data,DS:98ea,gun_firing,word,weapons,,Gun firing flag set by 465b
+vgame,data,DS:98f0,ai_last_heading,word,ai,,Last known player heading
+vgame,data,DS:9902,scen_state_count,w,damage,,records in the scenery override table DS:B772
+vgame,data,DS:9b04,aircraft_flags,word,flight,cockpit_flags;sys_flags;mission_flags,"word: 0x01 gear up, 0x02 key 9 devices, 0x04 bay open, 0x08 brakes, 0x10 ECM jammer, 0x20 IR jammer, 0x1000 training, 0x2000/0x4000 objectives (flight.md 2.4)"
+vgame,data,DS:9f64,ai_alert_half,word,ai,alert_thresh,200*[3660] (d707)
+vgame,data,DS:a068,gear_lever,word,flight,,key 6: 1 gear down
+vgame,data,DS:b00a,fm_speed_target,u16,flight,,target speed raw
+vgame,data,DS:b04c,last_weapon_slot,int,weapons,proj_last_slot;last_proj_slot,Last launched weapon slot (view 0x89 target)
+vgame,data,DS:b052,fm_speed,u16,flight,speed_raw,"raw speed, 27 per knot"
+vgame,data,DS:b054,ai_engaged_prev,word,ai,,Previous pass count; fratricide guard for SAM/AAM launches
+vgame,data,DS:b056,fm_history,u8[256],flight,pose_ring,16x16 byte ring
+vgame,data,DS:b168,fm_kts,int16,flight,airspeed_kt;airspeed,speed in knots
+vgame,data,DS:b16c,gun_slots,word,weapons,,"clamp(2*fps,3,16)"
+vgame,data,DS:b170,thr,int16,flight,,engine throttle spooled
+vgame,data,DS:b286,ai_alert_time,word,ai,alert_reload,250*[3660] (d707)
+vgame,data,DS:b28e,tgt_cooldown,int,weapons,,Ground target search cooldown (4 frames)
+vgame,data,DS:b290,site0_backup,16 B,weapons,,671a saves/restores the scratch site record 0 here
+vgame,data,DS:b2a0,ai_last_x,word,ai,,Last known player X (or decoy X)
+vgame,data,DS:b2a4,site_tab,site_t[],ai,site_list,site records 16 B from B2A2 (+2 x here): simflow Part 5 6.2
+vgame,data,DS:b75a,ai_last_y,word,ai,,Last known player Y (or decoy Y)
+vgame,data,DS:b76e,ai_last_z,word,ai,,Last known player altitude
+vgame,data,DS:b772,scen_state_tab,byte[5][],damage,terr_override_tab,"Changed/destroyed scenery table, 5-byte records, count DS:9902"
+vgame,data,DS:ba14,scenery_hit_rec,hit_t,damage,wobj_hit,"Hit record of 0d08, 0x13 bytes"
+vgame,data,DS:c070,det_ring_scale,word,detect,,"(sig+[3D5C])*D/100, radius scale of the map ring/arc"
+vgame,data,DS:c0b6,alert_pulse_in,word,detect,window_cur,set to 0xFF by 559a; latched into [C600] and cleared every 8th step by 39c4
+vgame,data,DS:c13a,threat_bearing,word,detect,det_arc_a0,Threat pointer state before O[0]
+vgame,data,DS:c13c,threat_range,word,detect,det_arc_a1,"Threat pointer state, reset 0x100"
+vgame,data,DS:c140,air_tab,air_t[],ai,air_units;unit_list,unit records 36 B from C13E (+2 x here): see flight.md 1.1
+vgame,data,DS:c5c8,damage_points,word,damage,dmg_pts;hit_count,"Damage point counter, 2 at start"
+vgame,data,DS:c600,alert_pulse,word,detect,window_count,0xFF for 8 steps after an alert: 4f2a services sites more often (+2)
+vgame,data,DS:de8a,roll_in,int16,flight,,roll command after curve
+vgame,data,DS:dece,stat_visual_ids,word,detect,,Visual ID events counter
+vgame,data,DS:ded2,stat_radar_ids,word,detect,,Radar ID events counter
+vgame,data,DS:ded6,n_active_threats,word,detect,stat_locks,Active threat count from fps estimator
+vgame,data,DS:e2fe,weapon_mode,int,weapons,tgt_mode;master_mode,"master mode 0 none, 1 air-to-air, 2 air-to-ground (F2)"
+vgame,data,DS:e446,pitch_in,int16,flight,,pitch command after curve
+vgame,data,DS:e448,fm_vref,int16,flight,min_speed,speed reference knots
+vgame,data,DS:e44e,bullets,12 B records,weapons,bullet_tab;wpn_tracers,"Gun bullets x,y,z,dx,dy,dz"
+vgame,data,DS:e54c,det_ring_solid,word,detect,,1 = Doppler radar (solid arc) 0 = pulse (dotted)
+vgame,data,DS:e55e,bay_cmd,word,weapons,,key 8: bay doors commanded open

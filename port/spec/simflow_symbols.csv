@@ -15,8 +15,6 @@ vgame,func,0000:0af9,load_3dt_scenery,void(char *stem),loader,,".3dT: type count
 vgame,func,0000:0c2c,load_3dg_terrain,void(void),loader,,".3dG: L3 map 9F68, L2 9D10, L1 9B08, L0 9904; copies 64-byte L4 theatre table 0A68+64*t to B00C"
 vgame,func,0000:0cd1,load_error_msg,void(const char *msg),loader,,"8AA2(msg,0,0x60,0xF) then getch; returns (no exit)"
 vgame,func,0000:0ce7,set_file_ext,"void(char *name,const char *ext)",lib,,replace text from first . (or NUL) with ext; used on the stem buffer
-vgame,func,0000:0d08,terr_find_scenery_at,"hit_t *terr_find_scenery_at(long x,long y_inv)",damage,,"Nearest scenery object at world point (x=cell<<5, y=(0x8000-cell)<<5); fills hit record BA14; returns BA14 or 0"
-vgame,func,0000:0f31,terr_set_scenery_state,"void terr_set_scenery_state(hit_t *h,byte newid)",damage,,"Records new id of a hit scenery object in table B772 (5-byte recs, count 9902) or tile entry; sets bit7 of tile entry+6"
 vgame,func,0000:17a3,cockpit_draw_adi,void cockpit_draw_adi(void),simflow,,"Attitude indicator 32x28 at (265,140): horizon polygon col 1 on col 9, bezel 91a4, copy back page to screen; only C07A==0"
 vgame,func,0000:1961,mfd_view_sky_bands,void(int horizon),simflow,,"up to 16 sky quads colours 80h+i above horizon row, clamped at y=6Eh; table DS:0D22"
 vgame,func,0000:19ea,mfd_view_ground_bands,"void(int horizon,int mode)",simflow,,"up to 16 ground quads colours 70h+i (F0h if mode==1) below horizon, clamped at y=A9h"
@@ -30,7 +28,6 @@ vgame,label,0000:1c89,timer_isr,void interrupt(void),simflow,,"INT 8: clock+=[26
 vgame,label,0000:1cef,timer_resync,void(void),simflow,,every 20th tick: wait for vertical retrace and reload PIT ch0 with [2632]; disables itself if no retrace seen
 vgame,func,0000:1e0b,pit_read_retrace,u16(void),lib,,wait retrace start on 3DAh (3BAh mono) then latch and read PIT ch0; 0 on timeout
 vgame,label,0000:1e67,timer_tick_work,void(void),simflow,,"[2646]++,[264A]++,[2648]++, slot 46 explosion_fx_tick, snd_poll on 6 of 7 ticks, result steers 1C5B/1C73"
-vgame,func,0000:1e9e,sim_input_flight,void(void),simflow,,"per-frame: key read+dispatch, stick, player aircraft model (attitude/speed/alt/fuel/G/eject), history ring"
 vgame,label,0000:1f72,key_throttle_dec,label,simflow,,key '-': throttle-10
 vgame,label,0000:1f89,input_join,label,simflow,,common tail after key switch
 vgame,label,0000:1fc1,key_throttle_inc,label,simflow,,key '=': throttle +5/+10
@@ -45,11 +42,6 @@ vgame,label,0000:2110,key_boss_screen,label,simflow,,Alt-B: blank screen until k
 vgame,label,0000:216d,key_pause,label,simflow,,Alt-P: 3939
 vgame,label,0000:2173,input_keyboard_stick,label,simflow,,virtual stick bytes -> 2CD2/2CD3
 vgame,label,0000:219f,input_stick_curve,label,simflow,,stick bytes -> roll_in/pitch_in
-vgame,label,0000:23a8,fm_eject_sequence,label,flight,,crash/eject block (C06E != 0)
-vgame,label,0000:2b6f,fm_history_store,label,flight,,16-entry ring + sway
-vgame,func,0000:2c6e,fm_rotate_apply,"void(int*A,int*B)",flight,,fm_mat = A x B via 2DDC; every 8th sets dirty
-vgame,func,0000:2c9e,fm_mat_to_euler,void(void),flight,,matrix -> yaw/pitch/roll
-vgame,func,0000:2e43,fm_mat_from_euler,void(void),flight,,"e26b(2D94,yaw,pitch,roll); clear dirty"
 vgame,func,0000:2e64,fx_ratio_q15,"int(int x,int y)",lib,,x/y in Q15 with signs
 vgame,func,0000:2ebe,fx_asin,u16(int q15),lib,,inverse sine via table 2084
 vgame,func,0000:2f2f,fx_acos,u16(int q15),lib,,0x4000-asin
@@ -92,12 +84,8 @@ vgame,label,0000:420a,sim_beacon_phase,label,simflow,,Strip beacon phase DFDE up
 vgame,label,0000:423d,sim_second_tick,label,simflow,,"3D60++ and once per fps steps mission clock, palette drift, deadline event, event log"
 vgame,label,0000:4301,sim_fps_estimate,label,simflow,,Every 4*fps steps: fps estimator from timer ticks and DED6 recount
 vgame,label,0000:43e7,sim_tail,label,simflow,,Calls 43ee (key dispatch + signature) and returns
-vgame,func,0000:43ee,sim_key_and_signature,void(void),detect,,"cba0(DE90) key dispatcher then radar signature 3D5C (bank, speed/AGL, power, gear, bay, radar)"
 vgame,func,0000:44a9,hud_draw_store_counts,void(void),simflow,,Redraw flare/chaff/decoy counters (a=1..3 via 44c4)
 vgame,func,0000:44c4,hud_draw_store_count,void(int type),simflow,,Draw 2-digit store count of type 1 flare 2 chaff 3 decoy in panel field 3D9C[type] via d92d
-vgame,func,0000:4512,wpn_release_countermeasure,void(int type),weapons,,"Release flare/chaff/decoy: decrement 3636[type], fill slot R[] at 39AA, timers, message ""<name> released"", sound 0xF"
-vgame,func,0000:461c,wpn_cm_tick,void(void),weapons,,Per-step countdown of the 4 countermeasure slots; decoy lamp 7 via 898b
-vgame,func,0000:465b,wpn_gun_update,void(void),weapons,,"Move gun bullets (E44E, 12 B) and spawn on fire button: ammo 3650, vel from heading/pitch, sound 6"
 vgame,func,0000:479c,fx_smoke_update,void(void),simflow,,"Smoke puffs (39DA x16 x8 B) over burning site 3D68: age+=4, y drift, spawn every 8 steps"
 vgame,func,0000:483c,fx_fall_update,void(void),simflow,,"Falling body C602 altitude, B756 velocity (gravity -12/step, min -16)"
 vgame,func,0000:4857,sim_reset_clock_palette,void(void),simflow,,"Seed rand, reset cockpit (784a), 3D60 random, start clock 9870, 98E2=0, palette pre-steps toward day/night table"
@@ -116,22 +104,6 @@ vgame,func,0000:4d43,pal_time_of_day_step,void(void),simflow,,Once per second: e
 vgame,func,0000:4e0f,hud_glideslope_update,void(void),simflow,,"Compute glide-slope state 46C2 (0 gear up,1,2 ok,3) from slope angle vs 7.98 deg tolerance"
 vgame,func,0000:4ebc,hud_lamp_timers,void(void),simflow,,Count down chaff/flare/aux indicator timers and set lamps 0xE/0xF/0x18 via 4f05
 vgame,func,0000:4f05,hud_lamp_set,"void(int lamp,int on)",simflow,,"If cockpit visible and lamp state differs call d83e(3FE2,lamp,on)"
-vgame,func,0000:4f2a,hud_threat_update,void(void),detect,,"Stealth bars from 3D5C, staggered site scheduler calling 516d, threat arrow 8548/863c; 3D6A--"
-vgame,func,0000:516d,det_site_radar_update,void(int site),detect,,"Per-site radar scan: 5460 signal, bars, ""detected"" msg, level build-up, ""Radar ID"" msg, SAM launch into DS:3C0C slot site&7"
-vgame,func,0000:5460,det_radar_signal,"int(int x,int y,int z,int rtype,int*bearing,int*dist)",detect,,"Radar formula: (maxr-D)*cell*(2*skill+factor+1)/maxr, aspect/Doppler factor, altitude cone, halved for Lockheed model; D=dist>>6"
-vgame,func,0000:5588,det_radar_warning,void(void),detect,,"[3D92]=2*[3660] warning lamp timer; snd_cmd 8 via d6bf(8,1)"
-vgame,func,0000:559a,det_alert_network,void(void),detect,,"Alert: [3D62]=[B286], last known player pos/alt/heading, raise every radar level to floor 16*(war+skill-1)"
-vgame,func,0000:5730,ai_update_units,void(void),ai,,"Per-step AI of all enemy aircraft units (36B at DS:C13E): modes patrol/hunt/RTB, steering, crash, landing msgs, scramble, calls 62d0/65d4"
-vgame,func,0000:62d0,ai_unit_radar,void(int u),ai,,"Aircraft radar via 5460, level build-up, ""Visual ID - X"" msg, air-to-air missile launch ""W fired by X"", lock tone snd 7"
-vgame,func,0000:65d4,ai_unit_takeoff,"void(int u,int site)",ai,,"Place unit on airbase (carrier z=0x8C), flags|=0x403, endurance, msg ""<site> - <type> taking off"""
-vgame,func,0000:671a,wpn_proj_update_all,void(void),weapons,,"per-step update of the 12 projectile slots (0-7 enemy, 8-11 player): seeker/decoys, steering, move, impact, proximity burst, messages"
-vgame,func,0000:711f,wpn_seeker_check,"int(int slot,int tx,int ty,int tz,int cls)",weapons,,22.5 deg cone / rear-aspect test of projectile vs point; sets [94F4] dist [94F6] bearing; tz unused
-vgame,func,0000:71b4,dmg_unit_kill,void(int u),damage,,"marks unit u dead (flags 0x20), logs event 3/0x83, name to 9876, sound 5, mission_target_done(0) for primary air target"
-vgame,func,0000:72a4,dmg_object_destroy,void(int o),damage,,"destroys ground object o: flag 0x80, wreck shape, mission target k (kind 2) done, event log 1/0xC/2, sound 5"
-vgame,func,0000:7470,mission_target_done,int(int j),simflow,,primary/secondary target achieved: sets 9B05 0x40/0x20 and 2E7C 1/2/3; 9876 = Primary target or Second. target; logs 0x8B/0x4B for kinds 3/4
-vgame,func,0000:74f6,dmg_player_blast,void(void),damage,,skill+1 random bits into [3632] damage mask and [C5C8]++; lamps 10..16 refresh; [98EE]=1; sound 4; no-op in training
-vgame,func,0000:753f,wpn_release,void(void),weapons,,"fire key: checks roll/bay/altitude, takes a store from the selected bay, fills a free projectile slot 8-11 or transfers fuel; messages Bay closed etc."
-vgame,func,0000:780a,dmg_wobj_destroyable,int(int o),damage,,1 if the world object found in [9F10] is not yet the wreck shape (C0AC or DEA4 by class)
 vgame,func,0000:784a,cockpit_widgets_reset,void(void),simflow,,"mission-start reset of panel widgets (d83e x4), [409C]=0, [DFDC]=0x18; called from 4857"
 vgame,func,0000:7898,hud_overlay_frame,void hud_overlay_frame(void),simflow,,"per-frame HUD C part: flash, lamps 0-2, stall lamp, weapon/gun line, crosshair, tapes, AAM circle, speed/alt numbers, waypoint caret, message, view 42 altitude"
 vgame,func,0000:80a0,mfd_left_select,void mfd_left_select(int mode),simflow,,left MFD mode 0 map / 1 scope; lamp 22/23 via d83e; F3
@@ -168,7 +140,6 @@ vgame,func,0000:8b04,txt_draw,"void txt_draw(TextCtx *c,char *s,int x,int y,int 
 vgame,func,0000:8b3b,hud_num_left,"void hud_num_left(int v,int x,int y,int col)",simflow,,itoa to DS:C5D8 and draw left aligned
 vgame,func,0000:8b5c,hud_num_right,"void hud_num_right(unsigned v,int xr,int y,int col)",simflow,,"ltoa unsigned, right aligned x = xr - 4*len"
 vgame,func,0000:8b93,msg_post,void msg_post(char *text),simflow,,"strcpy(DS:C578,text); DS:409E = 3*DS:3660 frames"
-vgame,func,0000:8bab,wpn_suit,"int wpn_suit(int wpn,int site)",weapons,,weapon suitability DS:386A[wpn*16 + class[site type]]
 vgame,func,0000:8bd3,gfx_restore_rect,"void(x,y,w,h)",simflow,,page2 -> page0 and page1
 vgame,func,0000:8c10,mfd_scope_draw,void mfd_scope_draw(int flip),simflow,,"left MFD mode 1 scope: grid, air units, missile tracks, sites, ownship, countermeasure marks"
 vgame,func,0000:903f,mfd_target_box,"void mfd_target_box(int x,int y,int col)",simflow,,9x7 selection frame around a scope icon
@@ -195,13 +166,6 @@ vgame,func,0000:b5af,hud_lock_bracket,void(int animate),simflow,,converging squa
 vgame,func,0000:b6ae,hud_lock_indicator,"void(int mode,int lock)",simflow,,"sets (b04E,b050)=(207;140); Maverick seeker cross; lock bracket; cockpit lamp 3 on (steady if lock else blinking by [3D60]&1) when [E55C]"
 vgame,func,0000:b77a,hud_ping_label,"void(char *s,int colour,int dy)",simflow,,expanding hexagon (half-size dy) + centred name text at projected point DS:49E0/49E8 (text colour DS:9872)
 vgame,func,0000:b7f8,hud_format_range,void(int dist),simflow,,"DS:9876 = ""Range "" + (dist>>6) + ""."" + ((dist&63)*2/13) + "" km"""
-vgame,func,0000:bad1,obj_find_at,"int(int x,int y)",weapons,wobj_register,terrain object at world point -> site index (>=1) / 0 = scratch site 0 filled / -1 none (R6 name obj_find_at)
-vgame,func,0000:bb86,wpn_site_dist,int(int site),weapons,,"bbb4 with site record DS:B2A4+16*site (x,y), bearing wanted"
-vgame,func,0000:bb9e,wpn_unit_dist,int(int unit),weapons,,"bbb4 with unit record DS:C140+36*unit (x,y), no bearing"
-vgame,func,0000:bbb4,obj_dist_bearing,"int(int x_u,int y_u,int want_bearing)",weapons,,"[94FE]=dist2d(c987), [9502]=atan2(c9d6) if flag; relative to player [C0A4],[C0B2]; returns dist"
-vgame,func,0000:bbed,fm_bomb_dive_angle,int(void),flight,,(((0x4000-|[2DF0]|)<<12)/(([2DF4]+0x1000)&0xFFFF))-0x4000 ; FFBOMB dive floor
-vgame,func,0000:bc77,obj_cls_soft,int(int o),weapons,,"C604[type]&15 in {9,11,12,13}"
-vgame,func,0000:bcac,obj_cls_ship,int(int o),weapons,,"C604[type]&15 in {12,13}"
 vgame,func,0000:bd24,load_stflt_3dx,void(void),loader,,stflt.3dx -> bank 0 (B75E); flags to 0760; 09E0[i]=6
 vgame,func,0000:bf71,mfd_view_render,"void(unsigned obj,int x,int y,int z,int a0,int a1,int a2,int mode,int zshift)",simflow,,"Sensor/seeker view window x169-245 y110-169: camera, sky/ground bands, 3D object, FLIR tint, BRG and zoom labels; called by a17e (modes 1,3,4)"
 vgame,label,0000:c05c,bf71_cam_look,local label,simflow,,bf71 local: camera for modes 0/1: bearing/elevation/range to object
@@ -223,7 +187,6 @@ vgame,func,0000:cb1b,fx_sext8,int(int x),lib,,sign-extend low byte
 vgame,func,0000:cb39,lib_sign,int(int v),lib,,signum
 vgame,func,0000:cb56,rand_seed_timer,void(void),lib,,srand(bios_timer)
 vgame,func,0000:cb62,rand_n,int(int n),lib,,rand()*n>>15
-vgame,func,0000:cb72,input_button,int(int n),simflow,,key pulse 43BE+2n plus joy_button(n)
 vgame,func,0000:cba0,input_command_key,void(unsigned key),simflow,,"Per-frame key command interpreter called from 43ee with [DE90]: 1-9, F1-F10, Alt/Shift keys, debug keys, nav map keys, then tail (fire button, chaff/flare timers, bay doors, gear, lamps). NOT a menu."
 vgame,label,0000:cbbc,key_n_toggle,local label,simflow,,"cba0 local: n: 9B05^=1, LOOK(0) if DFDC==13h"
 vgame,label,0000:cbd0,key_gate_debug,local label,simflow,,"cba0 local: post-switch: debug key switch when 9B05&10h, then d2fe"
@@ -293,7 +256,6 @@ vgame,func,0000:d82f,file_close,void(h),loader,,1199:00C8 dos_close
 vgame,func,0000:d83e,hud_lamp_recolor,"void(ctx,lamp,on)",simflow,,"rect_recolor lamp rect, table 46D8/4672"
 vgame,func,0000:d92d,hud_digits_draw,"void(page,slot,str)",simflow,,blit 4x7 digits from page2 strip
 vgame,func,0000:d9a3,hud_side_strips,void(int page),simflow,,side bars + store highlight 46C2
-vgame,func,0000:e578,mat_mul,"void(A,B,C)",lib,,3x3 Q15 C=AxB; bit-exact spec: render3d.md Part 1 (E578)
 vgame,func,0000:ea26,pal_fade_step,"int pal_fade_step(RGB far*cur,RGB far*target,int count)",lib,,"moves each component of cur one step toward target, returns number changed (callers 4857,4D43)"
 vgame,func,0000:ea7c,file_load_paras,u16(const char *name),loader,,"fopen r+b, filelength, check free paragraphs, alloc, int86x read loop (64K chunk bug); returns segment or 0; size in C074/C076"
 vgame,func,0000:f0b0,ltoa,"char *(long v,char *buf,int radix)",lib,,signed entry (bl=1) of the number conversion at FA38; f094 is the unsigned head
@@ -332,14 +294,8 @@ vgame,label,10a8:07ea,hud_ladder_draw,local,simflow,,Local label in hud_draw_fro
 vgame,label,10a8:087b,hud_ladder_labels,local,simflow,,Local label in hud_draw_front: ladder number labels
 vgame,func,10a8:09ce,hud_color_init,void(void),simflow,,"Sets panel seg [E558] in blit ctx B0..B3 and day/night HUD colours (0A/2F day, 0F/07 night)"
 vgame,func,10a8:0a22,hud_layout_init,void(void),simflow,,"Fills layout block DS:291C..2948 + text/blit ctx fields for HUD style [294B] (0 wide, 1 compact)"
-vgame,func,10a8:0c87,joy_recenter,void(void),simflow,,"raw read, min=max=centre=raw"
-vgame,func,10a8:0c95,joy_set_centre_axis,SI axis,simflow,,centre/min/max[si]=raw[si]
-vgame,func,10a8:0ca8,joy_poll,void(void),simflow,,"raw read + joy_scale X,Y -> 2CD2/2CD3"
 vgame,func,10a8:0d70,joy_get_calib,void(void far *dst),lib,,copy 20 words DS:2CA2 -> far dst (comm+48h)
 vgame,func,10a8:0d82,joy_set_calib,void(void far *src),lib,,copy 20 words far src (comm+48h) -> DS:2CA2
-vgame,func,1181:0008,keypad_stick_install,void(void),simflow,,"NumLock off, clear state, 2CD6/2CD7=80h, save INT 9, install keypad_stick_isr"
-vgame,func,1181:0058,keypad_stick_remove,void(void),simflow,,restore INT 9 from cs:0187
-vgame,func,1181:0072,keypad_stick_isr,void interrupt(void),simflow,,"INT 9: keypad/arrow keys -> virtual stick bytes 2CD6/2CD7 (80h centre; 5Ah tap, 7Fh double tap), drops repeated identical keys in the BIOS buffer, chains to BIOS"
 vgame,func,1199:00c8,dos_close,void(int h),lib,,"INT 21/3E, fatal on error"
 vgame,func,1199:00f0,dos_read,"int(int h,u16 n,void *buf)",lib,,"INT 21/3F into DS buffer, fatal on error (unused)"
 vgame,func,1199:0122,dos_read_far,"int(int h,u16 n,u16 off,u16 seg)",lib,,INT 21/3F into seg:off (unused)
@@ -452,20 +408,7 @@ vgame,data,DS:2cdb,pad_last_scan,u8,simflow,,previous scancode (E0h detection)
 vgame,data,DS:2cdc,pad_last_mask,u8,simflow,,mask of the last pressed stick key
 vgame,data,DS:2cdd,pad_skip,u8,simflow,,scancode bytes to skip after E1h
 vgame,data,DS:2cde,pad_xlat,u8[41],simflow,,scancode 29h..51h -> stick mask
-vgame,data,DS:2d14,gload_tab,u8[128],flight,,16/cos(bank) table
-vgame,data,DS:2d94,fm_mat,int16[9],flight,ac_matrix,aircraft matrix Q15
-vgame,data,DS:2da6,fm_rot_yaw,int16[9],flight,,yaw increment matrix
-vgame,data,DS:2db8,fm_rot_pitch,int16[9],flight,,pitch increment matrix
-vgame,data,DS:2dca,fm_rot_roll,int16[9],flight,,roll increment matrix
-vgame,data,DS:2ddc,fm_mat_tmp,int16[9],flight,,product scratch
-vgame,data,DS:2dee,fm_yaw,u16,flight,heading,yaw 0x10000=360deg
-vgame,data,DS:2df0,fm_pitch,int16,flight,,pitch
-vgame,data,DS:2df2,fm_roll,u16,flight,,roll
-vgame,data,DS:2df4,fm_alt_s,u16,flight,alt_world,compressed altitude
-vgame,data,DS:2df6,fm_alt,u16,flight,alt_ft;altitude_tape,raw altitude
-vgame,data,DS:2dfb,fm_mat_dirty,u8,flight,,rebuild matrix from angles
 vgame,data,DS:2dfc,view_tall,int,simflow,panel_strip,1 = pit window 107 rows (init 1); toggled by Alt+C
-vgame,data,DS:2dfe,thr_cmd,int16,flight,throttle,throttle 0..100
 vgame,data,DS:2e00,view_warmup,int,simflow,,2 frames countdown before 9F66 is updated
 vgame,data,DS:2e02,joy_recenter_cd,u16,simflow,,Alt-S debounce
 vgame,data,DS:2e34,flip_rows,u16,simflow,,rows copied by flip each frame (91 = 3D window)
@@ -475,47 +418,23 @@ vgame,data,DS:2e5e,s_safe_landing,string,simflow,,"""Safe Landing"""
 vgame,data,DS:2e6c,waypoints,u16[8],simflow,wp_list;nav_wp_x;mission_waypoints,START 15B2 waypoints
 vgame,data,DS:2e7c,wp_cur,word,simflow,nav_wp_view;mission_cur_wp;objective_done,current waypoint 0..3
 vgame,data,DS:2e7e,wp_sel,word,simflow,nav_wp_edit,selected waypoint (edit)
-vgame,data,DS:2e80,det_radar_types,"struct{char name[8];word maxr,factor;byte flags,pad;}[23]",detect,,Radar type table 14B; flags bit0 Doppler bit1 omni; same as START 15C6
-vgame,data,DS:2fc2,actype_tab,struct[32 B]*29,ai,ai_aircraft_types;unit_type_tab,aircraft type table: name[18] then 7 words (+0x12 speed ... +0x1A model +0x1C far model +0x1E kills)
 vgame,data,DS:3362,wpn_type_table,byte[18*41],simflow,wproto_tab;wpn_table;wpn_proto_tab,missile/SAM type records name[8] +8 range +0xC class
-vgame,data,DS:3632,damage_mask,word,damage,dmg_bits;dmg_mask,"Bit per damaged subsystem; bit 6 decoy launcher, bit 4 bay doors"
-vgame,data,DS:3634,fuel,word,flight,,Fuel 10000 at start; <5000 near landing base triggers speech 45
-vgame,data,DS:3636,store_count,word[4],weapons,,"[1] flares 12, [2] chaff 18, [3] decoys 3 (static init)"
-vgame,data,DS:363e,wpn_slots,"struct{u16 id,qty}[4]",weapons,bay_table;bay_tab,loadout copied from comm[38h..46h]
 vgame,data,DS:364e,wpn_sel,word,simflow,bay_sel;wpn_select,selected weapon slot 0..3
-vgame,data,DS:3650,gun_ammo,word,weapons,gun_rounds,Gun ammo 0..1000
-vgame,data,DS:3652,ap_alt,u16,flight,ap_alt_hold,autopilot target
-vgame,data,DS:3654,enemy_skill,word,detect,sim_skill;skill,pilot+3Eh 0..3
-vgame,data,DS:3656,war_level,word,detect,sim_war_level,pilot+3Ah 0..2
 vgame,data,DS:3658,night,u16,simflow,sim_night,comm[33h] night flag
 vgame,data,DS:365a,msg_all_views,word,simflow,,allows messages outside front view
 vgame,data,DS:365e,mfd_flag,u16,simflow,cockpit_visible;cockpit_active;panel_present;cockpit_view,([C07A]&C0h)!=0 set by 2F82
 vgame,data,DS:3660,sim_rate,word,simflow,frames_per_tick;time_scale;sim_frame_ticks;sim_tick_scale;rate;fps,Steps per second estimate 4..15
-vgame,data,DS:3662,wstore_tab,struct[26 B]*20,weapons,wpn_store_tab,"store catalogue: short name[10], long name[12], proto type @+0x16, icon @+0x18"
 vgame,data,DS:366c,wpn_table,byte[26*n],simflow,,weapon records name[12] +12 type idx
-vgame,data,DS:3678,wpn_table,rec26[],weapons,,weapon records 26 bytes; +2 = ordnance sprite index
 vgame,data,DS:386a,wpn_suit_tbl,byte[256],simflow,wpn_effect_tab,weapon suitability 16x16
-vgame,data,DS:39aa,cm_slots,4x12 B,weapons,cm_marks;decoy_tab,"Released countermeasures: x,y,pad,type,timer"
 vgame,data,DS:39da,smoke_puffs,16x8 B,simflow,particles;dmg_trail_list,"Smoke puffs x,y,age,count"
-vgame,data,DS:3a8c,ai_manoeuvre_tbl,short[3][8][8],ai,,Combat roll command table indexed [skill row][aspect octant][bearing octant]
-vgame,data,DS:3c0c,wpn_tab,wpn_t[],weapons,tracks;wpn_slots;proj_tab;wpn_enemy_slots,Weapon records 28 B: +0 x cell +2 y inv +4 alt +8 yaw +A pitch +E active
-vgame,data,DS:3d5c,signature,word,detect,det_player_signature,Radar signature value
 vgame,data,DS:3d60,step_counter,word,simflow,frame_cnt;sim_frame,"Per-step counter, random multiple of 8 at start"
-vgame,data,DS:3d62,timer_3d62,word,simflow,ai_alert_timer,Per-step countdown set by 559a/671a
-vgame,data,DS:3d64,sel_air_target,int,ai,tgt_unit;air_target;sel_unit,"Selected air target index, -1 none"
-vgame,data,DS:3d66,sel_ground_target,int,ai,tgt_site;gnd_target;sel_site;sel_gnd_target,"Selected ground target index, -1 none"
 vgame,data,DS:3d68,burning_site,word,simflow,last_dead_obj,Site index with smoke or -1
-vgame,data,DS:3d6a,alert_blink,word,detect,lock_state;announce_timer;det_ring_timer,"Threat marker/frame counter, 1 at start, decremented by 4f2a"
-vgame,data,DS:3d6c,det_bar_color,word,detect,,"Threat bar colour (0x2A/0x29/0x11 sites, 0x0B/0x0F aircraft)"
 vgame,data,DS:3d6e,special_unit,u16,simflow,lock_unit,START CABC special unit index (-1 none)
 vgame,data,DS:3d70,cam_zoom,int,simflow,view_ext_dist,Camera distance exponent clamped 2..8; D=0x18<<z; keys 8498/84d6
 vgame,data,DS:3d74,in_airfield_zone,word,simflow,,1 when inside airfield zone box this step
 vgame,data,DS:3d78,est_steps,word,simflow,,Steps since last fps estimate
 vgame,data,DS:3d7a,fps_mode,word,simflow,time_accel;sim_speed_mode,FrameRate menu 1 or 2 (static 1)
 vgame,data,DS:3d7c,dir_by_theatre,word[9],simflow,,"Runway direction sign by theatre: -1,1,-1,1,-1,1,1,-1,1"
-vgame,data,DS:3d8e,chaff_lamp_timer,word,weapons,,Chaff indicator steps left (lamp 0xE)
-vgame,data,DS:3d90,flare_lamp_timer,word,weapons,,Flare indicator steps left (lamp 0xF)
-vgame,data,DS:3d92,aux_lamp_timer,word,weapons,det_warn_timer,Lamp 0x18 timer set by 5588
 vgame,data,DS:3d94,fuel_speech_done,word,simflow,,Low-fuel speech played flag
 vgame,data,DS:3d9a,landing_count,word,simflow,,Landing-wait counter; 1 after first airborne
 vgame,data,DS:3d9c,store_field,word[4],simflow,,"Panel digit field per store type: 0,1,0,2"
@@ -593,12 +512,6 @@ vgame,data,DS:85e6,page2_seg,u16,simflow,,page 2 segment (comm[20h])
 vgame,data,DS:85ea,cur_seg,u16,simflow,r3d_draw_seg;r3d_dseg,current draw segment copy
 vgame,data,DS:94ea,log_count,u16,simflow,event_count,event log records
 vgame,data,DS:94ec,blob_cursor,u32,simflow,,far cursor into comm+7Ah
-vgame,data,DS:94f0,ai_cur_type,word,ai,,Aircraft type of unit being processed (5730/62d0)
-vgame,data,DS:94f2,ai_engaged_now,word,ai,,Count of fighters in mode 1 within 0x400 this pass
-vgame,data,DS:94f4,seeker_dist,short,weapons,,distance result of 711F
-vgame,data,DS:94f6,seeker_bearing,short,weapons,,bearing result of 711F
-vgame,data,DS:94fe,tgt_dist,int,weapons,obj_dist,bbb4 result: 2D distance
-vgame,data,DS:9502,tgt_bearing,int,weapons,obj_bearing,bbb4 result: bearing (atan2) if requested
 vgame,data,DS:9504,hud_photo_prev,int,simflow,,hud_photo_mode of the previous frame
 vgame,data,DS:9508,input_fire_prev,int,simflow,,cb72(1) of the previous frame
 vgame,data,DS:9516,pic_row_buf,u8[320],loader,,decoded picture row
@@ -610,60 +523,35 @@ vgame,data,DS:98c6,aoa,word,simflow,,angle of attack (marker offset)
 vgame,data,DS:98ca,mfd_w,word,simflow,,77 (unused)
 vgame,data,DS:98cc,mfd_h,word,simflow,,60 (unused)
 vgame,data,DS:98ce,hud_cam_pitch,int,simflow,,camera pitch for bf71 photo preview = [2DF0]-0x6EF
-vgame,data,DS:98d0,g_text,char[],flight,hud_gtext,G string
 vgame,data,DS:98d8,bay_anim,word,simflow,,bay door animation 0..2
-vgame,data,DS:98dc,g16,int16,flight,g_load,load factor x16
-vgame,data,DS:98de,range_shift,word,detect,detail_level;scope_detail;r3d_detail,comm+32h low byte; shift in d76b range table
 vgame,data,DS:98e0,takeoff_done,word,simflow,,Strip take-off line crossed
 vgame,data,DS:98e2,mission_seconds,word,simflow,mission_tick;mission_clock,Mission clock seconds of game time
 vgame,data,DS:98e6,bios_motor_ptr,u32,simflow,,far pointer 0000:0440 (BIOS motor-off counter)
-vgame,data,DS:98ea,gun_firing,word,weapons,,Gun firing flag set by 465b
 vgame,data,DS:98ee,hit_flash,word,simflow,,set by damage code; 7898 flashes view and shakes
-vgame,data,DS:98f0,ai_last_heading,word,ai,,Last known player heading
 vgame,data,DS:98f2,airfield_dist,word,simflow,det_dist_base,Distance in cells to nearest friendly/neutral airfield
 vgame,data,DS:98f4,pilot_ptr,u32,simflow,,far pointer comm+1272h (never written by VGAME)
 vgame,data,DS:98fc,site_threat_count,u16,simflow,n_threat_sites,leading sites with threat level (START CACE)
 vgame,data,DS:98fe,fx_expl_unit,int,simflow,,unit index the explosion follows (-1 none)
 vgame,data,DS:9900,zone_half_x,word,simflow,,Airfield zone half width in 1/32 cells
-vgame,data,DS:9b04,aircraft_flags,word,flight,cockpit_flags;sys_flags;mission_flags,"b0 gear up, b2 bay open, b3 brakes, b4 radar on; hi byte: b6/b5 objective 0/1 done, b4 training"
 vgame,data,DS:9b05,tgt_flags,byte,simflow,,"1 acquire req, 2 locked, 4 ILS, 0x10 training, 0x20/0x40 objectives done"
 vgame,data,DS:9b06,zone_half_y,word,simflow,,Airfield zone half length in 1/32 cells
 vgame,data,DS:9d08,hud_photo_mode,int,simflow,sensor_active,1 while camera photo mode active this frame (cleared at entry of a17e)
 vgame,data,DS:9d0a,tgt2_timer,short,simflow,,4*rate after secondary target destroyed (72A4)
 vgame,data,DS:9d0c,fx_expl_timer,int,simflow,sensor_overlay_idx;explosion_kind,"explosion animation counter: 0x10 -> 1 (sprite frame 16-|n|), -1 = one-frame ground puff, 0 = none"
 vgame,data,DS:9d0e,fx_target_down,int,simflow,sensor_overlay_on;target_destroyed,1 when the selected target was destroyed; cleared by a17e when no explosion
-vgame,data,DS:9f64,ai_alert_half,word,ai,alert_thresh,200*[3660] (d707)
-vgame,data,DS:a068,gear_lever,word,flight,,key 6: 1 gear down
-vgame,data,DS:b00a,fm_speed_target,u16,flight,,target speed raw
-vgame,data,DS:b04c,last_weapon_slot,int,weapons,proj_last_slot;last_proj_slot,Last launched weapon slot (view 0x89 target)
 vgame,data,DS:b04e,hud_panel_cx,int,simflow,,right MFD panel centre x (207)
 vgame,data,DS:b050,hud_panel_cy,int,simflow,,right MFD panel centre y (140)
-vgame,data,DS:b052,fm_speed,u16,flight,speed_raw,"raw speed, 27 per knot"
-vgame,data,DS:b054,ai_engaged_prev,word,ai,,Previous pass count; fratricide guard for SAM/AAM launches
-vgame,data,DS:b056,fm_history,u8[256],flight,pose_ring,16x16 byte ring
-vgame,data,DS:b168,fm_kts,int16,flight,airspeed_kt;airspeed,speed in knots
-vgame,data,DS:b16c,gun_slots,word,weapons,,"clamp(2*fps,3,16)"
 vgame,data,DS:b16e,dir_sign,word,simflow,,Runway direction sign +-1
-vgame,data,DS:b170,thr,int16,flight,,engine throttle spooled
 vgame,data,DS:b174,wld_grid,u8[256],simflow,tile_class;terr_radar_mask,16x16 level-3 grid
-vgame,data,DS:b286,ai_alert_time,word,ai,alert_reload,250*[3660] (d707)
 vgame,data,DS:b28c,acquiring,word,simflow,hud_photo_inframe,lock-on in progress
-vgame,data,DS:b28e,tgt_cooldown,int,weapons,,Ground target search cooldown (4 frames)
-vgame,data,DS:b2a0,ai_last_x,word,ai,,Last known player X (or decoy X)
 vgame,data,DS:b2a2,sites,rec16[],simflow,site_tab;obj_site_list;obj_tab,"site records (name,x,y,threat,flags,type,count,objid)"
-vgame,data,DS:b2a4,site_tab,site_t[],ai,site_list,"Ground site records 16 B, count C0B4: +0 x +2 y inv +4 active +6 flags"
 vgame,data,DS:b756,fall_vel,word,simflow,,Falling body vertical velocity
-vgame,data,DS:b75a,ai_last_y,word,ai,,Last known player Y (or decoy Y)
-vgame,data,DS:b76e,ai_last_z,word,ai,,Last known player altitude
-vgame,data,DS:b772,scen_state_tab,byte[5][],damage,terr_override_tab,"Changed/destroyed scenery table, 5-byte records, count DS:9902"
 vgame,data,DS:b80c,wp_edit,word,simflow,nav_mode,F7 edit mode
 vgame,data,DS:ba0e,ordnance_sprite,u16,simflow,ord_sprite_seg,segment of the 77x60 weapon list sprite
 vgame,data,DS:ba10,start_x,u32,simflow,,player start x in 1/32 level units (slot0 anchor site)
-vgame,data,DS:ba14,scenery_hit_rec,hit_t,damage,wobj_hit,"Hit record of 0d08, 0x13 bytes"
 vgame,data,DS:ba2a,event_log,u8[0x600],simflow,,"mission event log, 6-byte records, exported to END"
 vgame,data,DS:c02a,start_z,u32,simflow,,player start z (north-up) in 1/32 level units
 vgame,data,DS:c06e,eject_state,int,simflow,ejected,0 none; counter during ejection; forces view 0x8C
-vgame,data,DS:c070,det_ring_scale,word,detect,,"(sig+[3D5C])*D/100, radius scale of the map ring/arc"
 vgame,data,DS:c072,gear_anim,word,simflow,,0..3
 vgame,data,DS:c074,file_size,u32,loader,,size of the file last loaded by file_load_paras
 vgame,data,DS:c078,wp_bearing,word,simflow,,bearing to current waypoint
@@ -678,24 +566,17 @@ vgame,data,DS:c0ae,start_phase,u16,simflow,sim_state,"0 first input call, 1 miss
 vgame,data,DS:c0b0,fx_expl_z,int,simflow,boom_z,explosion z (sprite drawn only if >0)
 vgame,data,DS:c0b2,player_cell_y,word,simflow,pl_celly_inv;plyr_y_u,Player Y in cells = 0x8000 - (world Y >> 5)
 vgame,data,DS:c0b4,site_count,u16,simflow,obj_count,number of sites
-vgame,data,DS:c0b6,window_cur,word,simflow,,Current 128-step window counter
 vgame,data,DS:c0ba,wld_tbl2,u8[128],simflow,kill_by_wobj_type,START D33E table
-vgame,data,DS:c13a,threat_bearing,word,detect,det_arc_a0,Threat pointer state before O[0]
-vgame,data,DS:c13c,threat_range,word,detect,det_arc_a1,"Threat pointer state, reset 0x100"
 vgame,data,DS:c13e,units,rec36[],simflow,world_objects;unit_tab;obj_unit_list,unit records
-vgame,data,DS:c140,air_tab,air_t[],ai,air_units;unit_list,Air object records 36 B: +0 x +2 y inv +4 alt +6 long x +A long y inv
 vgame,data,DS:c576,view_range,word,simflow,,distance to object computed by bf71 (modes 0/1)
 vgame,data,DS:c578,msg_text,char[80],simflow,,On-screen message string
-vgame,data,DS:c5c8,damage_points,word,damage,dmg_pts;hit_count,"Damage point counter, 2 at start"
 vgame,data,DS:c5ca,int86_regs,u16[],lib,,REGS used by file_load_paras
 vgame,data,DS:c5d8,num_buf,char[],simflow,,number scratch
-vgame,data,DS:c600,window_count,word,simflow,,Previous 128-step window counter
 vgame,data,DS:c602,fall_alt,word,simflow,unit_boom_z,Falling body altitude
 vgame,data,DS:c604,obj_class_tbl,u8[128],simflow,obj_class;obj_class_tab,START D7F6 table indexed by object type
 vgame,data,DS:c684,fpm_y,word,simflow,,flight path marker y
 vgame,data,DS:c688,lzw_table,u8[6144],loader,r3d_v3d,"LZW dictionary (prefix u16, char u8) x 2048"
 vgame,data,DS:de88,flight_time_est,u16,simflow,deadline_s;deadline_tick;deadline,START D876 flight time estimate (ticks)
-vgame,data,DS:de8a,roll_in,int16,flight,,roll command after curve
 vgame,data,DS:de8c,window_prev,word,simflow,,Older window counter (never read)
 vgame,data,DS:de8e,blob_dir,u16,simflow,,"1 = import, 0 = export"
 vgame,data,DS:de90,key_code,u16,simflow,key_word,key read this frame
@@ -711,10 +592,7 @@ vgame,data,DS:dea8,view_tgt_id,int,simflow,,"Selected object for views 88/89/8B;
 vgame,data,DS:deaa,itoa_buf,char[],simflow,,itoa scratch
 vgame,data,DS:dec6,eject_cam_y,int,simflow,,Eject camera y inverted cell
 vgame,data,DS:deca,eject_cam_z,int,simflow,,Eject camera altitude
-vgame,data,DS:dece,stat_visual_ids,word,detect,,Visual ID events counter
 vgame,data,DS:ded0,unit_count,u16,simflow,n_objects;air_unit_count,number of units
-vgame,data,DS:ded2,stat_radar_ids,word,detect,,Radar ID events counter
-vgame,data,DS:ded6,n_active_threats,word,detect,stat_locks,Active threat count from fps estimator
 vgame,data,DS:ded8,tgt1_timer,short,simflow,,4*rate after primary target destroyed (72A4)
 vgame,data,DS:deda,map_busy,word,simflow,mfd_page;mfd_left_mode;map_off,Map refresh state
 vgame,data,DS:dedc,name_ptrs,u16[128],simflow,name_ptr_tab,pointers into the names block (entry 0 = empty string)
@@ -724,21 +602,15 @@ vgame,data,DS:dfea,wld_names,char[750],simflow,,NUL separated names
 vgame,data,DS:e2d8,mission_slots,rec18[2],simflow,mt_tab,START E05E mission slots: +2 target +4 anchor +6 flags (+7 prop index)
 vgame,data,DS:e2dc,dep_base,word,simflow,base_site,Departure base site (slot0+4)
 vgame,data,DS:e2ee,land_base,word,simflow,land_site,Landing base site (slot1+4)
-vgame,data,DS:e2fe,weapon_mode,int,weapons,tgt_mode;master_mode,1 = air-to-air mode
 vgame,data,DS:e302,mfd_x1,word,simflow,map_xmax,left MFD x1 150
 vgame,data,DS:e444,mfd_y1,word,simflow,map_ymax,left MFD y1 169
-vgame,data,DS:e446,pitch_in,int16,flight,,pitch command after curve
-vgame,data,DS:e448,fm_vref,int16,flight,min_speed,speed reference knots
-vgame,data,DS:e44e,bullets,12 B records,weapons,bullet_tab;wpn_tracers,"Gun bullets x,y,z,dx,dy,dz"
 vgame,data,DS:e540,site_first_nontarget,u16,simflow,,START E084
 vgame,data,DS:e542,hud_ladder_on,byte,simflow,,Pitch ladder enable (1e9e: E2FE==0 or |pitch|-|roll|/2>0x1000)
 vgame,data,DS:e546,stick_x,word,simflow,,rotated stick cursor x
 vgame,data,DS:e548,comm_ptr,u32,simflow,,far pointer to the comm block
-vgame,data,DS:e54c,det_ring_solid,word,detect,,1 = Doppler radar (solid arc) 0 = pulse (dotted)
 vgame,data,DS:e550,stick_y,word,simflow,,rotated stick cursor y
 vgame,data,DS:e552,quit_flag,u8,simflow,,frame loop exit flag set by mission_end
 vgame,data,DS:e556,look_azimuth,int,simflow,tv_azimuth;view_yaw;hud_aspect_quadrant,"Sensor look azimuth set by m , . / keys"
 vgame,data,DS:e558,offscreen_seg,u16,simflow,page2_seg;panel_sheet_seg;seg_panel,comm[20h] page segment
 vgame,data,DS:e55a,vspeed,word,simflow,,vertical speed (VSI bar)
 vgame,data,DS:e55c,hud_in_cone,int,simflow,,"1 when the designated target is inside the seeker cone (read by 753f, b6ae)"
-vgame,data,DS:e55e,bay_cmd,word,weapons,,key 8: bay doors commanded open

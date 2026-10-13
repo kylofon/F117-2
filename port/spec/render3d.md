@@ -103,7 +103,7 @@ driver slots 31/32/37/40/22.
   The four `1359` init/alloc rows (`lib` in S3.6) moved as well.
 * `0000:E578 mat_mul` stays in `simflow_symbols.csv` (owner lib; only caller `2C6E fm_rotate_apply`, flight model), but
   its bit-exact spec is here (Part 1 section 3, (T)). `14A2:00C5 pal_read_dac` (caller `1088:00D7 pal_save`) is palette
-  code: owner changed to simflow. `0D08`/`0F31` (scenery damage) are S3.8; loaders `0994`/`0AF9`/`0C2C` are in simflow Part 1.
+  code: owner changed to simflow. `0D08`/`0F31` (scenery damage) are S3.8 (`flight.md` sections 6.3, 6.4); loaders `0994`/`0AF9`/`0C2C` are in simflow Part 1.
 * **Other programs:** no other program has 3D code. START contains no `.3DX` reference and no matrix/projection code; its
   ID quiz is PIC-based (`AIR_ID.PIC`) and dead in this build (shell.md section 3); it reads `.3dG/.3dT` only for the
   mission generator (shell.md section 4) and its briefing map is 2D. END, SETUP, PLAYER, MPS_LOGO, DSWAP: no 3D data or
@@ -430,7 +430,7 @@ Tables (image DS, constant):
   Original quirk (port it): cells 9..14 re-read the next rows (oct 7 and the y of oct 5 read past the table into DS:03DC), so
   they are drawn **after** the camera cell, several twice; oct 5 draws (-2,2) (behind-left) and oct 7 (2,2).
 * `DS:04CC` (x) = `-1 1 1 -1 0 1 0 -1 0`, `DS:04DE` (y) = `1 1 -1 -1 1 0 -1 0 0` (corners, edges, centre; heading independent).
-* `DS:0506` dims `1024 256 64 16 8`; `DS:04FA` = `1 1 1 1 1 0`; `DS:04F4` = `0 0x1000 0x2000` (used by 0D08, not here).
+* `DS:0506` dims `1024 256 64 16 8`; `DS:04FA` = `1 1 1 1 1 0`; `DS:04F4` = `0 0x1000 0x2000` (used by 0D08, not here). **S3.8:** 0D08 indexes it with the cell offsets -1..1, i.e. `DS:04F2/04F4/04F6` = `-0x1000, 0, 0x1000` (`flight.md` section 6.3).
 * Records: `DS:E304[L*32+type]` = near pointer to the first record (pool DS:A06A, 7 bytes each, written by 0AF9),
   `DS:061E[L*32+type]` = record count (words, from the .3DT).
 Callers: 03CE, bf71. Callees: 0804, 0865, 0FB1, C6B8, DCA9, E7AC, E8A2.
@@ -1129,7 +1129,7 @@ Written: 3D64, 3D66, 49C6, B28E, DE92 (+ callee writes).
 | # | Item |
 |---|---|
 | 1 | (U) meaning of view 0x8B (own aircraft drawn first, no shadow 0x11) and of `[C06E]` (suppresses own model on the ground in external views). |
-| 2 | (U) weapon ids 0x13/0x19 in `[DFDC]` = laser-guided bombs (only these run the ground designator); `[E2FE]` modes 0..2. |
+| 2 | **S3.8 settled:** `[DFDC]` is the right-MFD page (0x13 = TV sensor page; 0x19 is never selected), so the ground designator runs only while the sensor page is up; `[E2FE]` = master mode 0 none / 1 air-to-air / 2 air-to-ground (`flight.md` section 5.1). |
 | 3 | (U) visual effect of BA67's z-term sign (pitched TV camera): only matters for puff size and the depth gate. |
 | 4 | (U) whether models 0x26..0x2A use var 9 (C040 stale for puffs 0..3 in C73C). |
 | 5 | 2FDC is the aircraft type table (32-B entries: +0 near model, +2 far model, name at +6; initial image: MiG-25 Foxbat 7/2, ...); 3372 = DS:3362 projectile prototype +0x10 (simflow 4.7). Initial values in the image may be replaced at load (U). |

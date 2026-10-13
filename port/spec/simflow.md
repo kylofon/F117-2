@@ -10,8 +10,8 @@ unclear / needs a runtime or visual check.
 
 How the document is built: Part 0 (this part, written at the merge) gives the map, the lifecycle, the cross-part decisions and the reconciled names.
 Parts 1-11 are the reader passes (each self-contained: algorithm per function, constants, globals, structures). **Where two parts disagree, Part 0
-section 5 decides.** Rendering internals (S3.7) and the flight model / weapons / AI / detection / damage internals (S3.8) are indexed (every function has
-a row with its `owner`), the renderer is specified in `render3d.md` (S3.7; Part 12 points there); the player flight model `1e9e` is specified in full in Part 2 because it is also the
+section 5 decides.** Rendering internals (S3.7) and the flight model / weapons / AI / detection / damage internals (S3.8) are specified in `render3d.md` (S3.7; Part 12
+points there) and `flight.md` (S3.8: owns 42 functions of Parts 2-6, 8, 9 and corrects several statements there, see its section 8); the player flight model `1e9e` is specified in full in Part 2 because it is also the
 input handler (S3.8 starts from there and from `port/notes/s36/r2_*.py`, an executable differential-tested reference).
 
 ## 1 Part map
@@ -492,6 +492,7 @@ if ([365E] != 0) pal_mfd_ramp_green();   // 1088:00A3
 
 Installed only when no joystick is configured (`comm[72h]&1 == 0`); it turns the numeric keypad (and the separate arrow keys) into a virtual stick and filters the BIOS key buffer.
 ### 1181:0008 `keypad_stick_install()`
+> **S3.8:** owned by `flight.md` section 2.4 (verified there; where they differ, flight.md is right).
 `*(u8*)0040:0017 &= ~20h` (NumLock **off**); `[2CD8]=0; [2CD9]=0; [2CDB]=[2CDC]=[2CDD]=0; [2CD6]=[2CD7]=80h`; save INT 9 (IVT 0:0024) in `cs:0187/0189` (operand of the `ljmp` at 1181:0186); install INT 9 := `1181:0072`.
 ### 1181:0058 `keypad_stick_remove()`: restore INT 9 from `cs:0187/0189`.
 ### 1181:0072 `keypad_stick_isr` (INT 9)
@@ -724,6 +725,7 @@ quadrant: x>0,y>0: f? 0x4000-r : r        x>0,y<=0: f? r+0x4000 : 0x8000-r
 ### 0000:cb56 `rand_seed_from_timer()`: `seed = bios_timer(); [9514] = seed; srand(seed)` (RTL LCG, see platform.md). Only caller 4857. (V by reading)
 ### 0000:cb62 `rand_n(int n) -> int` = `(rand() * n) >> 15` (32-bit product, arithmetic shift): uniform 0..n-1 for n>0. Callers 1e9e 39c4 4857 5730 671a 74f6 c73c cba0. LCG state at `DS:926E/9270` (V)
 ### 0000:cb72 `input_button(int n) -> int`  button n (0 or 1): `(comm[0x72]&1 ? joy_button(n) /*slot 93, 1 = pressed*/ : 0) + [43BE + 2n]`
+> **S3.8:** owned by `flight.md` section 2.4 (verified there; where they differ, flight.md is right).
 `[43BE]` / `[43C0]` are one-frame key pulses: `cba0` zeroes both at entry and sets `[43BE] = 1` for Backspace (`0E08`, only when pilot flight model
 `+42h` = 0) and `[43C0] = 1` for Enter (`1C0D`). Callers 465b a17e cba0 (fire / release). (V by reading)
 (Neighbour, R8: `cb39` = sign(x).)
@@ -742,6 +744,7 @@ ang = (i<<8) + (((long)(a-T[i])<<8) / (int16)(T[i+1]-T[i]));  return v<0 ? -ang 
 ### 0000:2e64 `fx_ratio(int x,int y) -> int` = `sign(x)*sign(y) * (((long)|x|<<16)/|y|) >> 1`  (x/y in Q15; caller guarantees |x|<=|y|; |x|==|y| gives 0x8000) (V). Only caller 2c9e.
 
 ### 0000:e578 `mat_mul(const int *A, const int *B, int *C)`  3x3 Q15, row-major (word offset = 2*(3*row+col))
+> **S3.8:** owned by `flight.md` section 2.2 (verified there; where they differ, flight.md is right).
 `C[3i+j] = i16( mul15(A[3i],B[j]) + mul15(A[3i+1],B[3+j]) + mul15(A[3i+2],B[6+j]) )`. `C` must not alias A or B (callers use scratch `DS:2DDC`). Only caller 2c6e. (V)
 ### 0000:e26b (not R2, but needed) `mat_from_euler(int *M, u16 yaw, int pitch, u16 roll)`
 > **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 1; where they differ, render3d.md is right.
@@ -751,6 +754,7 @@ rounded at every step; sums 16-bit). It also leaves `sin/cos` of yaw, pitch, rol
 ---
 
 ## 2. 0000:1e9e `sim_input_flight(void)` - input + player aircraft model, once per frame (3536 bytes, caller 1bbc only)
+> **S3.8:** owned by `flight.md` section 2.1 (verified there; where they differ, flight.md is right). Read `sim_rate` as emulated (not fixed), `[E2FE]` = master mode, `[9B04]` 0x10/0x20 = ECM / IR jammer (flight.md section 8).
 
 Names used below (DGROUP offsets in the globals table at the end): `rate = [3660]`, `fm_yaw [2DEE]`, `fm_pitch [2DF0]`, `fm_roll [2DF2]`, `fm_mat [2D94]` (9 words),
 `thr_cmd [2DFE]` (0..100), `thr [B170]` (engine, 0..100), `spd [B052]` (u16 raw speed, 27 raw = 1 knot), `kts [B168] = spd/27`, `alt [2DF6]` (u16), `alt_s [2DF4]`
@@ -946,6 +950,7 @@ The three `Euler/matrix` writes at the end of P8 and the first-call init: `if ([
 ## 3. Orientation helpers
 
 ### 0000:2c6e `fm_rotate_apply(const int *A, const int *B)`  (cdecl: A = [bp+4], B = [bp+6]) (V)
+> **S3.8:** owned by `flight.md` section 2.2 (verified there; where they differ, flight.md is right).
 `[2DF8]++; if (([2DF8] & 7) == 0) [2DFB] = 1; mat_mul(A, B, DS:2DDC); memcpy(DS:2D94, DS:2DDC, 18);` - i.e. `fm_mat = A x B` always lands in `fm_mat`. Calls in 1e9e:
 roll `(2D94, 2DCA)`, pitch `(2D94, 2DB8)` (post-multiply), yaw `(2DA6, 2D94)` (pre-multiply). The three increment matrices are static words in DGROUP; 1e9e writes only
 cos/sin/-sin words (see 2.8) and relies on the preset constants (`32767` on the fixed diagonal element, 0 elsewhere).
@@ -1015,6 +1020,7 @@ Finally `blit_rect(2 -> page, sx 251 sy 67 -> dx = 33 (mode 0) / 85 (mode 1), dy
 ### 0000:d7f4 `pic_show(const char *name, int page)`: `h = dos_open(name, 0) [d81d]; 11B9:000E(h, page); dos_close(h) [d82f]` - open + decode a PIC to `page` + close (fatal on error through the RTL). `d81d(name, mode)` = `1199:000C dos_open`; `d82f(h)` = `1199:00C8 dos_close`. Callers: Alt-Q (page 0, "adv.pic").
 
 ## 6. Joystick glue (asm module 10A8) (V by reading; scaling formula differential-tested in r2_ref.joy_scale design)
+> **S3.8:** owned by `flight.md` section 2.4 (verified there; where they differ, flight.md is right).
 Data (DS): calibration table 40 bytes at `2CA2` = copy of comm+48h (min `2CA2[2]`, max `2CAA[2]`, centre `2CB2[2]`, low range `2CBA[2]`, high range `2CC2[2]`, each array 4 words of which 2 are used = X,Y); raw counts `2CCA` (X) `2CCC` (Y); scaled output bytes `2CD2` (X) `2CD3` (Y).
 * `10A8:0CB7 joy_read_raw` (already named): trigger port 201h, count loops (X = bit0, Y = bit1) up to 65535, **timeout = 0xFFFF both**.
 * `10A8:0CA8 joy_poll()` (far): `joy_read_raw(); joy_scale(X); joy_scale(Y)`. Used by 1e9e when `comm[0x72] & 1`.
@@ -1498,6 +1504,7 @@ If `98DE < 3` just calls `1001:0006(ctx->fg)` (flat fill) and returns. Otherwise
 by `bp-2 = (4986<<8)/max(4988, 0x200)`, shifted left by `[433A]` and halved when `[294B]` is set, with the table `0xD22` / `[4980]` for the ground bands, trig through `109d:0006`. (U) which set is sky: 0x80..0x8F vs the 0x60..0x6F ramp of FORMATS.md.
 
 ### 0000:0D08 terr_find_scenery_at(long x, long y') -> hit* or 0  (553 B, owner damage/render3d)
+> **S3.8:** owned by `flight.md` section 6.3 (verified there; where they differ, flight.md is right). The full pseudocode of 0D08 and 0F31 is there.
 Args `x = cellx << 5`, `y' = (0x8000 - celly) << 5` (callers `39c4`, `4b57`, `72a4`, `baf8`). Scans levels 1 and 2 and the neighbouring tiles (`804/865` tile lookups) for the nearest scenery object entry (Manhattan metric `|dx|+|dy|` in `[BA16]`, initial 0x7FFF) whose class flags allow it; fills the hit record
 `DS:BA14`: `+0 word id (BA14; replaced by the id stored in the destroyed-object table when a record with the same key exists), +2 distance (BA16), +4 long x (BA18), +8 long y (BA1C), +0xC ptr to the 7-byte tile entry (BA20), +0xE..0x11 four key bytes (BA22..BA25: level, list index, tile coords)`. Returns `0xBA14` (found) or 0.
 ### 0000:0F31 terr_set_scenery_state(hit*, byte newid)  (128 B)
@@ -1877,6 +1884,7 @@ map. (2) `[3D72]` is overwritten with the old `[DFE0]` before the comparison, so
 rebuild the airfield objects when the nearest site is index 0. (3) 4926(1) path uses `pilot+40h` (crash mode) as "any crash mode".
 
 ### 0000:43ee `sim_key_and_signature` void sim_key_and_signature(void) (V)
+> **S3.8:** owned by `flight.md` section 3.1 (verified there; where they differ, flight.md is right).
 1. `cba0([DE90])` - key command dispatcher (owner R10; `[DE90]` = pending key code (scan<<8|ascii) written by `1e9e`; 0 = none; not cleared here, cba0 clears the button words `43BE/43C0` on entry).
 2. Radar signature `[3D5C]` (higher = more visible; drawn as bars by `4f2a`, used by `516d/62d0/5460`):
    `t = |(int8)([2DF2]>>8)|` (`cb1b` = sign-extend byte; bank angle in 1/256 turns, 0..0x80); `if (t>=0x40) t = 0x80-t`.
@@ -1896,6 +1904,7 @@ If `[365E]!=0`: `n=[3636+2a]` (a=1 Flare, 2 Chaff, 3 Decoy; static initial words
 a=1 -> field 1 (35,159), a=2 -> field 0 (35,149), a=3 -> field 2 (35,169). Digits are 4x7 sprites from page 2 (x offsets DS:4640[digit] = 67+5*digit, y=0x1F), step 5 px (d92d, owner R2). No bound check (n>99 prints 3 digits).
 
 ### 0000:4512 `wpn_release_countermeasure` void wpn_release_countermeasure(int a) (V)
+> **S3.8:** owned by `flight.md` section 5.5 (verified there; where they differ, flight.md is right).
 a: 1 flare, 2 chaff, 3 decoy (called by the three keys in `cba0` at cc40; nothing else).
 ```
 old = [3636+2a]--;
@@ -1916,9 +1925,11 @@ if (slot != -1) {
 `R` = array of 4 records x 12 bytes at DS:39AA (6.3). The counter is decremented before the slot test (quirk: with all slots busy the store is used up without effect and the message is not shown).
 
 ### 0000:461c `wpn_cm_tick` void(void) (V)
+> **S3.8:** owned by `flight.md` section 5.5 (verified there; where they differ, flight.md is right). **Correction:** only the first busy slot is decremented per call (the loop returns after it).
 For s=0..3: if `R[s].timer!=0`: `timer--`; if `R[s].type==3`: `898b(7, timer>=1 ? 0x29 : 0)` (decoy lamp 7: on while alive).
 
 ### 0000:465b `wpn_gun_update` void(void) (V)  (owner weapons)
+> **S3.8:** owned by `flight.md` section 5.6 (verified there; where they differ, flight.md is right).
 Only if `[B16C]!=0`. (1) Advance bullets: for i=0..`[B16C]+3`: record at DS:E44E+12i `{x,y,z,dx,dy,dz}` words; if `x!=0`: `x+=dx; y+=dy; z+=dz`.
 (2) Spawn: only when `([3D60]&1)` and `pilot+42h==0` (flight model 0): `i = ([3D60]>>1) % [B16C]`; if `cb72(0)` (fire button 0 = joystick button 0 or key flag `[43BE]`) and `[3650]>0` and `[C06E]==0`:
 `[3650] = clamp([3650] + (-40)/fps, 0, 1000)` (ammo), `d6bf(6,2)`, `sp = 0x70/fps`, `dz = caee([2DF0],sp)<<5` (sin(pitch)*sp), `h = cb07([2DF0],sp)` (cos), `dx = caee([2DEE],h)`, `dy = -cb07([2DEE],h)`;
@@ -2000,6 +2011,7 @@ For (timer, lamp) in ([3D8E] chaff, 0xE), ([3D90] flare, 0xF), ([3D92], 0x18): `
 `if ([365E] && DS:46E2[12*lamp] != on) d83e([3FE2], lamp, on)` - sets a cockpit lamp sprite on the page record 3FE2; the table at DS:46E2 has 12-byte records, word +0 = current state (written by d83e). Callers: 4ebc.
 
 ### 0000:4f2a `hud_threat_update` void(void) (V; owner detect for the scheduler, 8316/863c/9208/516d R5/R7)
+> **S3.8:** owned by `flight.md` section 3.4 (verified there; where they differ, flight.md is right).
 Part A (stealth bars, when redraw needed: `[3D6A]==0 || [DEC8]!=[3D5C]`, and `[365E]!=0`): `[DEC8]=[3D5C]`; `8316(clamp(100-[3D5C],0,99), 1, 0, 10)`; `8316(-clamp([3D5C],0,99), 0x2A, 0, 10)`
 (green/dark part = stealth margin, colour 0x2A part = signature; 8316 = bar-segment draw, owner R5); then if `[3D6A]==0 && [DEDA]==0`: if `[DFDC]==0x14` `9208()`; `[C13A]=0; [C13C]=0x100` (threat pointer reset).
 Part B (site scheduler): for i = 0 .. `[98FC]`-1 with `T[i].+6 != 0 && !(T[i].flags&0x80)`:
@@ -2163,6 +2175,7 @@ Global scale factors that appear everywhere:
 ## 1. Radar signal and site radar
 
 ### 0000:5460 `int det_radar_signal(int x, int y, int z, int rtype, int *bearing, int *dist)` (V)
+> **S3.8:** owned by `flight.md` section 3.2 (verified there; where they differ, flight.md is right).
 Args `[bp+4]=x [bp+6]=y [bp+8]=z [bp+0xA]=rtype [bp+0xC]=&bearing [bp+0xE]=&dist`. Returns `sig` (<= 0 means "not seen").
 Radar type table `R = DS:2E80 + 14*rtype` (see section 6.1): `R.maxr = word +8`, `R.factor = word +10`, `R.flags = byte +12` (bit0 Doppler, bit1 "radar looks only along the nose" - used by 62d0).
 1. `if (rtype == 0 || rtype == -1) return 0;`
@@ -2182,6 +2195,7 @@ Radar type table `R = DS:2E80 + 14*rtype` (see section 6.1): `R.maxr = word +8`,
 Callers: 516d, 62d0. Callees: c987 (dist2d), c9d6 (atan2), f302 (abs), d7bb.
 
 ### 0000:516d `void det_site_radar_update(int site)` (V; owner detect)
+> **S3.8:** owned by `flight.md` section 3.3 (verified there; where they differ, flight.md is right).
 Called by 4f2a for site `i` when its scan countdown `rec.+0xC` reaches 4 and `[3D6A] < 0` (ring animation idle); 4f2a then sets `rec.flags |= 2`.
 `rec = DS:B2A2 + 16*site` (site record, section 6.2). `t = rec.type (+6)`.
 ```
@@ -2251,6 +2265,7 @@ Details / quirks:
 * The weapon table index equals the radar type for rows 1..15 (SA-2 .. Seacat), so a site's SAM is `wpn_table[t]` (V by names).
 
 ### 0000:5588 `void det_radar_warning(void)` (V; owner detect)
+> **S3.8:** owned by `flight.md` section 3.5 (verified there; where they differ, flight.md is right).
 `[3D92] = 2 * [3660]` (radar-warning lamp countdown, consumed in 4ebc, R4) and `d6bf(8, 1)`, i.e. `snd_cmd(8)` (track `v3 <- F4A`, see sound.md section 8) if sound priority allows. Called by 516d and 62d0 every scan in which the player is seen.
 
 ### 0000:559a `void det_alert_network(void)` (V; owner detect)
@@ -2276,6 +2291,7 @@ Callers: 516d (site level > 0x7F, non-neutral, no decoy), 62d0 (unit level > 0xC
 See section 6.3 for the table. Key facts used below: `+0` home/target site, `+2 +4 +6` = x y z (word), `+8/+0xA`, `+0xC/+0xE` = 32-bit x/y << 5 (sub-pixel position), `+0x10` heading, `+0x12` pitch, `+0x14` bank, `+0x16` aircraft type, `+0x18` flags (low byte `+0x18`, high byte `+0x19`), `+0x1A` speed, `+0x1C` endurance countdown, `+0x1E` weapon type (index into the DS:3362 table), `+0x22` radar level 0..255.
 
 ### 0000:5730 `void ai_update_units(void)` (V flow, owner ai; index-level)
+> **S3.8:** owned by `flight.md` section 4.1 (verified there; where they differ, flight.md is right). **Superseded:** the full, differential-tested algorithm of 5730 is in flight.md sections 4.1-4.3; several statements below are wrong (flight.md section 8).
 Single pass over all units, called once per sim step from 39c4. Housekeeping first:
 * `if (!([3D60] & 1) && [3D68] == -1) DS:[39DA + 4*([3D60] & 0x1E)] = 0;` (frees one slot of the 16-entry smoke/crash trail list DS:39DA, entries 8 bytes: x, y, z, age).
 * `E44E[12 * ([B16C] + (([3D60] & 0xC) >> 2))].x = 0;` frees one enemy tracer slot (section 6.7). `[3D60]` = frame counter.
@@ -2304,6 +2320,7 @@ Per unit `u` (loop `u < [DED0]`):
 Callers: 39c4. Callees: 62d0, 65d4, 49e7, 8b93, 8548, 77d9, c9d6, c987, c94e, caee/cb07, cb62, f302.
 
 ### 0000:62d0 `void ai_unit_radar(int u)` (V; owner ai/detect)
+> **S3.8:** owned by `flight.md` section 4.4 (verified there; where they differ, flight.md is right).
 Airborne enemy aircraft radar, visual ID and missile launch. Inputs: `unit = DS:C13E + 0x24*u`, `[94F0]` = unit type (set by 5730), `AC = DS:2FC2 + 32*[94F0]` (aircraft table), radar type `AC.+0x18` (0xFFFF = no radar).
 ```
 sig = det_radar_signal(unit.x, unit.y, unit.z, AC.radar, &bearing, &D)
@@ -2355,6 +2372,7 @@ unit.level = clamp(unit.level, 0, 0xFF)
 Callers: 5730. Callees: 5460, 8316, 5588, 559a, 49e7 not used here (no site), 8b93, d6bf, 499e, c94e.
 
 ### 0000:65d4 `void ai_unit_takeoff(int u, int site)` (V; owner ai)
+> **S3.8:** owned by `flight.md` section 4.5 (verified there; where they differ, flight.md is right).
 Places unit `u` on airbase `site` and starts the take-off roll.
 ```
 T = unit.type (+0x16)
@@ -2937,6 +2955,7 @@ when a hit object is not registered).
 ## 3. Functions
 
 ### 0000:671A `wpn_proj_update_all` - void wpn_proj_update_all(void) (V)
+> **S3.8:** owned by `flight.md` section 5.3 (verified there; where they differ, flight.md is right).
 Owner weapons (index-level for the ballistics, full detail for the impact / messages / bookkeeping). Caller: 39C4 (once per sim step).
 Callees: 499E 711F 71B4 72A4 7470 74F6 77D9 81F6 8548 898B 8B93 8BAB BAD1 C94E C987 C9D6 CAEE CB07 CB39 CB62 D6BF F006 F046 F302 F46A.
 
@@ -3011,6 +3030,7 @@ if (((i ^ [3D60]) & 3) == 0) wpn_ground_test(x, y, z);     // 4-step phase per s
 After the block: `if (i < 8 && life != 0 && (3D60 & 1)) map_plot(x, y, 0x11)` (enemy missile blip, unreachable for dead slots). Loop end: restore the 16 bytes `DS:B290 -> DS:B2A2`.
 
 ### 0000:711F `wpn_seeker_check` - int wpn_seeker_check(int slot, int tx, int ty, int tz, int cls) (V)
+> **S3.8:** owned by `flight.md` section 5.4 (verified there; where they differ, flight.md is right).
 Args: slot `[bp+4]`, tx `[bp+6]`, ty `[bp+8]`, tz `[bp+10]` (**unused**), cls `[bp+12]`. Returns 1 if the projectile can see the point.
 ```
 dx = tx - p.x; dy = ty - p.y;  dist = hypot_approx(dx, dy);
@@ -3026,6 +3046,7 @@ if (cls == 0 && abs(p.heading - [2DEE]) > 0x2000) return 0;       // rear-aspect
 Side effects: `[94F6]` always set, `[94F4]` only on success, `p.life` possibly 0. Caller: 671A.
 
 ### 0000:71B4 `dmg_unit_kill` - void dmg_unit_kill(int u) (V)
+> **S3.8:** owned by `flight.md` section 6.2 (verified there; where they differ, flight.md is right). The field called "hp" (+0x1A) is the unit speed.
 Marks unit `u` destroyed (called by 671A, A17E). Owner damage.
 ```
 [98FE] = u;                                   // last killed unit
@@ -3048,6 +3069,7 @@ if ([E2FE] == 1 && [3D64] == u) [9D0E] = 1;                           // selecte
 (`mission_target_done` overwrites 9876 with "Primary target" but the `strcpy` above restores the unit name afterwards. A second kill of an already dead unit only repeats the strcpy / sound.)
 
 ### 0000:72A4 `dmg_object_destroy` - void dmg_object_destroy(int o) (V)
+> **S3.8:** owned by `flight.md` section 6.2 (verified there; where they differ, flight.md is right).
 Destroys ground object `o` (called by 671A, A17E). Owner damage; this is the core of the mission-objective bookkeeping.
 ```
 obj_name_build(o);                                   // 9876 = "<type> at <place>"
@@ -3087,6 +3109,7 @@ if (skill < 2) ai_alert_reset();
 Notes: (a) the *name* in 9876 is the object's own text; `mission_target_done` replaces it by "Primary target"/"Second. target" when `o` is a mission target (the caller 671A appends `" destroyed by <weapon>"` or `" hit by <weapon>"`); (b) per matching target `k`: `k == 0` sets `[DED8]`, `k == 1` sets `[9D0A]`, both `rate*4`; (c) already destroyed objects (flag 0x80) skip everything except `[3D68]`, sound 5, the target-destroyed flag and the map refresh; (d) the 0x80 flag + `+6 = 0` + wreck shape are what END reads from the blob; (e) `ded2` bit 0x1000 objects are counted objectives (e.g. SAM sites still alive) - the counter is read by 516D (AI).
 
 ### 0000:7470 `mission_target_done` - int mission_target_done(int j) (V)
+> **S3.8:** owned by `flight.md` section 6.2 (verified there; where they differ, flight.md is right).
 Marks mission target `j` (0 primary, 1 secondary) achieved. Callers: 39C4 (kind 4 landing), 671A, 71B4, 72A4, A17E (photographs).
 ```
 bit = 0x4000 >> j;  if ([9B04] & bit) return 0;           // already done -> no new message, no log
@@ -3099,6 +3122,7 @@ return 1;
 It does not display anything itself; the caller shows 9876. For kinds 1/2/5..8 the achievement is logged by the caller (72A4: `0x81/0x41/0x8C/0x4C` + object; 71B4: `0x83`; A17E: `0x8A/0x4A`). END derives the objective result from these log codes and from the saved object/mt records (the `[9B04]` bits are not part of the blob, U).
 
 ### 0000:74F6 `dmg_player_blast` - void dmg_player_blast(void) (V)
+> **S3.8:** owned by `flight.md` section 6.1 (verified there; where they differ, flight.md is right).
 Random subsystem damage to the player from a nearby blast.
 ```
 if ([9B05] & 0x10) return;                       // training mission: invulnerable
@@ -3110,6 +3134,7 @@ snd_play(4, 2);
 Called by 671A (bomb too close, enemy missile proximity) and A17E (gunfire hits).
 
 ### 0000:753F `wpn_release` - void wpn_release(void) (V)
+> **S3.8:** owned by `flight.md` section 5.2 (verified there; where they differ, flight.md is right).
 Fire key handler body (called by CBA0). Releases the currently selected store.
 ```
 if (abs([2DF2]) > 0x3000) return;                        // roll limit (about 67 deg)
@@ -3154,6 +3179,7 @@ if ([DFDC] == 0x15) lamps_refresh(0x15);                              // 829D(0x
 Notes: the quantity is decremented and the event 4 logged **before** the free-slot search, so with no free slot the weapon is lost silently (V). The bays (`DS:363E`) are copied at mission start by 39C4 (3B25..3B5A): `bay[i].store_id = comm[0x38 + 2*i]`, `bay[i].qty = comm[0x40 + 2*i]` for i = 0..3 (`comm` = far ptr `[E548]`; START writes id 0x13 = empty/Guns and qty 0 for unused bays, flight_model 1 = only 2 bays). `[364E]` is the selected bay (changed by CBA0; 39C4 resets it to 0). There are no separate pylons: the 4 (or 2) bays are the only stores stations.
 
 ### 0000:780A `dmg_wobj_destroyable` - int dmg_wobj_destroyable(int o) (V)
+> **S3.8:** owned by `flight.md` section 6.2 (verified there; where they differ, flight.md is right).
 Whether the world object last found (`[9F10]`) can still be turned into a wreck: `wreck = obj_cls_soft(o) ? (signed char)[C0AC] : (signed char)[DEA4]`;
 `if (wobj.+0 == wreck) return 0; p = wobj.+0C; if ((p.byte6 & 0x80) && (p.byte6 & 0x7F) == wobj.+0) return 0; return 1;` Callers: 72A4 (o == 0 path), A17E.
 
@@ -3382,6 +3408,7 @@ offset/window set (offset = 0 because the window origin is 0,0). Used for the cr
 ### 0000:88f6 `hud_line_win(x0,y0,x1,y1)` (V)
 `87a9(x0,y0,x1,y1, clip)` with clip (xmin,xmax,ymin,ymax) = (0x30,0x10F,0x0F,0x5A) = (48,271,15,90), or if `[294B]!=0` (99,220,30,90); both-pages flag 0. Callers a17e, b339, b3e6 (R9, HUD target brackets).
 ### 0000:8bab `wpn_suit(int wpn, int site)` (V)
+> **S3.8:** owned by `flight.md` section 5.4 (verified there; where they differ, flight.md is right).
 `type = (B2A2+16*site+0xE) & 0x7F` (site object type, byte at B2B0+16*site); `cls = byte [C604 + type] & 0xF` (target class); returns signed byte `[0x386A + 16*wpn + cls]` (weapon
 suitability table 16x16, same as DS:1D86 in START). Callers 671a, a17e.
 ### 0000:9641 `fmt_2digit(int n)` (V)
@@ -4241,6 +4268,7 @@ return;  invisible: [49E0] = 0xFFFF;
 (imul, shl/rcl, shl/adc 0). The matrix is built by `e26b` (called from 2f82 with the view angles; owner render3d).
 
 ## 0000:BB86  `int site_dist(int site)`; 0000:BB9E  `int unit_dist(int unit)`; 0000:BBB4  `int obj_dist_bearing(int x_u, int y_u, int want_bearing)`   (V) - owner weapons (targeting leaf math)
+> **S3.8:** owned by `flight.md` section 5.4 (verified there; where they differ, flight.md is right).
 
 * `bbb4`: `dx = [C0A4]-x; dy = [C0B2]-y; if (want_bearing) [9502] = atan2_16(-dx, dy)` (`c9d6`); `[94FE] = dist2d(dx,dy)` (`c987`); returns the distance in AX. `[9502]` is **not** touched when `want_bearing==0`.
 * `bb86(site)`: `bbb4(S.x, S.y, 1)` with the site record `DS:B2A4 + 16*site` (+0 x_u, +2 y_u). `bb9e(unit)`: `bbb4(U.x, U.y, 0)` with the unit record `DS:C140 + 36*unit`.
@@ -4813,6 +4841,7 @@ Table DS:9188 = 18 far pointers (off, seg 0x1853, a statically relocated data se
 The sibling `1ad6` (R11a) is the same with table DS:91D8.. (not in this range).
 
 ### 0000:bad1 `obj_find_at(x, y)` -> site index  (V)
+> **S3.8:** owned by `flight.md` section 5.4 (verified there; where they differ, flight.md is right).
 ```
 wobj = [9F10] = 0d08((long)x << 5, (long)(0x8000 - y) << 5);      /* terrain-object query (R3); returns pointer to DS:BA14 struct or 0 */
 if (wobj == 0) return -1;
@@ -4825,6 +4854,7 @@ return 0;
 Callers: a17e (S2 ground impact, S4c designation), 671a, 753f via proj.target (R6). Record 0 therefore represents "an anonymous world object last picked".
 
 ### 0000:bc12 `obj_wreck_shape(o)` / 0000:bc77 `obj_cls_soft(o)` / 0000:bcac `obj_cls_ship(o)`  (V)
+> **S3.8:** owned by `flight.md` section 5.4 (verified there; where they differ, flight.md is right). (bc12 itself is render3d.)
 > **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 3; where they differ, render3d.md is right.
 ```
 cls(o)        = C604[site[o].+0E & 0x7F] & 0x0F;                  /* object-type -> target class table loaded from the WLD */
@@ -4843,6 +4873,7 @@ Used by the target-preview windows (`bf71`) and, via `9aca`/terrain code, to pic
 * `bee1(obj, x32, y32, z, a, b, c)` (V): queue a 3D object relative to the camera: `v1 = (long)[B76A:B76C] + y32 - 0x01000000; dz = z - [B808]; v0 = x32 - (long)[B766:B768]`; if `abs(v0) < 0x7FFF && abs(v1) < 0x7FFF`: `dca9(0, 0, -dz)` (origin), `[E2FC] = 1`, `e7ac(obj, -c, ?, v0, -v1, b, a, (a != 1) ? ...)`: exact pushes: `e7ac(obj, -[bp+0x10], a_hi:lo = [bp+0x12..0x14], v0_lo, -v1_lo, flag = ([bp+0xE] == 0 ? 1 : 0))` (see disassembly bee1: pushes `(bp+0xe==0)`, `-v1`, `v0`, `[bp+0x14]`, `[bp+0x12]`, `-[bp+0x10]`, `[bp+4]`). Sibling of `bd8f` (R8) which adds the rear-view branch (`[C07A] & 0x80`) and the LOD shift argument `[bp+0x16]`.
 
 ### 0000:bbed `fm_bomb_dive_angle()`  (V) (owner flight)
+> **S3.8:** owned by `flight.md` section 2.3 (verified there; where they differ, flight.md is right).
 `t = (alt + 0x1000) & 0xFFFF; return (((0x4000 - abs(pitch)) << 12) / t) - 0x4000;` (32-bit shift/divide). FFBOMB launch stores `bbed() - 0x400` in `proj.+0x16` (R6).
 
 ### 0000:f492 `rtl_aFlshr_mem(long *p, int n)`  (V) (owner lib)
@@ -5582,6 +5613,8 @@ Callers: `bf71`.
 
 > **S3.7:** the render3d rows (146 functions + labels) moved to `render3d_symbols.csv`; their index is `render3d.md` Part 7.
 
+> **S3.8:** the flight / detect / ai / weapons / damage rows (42 functions, 2 labels, 84 data; plus 6 new data rows) moved to `flight_symbols.csv`; their index is `flight.md` section 12.
+
 | address | name | owner | signature | note |
 |---|---|---|---|---|
 | 0000:0010 | `main` | simflow | `void(void)` | VGAME entry from c0_start: comm/pilot ptrs, bind drivers, pages, gfxlib init, sim_init, sim_run, joystick cali |
@@ -5600,8 +5633,6 @@ Callers: `bf71`.
 | 0000:0c2c | `load_3dg_terrain` | loader | `void(void)` | .3dG: L3 map 9F68, L2 9D10, L1 9B08, L0 9904; copies 64-byte L4 theatre table 0A68+64*t to B00C |
 | 0000:0cd1 | `load_error_msg` | loader | `void(const char *msg)` | 8AA2(msg,0,0x60,0xF) then getch; returns (no exit) |
 | 0000:0ce7 | `set_file_ext` | lib | `void(char *name,const char *ext)` | replace text from first . (or NUL) with ext; used on the stem buffer |
-| 0000:0d08 | `terr_find_scenery_at` | damage | `hit_t *terr_find_scenery_at(long x,long y_inv)` | Nearest scenery object at world point (x=cell<<5, y=(0x8000-cell)<<5); fills hit record BA14; returns BA14 or  |
-| 0000:0f31 | `terr_set_scenery_state` | damage | `void terr_set_scenery_state(hit_t *h,byte newid)` | Records new id of a hit scenery object in table B772 (5-byte recs, count 9902) or tile entry; sets bit7 of til |
 | 0000:17a3 | `cockpit_draw_adi` | simflow | `void cockpit_draw_adi(void)` | Attitude indicator 32x28 at (265,140): horizon polygon col 1 on col 9, bezel 91a4, copy back page to screen; o |
 | 0000:1961 | `mfd_view_sky_bands` | simflow | `void(int horizon)` | up to 16 sky quads colours 80h+i above horizon row, clamped at y=6Eh; table DS:0D22 |
 | 0000:19ea | `mfd_view_ground_bands` | simflow | `void(int horizon,int mode)` | up to 16 ground quads colours 70h+i (F0h if mode==1) below horizon, clamped at y=A9h |
@@ -5609,10 +5640,6 @@ Callers: `bf71`.
 | 0000:1bbc | `frame_loop_body` | simflow | `void(void)` | THE frame loop: 2F82,7898,[C07A]==0:(10A8:0000,D9A3,17A3),flip,[262A]=1,1E9E,39C4 until [E552] |
 | 0000:1bfc | `timer_install` | simflow | `void(void)` | [2636]=[2640]=1, clock=0, timer_calibrate, save INT 8 in cs:1CEB, install timer_isr, [262B]=1 |
 | 0000:1e0b | `pit_read_retrace` | lib | `u16(void)` | wait retrace start on 3DAh (3BAh mono) then latch and read PIT ch0; 0 on timeout |
-| 0000:1e9e | `sim_input_flight` | simflow | `void(void)` | per-frame: key read+dispatch, stick, player aircraft model (attitude/speed/alt/fuel/G/eject), history ring |
-| 0000:2c6e | `fm_rotate_apply` | flight | `void(int*A,int*B)` | fm_mat = A x B via 2DDC; every 8th sets dirty |
-| 0000:2c9e | `fm_mat_to_euler` | flight | `void(void)` | matrix -> yaw/pitch/roll |
-| 0000:2e43 | `fm_mat_from_euler` | flight | `void(void)` | e26b(2D94,yaw,pitch,roll); clear dirty |
 | 0000:2e64 | `fx_ratio_q15` | lib | `int(int x,int y)` | x/y in Q15 with signs |
 | 0000:2ebe | `fx_asin` | lib | `u16(int q15)` | inverse sine via table 2084 |
 | 0000:2f2f | `fx_acos` | lib | `u16(int q15)` | 0x4000-asin |
@@ -5624,12 +5651,8 @@ Callers: `bf71`.
 | 0000:3939 | `sim_pause_wait` | simflow | `void(void)` | snd 25, wait key != Alt-P, restore 2646 |
 | 0000:3968 | `cockpit_refresh_panels` | simflow | `void cockpit_refresh_panels(void)` | After pit picture reload: re-light lit lamps (tab 46D8), 80a0(DEDA), 8113(DFDC), 38f8, 3926, 44a9 |
 | 0000:39c4 | `sim_frame_step` | simflow | `void(void)` | Per-frame simulation step (once per 1bbc iteration): grid pos, init, map markers, updaters, airfield/landing/g |
-| 0000:43ee | `sim_key_and_signature` | detect | `void(void)` | cba0(DE90) key dispatcher then radar signature 3D5C (bank, speed/AGL, power, gear, bay, radar) |
 | 0000:44a9 | `hud_draw_store_counts` | simflow | `void(void)` | Redraw flare/chaff/decoy counters (a=1..3 via 44c4) |
 | 0000:44c4 | `hud_draw_store_count` | simflow | `void(int type)` | Draw 2-digit store count of type 1 flare 2 chaff 3 decoy in panel field 3D9C[type] via d92d |
-| 0000:4512 | `wpn_release_countermeasure` | weapons | `void(int type)` | Release flare/chaff/decoy: decrement 3636[type], fill slot R[] at 39AA, timers, message "<name> released", sou |
-| 0000:461c | `wpn_cm_tick` | weapons | `void(void)` | Per-step countdown of the 4 countermeasure slots; decoy lamp 7 via 898b |
-| 0000:465b | `wpn_gun_update` | weapons | `void(void)` | Move gun bullets (E44E, 12 B) and spawn on fire button: ammo 3650, vel from heading/pitch, sound 6 |
 | 0000:479c | `fx_smoke_update` | simflow | `void(void)` | Smoke puffs (39DA x16 x8 B) over burning site 3D68: age+=4, y drift, spawn every 8 steps |
 | 0000:483c | `fx_fall_update` | simflow | `void(void)` | Falling body C602 altitude, B756 velocity (gravity -12/step, min -16) |
 | 0000:4857 | `sim_reset_clock_palette` | simflow | `void(void)` | Seed rand, reset cockpit (784a), 3D60 random, start clock 9870, 98E2=0, palette pre-steps toward day/night tab |
@@ -5648,22 +5671,6 @@ Callers: `bf71`.
 | 0000:4e0f | `hud_glideslope_update` | simflow | `void(void)` | Compute glide-slope state 46C2 (0 gear up,1,2 ok,3) from slope angle vs 7.98 deg tolerance |
 | 0000:4ebc | `hud_lamp_timers` | simflow | `void(void)` | Count down chaff/flare/aux indicator timers and set lamps 0xE/0xF/0x18 via 4f05 |
 | 0000:4f05 | `hud_lamp_set` | simflow | `void(int lamp,int on)` | If cockpit visible and lamp state differs call d83e(3FE2,lamp,on) |
-| 0000:4f2a | `hud_threat_update` | detect | `void(void)` | Stealth bars from 3D5C, staggered site scheduler calling 516d, threat arrow 8548/863c; 3D6A-- |
-| 0000:516d | `det_site_radar_update` | detect | `void(int site)` | Per-site radar scan: 5460 signal, bars, "detected" msg, level build-up, "Radar ID" msg, SAM launch into DS:3C0 |
-| 0000:5460 | `det_radar_signal` | detect | `int(int x,int y,int z,int rtype,int*bearing,int*dist)` | Radar formula: (maxr-D)*cell*(2*skill+factor+1)/maxr, aspect/Doppler factor, altitude cone, halved for Lockhee |
-| 0000:5588 | `det_radar_warning` | detect | `void(void)` | [3D92]=2*[3660] warning lamp timer; snd_cmd 8 via d6bf(8,1) |
-| 0000:559a | `det_alert_network` | detect | `void(void)` | Alert: [3D62]=[B286], last known player pos/alt/heading, raise every radar level to floor 16*(war+skill-1) |
-| 0000:5730 | `ai_update_units` | ai | `void(void)` | Per-step AI of all enemy aircraft units (36B at DS:C13E): modes patrol/hunt/RTB, steering, crash, landing msgs |
-| 0000:62d0 | `ai_unit_radar` | ai | `void(int u)` | Aircraft radar via 5460, level build-up, "Visual ID - X" msg, air-to-air missile launch "W fired by X", lock t |
-| 0000:65d4 | `ai_unit_takeoff` | ai | `void(int u,int site)` | Place unit on airbase (carrier z=0x8C), flags/=0x403, endurance, msg "<site> - <type> taking off" |
-| 0000:671a | `wpn_proj_update_all` | weapons | `void(void)` | per-step update of the 12 projectile slots (0-7 enemy, 8-11 player): seeker/decoys, steering, move, impact, pr |
-| 0000:711f | `wpn_seeker_check` | weapons | `int(int slot,int tx,int ty,int tz,int cls)` | 22.5 deg cone / rear-aspect test of projectile vs point; sets [94F4] dist [94F6] bearing; tz unused |
-| 0000:71b4 | `dmg_unit_kill` | damage | `void(int u)` | marks unit u dead (flags 0x20), logs event 3/0x83, name to 9876, sound 5, mission_target_done(0) for primary a |
-| 0000:72a4 | `dmg_object_destroy` | damage | `void(int o)` | destroys ground object o: flag 0x80, wreck shape, mission target k (kind 2) done, event log 1/0xC/2, sound 5 |
-| 0000:7470 | `mission_target_done` | simflow | `int(int j)` | primary/secondary target achieved: sets 9B05 0x40/0x20 and 2E7C 1/2/3; 9876 = Primary target or Second. target |
-| 0000:74f6 | `dmg_player_blast` | damage | `void(void)` | skill+1 random bits into [3632] damage mask and [C5C8]++; lamps 10..16 refresh; [98EE]=1; sound 4; no-op in tr |
-| 0000:753f | `wpn_release` | weapons | `void(void)` | fire key: checks roll/bay/altitude, takes a store from the selected bay, fills a free projectile slot 8-11 or  |
-| 0000:780a | `dmg_wobj_destroyable` | damage | `int(int o)` | 1 if the world object found in [9F10] is not yet the wreck shape (C0AC or DEA4 by class) |
 | 0000:784a | `cockpit_widgets_reset` | simflow | `void(void)` | mission-start reset of panel widgets (d83e x4), [409C]=0, [DFDC]=0x18; called from 4857 |
 | 0000:7898 | `hud_overlay_frame` | simflow | `void hud_overlay_frame(void)` | per-frame HUD C part: flash, lamps 0-2, stall lamp, weapon/gun line, crosshair, tapes, AAM circle, speed/alt n |
 | 0000:80a0 | `mfd_left_select` | simflow | `void mfd_left_select(int mode)` | left MFD mode 0 map / 1 scope; lamp 22/23 via d83e; F3 |
@@ -5700,7 +5707,6 @@ Callers: `bf71`.
 | 0000:8b3b | `hud_num_left` | simflow | `void hud_num_left(int v,int x,int y,int col)` | itoa to DS:C5D8 and draw left aligned |
 | 0000:8b5c | `hud_num_right` | simflow | `void hud_num_right(unsigned v,int xr,int y,int col)` | ltoa unsigned, right aligned x = xr - 4*len |
 | 0000:8b93 | `msg_post` | simflow | `void msg_post(char *text)` | strcpy(DS:C578,text); DS:409E = 3*DS:3660 frames |
-| 0000:8bab | `wpn_suit` | weapons | `int wpn_suit(int wpn,int site)` | weapon suitability DS:386A[wpn*16 + class[site type]] |
 | 0000:8bd3 | `gfx_restore_rect` | simflow | `void(x,y,w,h)` | page2 -> page0 and page1 |
 | 0000:8c10 | `mfd_scope_draw` | simflow | `void mfd_scope_draw(int flip)` | left MFD mode 1 scope: grid, air units, missile tracks, sites, ownship, countermeasure marks |
 | 0000:903f | `mfd_target_box` | simflow | `void mfd_target_box(int x,int y,int col)` | 9x7 selection frame around a scope icon |
@@ -5727,13 +5733,6 @@ Callers: `bf71`.
 | 0000:b6ae | `hud_lock_indicator` | simflow | `void(int mode,int lock)` | sets (b04E,b050)=(207;140); Maverick seeker cross; lock bracket; cockpit lamp 3 on (steady if lock else blinki |
 | 0000:b77a | `hud_ping_label` | simflow | `void(char *s,int colour,int dy)` | expanding hexagon (half-size dy) + centred name text at projected point DS:49E0/49E8 (text colour DS:9872) |
 | 0000:b7f8 | `hud_format_range` | simflow | `void(int dist)` | DS:9876 = "Range " + (dist>>6) + "." + ((dist&63)*2/13) + " km" |
-| 0000:bad1 | `obj_find_at` | weapons | `int(int x,int y)` | terrain object at world point -> site index (>=1) / 0 = scratch site 0 filled / -1 none (R6 name obj_find_at) |
-| 0000:bb86 | `wpn_site_dist` | weapons | `int(int site)` | bbb4 with site record DS:B2A4+16*site (x,y), bearing wanted |
-| 0000:bb9e | `wpn_unit_dist` | weapons | `int(int unit)` | bbb4 with unit record DS:C140+36*unit (x,y), no bearing |
-| 0000:bbb4 | `obj_dist_bearing` | weapons | `int(int x_u,int y_u,int want_bearing)` | [94FE]=dist2d(c987), [9502]=atan2(c9d6) if flag; relative to player [C0A4],[C0B2]; returns dist |
-| 0000:bbed | `fm_bomb_dive_angle` | flight | `int(void)` | (((0x4000-/[2DF0]/)<<12)/(([2DF4]+0x1000)&0xFFFF))-0x4000 ; FFBOMB dive floor |
-| 0000:bc77 | `obj_cls_soft` | weapons | `int(int o)` | C604[type]&15 in {9,11,12,13} |
-| 0000:bcac | `obj_cls_ship` | weapons | `int(int o)` | C604[type]&15 in {12,13} |
 | 0000:bd24 | `load_stflt_3dx` | loader | `void(void)` | stflt.3dx -> bank 0 (B75E); flags to 0760; 09E0[i]=6 |
 | 0000:bf71 | `mfd_view_render` | simflow | `void(unsigned obj,int x,int y,int z,int a0,int a1,int a2,int mode,int zshift)` | Sensor/seeker view window x169-245 y110-169: camera, sky/ground bands, 3D object, FLIR tint, BRG and zoom labe |
 | 0000:c6de | `mfd_view_flir_tint` | simflow | `void(int x,int y)` | Shade-fill (poly_fill mode 3, ramp 98h-9Fh) of the 77x61 sensor window at offset (x,y) = FLIR green look |
@@ -5748,7 +5747,6 @@ Callers: `bf71`.
 | 0000:cb39 | `lib_sign` | lib | `int(int v)` | signum |
 | 0000:cb56 | `rand_seed_timer` | lib | `void(void)` | srand(bios_timer) |
 | 0000:cb62 | `rand_n` | lib | `int(int n)` | rand()*n>>15 |
-| 0000:cb72 | `input_button` | simflow | `int(int n)` | key pulse 43BE+2n plus joy_button(n) |
 | 0000:cba0 | `input_command_key` | simflow | `void(unsigned key)` | Per-frame key command interpreter called from 43ee with [DE90]: 1-9, F1-F10, Alt/Shift keys, debug keys, nav m |
 | 0000:d6bf | `snd_cue` | simflow | `void(cmd,prio)` | snd_cmd gated by snd_level 43C2 and eject state |
 | 0000:d6e5 | `snd_engine_refresh` | simflow | `void(void)` | snd_cmd 24 or 25 |
@@ -5761,7 +5759,6 @@ Callers: `bf71`.
 | 0000:d83e | `hud_lamp_recolor` | simflow | `void(ctx,lamp,on)` | rect_recolor lamp rect, table 46D8/4672 |
 | 0000:d92d | `hud_digits_draw` | simflow | `void(page,slot,str)` | blit 4x7 digits from page2 strip |
 | 0000:d9a3 | `hud_side_strips` | simflow | `void(int page)` | side bars + store highlight 46C2 |
-| 0000:e578 | `mat_mul` | lib | `void(A,B,C)` | 3x3 Q15 C=AxB |
 | 0000:ea26 | `pal_fade_step` | lib | `int pal_fade_step(RGB far*cur,RGB far*target,int count)` | moves each component of cur one step toward target, returns number changed (callers 4857,4D43) |
 | 0000:ea7c | `file_load_paras` | loader | `u16(const char *name)` | fopen r+b, filelength, check free paragraphs, alloc, int86x read loop (64K chunk bug); returns segment or 0; s |
 | 0000:f0b0 | `ltoa` | lib | `char *(long v,char *buf,int radix)` | signed entry (bl=1) of the number conversion at FA38; f094 is the unsigned head |
@@ -5792,14 +5789,8 @@ Callers: `bf71`.
 | 10a8:000c | `hud_draw_front` | simflow | `void(void)` | Front-cockpit HUD: airspeed/altitude/heading tapes, frame, reticle, G text, pitch ladder (style [294B], level  |
 | 10a8:09ce | `hud_color_init` | simflow | `void(void)` | Sets panel seg [E558] in blit ctx B0..B3 and day/night HUD colours (0A/2F day, 0F/07 night) |
 | 10a8:0a22 | `hud_layout_init` | simflow | `void(void)` | Fills layout block DS:291C..2948 + text/blit ctx fields for HUD style [294B] (0 wide, 1 compact) |
-| 10a8:0c87 | `joy_recenter` | simflow | `void(void)` | raw read, min=max=centre=raw |
-| 10a8:0c95 | `joy_set_centre_axis` | simflow | `SI axis` | centre/min/max[si]=raw[si] |
-| 10a8:0ca8 | `joy_poll` | simflow | `void(void)` | raw read + joy_scale X,Y -> 2CD2/2CD3 |
 | 10a8:0d70 | `joy_get_calib` | lib | `void(void far *dst)` | copy 20 words DS:2CA2 -> far dst (comm+48h) |
 | 10a8:0d82 | `joy_set_calib` | lib | `void(void far *src)` | copy 20 words far src (comm+48h) -> DS:2CA2 |
-| 1181:0008 | `keypad_stick_install` | simflow | `void(void)` | NumLock off, clear state, 2CD6/2CD7=80h, save INT 9, install keypad_stick_isr |
-| 1181:0058 | `keypad_stick_remove` | simflow | `void(void)` | restore INT 9 from cs:0187 |
-| 1181:0072 | `keypad_stick_isr` | simflow | `void interrupt(void)` | INT 9: keypad/arrow keys -> virtual stick bytes 2CD6/2CD7 (80h centre; 5Ah tap, 7Fh double tap), drops repeate |
 | 1199:00c8 | `dos_close` | lib | `void(int h)` | INT 21/3E, fatal on error |
 | 1199:00f0 | `dos_read` | lib | `int(int h,u16 n,void *buf)` | INT 21/3F into DS buffer, fatal on error (unused) |
 | 1199:0122 | `dos_read_far` | lib | `int(int h,u16 n,u16 off,u16 seg)` | INT 21/3F into seg:off (unused) |
