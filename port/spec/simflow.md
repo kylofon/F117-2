@@ -11,7 +11,7 @@ unclear / needs a runtime or visual check.
 How the document is built: Part 0 (this part, written at the merge) gives the map, the lifecycle, the cross-part decisions and the reconciled names.
 Parts 1-11 are the reader passes (each self-contained: algorithm per function, constants, globals, structures). **Where two parts disagree, Part 0
 section 5 decides.** Rendering internals (S3.7) and the flight model / weapons / AI / detection / damage internals (S3.8) are indexed (every function has
-a row with its `owner`), the interface to the renderer is Part 12; the player flight model `1e9e` is specified in full in Part 2 because it is also the
+a row with its `owner`), the renderer is specified in `render3d.md` (S3.7; Part 12 points there); the player flight model `1e9e` is specified in full in Part 2 because it is also the
 input handler (S3.8 starts from there and from `port/notes/s36/r2_*.py`, an executable differential-tested reference).
 
 ## 1 Part map
@@ -29,7 +29,7 @@ input handler (S3.8 starts from there and from `port/notes/s36/r2_*.py`, an exec
 | 9 | R9 | `a17e` per-frame overlay pass (tracers, explosion, target boxes, photo, beacon), object/site/projectile structure layouts | `a17e 1a85 b339..bee1 f492` |
 | 10 | R10 | `cba0` key command interpreter (authoritative key table), `bf71` sensor window renderer | `cba0 bf71 1961 19ea c6de c73c c834` |
 | 11 | - | function index (generated from `simflow_symbols.csv`) | all 376 |
-| 12 | R11a/R11b | render3d INTERFACE only: conventions, sine table, scene call contract, `11EB:00D3` input contract, buffer map | extracts; the full index passes stay in `port/notes/s36/spec_R11a.md`, `spec_R11b.md` (not committed, S3.7 reads them) |
+| 12 | R11a/R11b | render3d: pointer table into `render3d.md` (S3.7 replaced the R11a/R11b interface extracts) | the S3.6 passes are kept in `port/notes/s36/spec_R11a.md`, `spec_R11b.md` as history |
 
 ## 2 Program map and lifecycle in one page
 
@@ -485,6 +485,7 @@ if ([365E] != 0) pal_mfd_ramp_green();   // 1088:00A3
 `pal_write_vsync(first=98h, count=8, rgb = DS:206A)` / `rgb = DS:1212` (the latter is filled at run time by the MFD code).
 ### 1088:00D7 `pal_save()`: `pal_read_dac(DS:0D4A)` (768 bytes). `1088:00EE pal_restore()`: `pal_write_vsync(0,256, DS:0D4A)`. `1088:0107 pal_set_adv()`: `pal_write_vsync(0,256, DS:134A)` (= ADV.PAL, the quit requester screen). Used by 1E9E (206A save, 2089 set, 20E7 restore).
 ### 1088:0120 `r3d_depth_shade(void) -> u8` (owner render3d; V)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 1; where they differ, render3d.md is right.
 `if ([7D5E] != 0 || [43B6] == 0) return 0; v = max(0, (s8)[4963]) >> 1; v -= (u8)[497A]; v = clamp(v, 0, 31); return v >> 1;` The result lands in `[4894]` (shade offset subtracted from ramp colours >= A0h, FORMATS.md). Callers DE6A, E830. The code after it (1088:0156..) are fixed-point multiply/divide helpers (other readers).
 
 ## 7. Keypad-as-stick keyboard hook (1181:xxxx) (V)
@@ -743,6 +744,7 @@ ang = (i<<8) + (((long)(a-T[i])<<8) / (int16)(T[i+1]-T[i]));  return v<0 ? -ang 
 ### 0000:e578 `mat_mul(const int *A, const int *B, int *C)`  3x3 Q15, row-major (word offset = 2*(3*row+col))
 `C[3i+j] = i16( mul15(A[3i],B[j]) + mul15(A[3i+1],B[3+j]) + mul15(A[3i+2],B[6+j]) )`. `C` must not alias A or B (callers use scratch `DS:2DDC`). Only caller 2c6e. (V)
 ### 0000:e26b (not R2, but needed) `mat_from_euler(int *M, u16 yaw, int pitch, u16 roll)`
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 1; where they differ, render3d.md is right.
 `sa,ca = sin16/cos16(yaw)` ... : `M0=ca*cc+sa*sb*sc; M1=sa*sb*cc-ca*sc; M2=sa*cb; M3=cb*sc; M4=cb*cc; M5=-sb; M6=ca*sb*sc-sa*cc; M7=ca*sb*cc+sc*sa; M8=cb*ca` (each product = mul15, nested products
 rounded at every step; sums 16-bit). It also leaves `sin/cos` of yaw, pitch, roll in `DS:4982 4984 4986 4988 498A 498C`. (V by differential test)
 
@@ -1007,6 +1009,7 @@ Finally `blit_rect(2 -> page, sx 251 sy 67 -> dx = 33 (mode 0) / 85 (mode 1), dy
 (`[43B8]` read by 03CE 39C4 cba0; `[B16C]` by 465B 5730 A17E; `[B286]` by 559A 671A; `[9F64]` by 5730 671A: per-rate timing constants of weapons / AI.) `[3D7A]` = frame-rate setting (0..2).
 ### 0000:d7bb `frame_rate_halve()`: `if ([3D7A] == 2) { [3D7A] = 1; rate <<= 1; d707(); }` (callers 5460 753F cba0: time-acceleration cancel).
 ### 0000:d76b `view_range_setup()` (owner render3d; callers 39C4 cba0) (V by reading)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 1; where they differ, render3d.md is right.
 `for i in 0..5: [48A6 + 2i] = 0x20 << (i + (uint8)[98DE]);  [48B2] = [48AE] + [48B0];  [48B4] = fx_clamp_wrap([48B0]*2, 0x1000, 0x270F);  [48B6] = ([98DE] + 1) * 0xD05;` `[98DE]` = detail / view-range level (read by 03CE 04DA 1442 8C10 ...); `[48B6]` is read by `E8B5` (cull).
 ### 0000:d7d0 `nav_copy_xy(int dst, int src)`: `[2E6C + 4*dst] = word at B2A4 + 16*src; [2E6E + 4*dst] = word at B2A6 + 16*src` (copy the x,y of site record `src` to a 4-byte destination slot; callers: cba0 only). Site/runway records: 16 bytes from `DS:B2A4`, `+0 x, +2 y, +7 flags` (bit1 = carrier deck, bit3 = short field (U)).
 ### 0000:d7f4 `pic_show(const char *name, int page)`: `h = dos_open(name, 0) [d81d]; 11B9:000E(h, page); dos_close(h) [d82f]` - open + decode a PIC to `page` + close (fatal on error through the RTL). `d81d(name, mode)` = `1199:000C dos_open`; `d82f(h)` = `1199:00C8 dos_close`. Callers: Alt-Q (page 0, "adv.pic").
@@ -1367,6 +1370,7 @@ everything below it is static art + the explicit copies above + whatever `7898`/
 ---------------------------------------------------------------------------------------------------------
 
 ## 3 `0000:03ce` r3d_scene_draw  (owner render3d, 237 bytes)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 1; where they differ, render3d.md is right.
 
 `void r3d_scene_draw(int yaw_neg, int pitch, int roll, long x, long y, long z, int x0, int y0, int w, int h)` - stack layout (V):
 `[bp+4] = -E44C, [bp+6] = C07C, [bp+8] = B770, [bp+0xA..0xC] = B288:B28A, [bp+0xE..0x10] = B752:B754, [bp+0x12..0x14] = z (sign-extended B75C),
@@ -1470,20 +1474,25 @@ Map projection used by the icon routines (`8514`, `852B`, R7): `px = ((x - [4084
 ## 9 Index-level entries (terrain / horizon / map renderer)  (owner render3d unless noted)
 
 ### 0000:119C map_render_terrain(ctx, px, py, shift)  (86 B)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 3; where they differ, render3d.md is right.
 `[4894]=0; dae8(ctx, 0, 0xC000, 0, 0, 0, 0x2000, 1, 0x100)` (top-down camera, pitch -90 deg, altitude 0x2000, draw ground fill);
 `offset_set(pixel_offset(ctx->xmin, ctx->ymin))`; `11F2(px, py, shift)`; `db3e()`; `[7D5E] = 0`. Only caller: `8387`.
 
 ### 0000:11F2 map_draw_tiles(px, py, shift)  (353 B)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 3; where they differ, render3d.md is right.
 `[94E2] = px >> shift; [94E4] = py >> shift;` for tile level `L = 4 .. 0` (`[94E8]`): `[94E6] = (L <= 1) ? 0x80 : 0` (object class filter), `[E2FC] = word[0xCFC + 2L]` (`3,4,2,3,4`),
 `[DECC] = (4 - [E2FC])*2 + shift`, tile size in pixels `[94DE] = 0x1000 >> [DECC]` (level skipped when <= 0x10), tiles per side `[94E0] = 4 << ((4 - [E2FC])*2)`;
 `1353` gives the visible tile range; for every tile `865(level, tx, ty)` (R11a) returns the tile record (-1 none); its object list (entries of 7 bytes `{int dx, dy; byte? z; byte id}` at `[tile_list + ...]`, count at `word[0x61E + (level*32+tile)*2]`)
 is walked and `13E3(id, x_screen, y_screen)` is called for entries with `[+4]==0`; `[7D5E] = [DECC] + 0xE` before each. Tables: count `word[0x61E + 2*(E2FC*32 + tile)]`, list pointer `word[0xE304 + 2*(E2FC*32 + tile)]` (U for the inner loop details). `0xD22` = 17-word table `0,2,3,4,6,8,11,15,20,27,36,48,64,87,119,164,0` (used by `1442`).
 ### 0000:1353 map_tile_bounds(&x0,&x1,&y0,&y1)  (89 B) / 0000:13AC map_pixel_to_tile(px, py, &tx, &ty)  (55 B)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 3; where they differ, render3d.md is right.
 `13AC`: `tx = ([94E2] - word[0xD1E=160] + px) / [94DE]`, `ty = ((py - word[0xD20=100])*4/3 + [94E4]) / [94DE]` (window centre = (160,100)). `1353` calls it for the window
 corners (`[2293]`,`[2295]` = clip size), clamps min to 0 and max to `[94E0]-1`.
 ### 0000:13E3 map_draw_object(id, x, y)  (94 B)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 3; where they differ, render3d.md is right.
 If `[E2FC] >= 3` the class byte `ptr[0xA62][id&0xFF] & 0x80` must equal `[94E6]`; then `[8560] = [B760]`, `1433:03A9`, `E54B()`, and `11EB:00D3(id, x, 0, -y, 0x49A0, 0xC02E)` (3DX object draw, R11a; argument order from the pushes at `13E3:141F..1436`).
 ### 0000:1442 r3d_draw_sky_ground(ctx)  (865 B)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 6; where they differ, render3d.md is right.
 Called by `dae8` after the frame sync. Copies the sin/cos cache (`4986 -> 98F8`, `4988 -> 9F12`, `498A -> 98C8 (negated)`, `498C -> 98E4`).
 If `98DE < 3` just calls `1001:0006(ctx->fg)` (flat fill) and returns. Otherwise two sets of 16 horizon bands: set 1 (sky) with colour `0x80+i` (or `0x88` when `[4360] && [43B2]`), set 2 (ground) with colour `0x70+i` (or `0x7C` when the same flag), each a 4-vertex polygon via `1001:01EC(ctx, 4, pts, colour)`; the band edges are scaled
 by `bp-2 = (4986<<8)/max(4988, 0x200)`, shifted left by `[433A]` and halved when `[294B]` is set, with the table `0xD22` / `[4980]` for the ground bands, trig through `109d:0006`. (U) which set is sky: 0x80..0x8F vs the 0x60..0x6F ramp of FORMATS.md.
@@ -1494,9 +1503,11 @@ Args `x = cellx << 5`, `y' = (0x8000 - celly) << 5` (callers `39c4`, `4b57`, `72
 ### 0000:0F31 terr_set_scenery_state(hit*, byte newid)  (128 B)
 Stores `newid` at `hit+0x12`, then looks the key (`hit+0xE..0x11`) up in the destroyed-object table `DS:B772` (5-byte records `{key[4], id}`, count `[9902]`, search from the newest by `0FB1`, which also leaves the found index in `[94DC]`). Found: if `newid == byte[DEA4]` or `newid == byte[C0AC]` the table record's id byte is replaced, else the tile entry byte `[+6]` is overwritten with `newid`. Not found: the 5 bytes at `hit+0xE` are appended (`memcpy(B772 + 5*[9902]++, hit+0xE, 5)`). In all cases `tile_entry[+6] |= 0x80` at the end (`DEA4`/`C0AC` = special ids, (U)).
 ### 0000:0FFB terr_probe_point(long x, long y', long z)  (417 B)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 3; where they differ, render3d.md is right.
 Scenery collision probe at a world point: `[C686]=0; [BA16]=0x7FFF`; locates the tile (`804(4, ...)`), walks its objects whose class flag `[0x960+id] & 0x10` is set and whose `[+6] & 0x50 == 0`, keeps the nearest (Manhattan) in `[BA20]`; if found builds the relative position into `4964..4968`,
 `[8560] = ...`, `1433:03A9`, `E54B()` and calls `11EB:01B8(model, x, y, z, 0x49A0)` which sets `[C686]` when the point is inside the object. Result in the byte `C686` (also written by dae8/671a/11eb).
 ### 0000:77D9 terr_probe_cell(int cellx, int celly, int alt)  (49 B)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 3; where they differ, render3d.md is right.
 `0FFB((long)cellx << 5, (long)(0x8000 - celly) << 5, (long)alt)`. Callers: `5730`, `671a` (air object and weapon flight code, sets bit 5 of the object flags from `C686`).
 
 ---------------------------------------------------------------------------------------------------------
@@ -4198,6 +4209,7 @@ Coordinate conventions seen (U for exact axes; owned by S3.7): "u" = 16-bit worl
 (set at the top of 2f82). `[3658]` = comm[33h] (night flag, 0 = day), `[365E]` = 1 for cockpit views (`([C07A]&0xC0)==0`, 2f82 0000:353A), `[294B]` = HUD style (also selects the 3D scale).
 
 ## 0000:B85D  `void r3d_project_point(int x_u, int y_u, int z)`   (V) - owner render3d
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 2; where they differ, render3d.md is right.
 
 World point -> screen. Results in globals: `[49E0]` = sx (`0xFFFF` = not visible), `[49E8]` = sy, `[DE92]` = depth (negative in front), `[9500]` = unclipped sx of a rejected point.
 ```c
@@ -4223,6 +4235,7 @@ return;  invisible: [49E0] = 0xFFFF;
 (Z negative in front, so the X sign is mirrored; the formula is exact.) Callers: 9aca (x10), a17e, 99a7/90b9.
 
 ## 0000:BA13  `long r3d_matrix_row_dot(int row, int dx, int dy, int dz)`   (V)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 2; where they differ, render3d.md is right.
 
 `return fmul(M[row][0],dx) + fmul(M[row][1],dy) + fmul(M[row][2],dz)` with the 3x3 matrix in DS from `B156`: element (row,col) at `B156 + 6*col + 2*row` (column-major), and `fmul(a,b)` = `109D:0006` = `(a*b) >> 14` with rounding
 (imul, shl/rcl, shl/adc 0). The matrix is built by `e26b` (called from 2f82 with the view angles; owner render3d).
@@ -4233,6 +4246,7 @@ return;  invisible: [49E0] = 0xFFFF;
 * `bb86(site)`: `bbb4(S.x, S.y, 1)` with the site record `DS:B2A4 + 16*site` (+0 x_u, +2 y_u). `bb9e(unit)`: `bbb4(U.x, U.y, 0)` with the unit record `DS:C140 + 36*unit`.
 
 ## 0000:BCD7  `void unit_terrain_class(int unit)`   (V)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 3; where they differ, render3d.md is right.
 
 Sets `[49C6]` (terrain/shade class forwarded to the model/billboard queue):
 ```c
@@ -4243,6 +4257,7 @@ else                   [49C6] = (cls == 0 && [3D62] == 0) ? 1 : 0;      /* the l
 (U) the class meaning 0..3.
 
 ## 0000:BD8F  `void r3d_draw_model(int model, long x, long y, int alt, int ang1, int ang2, int ang3, int lod)`   (V) - owner render3d
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 1; where they differ, render3d.md is right.
 
 Stack args: `[bp+4]` model id, `[bp+6..8]` x32, `[bp+A..C]` y32, `[bp+E]` altitude, `[bp+10]` ang1 (heading; negated), `[bp+12]` ang2 (pitch), `[bp+14]` ang3 (roll), `[bp+16]` LOD.
 ```c
@@ -4266,12 +4281,14 @@ Callers: 9aca (many), a17e, bee1, bf71.
 * `cb39`: `return v==0 ? 0 : v>0 ? 1 : -1`.
 
 ## 0000:DCC0  `void r3d_queue_billboard(int id, long x, long y, int z, int sx, int sy, int size)`   (V) - owner render3d
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 1; where they differ, render3d.md is right.
 
 Camera-relative like bd8f (`dx = x - [BA10:BA12]`, `dy = y + [C02A:C02C] - 0x01000000`, `dz = z - [2DF4]`, external-camera variant identical to bd8f), then **`sar` by 3 (style 0) or 2 (style 1)**
 (`cl = 2 + (style==0)`, dx,dy 32-bit, dz 16-bit). If the low words of |dx|,|dy| are < 0x7FFF: `dca9(0,0,-dz); [E2FC]=1;` rel = (dx, -dy, z != 0) minus `[497C]/[497E]/[4980]` stored to `[4964]/[4966]/[4968]`; `[497A]=2`;
 `e8a2(rel...)` (projection/accept test: nonzero = reject). If accepted: `[4956]=id; [496A]=sx; [496C]=sy; [496E]=size; ddfe()`. `(sx,sy,size)` are the already computed screen values. Caller: 9aca (particles).
 
 ## 0000:DDFE  `void r3d_queue_insert(void)`   (V) - owner render3d
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 1; where they differ, render3d.md is right.
 
 Billboard display list: entries of 0x16 bytes at `DS:49F0 + 0x16*n` (`n = [49C4]`, max 50) and an array of entry pointers sorted in `DS:4E3C` (2 bytes each).
 ```c
@@ -4288,6 +4305,7 @@ ptr[i+2 .. n] = ptr[i+1 .. n-1];  ptr[i+1] = e;  [49C4] = n + 1;          /* des
 The queue is consumed by the render3d code (S3.7).
 
 ## 0000:9ACA  `void r3d_draw_world_objects(void)`   (V flow, U names) - owner render3d (contains the target designator = weapons)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 2; where they differ, render3d.md is right.
 
 Called every frame by `03ce` after terrain and sky, no arguments. Locals: `bp-2E` best candidate (init -1), `bp-0E` best distance/limit, `bp-20` current-target distance, `bp-22` loop index, `bp-26` high-altitude flag, `bp-1C` shadow height.
 Tables: sites `B2A4` (16 B, `[C0B4]`), units `C140` (36 B, `[DED0]`), particles `39DA` (8 B x16), weapon slots `3C0C` (28 B x12), tile map `B174`, unit model table `2FDC`, weapon model table `3372`.
@@ -4789,6 +4807,7 @@ Text: `if (0x14 < sx < 0x118 && 0 < sy < 0x4C) text(s, sx - 2*strlen(s), sy + 5,
 `9876 = "Range " + ltoa(dist >> 6) + "." + ltoa((((uint8)dist & 0x3F) * 2) / 13) + " km"` (strings DS:430A "Range ", 4311 ".", 4313 " km"; ltoa radix 10 into DS:DEAA). 64 site units = 1 km; the decimal is 0..9.
 
 ### 0000:1a85 `fx_explosion_sprite(x, y, size, frame)`  (V) (owner render3d)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 1; where they differ, render3d.md is right.
 `ctx = ([0348] ? [4042] : [0344])` (3D window ctx or alternate); `sprite_scaled(ctx, x - size/2, y - size/2, size, size - (size>>2), off = word[9188 + 4*frame], seg = word[918A + 4*frame])` (driver slot 22; `size/2` rounds toward zero).
 Table DS:9188 = 18 far pointers (off, seg 0x1853, a statically relocated data segment of the EXE): offsets {0, 213, 553, 1355, 2064, 2553, 3290, 4340, 5906, 7610, 9742, 11945, 14242, 16208, 17492, 18509, 19201, 19620} (frames 0..17; a17e uses 0..15).
 The sibling `1ad6` (R11a) is the same with table DS:91D8.. (not in this range).
@@ -4806,6 +4825,7 @@ return 0;
 Callers: a17e (S2 ground impact, S4c designation), 671a, 753f via proj.target (R6). Record 0 therefore represents "an anonymous world object last picked".
 
 ### 0000:bc12 `obj_wreck_shape(o)` / 0000:bc77 `obj_cls_soft(o)` / 0000:bcac `obj_cls_ship(o)`  (V)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 3; where they differ, render3d.md is right.
 ```
 cls(o)        = C604[site[o].+0E & 0x7F] & 0x0F;                  /* object-type -> target class table loaded from the WLD */
 obj_cls_soft  = cls in {9, 0x0B, 0x0C, 0x0D};     obj_cls_ship = cls in {0x0C, 0x0D};
@@ -4818,6 +4838,7 @@ obj_wreck_shape(o):
 Used by the target-preview windows (`bf71`) and, via `9aca`/terrain code, to pick the model of a destroyed site.
 
 ### 0000:b85d-dependent: `ba67`, `bee1` (owner render3d, callers `c834` R10)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 2; where they differ, render3d.md is right.
 * `ba67(a, b, c, d, e, f)` (V): `dx = b - e; dy = (c - f) >> 5; dz = d - a;` `[DE92] = (mul14([4992], dz) + mul14([4998], dy) + mul14([499E], dx)) >> 3` where `mul14(a,b) = (a*b + 0x2000) >> 14` (lcall 109D:0006) and DS:4992/4998/499E = the camera forward vector components (U who fills them: e8b5 reads them). Result = depth of the point along the camera axis; negative = in front.
 * `bee1(obj, x32, y32, z, a, b, c)` (V): queue a 3D object relative to the camera: `v1 = (long)[B76A:B76C] + y32 - 0x01000000; dz = z - [B808]; v0 = x32 - (long)[B766:B768]`; if `abs(v0) < 0x7FFF && abs(v1) < 0x7FFF`: `dca9(0, 0, -dz)` (origin), `[E2FC] = 1`, `e7ac(obj, -c, ?, v0, -v1, b, a, (a != 1) ? ...)`: exact pushes: `e7ac(obj, -[bp+0x10], a_hi:lo = [bp+0x12..0x14], v0_lo, -v1_lo, flag = ([bp+0xE] == 0 ? 1 : 0))` (see disassembly bee1: pushes `(bp+0xe==0)`, `-v1`, `v0`, `[bp+0x14]`, `[bp+0x12]`, `-[bp+0x10]`, `[bp+4]`). Sibling of `bd8f` (R8) which adds the rear-view branch (`[C07A] & 0x80`) and the LOD shift argument `[bp+0x16]`.
 
@@ -5425,6 +5446,7 @@ offset_set(0);
 Applied after the scene is drawn: converts the whole window (77x61 px, one row more than the 60-row fill) to the green MFD ramp = FLIR look.
 
 #### `0000:c73c` `void fx_fire_puffs(a0, a1, a2, rx, ry, rz)`  (index-level, owner render3d)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 2; where they differ, render3d.md is right.
 Six puffs, state table `DS:3A5C`, 8 B each: `+0 dHeading, +2 dPitch, +4 frame (0..5), +6 active`. For `i<6`: if inactive or `frame>=6`
 re-randomise: `d = W[0x436A + 2*cb62(7)]` for both deltas (table `0C00 0800 0400 0200 FE00 FC00 F800 F400`), `frame = 1 + cb62(2)`,
 `active = 1`, no draw this call. Otherwise `(h,p) = (a0 + dH, a1 + dP)` with pole normalisation (`|p|>0x4000 || p==0x8000` ->
@@ -5432,6 +5454,7 @@ re-randomise: `d = W[0x436A + 2*cb62(7)]` for both deltas (table `0C00 0800 0400
 puffs 4,5: `[C040]=frame_old; e7ac(0x24, ...)`. Caller: `bf71` (burning ground target in close view).
 
 #### `0000:c834` `void fx_draw_effect_list(int camx, int camy, int camz)`  (index-level, owner render3d/effects)
+> **S3.7:** superseded by the bit-exact spec in `render3d.md` Part 2; where they differ, render3d.md is right.
 Draws the smoke column of the burning site `[3D68]` (does nothing if `[3D68] == -1`). For the 16 puff records at `DS:39DA`
 (8 B: `+0 x (0 = free), +2 y, +4 altitude/age, +6 rank`; maintained by `479c`):
 `ba67(x,y,alt,camx,camy,camz)` (R9; sets `[DE92]` = camera-space depth); if `-256 < [DE92] < 0`:
@@ -5557,6 +5580,8 @@ Callers: `bf71`.
 ---
 # Part 11: function index (generated from simflow_symbols.csv)
 
+> **S3.7:** the render3d rows (146 functions + labels) moved to `render3d_symbols.csv`; their index is `render3d.md` Part 7.
+
 | address | name | owner | signature | note |
 |---|---|---|---|---|
 | 0000:0010 | `main` | simflow | `void(void)` | VGAME entry from c0_start: comm/pilot ptrs, bind drivers, pages, gfxlib init, sim_init, sim_run, joystick cali |
@@ -5568,11 +5593,7 @@ Callers: `bf71`.
 | 0000:02c1 | `stub_ret_02c1` | lib | `void(void)` | single ret (unused) |
 | 0000:02c2 | `gfx_pages_init` | simflow | `void(void)` | page0=A000 -> 85E2/85EA, page1=gfx_alloc(1) -> 85E4, page2=comm[20h] -> 85E6; page_seg_set_b for 1 and 2 |
 | 0000:02fe | `ordnance_panel_build` | simflow | `void(void)` | ordnance.pic -> page 1; 2 or 4 weapon strips 77x15 to page 2 at (169,110+15i); sprite_grab 77x60 -> BA0E |
-| 0000:03ce | `r3d_scene_draw` | render3d | `void r3d_scene_draw(int yaw_neg,int pitch,int roll,long x,long y,long z,int x0,int y0,int w,int h)` | Scene entry: window ctx 344, 04bb delay, dae8 camera+sky, 04da terrain, 9aca, db3e, a17e |
 | 0000:04bb | `frame_delay` | simflow | `void frame_delay(int ticks)` | Busy-wait ticks increments of byte DS:264A (timer tick); arg = DS:43B8 frame-rate menu value |
-| 0000:04da | `r3d_draw_terrain` | render3d | `void r3d_draw_terrain(int heading_neg,int pitch,long x,long y,long z)` | terrain+scenery: levels 4..1, cells far->near per view octant, records -> E7AC; cull cells with E8A2 (path A) |
-| 0000:0804 | `terr_to_level` | render3d | `long terr_to_level(int level,long world)` | world units -> level units (L4 >>6, L3 >>4, L2 >>2, L1 x1, L0 x2; rounded) |
-| 0000:0865 | `terr_tile_type` | render3d | `int terr_tile_type(int level,int x,int y)` | tile type from 8x8(B00C)/16x16(9F68)/child tables(9D10,9B08,9904); 0 if out of range |
 | 0000:097a | `load_theatre_data` | loader | `void(void)` | load_3dg_terrain, load_3dx_banks(stem), load_3dt_scenery(stem), [0CA8]=0 |
 | 0000:0994 | `load_3dx_banks` | loader | `void(char *stem)` | theatre .3DX -> bank1 (B760), PHOTO.3DX -> bank2 (B762), flag tables, id table 0510, mission prop entries, KU  |
 | 0000:0af9 | `load_3dt_scenery` | loader | `void(char *stem)` | .3dT: type counts 0614, rec counts 061E, 7-byte records at A06A, ptr table E304[32*level+type] |
@@ -5581,20 +5602,9 @@ Callers: `bf71`.
 | 0000:0ce7 | `set_file_ext` | lib | `void(char *name,const char *ext)` | replace text from first . (or NUL) with ext; used on the stem buffer |
 | 0000:0d08 | `terr_find_scenery_at` | damage | `hit_t *terr_find_scenery_at(long x,long y_inv)` | Nearest scenery object at world point (x=cell<<5, y=(0x8000-cell)<<5); fills hit record BA14; returns BA14 or  |
 | 0000:0f31 | `terr_set_scenery_state` | damage | `void terr_set_scenery_state(hit_t *h,byte newid)` | Records new id of a hit scenery object in table B772 (5-byte recs, count 9902) or tile entry; sets bit7 of til |
-| 0000:0fb1 | `terr_scenery_override` | render3d | `int terr_scenery_override(int level,int idx,int cx,int cy)` | search mission override table DS:B772 (5-byte entries, count 9902) backwards; returns new object or 0 |
-| 0000:0ffb | `terr_probe_point` | render3d | `void terr_probe_point(long x,long y_inv,long z)` | Scenery collision probe: nearest solid object in tile then 11eb:01b8 point test; result in byte C686 |
-| 0000:119c | `map_render_terrain` | render3d | `void map_render_terrain(ctx*,int px,int py,int shift)` | Map MFD terrain: dae8 top-down camera, 11f2 tile walk, db3e; only caller 8387 |
-| 0000:11f2 | `map_draw_tiles` | render3d | `void map_draw_tiles(int px,int py,int shift)` | Walks tile levels 4..0, tile object lists, calls 13e3 per object (3DX top-down draw) |
-| 0000:1353 | `map_tile_bounds` | render3d | `void map_tile_bounds(int*x0,int*x1,int*y0,int*y1)` | Visible tile range of the map window using 13ac, clamped 0..94E0-1 |
-| 0000:13ac | `map_pixel_to_tile` | render3d | `void map_pixel_to_tile(int px,int py,int*tx,int*ty)` | tx=(94E2-160+px)/94DE; ty=((py-100)*4/3+94E4)/94DE |
-| 0000:13e3 | `map_draw_object` | render3d | `void map_draw_object(int id,int x,int y)` | Draw one 3DX scenery object top-down via 1433:03a9, e54b, 11eb:00d3 (class filter 94E6) |
-| 0000:1442 | `r3d_draw_sky_ground` | render3d | `void r3d_draw_sky_ground(ctx*)` | 16 sky bands (col 0x80+i) + 16 ground bands (0x70+i) as polygons 1001:01ec; flat fill if 98DE<3; caches sin/co |
 | 0000:17a3 | `cockpit_draw_adi` | simflow | `void cockpit_draw_adi(void)` | Attitude indicator 32x28 at (265,140): horizon polygon col 1 on col 9, bezel 91a4, copy back page to screen; o |
 | 0000:1961 | `mfd_view_sky_bands` | simflow | `void(int horizon)` | up to 16 sky quads colours 80h+i above horizon row, clamped at y=6Eh; table DS:0D22 |
 | 0000:19ea | `mfd_view_ground_bands` | simflow | `void(int horizon,int mode)` | up to 16 ground quads colours 70h+i (F0h if mode==1) below horizon, clamped at y=A9h |
-| 0000:1a85 | `fx_explosion_sprite` | render3d | `void(int x,int y,int size,int frame)` | explosion animation frame (18-entry far-ptr table DS:9188) via sprite_scaled slot 22; w=size h=size-size/4 at  |
-| 0000:1ad6 | `r3d_sprite_main` | render3d | `void r3d_sprite_main(int x,int y,int size,int cls)` | 2D scaled sprite (slot 22) centred at x,y, height 3/4 size, ctx=[0344]; far ptr DS:91D8[cls] |
-| 0000:1b1b | `r3d_sprite_tv` | render3d | `void r3d_sprite_tv(int x,int y,int size,int cls)` | same as 1AD6 but ctx=[4042] (target camera window) |
 | 0000:1bb0 | `frame_loop` | simflow | `void(void)` | saves bp si di es and calls frame_loop_body |
 | 0000:1bbc | `frame_loop_body` | simflow | `void(void)` | THE frame loop: 2F82,7898,[C07A]==0:(10A8:0000,D9A3,17A3),flip,[262A]=1,1E9E,39C4 until [E552] |
 | 0000:1bfc | `timer_install` | simflow | `void(void)` | [2636]=[2640]=1, clock=0, timer_calibrate, save INT 8 in cs:1CEB, install timer_isr, [262B]=1 |
@@ -5653,7 +5663,6 @@ Callers: `bf71`.
 | 0000:7470 | `mission_target_done` | simflow | `int(int j)` | primary/secondary target achieved: sets 9B05 0x40/0x20 and 2E7C 1/2/3; 9876 = Primary target or Second. target |
 | 0000:74f6 | `dmg_player_blast` | damage | `void(void)` | skill+1 random bits into [3632] damage mask and [C5C8]++; lamps 10..16 refresh; [98EE]=1; sound 4; no-op in tr |
 | 0000:753f | `wpn_release` | weapons | `void(void)` | fire key: checks roll/bay/altitude, takes a store from the selected bay, fills a free projectile slot 8-11 or  |
-| 0000:77d9 | `terr_probe_cell` | render3d | `void terr_probe_cell(int cellx,int celly,int alt)` | 0ffb(cellx<<5,(0x8000-celly)<<5,alt); result C686 |
 | 0000:780a | `dmg_wobj_destroyable` | damage | `int(int o)` | 1 if the world object found in [9F10] is not yet the wreck shape (C0AC or DEA4 by class) |
 | 0000:784a | `cockpit_widgets_reset` | simflow | `void(void)` | mission-start reset of panel widgets (d83e x4), [409C]=0, [DFDC]=0x18; called from 4857 |
 | 0000:7898 | `hud_overlay_frame` | simflow | `void hud_overlay_frame(void)` | per-frame HUD C part: flash, lamps 0-2, stall lamp, weapon/gun line, crosshair, tapes, AAM circle, speed/alt n |
@@ -5709,7 +5718,6 @@ Callers: `bf71`.
 | 0000:9770 | `mfd_map_restore_bg` | simflow | `void(void)` | Reverse of 973c: backup page -> draw page |
 | 0000:97a4 | `mfd_objectives_page` | simflow | `void mfd_objectives_page(void)` | right MFD page 0x18 mission orders text builder (PRIMARY/SECONDARY Mission, verb phrase, noun at place, Before |
 | 0000:99a7 | `hud_ils` | simflow | `void hud_ils(void)` | F9 ILS needles: localiser x 139..181, glide slope y 40..72, label "ILS" |
-| 0000:9aca | `r3d_draw_world_objects` | render3d | `void(void)` | Per-frame world objects: own ship, ground-target acquisition, particles, units(C140), weapon slots(3C0C), shad |
 | 0000:a17e | `obj_overlay_frame` | simflow | `void(void)` | Per-frame (from 03ce after db3e): projectile markers, cannon tracers+hit tests, explosion sprite, ground/air t |
 | 0000:b339 | `hud_draw_diamond` | simflow | `void(void)` | 4-line diamond +-4 px around (DS:49E0,49E8) in HUD colour [2CA0] |
 | 0000:b3b3 | `hud_update_aspect_label` | simflow | `void(void)` | quadrant of (2DEE-DED4+0x2000)&0xC000 (left/right swapped); on change [E556]=q and 81F6() redraws Ahead/Rear/R |
@@ -5719,26 +5727,16 @@ Callers: `bf71`.
 | 0000:b6ae | `hud_lock_indicator` | simflow | `void(int mode,int lock)` | sets (b04E,b050)=(207;140); Maverick seeker cross; lock bracket; cockpit lamp 3 on (steady if lock else blinki |
 | 0000:b77a | `hud_ping_label` | simflow | `void(char *s,int colour,int dy)` | expanding hexagon (half-size dy) + centred name text at projected point DS:49E0/49E8 (text colour DS:9872) |
 | 0000:b7f8 | `hud_format_range` | simflow | `void(int dist)` | DS:9876 = "Range " + (dist>>6) + "." + ((dist&63)*2/13) + " km" |
-| 0000:b85d | `r3d_project_point` | render3d | `void(int x_u,int y_u,int z)` | World point to screen: sx[49E0] (FFFF=invisible) sy[49E8] depth[DE92]; 90 deg field, scale 256, sy*3/4, centre |
-| 0000:ba13 | `r3d_matrix_row_dot` | render3d | `long(int row,int dx,int dy,int dz)` | Row of 3x3 camera matrix (DS:B156, col-major) dot vector via fmul 109D:0006 |
-| 0000:ba67 | `r3d_view_depth` | render3d | `void(int a,int b,int c,int d,int e,int f)` | [DE92] = (mul14(4992,d-a)+mul14(4998,(c-f)>>5)+mul14(499E,b-e))>>3 camera-axis depth; caller c834 (R10) |
 | 0000:bad1 | `obj_find_at` | weapons | `int(int x,int y)` | terrain object at world point -> site index (>=1) / 0 = scratch site 0 filled / -1 none (R6 name obj_find_at) |
 | 0000:bb86 | `wpn_site_dist` | weapons | `int(int site)` | bbb4 with site record DS:B2A4+16*site (x,y), bearing wanted |
 | 0000:bb9e | `wpn_unit_dist` | weapons | `int(int unit)` | bbb4 with unit record DS:C140+36*unit (x,y), no bearing |
 | 0000:bbb4 | `obj_dist_bearing` | weapons | `int(int x_u,int y_u,int want_bearing)` | [94FE]=dist2d(c987), [9502]=atan2(c9d6) if flag; relative to player [C0A4],[C0B2]; returns dist |
 | 0000:bbed | `fm_bomb_dive_angle` | flight | `int(void)` | (((0x4000-/[2DF0]/)<<12)/(([2DF4]+0x1000)&0xFFFF))-0x4000 ; FFBOMB dive floor |
-| 0000:bc12 | `obj_wreck_shape` | render3d | `int(int o)` | model id to draw for site o: raw +0E, or destroyed variant (R6 name obj_wreck_shape) |
 | 0000:bc77 | `obj_cls_soft` | weapons | `int(int o)` | C604[type]&15 in {9,11,12,13} |
 | 0000:bcac | `obj_cls_ship` | weapons | `int(int o)` | C604[type]&15 in {12,13} |
-| 0000:bcd7 | `r3d_unit_terrain_class` | render3d | `void(int unit)` | [49C6]=tile class (DS:B174[(y>>11)*16+(x>>11)]&3); last 4 units forced 0/1 |
 | 0000:bd24 | `load_stflt_3dx` | loader | `void(void)` | stflt.3dx -> bank 0 (B75E); flags to 0760; 09E0[i]=6 |
-| 0000:bd8f | `r3d_draw_model` | render3d | `void(int model,long x,long y,int alt,int a1,int a2,int a3,int lod)` | Camera-relative setup, lod shift, then dca9 + e7ac model submission (HUD style shifts scale) |
-| 0000:bee1 | `r3d_queue_object` | render3d | `void(void *model,long x,long y,int z,int a,int b,int c)` | camera-relative cull (/dx/,/dy/<0x7FFF) then dca9(0;0;-dz), [E2FC]=1, e7ac(...); sibling of bd8f; caller c834 |
 | 0000:bf71 | `mfd_view_render` | simflow | `void(unsigned obj,int x,int y,int z,int a0,int a1,int a2,int mode,int zshift)` | Sensor/seeker view window x169-245 y110-169: camera, sky/ground bands, 3D object, FLIR tint, BRG and zoom labe |
-| 0000:c6b8 | `r3d_scenery_id` | render3d | `unsigned r3d_scenery_id(unsigned id)` | if bank bit set: DS:0510[id&7F] / (id&8000) (3DT object byte -> bank<<8/idx); else id |
 | 0000:c6de | `mfd_view_flir_tint` | simflow | `void(int x,int y)` | Shade-fill (poly_fill mode 3, ramp 98h-9Fh) of the 77x61 sensor window at offset (x,y) = FLIR green look |
-| 0000:c73c | `fx_fire_puffs` | render3d | `void(a0,a1,a2,rx,ry,rz)` | 6 randomised fire/smoke puffs (state DS:3A5C) drawn with e7ac models 24h/25h+frame around a burning air target |
-| 0000:c834 | `fx_smoke_draw` | render3d | `void(int camx,int camy,int camz)` | Draws the 16 smoke puffs of DS:39DA (burning site 3D68) via ba67 + bee1(0x25) with depth based size |
 | 0000:c8fa | `lib_scale_eighths` | lib | `int(int mode,int v)` | mode 0..3 -> v*0.5/0.625/0.75/0.875 (sar), else v |
 | 0000:c94e | `fx_clamp_wrap` | lib | `int(v,lo,hi)` | clamp with wrap quirk (v<=-0x4000 -> hi) |
 | 0000:c96d | `fx_clamp` | lib | `int(v,lo,hi)` | plain clamp |
@@ -5755,7 +5753,6 @@ Callers: `bf71`.
 | 0000:d6bf | `snd_cue` | simflow | `void(cmd,prio)` | snd_cmd gated by snd_level 43C2 and eject state |
 | 0000:d6e5 | `snd_engine_refresh` | simflow | `void(void)` | snd_cmd 24 or 25 |
 | 0000:d707 | `frame_params_update` | simflow | `void(void)` | clamp rate 4-3D7A..15; 43B8 B16C B286 9F64 |
-| 0000:d76b | `view_range_setup` | render3d | `void(void)` | 48A6.. = 0x20<<(i+98DE); 48B2 48B4 48B6 |
 | 0000:d7bb | `frame_rate_halve` | simflow | `void(void)` | 3D7A 2->1, rate<<=1 |
 | 0000:d7d0 | `nav_copy_xy` | simflow | `void(dst,src)` | copy site xy to 2E6C+4*dst |
 | 0000:d7f4 | `pic_show` | loader | `void(name,page)` | open + 11B9:000E decode + close |
@@ -5764,21 +5761,7 @@ Callers: `bf71`.
 | 0000:d83e | `hud_lamp_recolor` | simflow | `void(ctx,lamp,on)` | rect_recolor lamp rect, table 46D8/4672 |
 | 0000:d92d | `hud_digits_draw` | simflow | `void(page,slot,str)` | blit 4x7 digits from page2 strip |
 | 0000:d9a3 | `hud_side_strips` | simflow | `void(int page)` | side bars + store highlight 46C2 |
-| 0000:dae8 | `r3d_begin_scene` | render3d | `void r3d_begin_scene(Viewport*vp,int a1,int a2,int a3,int ox,int oy,int oz,int backdrop,int focal)` | DB71, DC64, DCA9; if backdrop: 11EB:0F9B, wait [262A], 1442 sky/ground; [49C4]=0 |
-| 0000:db3e | `r3d_end_scene` | render3d | `void r3d_end_scene(void)` | DF08 flush sorted queue, offset_clear, advance spinner vars C04C/C04E, copy matrix 498E->49B2 |
-| 0000:db71 | `r3d_set_viewport` | render3d | `void r3d_set_viewport(Viewport*vp)` | screen centre 0D1E/0D20, clip max 2293/2295, draw offset, page seg 85EA, cull tables E53E/E544 |
-| 0000:dc64 | `r3d_set_camera_matrix` | render3d | `void r3d_set_camera_matrix(int a1,int a2,int a3,int focal)` | E26B(498E,-a1,-a2,-a3); 1433:03A9(-a1,-a2,a3,49A0); 11EB:000C(49A0,focal) |
-| 0000:dca9 | `r3d_set_origin` | render3d | `void r3d_set_origin(int x,int y,int z)` | [497C],[497E],[4980] = camera/cell origin used by E7AC |
-| 0000:dcc0 | `r3d_queue_billboard` | render3d | `void(int id,long x,long y,int z,int sx,int sy,int size)` | Camera-relative like bd8f (sar 3/2), e8a2 accept test, then ddfe inserts into depth-sorted billboard list |
-| 0000:ddfe | `r3d_queue_insert` | render3d | `void(void)` | Insert entry (0x16 B at DS:49F0) into pointer list DS:4E3C sorted descending by key; max 50, drops farthest |
-| 0000:df08 | `r3d_draw_queued` | render3d | `void r3d_draw_queued(void)` | draw sorted object queue (DS:4E3C, count 49C4) far->near; sprite objects, bank-0 var setup, type 0x18 special, |
-| 0000:e26b | `r3d_matrix_from_angles` | render3d | `void r3d_matrix_from_angles(short m[9],int A,int B,int C)` | Q15 3x3 rotation from sin/cos (109D) into m (DS:498E); also leaves sin/cos in 4982..498C |
-| 0000:e3e2 | `r3d_matrix_obj_side` | render3d | `void r3d_matrix_obj_side(void)` | Q15 matrix at 49A0..49B0 from [496A],[496C],[496E]; only used for type-0x18 sub-model order decision in DF08 |
-| 0000:e54b | `r3d_transpose49A0` | render3d | `void r3d_transpose49A0(void)` | transpose DS:49A0 3x3 in place |
 | 0000:e578 | `mat_mul` | lib | `void(A,B,C)` | 3x3 Q15 C=AxB |
-| 0000:e7ac | `r3d_place_object` | render3d | `void r3d_place_object(unsigned type,int a1,int a2,int a3,int X,int Y,int Z)` | rel pos, flag byte from DS:0A60 bank, E8B5 cull, flag bit7 -> DDFE queue else 03A9+transpose+11EB:00D3 draw no |
-| 0000:e8a2 | `r3d_cull_point` | render3d | `int r3d_cull_point(int x,int y,int z)` | cdecl wrapper for E8B5 (BP=x,BX=y,CX=z); 0 = visible |
-| 0000:e8b5 | `r3d_cull_core` | render3d | `reg: BP=x BX=y CX=z -> AX,ZF` | view vector via DS:498E -> 4958/495C/4960, depth+frustum+class tests, [4978]=distance; AX=0 visible |
 | 0000:ea26 | `pal_fade_step` | lib | `int pal_fade_step(RGB far*cur,RGB far*target,int count)` | moves each component of cur one step toward target, returns number changed (callers 4857,4D43) |
 | 0000:ea7c | `file_load_paras` | loader | `u16(const char *name)` | fopen r+b, filelength, check free paragraphs, alloc, int86x read loop (64K chunk bug); returns segment or 0; s |
 | 0000:f0b0 | `ltoa` | lib | `char *(long v,char *buf,int radix)` | signed entry (bl=1) of the number conversion at FA38; f094 is the unsigned head |
@@ -5792,30 +5775,12 @@ Callers: `bf71`.
 | 0000:fe10 | `malloc` | lib | `void *(unsigned n)` | jmp rtl_nmalloc (fe35) |
 | 0000:ffb7 | `rtl_nh_last_free` | lib | `internal` | near-heap list walk to the last free block (sentinel FFFEh), used by rtl_nh_grow |
 | 0ffd:0008 | `drv_bind` | loader | `void(u16 seg)` | driver header seg:0: [18h] code seg, [1Ch] first slot, [22h] count, [24h..] offsets -> DS:011A+5*(first+k)+1/+ |
-| 1001:0006 | `hz_fill_far` | render3d | `void far hz_fill_far(int colour)` | [0D46]=colour then horizon split 0018 (flat sky/ground, detail<3) |
-| 1001:0018 | `hz_draw` | render3d | `void hz_draw(void)` | horizon line from pitch/roll (H=256*tan, zoom) clipped, fills sky colour [0D46] and ground 0x78 via edge table |
-| 1001:01ec | `poly_fill_far` | render3d | `void far poly_fill_far(Viewport*vp,int n,int*pts,int colour)` | n-point polygon: clear tables, edges via 06AC, slot 37 solid; used for the 4-point backdrop bands by 1442 |
-| 1001:024c | `fill_rows_far` | render3d | `void far fill_rows_far(Viewport*vp,int xl,int ymin,int xr,int ymax)` | page select vp->page, colour vp+4, fill rows ymin..ymax between xl..xr via tables+slot 40 |
-| 1001:02ba | `fill_rows2_near` | render3d | `void fill_rows2_near(...)` | dead near copy of 024C using colour vp+6 (never called) |
-| 1001:0326 | `line_clip_far_stub` | render3d | `void far line_clip_far_stub(void)` | call 0336; retf |
-| 1001:032a | `line_clip_far` | render3d | `void far line_clip_far(void)` | saves BP/SI/DI/ES, 0336: clip+draw segment [2299..229F] |
-| 1001:0336 | `line_clip_draw` | render3d | `int line_clip_draw(void)` | Cohen-Sutherland clip to 0..[2293]x0..[2295] with INT0 hook 04E3; slot 31 line; CF=1 if rejected |
-| 1001:04c2 | `clip_outcode` | render3d | `byte clip_outcode(bx=x,bp=y)` | AL bits 1:x>xmax 2:y>ymax 4:y<0 8:x<0; ZF if inside |
-| 1001:04e3 | `int0_sat_a` | render3d | `INT0 handler` | divide overflow in 0336: AX=+-0x7F00, DX=0, skip faulting idiv |
-| 1001:0504 | `poly_flush_far` | render3d | `void far poly_flush_far(int mode)` | slot 37 poly_fill([2615],22A1,[2617],mode): 0 solid 1 OR 2 AND >=3 green |
-| 1001:051f | `tables_clear_far` | render3d | `void far tables_clear_far(void)` | call 0525; retf |
-| 1001:0525 | `tables_clear` | render3d | `void tables_clear(void)` | reset dirty range of edge tables: L=0xFFFF R=0, [2615]=FFFF [2617]=0 |
-| 1001:055b | `edge_column` | render3d | `void edge_column(si=x,di=ya,dx=yb)` | write border column x(0 or xmax) into L or R table for rows ya..yb; entry 05AA picks side from bx |
-| 1001:06a0 | `edge_to_tables_far` | render3d | `void far edge_to_tables_far(void)` | saves ES/SI/DI/BP, 06AC, retf |
-| 1001:06ac | `edge_to_tables` | render3d | `void edge_to_tables(void)` | clip edge [2299..229F] (INT0 hook 0854) and Bresenham into L/R tables (05B9 rasteriser inside this block) |
-| 1001:0854 | `int0_sat_b` | render3d | `INT0 handler` | divide overflow in 06AC (IP 0x7CE): AX=+-0x7F00 |
 | 1088:0006 | `pal_flight_load` | simflow | `void(void)` | climate ramps (DS:0D47!=2) into A/B/C, pick A/B/C by [43AE]/[3658], copy 768 B to 104A, set DAC 256, MFD ramp  |
 | 1088:00a3 | `pal_mfd_ramp_green` | simflow | `void(void)` | set DAC 98h..9Fh from DS:206A (green MFD ramp) |
 | 1088:00bd | `pal_mfd_ramp_rt` | simflow | `void(void)` | set DAC 98h..9Fh from DS:1212 (runtime ramp) |
 | 1088:00d7 | `pal_save` | simflow | `void(void)` | pal_read_dac -> DS:0D4A (768 B) |
 | 1088:00ee | `pal_restore` | simflow | `void(void)` | set DAC 0..255 from DS:0D4A |
 | 1088:0107 | `pal_set_adv` | simflow | `void(void)` | set DAC 0..255 from DS:134A (ADV.PAL, quit requester) |
-| 1088:0120 | `r3d_depth_shade` | render3d | `u8(void)` | shade offset: 0 if [7D5E] or ![43B6]; else clamp(max(0,(s8)[4963])>>1 - [497A],0,31)>>1; callers DE6A E830 ([4 |
 | 109d:0006 | `fx_mul15` | lib | `int(a,b)` | (a*b+0x4000)>>15 |
 | 109d:006c | `fx_cos16` | lib | `int(a)` | sin16(a+0x4000) |
 | 109d:007c | `fx_sin16` | lib | `int(a)` | table interpolation 2084 |
@@ -5848,421 +5813,22 @@ Callers: `bf71`.
 | 11ce:0034 | `pic_begin` | loader | `void(void)` | read header word: bit7 -> 8-bit pixels else 4-bit; max code bits; init LZW table C688 (2048*3 B) |
 | 11ce:00b2 | `pic_rle90_fill` | loader | `void(void)` | expand [965A] pixels with RLE escape 90h; 4-bit mode emits 2 px per byte |
 | 11ce:012b | `pic_lzw_next` | loader | `void(void)` | variable-width LZW decoder step using a private stack and the 512 B file buffer 43C8 |
-| 11eb:000c | `r3d_set_camera` | render3d | `void far(const int16*mat9,int zoom)` | copies cam matrix to 7AF8, scales (x/y halved, z by 7D2E, y*0.75), sets far limit 7D2E=7FFF00h/max(/2zoom/,100 |
-| 11eb:00d3 | `r3d_draw_object` | render3d | `void far(obj,x,y,z,mat9*,vars*)` | draws one 3DX object: LOD, cull, parts, planes, vertices, edges, faces. DS:8560=bank seg. Callers 13E3,DF08,E7 |
-| 11eb:01b8 | `r3d_probe_object` | render3d | `void far(obj,x,y,z,mat9*)` | 00D3 without drawing: sets C686 bit7 when the point is inside a closed model (collision/inside test, caller 0F |
-| 11eb:0281 | `r3d_hook_div0` | render3d | `void near()` | saves real-mode INT0 vector to DS:5EB6/8 and installs 11EB:0975 |
-| 11eb:02a2 | `r3d_unhook_div0` | render3d | `void near()` | restores INT0 vector from DS:5EB6/8 |
-| 11eb:02b6 | `r3d_frustum_test` | render3d | `bool near(AX=radius)->ZF` | sphere/pyramid cull: far limit 7D2E, 2*zhi+radius >= /xhi/,/yhi/; ZF=1 visible, AX=FFFF culled |
-| 11eb:031b | `r3d_setup_parts` | render3d | `void near(CX=nparts)` | per-part matrices (7B1C+24h*k), eye vectors 7C3C, light vectors 7C6C, part origins 7CAE; uses 1433:0286/03A9/0 |
-| 11eb:0440 | `r3d_part_pivot` | render3d | `void near(BX=eye slot,DI,ES:SI=pivot)` | origin_part = origin_obj + pivot*M_root - pivot*M_part (rotation about pivot); eye slot = -pivot |
-| 11eb:04cd | `r3d_light_root` | render3d | `void near()` | copies light vector 7D54 to 7C6C, rotates by ObjMat^T, 7D4C=7C6C+6 |
-| 11eb:04f9 | `r3d_light_part` | render3d | `void near()` | light vector for a part: 7C6C rotated by part matrix (DI), stored at [7D4C], 7D4C+=6 |
-| 11eb:0565 | `r3d_planes` | render3d | `void near(ES:SI=nplanes)` | plane visibility n.eye+d>=0 -> 76D2[], shade 77D2[], vertex-needed flags 79D2[], BSP order 78D2 (0E5F) |
-| 11eb:0658 | `r3d_clear_vertex_flags` | render3d | `void near()` | zeroes (/nverts/+2)/2 words at DS:79D2 |
-| 11eb:0678 | `r3d_plane_shade` | render3d | `void near()` | shade byte ((n.L)<<2)>>16 into 77D2[di]; only copied to 7D5A, never used (dead) |
-| 11eb:06b9 | `r3d_xform_vertices` | render3d | `void near(ES:SI=vertices)` | transform needed vertices into C688 (s32 x3, 16B) and project into D688 (8B); handles part prefixes 8000-800F |
-| 11eb:0819 | `r3d_xform_one` | render3d | `void near(ES:SI,BX=mat,DI=out3d,BP=outproj)` | v*M + origin (s32), then 0906 project; advances bp+=8 di+=16 si+=6 |
-| 11eb:0906 | `r3d_project` | render3d | `void near(DI=v3d,BX=out)` | perspective x/z,y/z in 3 z ranges (>=100h,>=1,<1 => x_hi=8000h behind); map mode if 7D5E!=0; idiv overflow cau |
-| 11eb:0975 | `r3d_div0_handler` | render3d | `INT0 handler` | divide overflow recovery: skips idiv+cdq (IP+3), redoes (dx:ax>>8)/cx and returns quotient<<8 |
-| 11eb:0990 | `r3d_near_bisect` | render3d | `void far(p0[6w],p1[6w])` | bisects segment p0p1 until mid z hi is 0 or 1; result x@7D42 y@7D46; used for edges crossing the near plane |
-| 11eb:0a37 | `r3d_build_edges` | render3d | `void near(ES:SI=nedges)` | for each edge (v0,v1) with both vertices needed -> 0B3F; edge records at DS:5EBA+24*i |
-| 11eb:0b3f | `r3d_make_edge` | render3d | `void near(SI=rec,DI=v0*8,BX=v1*8)` | builds 24-byte edge record from D688 projections + centre 85D2/85D4, near-plane handling, calls 12EF:0333 clip |
-| 11eb:0c7a | `r3d_draw_faces` | render3d | `void near()` | planes in file order (nplanes>0), BSP order list 78D2 (<0), or single face list (=0); calls 0CAC/0CED |
-| 11eb:0cac | `r3d_draw_face_plane` | render3d | `void near(BX=plane)` | if 76D2[plane]>7Fh: 7D5A=shade, si=face-list offset table[plane], 0CED |
-| 11eb:0ced | `r3d_face_list` | render3d | `void near(ES:SI=list)` | face-list interpreter: polygon (n<20h edges+colour) -> 12EF:003E/010A; 40h lines -> 1359:0040/0049; 20h points |
-| 11eb:0e5f | `r3d_bsp_order` | render3d | `void near(ES:SI,DI=out,BX=vis)` | iterative BSP walk: visible node -> back,self,front; hidden -> front,back; output FF-terminated list |
-| 11eb:0ef2 | `r3d_object_extent` | render3d | `void far(obj,int16 out[3])` | max /x/,/y/,/z/ of the vertices of LOD0 model; no direct callers |
-| 11eb:0f9b | `r3d_shared_verts` | render3d | `void far()` | builds shared-vertex table DS:4EB6 (*7AF8) from count after the 3DX offset table (0 in shipped data); caller D |
-| 12ef:0002 | `r3d_clip_line_queue` | render3d | `void far(x0,y0,x1,y1)` | builds edge record 5EBA from 4 s16, clips (0333), adds to polygon (003E); no callers |
-| 12ef:003e | `r3d_poly_add_edge` | render3d | `void near(SI=edge rec)` | accumulates flags 85B2; near pts (00E0); rasterises via 1359:0719; tracks left/right wall y ranges |
-| 12ef:00aa | `r3d_note_left` | render3d | `void near(BX,CX)` | left wall y range min/max into 85B4/85B6 |
-| 12ef:00c5 | `r3d_note_right` | render3d | `void near(BX,CX)` | right wall y range min/max into 85B8/85BA |
-| 12ef:00e0 | `r3d_note_zclip_point` | render3d | `void near(SI)` | saves rec+10h..16h (near-plane point) to 8588/8590, 85BE++ |
-| 12ef:010a | `r3d_poly_finish` | render3d | `void far(colour_word)` | 1359:0040 colour; close near-plane gap, wall fills 0185/019B, 1359:0052 fill, reset 85B2..85BE and wall ranges |
-| 12ef:0185 | `r3d_wall_right` | render3d | `void near()` | 1359:07D6(xmax+1,85B8,85BA) |
-| 12ef:019b | `r3d_wall_left` | render3d | `void near()` | 1359:07D6(xmin-1,85B4,85B6) |
-| 12ef:01b1 | `r3d_draw_line` | render3d | `void far(x0,y0,x1,y1,colour)` | colour via 1359:0040, edge record, clip, emit via 01F9; no callers |
-| 12ef:01f9 | `r3d_line_emit` | render3d | `void near(SI)` | if rec flag bit7 clear call 1359:0049 |
-| 12ef:020b | `r3d_clip_flags16` | render3d | `void near` | edge side flags (bit0 right,1 left for end0; 2,3 end1) into rec+2 and clamped y0/y1 into rec+6/+0E |
-| 12ef:0265 | `r3d_clip_intercept` | render3d | `void near(AL=mask,BX,CX)` | intersection of the edge with the window border selected by AL using dx/dy 85AC/85AE; CF=1 if off window |
-| 12ef:02d1 | `r3d_outcode16` | render3d | `void near(BX=x,CX=y)->AL` | Cohen-Sutherland outcode: 1 y<ymin 2 y>ymax 4 x<xmin 8 x>xmax; sets 85C0 on compare overflow |
-| 12ef:0333 | `r3d_clip_edge` | render3d | `void far(SI=edge rec)` | clips edge to window 85CA..85D0: s16 fast path (0465), s32 bisection path (0359); writes rec+2 flags, clipped  |
-| 12ef:04ef | `r3d_bisect_in` | render3d | `void near` | 32-step bisection moving the outside end of an s32 edge towards the window |
-| 12ef:056b | `r3d_bisect_out` | render3d | `void near` | 32-step bisection variant that keeps the inside point (s32 edge) |
-| 12ef:05d9 | `r3d_clip_flags32` | render3d | `void near(BP,DI)` | side flags and clamped y for the 32-bit path |
-| 12ef:063e | `r3d_on_border` | render3d | `void near` | BP!=0 if point lies exactly on a window border |
-| 12ef:0665 | `r3d_outcode32` | render3d | `void near(DX:AX,CX:BX)->BP` | outcode of an s32 point against the window |
-| 1359:0000 | `gfxlib_mode_init` | render3d | `void(char mode)` | mode letter E/M/C/T -> row offset table 85EC and dispatch base 85C2; main passes M |
-| 1359:0040 | `gfxlib_dispatch_a` | render3d | `void(void)` | call cs:[[85C2]+4] (MCGA: 1359:01D4) |
-| 1359:0049 | `gfxlib_dispatch_b` | render3d | `void(void)` | call cs:[[85C2]+6] (MCGA: 1359:045D) |
-| 1359:0052 | `gfxlib_dispatch_c` | render3d | `void(void)` | call cs:[[85C2]+8] (MCGA: 1359:0AF7 polygon fill) |
-| 1359:0094 | `gfxlib_alloc_dead` | lib | `u16(u16 paras)` | INT 21/48 with 400h reserve, inverted test; never called |
-| 1359:00e7 | `gfxlib_rows_ega` | lib | `void(void)` | EGA row table 200 rows *28h |
-| 1359:010a | `gfxlib_rows_mcga` | render3d | `void(void)` | MCGA row table: 200 words row*140h at DS:85EC, [85C2]=70h (the only one used) |
-| 1359:0126 | `gfxlib_rows_cga` | lib | `void(void)` | CGA interleaved row table, [85C2]=7Ch |
-| 1359:0149 | `gfxlib_rows_tandy` | lib | `void(void)` | Tandy 4-bank row table, [85C2]=88h |
-| 1359:019b | `r3d_set_page` | render3d | `void far(int page)` | 85C6=page; 85EA=[85E2+2*page]; no callers (DB71 does it inline) |
-| 1359:01b1 | `r3d_setcolor_E` | render3d | `void near(AX)` | EGA mode colour setter (GC regs 3CEh); dead |
-| 1359:01f8 | `r3d_setcolor_C` | render3d | `void near(AX)` | CGA mode colour pattern 914A/914C; dead |
-| 1359:021d | `r3d_setcolor_T` | render3d | `void near(AX)` | Tandy mode colour pattern 914E; dead |
-| 1359:023a | `r3d_pixel_E` | render3d | `void far(x,y,c)` | EGA window-clipped pixel; dead |
-| 1359:027b | `r3d_pixel_M` | render3d | `void far(x,y,c)` | mode M window-clipped pixel; no callers |
-| 1359:02b6 | `r3d_pixel_C` | render3d | `void far(x,y,c)` | CGA pixel; dead |
-| 1359:0301 | `r3d_pixel_T` | render3d | `void far(x,y,c)` | Tandy pixel; dead |
-| 1359:0344 | `r3d_ega_addr` | render3d | `void near` | EGA pixel address/mask helper of 023A; dead |
-| 1359:0719 | `r3d_edge_dda` | render3d | `void far(SI=edge rec)` | scan-converts edge into per-scanline min/max x tables L=DS:89AC+2y, R=DS:8D6E+2y; updates 9130 (min y) |
-| 1359:07d6 | `r3d_wall_fill` | render3d | `void far(x,ya,yb)` | vertical wall: L=min(L,x), R=max(R,x) for rows ya..yb clamped to window |
-| 1433:0004 | `math_sin` | lib | `int far(uint16 a)` | Q15 sine from quadrant table 14B2:0000 (2048 words); 65536=360deg |
-| 1433:0031 | `math_cos` | lib | `int far(uint16 a)` | Q15 cosine = sin(a+4000h) |
-| 1433:0061 | `math_atan2` | lib | `uint16 far(int y,int x)` | angle 0..FFFF (4000h=90deg) from octant base DS:9178 +/- atan table 14B2:1000 (4096 words) |
-| 1433:00d9 | `math_mul_sin` | lib | `int far(int k,uint16 a)` | (k*sin a)>>15 |
-| 1433:011a | `math_mul_cos` | lib | `int far(int k,uint16 a)` | (k*cos a)>>15 |
-| 1433:015e | `math_asin` | lib | `int far(int x)` | arcsin of Q15 x via table 14B2:3202 (1024 words), signed result |
-| 1433:018e | `math_hypot2` | lib | `int far(int a,int b)` | approx sqrt(a^2+b^2) = L + L*tab(S/L) with 256-entry table 14B2:3000 |
-| 1433:01e0 | `math_hypot3` | lib | `int far(int x,int y,int z)` | hypot2(hypot2(x,y),z); negative intermediate => h+/z//2 |
-| 1433:0219 | `mat_vec16` | lib | `void far(int16 v[3],const int16 M[9])` | in-place v=v*M>>15 (Q15 row vector times matrix) |
-| 1433:0286 | `r3d_mat_mul_fx` | lib | `void far(A,B,C)` | C=A*B 3x3 Q15 (row i of A times columns of B) |
-| 1433:02aa | `mat_row_mul` | lib | `near(SI=A row,BX=B,DI=C row)` | helper of mat_mul: one output row |
-| 1433:02e2 | `mat_transpose` | lib | `void far(src,dst)` | 3x3 transpose |
-| 1433:0314 | `mat_copy` | lib | `void far(src,dst)` | copies 9 words |
-| 1433:032e | `vec_mat32` | lib | `void far(v16[3],M[9],out32[3])` | out_k = sum v_j*M[3j+k] full 32-bit, unshifted |
-| 1433:03a9 | `mat_from_euler` | lib | `void far(a,b,c,out[9])` | rotation matrix from 3 angles (formulas in spec); callers DC64,DF08,E7AC,13E3,0FFB,31B |
-| 1433:04d7 | `mat_to_euler` | lib | `void far(M,&a,&b,&c)` | inverse of 03A9: b=asin(m5), gimbal lock if /b/>3E80h |
-| 1433:0542 | `math_mulq` | lib | `int far(int a,int b)` | (a*b)>>15 |
-| 1433:0554 | `math_muldiv` | lib | `int far(int a,int b,int c)` | a*b/c with overflow-aware ordering |
-| 1433:058f | `math_div32sat` | lib | `int far(lo,hi,d)` | (hi:lo)//d/ with saturation 7FFF^sign |
-| 1433:05c6 | `math_imul` | lib | `long far(int a,int b)` | 32-bit product DX:AX |
-| 1433:05d1 | `mat_from_euler_b` | lib | `void far(c,b,a,out[9])` | alternative Euler order matrix; no callers |
-| 14a2:00c5 | `pal_read_dac` | render3d | `void(void far *dst)` | wait retrace, read 768 bytes of DAC from index 0 into dst (6-bit) |
+| 14a2:00c5 | `pal_read_dac` | simflow | `void(void far *dst)` | wait retrace, read 768 bytes of DAC from index 0 into dst (6-bit) |
 
 
 ---
-# Part 12: render3d interface (extracts of the R11a / R11b index passes)
+# Part 12: render3d interface (moved to render3d.md, S3.7)
 
-Only the interface is kept here (conventions, sine table, scene call contract, what the renderer reads, buffer map). The per-function index of the renderer (terrain/scenery 04DA family, 1001 edge tables, 11EB/12EF/1359/1433) is in `simflow_symbols.csv` (`owner=render3d`) and in the S3.6 working notes `port/notes/s36/spec_R11a.md`, `spec_R11b.md`. Note R11a: "DS:oooo is at file offset 0x1EA50+oooo" (file incl. MZ header); the image base used by `dsann.py` is 0x1E230.
+The renderer is specified bit-exact in `port/spec/render3d.md` (S3.7), which replaces the R11a/R11b extracts that stood here
+(several of their details were corrected there). Where to find what the sim side needs:
 
-## 12.1 From R11a (scene set-up, conventions, sine table)
-
-## 1. Overview: how a 3D scene is drawn (data flow)
-
-### 1.1 Frame call chain (main view)
-`frame loop 1BBC -> 2F82 (view) -> 03CE r3d_scene` (03CE is R3's; arguments below because they are the entry-point parameters):
-
-```
-03CE(heading_neg, pitch, roll, xlo, xhi, ylo, yhi, zlo, zhi, x0, y0, w, h)       // cdecl, [bp+4].. in this order
-  vp = (Viewport*)[0344] = DS:032E        // the main viewport record (see 3.1)
-  vp->y0=[bp+0x18] vp->y1=y0+h-1 vp->x0=[bp+0x16] vp->x1=x0+w-1   // vp+0xE,+0x10,+0x12,+0x14   (so [bp+0x16]=x0,[bp+0x18]=y0,[bp+0x1A]=w,[bp+0x1C]=h)
-  vp->page = flip_flag()  (driver slot 45)  ;  vp->bg = 0x88  (+4)
-  04BB([43B8])                                  // frame pacing: spin until the byte tick counter [264A] has advanced by [43B8] (V)
-  [7D50] = (detail==3) ? 7F60 : 8360            // colour-byte -> fill word table (day, high / low detail)     (V, [98DE]==3)
-  var[1]=[C030]=0 ; var[10]=[C042]=var[11]=[C044]=[9874]=0 ; if byte[11E2] < 0x14 -> all three = 1   (V; lights on, 11E2 = light/time level (U))
-  focal = 0x100 ; if [365E] && [294B] focal = 0x80                                                   // 365E = side/rear view, 294B = narrow lens flag (U)
-  DAE8(vp, a1=heading_neg, a2=pitch, a3=roll, ox=0, oy=0, oz=zlo, draw_backdrop=1, focal)           // set-up + sky/ground
-  04DA(heading_neg, pitch, xlo, xhi, ylo, yhi, zlo, zhi)                                            // terrain + scenery (world position, 32-bit x,y,z)
-  9ACA()                                                                                            // sim objects -> culled -> queued/drawn (R8: dcc0)
-  DB3E()                                                                                            // flush sorted queue far->near, advance spinner vars
-  [7D50] = 7D60 ; A17E() ; [0346] ^= 1                                                              // overlays/MFD 3D, buffer parity (U)
-```
-The call in 2F82 (V, 3758) passes: `-[E44C]` (heading, 0 = north, clockwise), `[C07C]` (pitch, +up), `[B770]` (roll), x = `[B28A]:[B288]`,
-y = `[B754]:[B752]`, z = sign-extended `[B75C]` (altitude, 16 bit), viewport origin (0,0), width 0x140, height 0xC8 / 0xA1 / 0x9D (by view mode).
-Angles/positions in DS:E44C, C07C, B770, B75C are written by 2F82 (copies of the plane state adjusted per view mode).
-
-Other callers of the same primitives:
-* `bf71` (target camera / TV picture, viewport `[4042]` = DS:402C, window at screen (169,110)): `DAE8(vp4042, -[DED4], [9510], [9512], 0,0,0, 1, 0x100<<[433A])`
-  (c40e) or the map-like variant at c49f with `[4360]=1`, then `04DA(...)` (with `[0348]=1` forcing the "near" detail path), `DB3E`, `E7AC` for the target object.
-* `119C` (map/overview, R3): `DAE8(vp, a1=0, a2=0xC000, a3=0, 0,0, oz=0x2000, 1, 0x100)` = camera looking straight down (pitch -90 deg) from z=0x2000, then `11F2(...)` (map terrain) and `DB3E`.
-* `0FFB` (R? map object drawer) writes the same origin variables [497C..4980] and calls `11EB:01B8` directly.
-
-### 1.2 Inside DAE8 r3d_begin_scene (draw order of the static scene)
-1. `DB71(vp)` viewport -> clip window, screen centre, draw offset, cull tables.
-2. `DC64(a1,a2,a3,focal)` camera matrices: `E26B(DS:498E, -a1,-a2,-a3)` (cull/transform matrix), `1433:03A9(-a1,-a2,a3, DS:49A0)` (model-side matrix), `11EB:000C(DS:49A0, focal)` (final view matrix at DS:7AF8 + depth scale [7D2E]).
-3. `DCA9(ox,oy,oz)` -> [497C],[497E],[4980] (camera origin used by E7AC; per-cell overridden by 04DA).
-4. if `draw_backdrop`: `[C686]=0`; `[8560]=[B760]` (theatre .3DX bank segment); `11EB:0F9B` (pre-transform the theatre shared vertex table into DS:4EB6 with the new matrix, R11b);
-   spin `while (byte[262A]) ;` ([262A] is set to 1 by the frame loop after the flip, cleared elsewhere (timer ISR, U)): do not draw on the page being shown;
-   `1442(vp)` = **sky + ground backdrop** (R? ; calls `1001:0006` flat horizon fill when detail<3, else 16+16 colour bands via `1001:01EC`).
-5. `[49C4] = 0` (empty the sorted-object queue).
-
-### 1.3 Order of drawing inside one scene
-```
-backdrop (1442)  ->  terrain/scenery (04DA, levels 4,3,2,1 = coarse far->fine near, cells far->near inside a level)
-                 ->  non-sorted objects are drawn immediately by E7AC (11EB:00D3), flag byte bit7 = 1 objects are only queued (DDFE)
-                 ->  9ACA: simulation objects (planes, weapons, ...) via DCC0 -> E8A2 cull -> DDFE queue (R8)
-                 ->  DB3E: DF08 draws the queue in order (list sorted by view depth, FARTHEST first, painter's algorithm)
-                 ->  A17E overlays
-```
-Within DF08 a record may also be a 2D scaled sprite (type bit 0x400) or have a 2D flame/glow sprite added after the model (bank 0, type >= 0x25).
-
-### 1.4 Projection set-up (summary; details in 3 and 4)
-* screen centre (viewport-relative): `[0D1E]` = (width+1)/2-1 (159 for 320), `[0D20]` = 100 for a viewport starting at y0=0 (special: 60 or 52 if `[365E]`, see DB71), else (height+1)/2-1; absolute copy in `[85D2],[85D4]`.
-* focal length in pixels: the last argument of DAE8 (`0x100` normal, `0x100<<[433A]` zoom in bf71, `0x80` for `[365E]&&[294B]`), turned into `[7D2E] = 0x7FFF00 / max(0x100, |2*focal|)` by `11EB:000C` (0x3FFF for focal 0x100).
-  The vertical axis is squeezed by 3/4 for non-square pixels (`11EB:000C`, `[7D3A]==0`; same 3/4 factor in 1ad6/1b1b sprite heights and in the horizon routine 1001:0018) (V).
-* view matrices: DS:498E (Q15, built by E26B; used for CULLING by E8B5 and by 1442/1001:0018 via its sin/cos copies in DS:4982..498C), DS:49A0 (model-side matrix handed to 11EB:00D3, transposed by E54B), DS:7AF8 (final matrix incl. focal, R11b).
-* max view distance: `[48B6]` = 0x0D05 * (detail+1) (written by `D76B`), min depth per size class `[48C6+2*class]` = -1,-23,-91,-182,-363,-725,-1450,-2900.
-* detail level `[98DE]` 0..3: from comm+0x32 at mission start (3AFB..3B05 copies the byte), cycled by a key (CCD8: decrement; <0 -> value of driver slot 63 `get_const_3` if it is 3, else 2; message "Detail Level n"), then `D76B` rebuilds the depth tables.
-  Effects seen: 3 = colour table 7F60 (instead of 8360) + 16-band gradient ground (1442); >=2 = level-4 terrain uses the 15-cell frustum-culled path (04DA path A); <2 = far cells drawn only as the single ground record, near/other levels use the plain 9-cell path;
-  `[48B6]` grows by 0xD05 per detail step.
-
----------------------------------------------------------------------------------------------------------------------------------------------
-
-## 2. Coordinate conventions, angles and the sine table (needed by S3.7 / S3.8)
-
-### 2.1 World / camera coordinates
-* World: **x = east, y = north, z = up**. Theatre = 0x100000 (2^20) world units square (x,y 32-bit values 0..0xFFFFF in the sim; the 16-bit pair is `lo` at the lower address). Altitude z is a **signed 16-bit** value (2F82 sign-extends `[B75C]`). The physical unit is not visible in the code (probably feet, (U)).
-* Terrain cell sizes: see 4.1 (level 4 cell = 0x40000, level 3 = 0x10000, level 2 = 0x4000, level 1 = 0x1000 world units; level 0 = 0x800).
-* Object records / placement: E7AC and DF08 work with **camera-relative** (east, north, up) = `([4964],[4966],[4968])`. The 3DX model space is (x east, y up, z south), so the call to `11EB:00D3` passes `(x=[4964], y=[4968], z=-[4966])` (V).
-* View space produced by E8B5 (32-bit, units = input units, hi word = value): **A = right, B = up, C = forward depth**:
-  `A = 2*(m6*N + m3*U + m0*E)`, `B = 2*(m7*N + m4*U + m1*E)`, `C = 2*(m8*N + m5*U + m2*E)` with (E,N,U) = (BP, BX, CX) = (x,y,z) and m0..m8 = the words DS:498E+2k (V).
-
-### 2.2 Angles
-16-bit binary angles, **0x10000 = 360 deg, 0x4000 = 90 deg**, wrap-around by 16-bit arithmetic.
-* heading `[E44C]`: 0 = north, 0x4000 = east (clockwise) (V from the 04DA octant table: octant = (0x1000 + heading) >> 13, heading 0 -> far cells at +y). The scene functions receive `-heading` (a1 = `-[E44C]`) and negate again inside DC64 (V).
-* pitch `[C07C]`: positive = nose up (V from the matrix: C = cos p*(x sin h + y cos h) + z sin p). 04DA treats pitch < 0xD555 (= -60 deg, signed compare) as "looking straight down".
-* roll `[B770]`: positive = right wing down (V from the matrix: right = (cos r, -, -sin r) for h=p=0).
-* Object angles in queue records (+0x10,+0x12,+0x14) / E7AC args: three angles (a1,a2,a3) handed to `1433:03A9(-a1,-a2,a3)` (R11b); E3E2 reads them as (sin/cos of [496A],[496C],[496E]).
-
-### 2.3 Sine table and trig helpers (segment 109D; DS data) -- COMPLETE
-* **Table: DS:2084, 257 signed 16-bit words** (image 0x20AD4). `T[i] = round(32768 * sin(2*pi*i/256))` clamped to +/-32767 (i = 0..256; verified: all 257 entries equal the formula, only i=64 (32767 instead of 32768) and i=192 (-32767) are clamped). One full circle = 256 entries (step 1.40625 deg), entry 256 = 0 is the interpolation guard word.
-  Symmetries (verified): `T[128-i] = T[i]`, `T[256-i] = -T[i]`. Q15 scale: **unity = 0x7FFF (32767)**, there is no 0x8000.
-* Quarter wave T[0..64]: 0,804,1608,2411,3212,4011,4808,5602,6393,7180,7962,8740,9512,10279,11039,11793,12540,13279,14010,14733,15447,16151,16846,17531,18205,18868,19520,20160,20788,21403,22006,22595,23170,23732,24279,24812,25330,25833,26320,26791,27246,27684,28106,28511,28899,29269,29622,29957,30274,30572,30853,31114,31357,31581,31786,31972,32138,32286,32413,32522,32610,32679,32729,32758,32767.
-* `109D:0090` core (BX = angle in, BX = result): `i = a >> 8 (bh)`, `f = a & 255 (bl)`, `r = T[i] + ((T[i+1]-T[i])*f + 128 >> 8)` (the code: imul, take bits 8..23 of the product, add the carry from bit 7 = round half up) (V).
-* `109D:007C sin16(angle)` = core(angle); `109D:006C cos16(angle)` = core(angle + 0x4000); both far, cdecl `[bp+6]`, result in AX, Q15 (V). `109D:0088` = register entry of the core.
-* `109D:0006 mul_q15(a, b)` = `(a*b + 0x4000) >> 15` (signed, rounded; code: imul, shl/rcl, shl + adc dx,0) (V). Q15 x int gives int (coordinates), Q15 x Q15 gives Q15.
-* The only other reader of the table is `0000:2EBE asin_q15(x)` (V): `x == 0x8000 -> 0xC000`; else `i = (|x|>>9)+1` (<= 64), decrement i until `T[i] <= |x|`, `ang = (i<<8) + (((|x|-T[i]) << 8) / (T[i+1]-T[i]))`, negated if x < 0. Input Q15, output 16-bit angle in -0x4000..0x4000. `2F2F acos_q15(x) = 0x4000 - asin_q15(x)` is built on it.
-* START has its own copy of the idea (shell.md `ui_sin16` at DS:ABF8), not shared.
-* Inverse use: none found in this scope.
-
-### 2.4 Matrix layouts
-All matrices are 9 signed 16-bit words, row-major as the code stores them, **Q15 (0x7FFF = 1.0)**, entries `m0..m8` at `base+2k`.
-* **DS:498E** (E26B output; "camera/cull matrix"). With (s1,c1) = sin/cos of A, (s2,c2) of B, (s3,c3) of C, where DC64 passes (A,B,C) = (-a1,-a2,-a3) = (heading, -pitch, -roll):
-  ```
-  m0 = c1*c3 + s1*s2*s3     m1 = s1*s2*c3 - c1*s3     m2 = s1*c2
-  m3 = c2*s3                m4 = c2*c3                m5 = -s2
-  m6 = c1*s2*s3 - s1*c3     m7 = c1*s2*c3 + s1*s3     m8 = c1*c2        (every product is mul_q15, sums in 16 bit)
-  ```
-  used as `view.A = m0*E + m6*N + m3*U`, `view.B = m1*E + m7*N + m4*U`, `view.C = m2*E + m8*N + m5*U` (E8B5). (V)
-* **DS:49A0** (model matrix): `1433:03A9` (R11b) from (-a1,-a2,a3); transposed by E54B/E7AC before `11EB:00D3`. E3E2 builds an alternative 49A0 (see 5.10).
-* **DS:49B2**: 18-byte copy of DS:498E made by DB3E (memcpy(0x49B2, 0x498E, 0x12)); no reader found in the code image (U).
-* `E54B` = transpose of DS:49A0 (swaps 49A2<->49A6, 49A4<->49AC, 49AA<->49AE) (V).
-
----------------------------------------------------------------------------------------------------------------------------------------------
-
-## 3. Common structures
-
-### 3.1 Viewport record (`Viewport`, e.g. DS:032E main, DS:402C target camera; also the TextCtx/sprite ctx layout of video.md)
-| off | size | meaning |
-|---|---|---|
-| +0 | w | page number (03CE: from driver slot 45 `flip_flag`); index into the page-segment table DS:85E2 (db71 -> [85EA]) |
-| +4 | w | background (sky) colour: 0x88 for the main view (03CE writes it); 1001:0006/024C use it |
-| +6 | w | second colour (used only by the dead near function 1001:02BA) |
-| +0xE | w | y0 (top) |
-| +0x10 | w | y1 (bottom, inclusive) |
-| +0x12 | w | x0 (left) |
-| +0x14 | w | x1 (right, inclusive) |
-
-### 3.2 Sorted-object queue (ddfe, R8; documented because DF08 is mine)
-`DS:4E3C`: 50 near pointers (sorted list), `[49C4]` count (max 0x32); record pool `DS:49F0` = 50 x 0x16 bytes (record = pool + 0x16*index when not full; when full the farthest one is dropped and its record reused).
-Sorted descending by key (farthest first, signed 32-bit compare, ties by low word). Record:
-| off | size | meaning |
-|---|---|---|
-| +0 | s32 | sort key = view depth `[4960]:[4962]` >> (2*(4 - `[E2FC]`)) (so all terrain levels compare in level-4 units; DCC0 sets `[E2FC]`=1) |
-| +4 | w | shade value = result of `1088:0120` (distance fade, 0..15; used as `[4894]` colour shift) |
-| +6 | w | flags `[49C6]` (set by 9ACA/BCD7/C834): bits 0-1 -> var[12]=1; bit 5 -> suppresses var[13]; rest (U) |
-| +8 | w | type: low byte = object index, high byte = bank (0 STFLT, 1 theatre, 2 PHOTO); bit 15 = "destroyed" variant (var[1]); 0x0400 = 2D sprite object |
-| +0xA,+0xC,+0xE | s16 x3 | position relative to the camera: east, north, up |
-| +0x10,+0x12,+0x14 | s16 x3 | angles a1,a2,a3 (for sprite objects: screen x, screen y, size!) |
-
-### 3.3 3DX variable table `DS:C02E` (the `vars` argument of `11EB:00D3`; word per var number, var & 0x1F)
-var[1]=`[C030]` destroyed; var[5]=`[C038]`, var[6]=`[C03A]`, var[7]=`[C03C]`, var[8]=`[C03E]`; var[10]=`[C042]` lights, var[11]=`[C044]` lights; var[12]=`[C046]`, var[13]=`[C048]`, var[14]=`[C04A]`;
-var[15]=`[C04C]`, var[16]=`[C04E]` = spinner angles advanced each frame by DB3E. Setting is done by 03CE (lights), 04DA (lights/destroyed), E7AC (destroyed) and DF08 (the rest, bank 0).
-
----------------------------------------------------------------------------------------------------------------------------------------------
-
-
-## 7. What the sim side must provide (parameters, summary)
-* Scene entry: `03CE(...)` (see 1.1) -- once per frame from 2F82; with the player's world position (x,y: 20-bit within a 32-bit, z: 16-bit), `-heading`, pitch, roll; viewport (x0,y0,w,h).
-* Sim object submission (R8): `DCC0(type, xlo, xhi, ylo, yhi, z, a1, a2, a3)` (queue after cull) -> stored in the sorted queue. Everything else (terrain, scenery) comes from the .3DG/.3DT data held in DGROUP (`DS:E304/061E`, `DS:B00C/9F68/9D10/9B08/9904`).
-* Mission scenery state: override table `DS:B772` x `DS:9902` (destroyed/replaced objects) read by 04DA via 0FB1.
-* Per-object state variables: `DS:C02E..C04E` (3.3).
-* Detail level `[98DE]`, lens flag `[294B]`, side-view flag `[365E]`, zoom shift `[433A]`, wide mode `[4360]`, light level `[11E2]`.
-
-
-## 12.2 From R11b (renderer pipeline, input contract, working buffers)
-
-## 1. Pipeline overview (one object, one call of `11EB:00D3`)
-
-```
-sim side (df08 world objects / e7ac terrain scenery / 13e3 / 0ffb)
-   DS:8560 <- segment of the 3DX bank (DS:B75E + 2*bank)
-   mat9 (DS:49A0)  <- 1433:03A9 mat_from_euler(-a1,-a2,+a3) then transposed by 0000:E54B
-   11EB:00D3 r3d_draw_object(obj, x, y, z, mat9, vars)           (vars = DS:C02E)
-      |  0281 hook INT 0 (divide overflow -> 0975)                 ; restored at the end by 02A2
-      |  1433:032E  cam-space position = (x,y,z)*mat9              -> DS:7CA2 (3 x s32)
-      |  LOD select: first LOD entry whose maxdepth >= |zhi|        (model offset)
-      |  02B6 frustum/sphere cull  (radius, far limit DS:7D2E)     ; fail -> return
-      |  031B build per-part matrices (1433:0286 mat_mul, 03A9 euler, 02E2 transpose, 0219 mat*vec16)
-      |  0565 PLANES : per plane  n.eye+d >= 0  -> DS:76D2[plane] (FF visible / 7F var-hidden / 00 back-facing)
-      |                          shade byte DS:77D2[plane]  (0678, apparently unused)
-      |                          mark needed vertices DS:79D2[v]=1 ; BSP walk 0E5F -> draw order DS:78D2
-      |  06B9 VERTICES: for needed vertices   v*M_part + part origin  -> DS:C688 (s32 x,y,z per vertex)
-      |                 0906 project  x/z, y/z                       -> DS:D688 (s32 x,y; x_hi==8000h => behind camera)
-      |  0A37 EDGES   : for each edge (v0,v1) both needed -> 0B3F builds 24-byte edge record at DS:5EBA+24*i
-      |                 (adds screen centre DS:85D2/85D4; if one end is behind the camera: 0990 bisection to z~1)
-      |                 12EF:0333 clips the edge to the window (DS:85CA..85D0) -> flags in rec+2
-      |  0C7A FACE LISTS: planes in file order, or BSP order, or the single list of a plane-less model
-      |       0CAC visible plane -> 0CED face-list interpreter:
-      |          polygon : for each edge  12EF:003E (-> 1359:0719 per-scanline min/max DDA into the L/R tables)
-      |                    then colour byte -> word via table DS:[7D50] -> 12EF:010A poly_finish
-      |                         -> 1359:0040 set colour, wall fills 12EF:0185/019B (-> 1359:07D6), 1359:0052 = fill (mode M: 1359:0AF7)
-      |          lines   : 1359:0040 colour, then per edge 1359:0049 (mode M: 1359:045D Bresenham)
-      |          points  : computed, never drawn
-      v  pixels in the page segment DS:85EA (A000h or an off-screen page)
-```
-
-Calling relationships (V, from the function index): `00D3` is called by 13E3, DF08, E7AC; `01B8` by 0FFB; `000C` by DC64;
-`0F9B` by DAE8; `1433:03A9` by 0FFB, 13E3, DC64, DF08, E7AC; `0EF2`, `12EF:0002`, `12EF:01B1`, `1359:019B`, `1359:023A..0301` have **no**
-direct callers in the image (public API of the module that the game does not use; (U) except via data).
-
-## 2. Conventions used by all four segments
-
-* Far calls (`lcall seg,off`), C calling convention: args pushed right to left, first argument at `[bp+6]` (return CS:IP + saved BP),
-  caller cleans (`add sp,N`). Helpers called with `call` (near) inside a segment use registers (listed per function).
-* Angles: 16-bit, 65536 = 360 degrees, 4000h = 90 degrees. Positive = counter-clockwise in `atan2(y,x)` terms (V, see 1433:0061).
-* Matrices: 3x3 of s16, row-major, 9 words = 18 bytes (0x12), **Q15** (7FFFh ~ 1.0; products `(a*b)>>15`). Vectors are
-  row vectors: `out_k = sum_j v_j * M[j*3+k]`. So `view = model * ObjMat * CamMat`.
-* "s32 pair": lo word at +0, hi word at +2 (little endian). The hi word is the integer part for the projection (z "hi" is what is compared with LOD depths).
-* Coordinates in model space: x east, y up, z south (FORMATS.md); the sim passes world offsets as (east, up, -north).
-* The camera matrix is stored with scale folded in (11EB:000C): x/y columns halved, z column scaled by the zoom, y column additionally x0.75 (flag DS:7D3A, always 0 => see 11EB:000C).
-* No clipping to a 3D frustum except the coarse sphere test 02B6; real clipping is 2D (12EF) plus the near-plane bisection (0990).
-
-## 3. Input of the renderer: what the sim must provide
-
-### 3.1 Call interface
-
-```c
-void far r3d_draw_object(uint16 obj,        // object index inside the bank (low 8 bits of obj record type), must be < word count at bank:0000
-                         int16 x, int16 y, int16 z, // object origin relative to the camera, WORLD axes: x = east, y = up, z = south(-north)
-                         const int16 *mat9, // DS ptr: object orientation matrix (Q15, 9 words). Callers use the transpose of 1433:03A9(-a1,-a2,+a3)
-                         const int16 *vars);// DS ptr: the "var table" DS:C02E, 32 words (see 3.3)
-```
-Prerequisites in DGROUP (all set by the callers / view setup `dae8`, R11a/R10):
-
-| global | set by | meaning |
-|---|---|---|
-| DS:8560 | caller (`mov ax,[bx-48A2h]` = `DS:B75E+2*bank`; 13E3 uses `[B760]`; DAE8 sets `[B760]` for the shared-vertex call) | segment of the 3DX bank file (see FORMATS.md: word count, offset table) |
-| DS:7AF8..7B09 | `11EB:000C` via `DC64` | camera matrix (scaled) |
-| DS:7D2E | `11EB:000C` | far limit = 7FFF00h / max(|2*zoom|,100h) |
-| DS:7D50 | 0000:03CE, 0000:BF71 | pointer to the colour table (colour byte -> fill word): 7D60 / 7F60 / 8160 / 8360 (FORMATS.md) |
-| DS:4894 | DF08/E7AC/119C | shade/brightness offset subtracted from ramp colours (colour lo >= A0h) by `1359:01D4` |
-| DS:85CA,85CC,85CE,85D0 | `0000:DB71` | clip window xmin,ymin,xmax,ymax (inclusive, from rect +12h,+0Eh,+14h,+10h) |
-| DS:85D2,85D4 | `0000:DB71` | projection centre x,y = xmin+((w+1)/2-1), ymin+((h+1)/2-1)  (defaults 0A0h,64h); special case in DB71 when ymin==0 |
-| DS:85EA | `0000:DB71` | draw segment (page) = `[85E2 + 2*page]` |
-| DS:7D54,7D56,7D58 | `0000:DB71` | light direction (-36,+36,+36) (V) |
-| DS:7D5E | `0000:119C/11F2` | 0 = perspective; nonzero = "map mode" orthographic projection (see 0906) and no culling |
-| DS:7D3A | never written (0) | y-axis scale switch of `000C`: 0 -> y column x(-0.75) (V, constant 0 in the image) |
-| DS:C686 | cleared by `DAE8`, `2F82`, ... | bit 7 set by 00D3/01B8 (see 3.4) |
-
-### 3.2 What the model data must look like (read order in `00D3`)
-
-`00D3` reads exactly the 3DX layout of FORMATS.md; the order in which it consumes the stream (V):
-
-1. `es:0000` word = number of objects; the call is ignored if `obj >= that` (`cmp ax,[bp+6]; ja`).
-2. `es:[2*obj+2]` = object offset; LOD list = pairs `(maxdepth,model offset)`; loop `do { dx=|zhi| ; ax=pair.maxdepth ; si+=4 } while (|zhi| > maxdepth)` (unsigned compare, last entry has 8001h so it always ends). `si = model offset`.
-3. Model header: `radius` (word, used only by the cull `02B6` and the "camera inside" test), `nparts` (word; `31B`), then the `(var,axis)` list of `nparts-1` entries, then `nparts-1` pivots of 3 words each (also consumed by `31B`).
-4. `nverts` (word -> DS:7D2C, signed: negative = |n| byte indices into the shared table DS:4EB6), `nplanes` (word -> DS:7D2A, signed, negative = BSP).
-5. Planes: per plane (prefix words `80pp` / `8100 var val` allowed) `nx,ny,nz` s16 + `d` s32 (14 bytes of payload); then per plane `n` + n vertex indices; then (BSP) root byte + `|nplanes|` `(front,back)` byte pairs.
-6. Vertices (nverts x 3 words, prefix words 8000h..800Fh select the part whose matrix/origin is used from then on); `nedges` word + `(v0,v1)` byte pairs; `|nplanes|` face-list offsets (absent if nplanes==0: one list follows); face lists.
-
-### 3.3 The var table DS:C02E (32 words)
-
-Index `v` -> DS:C02E+2v. Used by (a) rotating parts: `var` selects an angle word (16-bit angle units), (b) conditional planes `8100 v val` and conditional face elements `80|v val` (compared as signed value with the word). Writers seen by the cross-reference (R10/R11a own the semantics): v1 = DS:C030 (destroyed; 03CE, DF08, E7AC), v5..v9 = C038,C03A,C03C,C03E,C040 (DF08, C73C; DF08 sets C038 =1 and C03A = [C072]-1 for object type 18h, C03C = 1 for ...), v10..v14 = C042,C044,C046,C048,C04A (03CE/04DA/8387/DF08), v15 = C04C, v16 = C04E (lights/night, DB3E). FORMATS.md: "Vars seen: 1 = destroyed, 10 = lights (night)" (note: FORMATS numbering is the same: var 10h = DS:C04E).
-
-### 3.4 Output of the renderer
-
-* Pixels in the page segment DS:85EA. `00D3` returns nothing in registers.
-* DS:7D4E = pointer to the last *line* edge record drawn (used by DF08 for object type 25h to read the on-screen endpoints: `[bx]` x, `[bx+4]` y of both ends).
-* DS:C686 bit 7 (`or word [C686],80h`): "the probe point (= the camera of this view, or the query point of `0000:77D9`) is INSIDE a solid model": set when the point is within the bounding radius of the model (`radius > |zhi|`, so 7D5C was not pre-set) and NO plane is front-facing from it (all planes back-facing => inside a closed hull; models with fewer than 4 planes set 7D5C=80h and never raise the flag). Cleared by `DAE8`, `2F82` (before the view, `[C686]=0` at 36AB; copied to DS:9F66 after drawing, read by 39C4 line 41C2: player camera inside an object), `0000:671A` (before the ground/scenery query `77D9` of a moving object, then `C686 != 0` => impact). `01B8` is the draw-less version used by `0FFB` (called from `77D9`) to implement that point-in-object test.
-
-## 4. Working buffers in DGROUP (all addresses are DS offsets)
-
-| range | size | content | users |
-|---|---|---|---|
-| 4EB6..5EB5 | 0x1000 | shared vertex table (`0F9B`), 16 bytes (3 x s32 + pad) each, <= 256 | 0F9B writes, 06B9 path "nverts<0" reads |
-| 5EB6,5EB8 | 4 | saved INT 0 vector (offset, segment) | 0281 / 02A2 |
-| 5EBA..7AF7 | 0x213E | edge records, 24 (0x18) bytes each, index = edge index, <= 354 | 0A37/0B3F write, 12EF reads, 0CED indexes (`idx*24`) |
-| 76D2..77D1 | 256 | plane visibility byte (FF visible / 7F hidden by var / 00 back-facing) | 0565 write, 0CAC, 0E5F read |
-| 77D2..78D1 | 256 | plane shade byte `(n.L)>>14` | 0678 write; 0CAC copies to 7D5A; no reader found => dead (U) |
-| 78D2..79D1 | 256 | BSP draw order (plane indices, FFh-terminated) | 0E5F write, 0C7A read |
-| 79D2..7AD1 | 256 | vertex "needed" byte (1 if the vertex belongs to a front-facing plane) | 0565 write, 06B9 / 0A37 read |
-| 7AF8 | 18 | camera matrix (scaled) | 000C write; 031B,0F9B read |
-| 7B0A | 18 | transpose of the *unscaled* camera matrix (never read, (U) dead) | 000C |
-| 7B1C | 0x24 x (nparts+1) | per-part matrix slots: +0 `M_part` (model->view, 9 words), +12h its pivot/object-orientation transpose (for eye/light vectors); one extra slot used as temp. Room for <= 7 parts before overlapping 7C3C (U) | 031B |
-| 7C3C | 6 x 8 | eye (camera) position in each part's model frame (3 words/part) | 031B/0440 write, 0565 read |
-| 7C6C | 6 x 8 | light vector in each part's frame | 04CD/04F9 write, 0678 read |
-| 7C9C | 6 | object offset (x,y,z s16) relative to camera, world axes | 00D3 |
-| 7CA2..7CAD | 12 | object origin in view space (x,y,z as s32 pairs); 7CAC = z hi used by LOD and cull | 00D3 via 032E |
-| 7CAE.. | 12 x 8 | origin of each part in view space (s32 x3) | 031B/0440 write, 06B9 read |
-| 7D0E..7D19 | 12 | temp pivot vector (s32 x3) | 0440 |
-| 7D1A,7D1C,7D1E,7D20,7D26,7D28,7D2A,7D2C,7D2E | words | scratch ptrs/counters: 7D1A current 3D vertex ptr; 7D1C object matrix ptr; 7D1E var table ptr; 7D20 current part-matrix slot; 7D26 current part-origin ptr; 7D28 nparts; 7D2A nplanes; 7D2C nverts; 7D2E far limit | |
-| 7D38 | byte | per-plane "hidden by var" mask: FFh, set to 7Fh by a failed `8100` test, reset for every plane | 0565 |
-| 7D3A | word | y scale switch (0) | 000C |
-| 7D3E,7D40 | words | current polygon: edge count, start ptr | 0CED |
-| 7D42..7D49 | 8 | bisection midpoint x lo,hi / y lo,hi | 0990 |
-| 7D4A | word | BSP: visibility array ptr | 0E5F |
-| 7D4C | word | current light-vector slot ptr (7C6C+6*part) | 0565/04CD/04F9/0678 |
-| 7D4E | word | last line edge record drawn | 0CED |
-| 7D50 | word | colour table base | 03CE/BF71 write, 0CED read |
-| 7D54 | 6 | light vector | DB71 |
-| 7D5A | byte | last drawn plane's shade | 0CAC (write only) |
-| 7D5C | byte | working "visible/inside" flags (bit 7) | 00D3/01B8/0565 |
-| 7D5E | word | orthographic (map) mode | 119C/11F2 write |
-| 7D60..8560 | 4 x 0x200 | colour tables | |
-| 8568..8587 | 32 | scratch copy of an edge's endpoints for the bisection clipper | 12EF:0333 |
-| 8588..8597 | 16 | up to 2 saved near-plane clip points (4 words each) | 12EF:00E0 |
-| 85A8,85AA,85AC,85AE,85B0 | words | clip scratch: out-code masks of the two ends, dx, dy of the edge, bisection counter (starts at 32) | 12EF |
-| 85B2 | word | OR of all edge flags of the polygon being built | 12EF:003E |
-| 85B4,85B6 | words | left-wall y range (min,max), reset to 7FFFh,8000h... | 12EF |
-| 85B8,85BA | words | right-wall y range | 12EF |
-| 85BC | word | count/flag: at least one edge was rasterised (set to 4) | |
-| 85BE | word | number of saved near-plane clip points (0..2) | |
-| 85C0 | byte | overflow seen in the 16-bit out-code compare | 12EF:02D1 |
-| 85C2 | word | mode dispatch table offset (cs-relative): 0064 E, 0070 M, 007C C, 0088 T | 1359:0000.. |
-| 85C4 | word | upper-cased mode char ('M' passed by `0010`) | |
-| 85C6 | word | page number | 1359:019B |
-| 85CA..85D0 | 4 words | clip window xmin,ymin,xmax,ymax | DB71 |
-| 85D2,85D4 | words | projection centre | DB71 |
-| 85D6 | word | current fill colour word (hi = fill mode, lo = colour) | 1359:01D4 |
-| 85E2,85E4,85E6 | words | page segments (A000h, page 1, page 2) | (R-other) |
-| 85EA | word | current draw segment | DB71 / 1359:019B |
-| 85EC | 480 x 2 | row start offset table: mode M `y*320` (200 used) | 1359:010A |
-| 89AC | 480 x 2 | LEFT edge table (min x per scanline), idle value 7FFFh | 1359:0719 |
-| 8D6E | 480 x 2 | RIGHT edge table (max x per scanline), idle value 8001h | |
-| 9130 | word | min scanline touched (7FFFh = nothing) | |
-| 9132,9134 | words | pixel scratch (EGA mode) | |
-| 9140 | word | fill colour word copy | 1359:0AF7 |
-| 9150.. | | EGA/CGA bit mask tables (not used in mode M) | |
-| 9168 | 16 words | EGA/CGA colour plane table (zero in the image: those modes are dead) | |
-| 9170..9177 | | scratch: sin/cos of the 3 Euler angles (916C,916E,9170,9172,9174,9176) | 1433 |
-| 9178 | 8 words | atan2 octant base angles `0000,4080,0080,C000,8080,4000,8000,C080` (low byte 80h = subtract) (V) | 1433:0061 |
-| C688..D687 | 0x1000 | transformed (view-space) vertices, 16 bytes each (x s32, y s32, z s32, pad), <= 256 (also used as a read buffer by loader 11CE) | 06B9 |
-| D688..DE87 | 0x800 | projected vertices, 8 bytes each (x s32, y s32; x hi == 8000h marks "behind camera") | 06B9 |
-| seg 14B2 | 0x3A02 | math tables, see 1433 | |
-
-### 4.1 Edge record (24 bytes at DS:5EBA + 24*i), built by 11EB:0B3F
-
-Before clipping: `+0 x0 (s32)`, `+4 y0 (s32)`, `+8 x1 (s32)`, `+0C y1 (s32)` (screen coordinates incl. centre offset); `+10h x', +14h y'` (s32 pair)
-only for edges with one end behind the camera = the intersection point with the near plane, used to close the polygon.
-After `12EF:0333`: `+0 x0, +4 y0, +8 x1, +0C y1` are s16 (clipped to the window), `+2` = flag word (low byte = high byte), `+6` = y0 clamped to the window
-(before clipping) and `+0E` = y1 clamped, `+0Ah,+0Eh,..` as above. Flag bits (V from 12EF:020B/0333/003E):
-
-| bit | meaning |
+| topic | render3d.md |
 |---|---|
-| 0 | end 0 was to the right of xmax |
-| 1 | end 0 was left of xmin |
-| 2 | end 1 right of xmax |
-| 3 | end 1 left of xmin |
-| 6 (40h) | one end was behind the camera; +10h..+16h hold the near-plane point |
-| 7 (80h) | edge rejected (outside, or both behind). 85h / 8Ah = rejected but both ends right / left (used for the vertical walls); 80h plain |
-
-`flags == 0`: edge completely inside the window.
-
+| scene entry `03CE` (arguments from `2F82`), `DAE8`/`DB3E` set-up and end, viewport `DB71`, camera matrices | Part 1 section 1 |
+| coordinates, angles, Q15 helpers, matrix conventions | section 3 (conventions), Part 6 C (1433), simflow Part 2 section 1 (sine table, 109D) |
+| draw order and sorting (terrain walk, object queue 50 entries farthest-first) | section 2.1, Part 1 sections 2 and 5 |
+| sim-object submission `BD8F`, `DCC0`, `BEE1`, `E7AC`; queue record layout (0x16 bytes) | Part 1 sections 4-5 |
+| per-frame object pass `9ACA`, projection `B85D` (49E0/49E8/DE92) | Part 2 |
+| object renderer `11EB:00D3` call contract, var table DS:C02E, inside flag DS:C686, working buffers | Part 4 |
+| map MFD terrain `119C`, collision probe `77D9`/`0FFB` | Part 3 |
+| sky/ground `1442`, 2D edge tables / clipper of 1001 used by the HUD and cockpit lines | Part 6 |

@@ -1,0 +1,5 @@
+line_clip_draw 032A    cases  20000  mismatches 0 (298 INT0 overflows hit, 0 ref-clobber cases skipped)
+edge_to_tables 06A0    cases  20000  mismatches 0 (321 INT0 overflows hit, 0 ref-clobber cases skipped)
+edge_walk 05B9         cases  20000  mismatches 0 (0 INT0 overflows hit, 0 ref-clobber cases skipped)
+poly_fill 01EC         cases   5000  mismatches 0 (369 INT0, 0 clobber skipped)
+hz_draw via 0006       cases   5000  mismatches 0 (0 clobber skipped)

@@ -1,0 +1,21 @@
+sin 0004               cases  65536  mismatches 0 
+cos 0031               cases  65536  mismatches 0 
+asin 015E              cases  65536  mismatches 0 
+  cos(a)==sin(a+4000h) for all a: True
+mul_sin 00D9           cases  20000  mismatches 0 
+mul_cos 011A           cases  20000  mismatches 0 
+atan2 0061             cases  20000  mismatches 0 
+hypot2 018E            cases  20000  mismatches 0 
+mulq 0542              cases  20000  mismatches 0 
+imul 05C6              cases  20000  mismatches 0 
+hypot3 01E0            cases  20000  mismatches 0 
+muldiv 0554            cases  20000  mismatches 0 (0 #DE cases skipped)
+div32sat 058F          cases  19375  mismatches 0 (625 #DE cases skipped)
+mat_vec16 0219         cases  20000  mismatches 0 
+vec_mat32 032E         cases  20000  mismatches 0 
+mat_mul 0286 (x3 alias) cases  20000  mismatches 0 
+transpose 02E2 (x2)    cases  20000  mismatches 0 
+mat_copy 0314          cases  20000  mismatches 0 
+mat_from_euler 03A9    cases  20000  mismatches 0 
+mat_from_euler_b 05D1  cases  20000  mismatches 0 
+mat_to_euler 04D7 (x2) cases  20000  mismatches 0 

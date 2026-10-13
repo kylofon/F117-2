@@ -1,0 +1,31 @@
+clip_edge: 20000 cases, 0 mismatches, 0 div0 (both), 0 near-ret bug, flag values 10 distinct
+edge_dda: 4000 cases, 0 mismatches
+line_M: 1000 cases, 0 mismatches
+polygon (0333+003E+010A+1359 M): 2000 cases, 0 mismatches, 0 div0
+  cov bisect_in 32 iters fail                  9
+  cov bisect_in corner fail                    3191
+  cov bisect_out 32 iters                      21
+  cov bisect_out on border                     1325
+  cov f16 85C0 -> 32                           2
+  cov f16 clipped                              2822
+  cov f16 dx overflow -> 32                    175
+  cov f16 fail end0 5                          986
+  cov f16 fail end0 a                          970
+  cov f16 fail end1 5                          1
+  cov f16 fail end1 a                          1
+  cov f16 reject x side                        2906
+  cov f16 reject y                             7975
+  cov finish 85BE=0                            1468
+  cov finish 85BE=1                            130
+  cov finish 85BE=3                            158
+  cov finish closing edge                      244
+  cov finish nothing rasterised, both walls    211
+  cov half quirk -1                            145
+  cov half quirk unhalved                      320
+  cov half quirk zero                          314
+  cov p32 both out ok                          604
+  cov p32 end0 out                             70
+  cov p32 end1 out                             68
+  cov p32 trivial reject                       10167
+  cov wall drawn                               1734
+  cov wall single row skipped                  1

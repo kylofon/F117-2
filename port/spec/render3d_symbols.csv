@@ -1,0 +1,460 @@
+exe,kind,address,name,type,owner,other_names,notes
+vgame,func,0000:03ce,r3d_scene_draw,"void near(int16 a1,int16 a2,int16 a3,int32 x,int32 y,int32 z,int16 x0,int16 y0,int16 w,int16 h)",render3d,,"[Part 1] main 3D view: viewport 0344, 04BB delay, 7D50 table, lights, DAE8, 04DA, 9ACA, DB3E, A17E (simflow Part 3 s3)"
+vgame,func,0000:04da,r3d_draw_terrain,"void near(int16 a1,int16 pitch,int32 x,int32 y,int32 z)",render3d,,"[Part 1] levels 4..1, cells per octant table 034C (path A 15 cells + E8A2 cull, path B 9), records -> E7AC; 0FB1 overrides"
+vgame,label,0000:050b,terr_pathA_cell,label in 04DA,render3d,,[Part 1] path A (level 4 detail>=2): cell offsets + E8A2 class-7 cull
+vgame,label,0000:0575,terr_pathB_cell,label in 04DA,render3d,,"[Part 1] path B: i==9 end, low-detail far-cell skip, look-down table 04CC/04DE if pitch<D555h"
+vgame,label,0000:05f9,terr_cell_draw,label in 04DA,render3d,,[Part 1] DCA9 origin + tile type + record loop
+vgame,label,0000:0669,terr_rec_noovr,label in 04DA,render3d,,[Part 1] override 0 -> obj & 7Fh
+vgame,label,0000:0719,terr_far_cell,label in 04DA,render3d,,"[Part 1] low detail far cell: level 4 record 0 only, type 100h|obj raw, [0504]=400h"
+vgame,label,0000:0755,terr_next_cell,label in 04DA,render3d,,[Part 1] i++ and path select
+vgame,label,0000:0772,terr_next_level,label in 04DA,render3d,,[Part 1] [E2FC]-- and level set-up (0804 x/y/z)
+vgame,func,0000:0804,terr_to_level,"int32 near(int16 level,uint32 v)",render3d,,"[Part 1] L0 v<<1, L1 v, L2 (v+2)>>2, L3 (v+8)>>4, L4 (v+20h)>>6 (shr32). Diff-tested"
+vgame,func,0000:0865,terr_tile_type,"uint16 near(int16 level,int16 x,int16 y)",render3d,,"[Part 1] L4 +2 offset, bounds vs DS:0506, maps B00C/9F68, child tables 9D10/9B08/9904 (recursive). Diff-tested"
+vgame,func,0000:0fb1,terr_scenery_override,"uint16 near(int16 level,int16 idx,int16 cx,int16 cy)",render3d,,[Part 1] backward search DS:B772 x [9902]; AH = hi(count-1): returns FF00h when count 0 (quirk); [94DC]=index
+vgame,func,0000:0ffb,terr_probe_point,"void near(uint32 x,uint32 y,uint32 z)",render3d,,"[Part 3] nearest flag-0x10 record of the level-4 tile (records 0..n-2, id&0x50 skipped), 11EB:01B8 inside test -> byte C686=0x80"
+vgame,func,0000:119c,map_render_terrain,"void near(Viewport*ctx,int16 px,int16 py,int16 shift)",render3d,,"[Part 3] map MFD: 4894=0, DAE8 top-down camera (pitch C000, z 2000h, backdrop), 11F2, DB3E, 7D5E=0; only caller 8387"
+vgame,func,0000:11f2,map_draw_tiles,"void near(int16 px,int16 py,int16 shift)",render3d,,"[Part 3] 5 passes L=4,3,2,4,3 (0CFC), filter 94E6; rows then columns of 1353 range; z==0 records -> 13E3 with 7D5E=DECC+0Eh"
+vgame,func,0000:1353,map_tile_bounds,"void near(int16*x0,int16*x1,int16*y0,int16*y1)",render3d,,"[Part 3] 13AC of (0,0) and ([2293],[2295]); min clamped to 0, max to [94E0]-1 (signed)"
+vgame,func,0000:13ac,map_pixel_to_tile,"void near(int16 px,int16 py,int16*tx,int16*ty)",render3d,,"[Part 3] tx=idiv(94E2-0D1E+px,94DE); ty=idiv(idiv((py-0D20)<<2,3)+94E4,94DE); trunc toward 0"
+vgame,func,0000:13e3,map_draw_object,"void near(uint16 obj,int16 x,int16 y)",render3d,,"[Part 3] L>=3: 07E0[obj]&80h must equal 94E6; 8560=B760; identity 49A0; 11EB:00D3(obj&FF,x,0,-y,49A0,C02E)"
+vgame,func,0000:1442,r3d_draw_sky_ground,void near r3d_draw_sky_ground(Viewport*ctx),render3d,,[Part 6] detail<3: hz_fill_far(ctx+4); else 16 sky bands 80h+i and 16 ground bands 70h+i (mono 88h/7Ch) via 1001:01EC
+vgame,func,0000:1a85,fx_explosion_sprite,"void near(int16 x,int16 y,int16 size,int16 cls)",render3d,,"[Part 1] sprite_scaled centred, h=size-size/4, table DS:9188, ctx [0348]?[4042]:[0344]; caller A17E"
+vgame,func,0000:1ad6,r3d_sprite_main,"void near(int16 x,int16 y,int16 size,int16 cls)",render3d,,"[Part 1] sprite_scaled(ctx [0344], x-size/2, y-size/2, size, size-(size sar 2), DS:91D8[cls])"
+vgame,func,0000:1b1b,r3d_sprite_tv,"void near(int16 x,int16 y,int16 size,int16 cls)",render3d,,[Part 1] same as 1AD6 with ctx [4042]
+vgame,func,0000:77d9,terr_probe_cell,"void near(int16 cellx,int16 celly,int16 alt)",render3d,,"[Part 3] 0FFB((long)cx<<5,(0x8000-(long)cy)<<5,(long)alt); callers 5730 (unit flag 0x2000), 671a (impact)"
+vgame,func,0000:9aca,r3d_draw_world_objects,void near(void),render3d,,"[Part 2] per-frame object pass (03CE): own F-117, smoke billboards, units+shadows, projectiles, wreck 0x0B; embeds ground/air target designator (weapons logic)"
+vgame,func,0000:b85d,r3d_project_point,"void near(int16 x_u,int16 y_u,int16 z)",render3d,,"[Part 2] world->screen via BA13 x3: 49E0 sx (FFFF invisible) 49E8 sy DE92 depth>>3; |X|<=-Z, scale 256, sy*3/4, centre 160/52|60|100 (T)"
+vgame,func,0000:ba13,r3d_matrix_row_dot,"int32 near(int16 row,int16 dx,int16 dy,int16 dz)",render3d,,"[Part 2] mq(B156[r],dx)+mq(B15C[r],dz)+mq(B162[r],dy), 32-bit sum (T)"
+vgame,func,0000:ba67,r3d_view_depth,"void near(int16 px,int16 py,int16 pz,int16 cx,int16 cy,int16 cz)",render3d,,"[Part 2] [DE92]=sar32(mq(4992,cx-px)+mq(4998,(pz-cz)>>5)+mq(499E,py-cy),3); z-term sign quirk; caller C834 (T)"
+vgame,func,0000:bc12,obj_wreck_shape,uint16 near(int16 site),render3d,,[Part 3] site +0E shape; destroyed (+8&80h): shape|100h if flag 20h else cbw(C0AC or DEA4 by BC77)+100h (ids>=80h lose the bank)
+vgame,func,0000:bcd7,r3d_unit_terrain_class,void near(int16 unit),render3d,,[Part 3] [49C6]=B174[(y>>11)*16+(x>>11)]&3 for the last 4 units; others 1 if class 0 and [3D62]==0 else 0
+vgame,func,0000:bd8f,r3d_draw_model,"void near(uint16 model,int32 x,int32 y,int16 alt,int16 a1,int16 a2,int16 a3,int16 lod)",render3d,,"[Part 1] camera-relative, shift by lod-(294B?2:3), abs16 of LOW words < 7FFFh, DCA9(0,0,-rz), E2FC=1, E7AC(C6B8(model),...)"
+vgame,func,0000:bee1,r3d_queue_object,"void near(uint16 id,int32 x,int32 y,int16 z,int16 a1,int16 a2,int16 a3)",render3d,,"[Part 1] BD8F variant relative to bf71 camera B766/B76A/B808; no lod shift, no C6B8; caller C834"
+vgame,func,0000:c6b8,r3d_scenery_id,uint16 near(uint16 id),render3d,,[Part 1] if id bit 8: DS:0510[id&7F] | (id&8000) else id
+vgame,func,0000:c73c,fx_fire_puffs,"void near(int16 hdg,int16 pitch,int16 roll,int16 X,int16 Y,int16 Z)",render3d,,"[Part 2] 6 puffs DS:3A5C -> E7AC 0x25+frame (0..3) / 0x24 with C040=frame (4,5); consumes game RNG cb62"
+vgame,func,0000:c834,fx_smoke_draw,"void near(int16 cx,int16 cy,int16 cz)",render3d,fx_draw_effect_list,"[Part 2] 16 smoke puffs DS:39DA for TV camera: BA67 depth gate, 49C6=size<<8|class, BEE1(0x25)"
+vgame,func,0000:d76b,view_range_setup,void near(void),render3d,,"[Part 1] 48A6[k]=20h<<(k+detail) k<6, 48B2, 48B4 (no readers); [48B6]=(detail+1)*0D05h max depth"
+vgame,func,0000:dae8,r3d_begin_scene,"void near(Viewport*vp,int16 a1,int16 a2,int16 a3,int16 ox,int16 oy,int16 oz,int16 backdrop,int16 focal)",render3d,,"[Part 1] DB71, DC64, DCA9; backdrop: C686=0, 8560=B760, 11EB:0F9B, wait byte[262A]==0, 1442; [49C4]=0"
+vgame,func,0000:db3e,r3d_end_scene,void near(void),render3d,,"[Part 1] DF08, offset_clear, C04E+=1800h C04C+=1B00h ([4EA0]=6), memcpy(49B2,498E,18)"
+vgame,func,0000:db71,r3d_set_viewport,void near(Viewport*vp),render3d,,"[Part 1] light 7D54=-36,36,36; centre 0D1E/0D20 (y0==0: 100 or 52/60), offset_set, 85CA..85D4, 2293/5, 85EA, E53E/E544 tables"
+vgame,func,0000:dc64,r3d_set_camera_matrix,"void near(int16 a1,int16 a2,int16 a3,int16 focal)",render3d,,"[Part 1] E26B(498E,-a1,-a2,-a3); 1433:03A9(-a1,-a2,a3,49A0); 11EB:000C(49A0,focal)"
+vgame,func,0000:dca9,r3d_set_origin,"void near(int16 x,int16 y,int16 z)",render3d,,[Part 1] [497C]=x [497E]=y [4980]=z
+vgame,func,0000:dcc0,r3d_queue_billboard,"void near(uint16 id,int32 x,int32 y,int16 z,int16 sx,int16 sy,int16 size)",render3d,,"[Part 1] camera-relative, sar by 294B?2:3, low-word test, class 2 E8A2, DDFE with sx/sy/size in +10..+14; caller 9ACA"
+vgame,func,0000:ddfe,r3d_queue_insert,void near(void),render3d,,"[Part 1] full: drop ptr[0] (farthest) and reuse; key=sar32(C,2*(4-E2FC)) (+200000h L2 class5); signed hi/unsigned lo; new before equal. Diff-tested"
+vgame,label,0000:de3b,r3d_queue_key,label in DDFE,render3d,,[Part 1] key computation and record fill
+vgame,label,0000:deb3,r3d_queue_search,label in DDFE,render3d,,[Part 1] insertion search from the nearest end
+vgame,func,0000:df08,r3d_draw_queued,void near(void),render3d,,[Part 1] replays queue far->near: sprite recs (400h) 1AD6; bank0 vars 5..14; id 18h gear/side models 21h/22h/23h; ids>=25h glow 1B1B
+vgame,label,0000:df16,r3d_dq_body,label in DF08,render3d,,[Part 1] record body (lights and sprite test)
+vgame,label,0000:dfe9,r3d_dq_player,label in DF08,render3d,,"[Part 1] id 18h: C072==0 -> 1Fh, else E3E2, side tests, deck alt, model 23h"
+vgame,label,0000:e0d8,r3d_dq_draw,label in DF08,render3d,,[Part 1] 1433:03A9 + E54B then draw(s)
+vgame,label,0000:e19d,r3d_dq_var14,label in DF08,render3d,,[Part 1] ids 1/0Ah/0Fh: var 14 = 1
+vgame,label,0000:e1a6,r3d_dq_single,label in DF08,render3d,,[Part 1] single model draw + glow overlay (7D4E edge)
+vgame,label,0000:e23f,r3d_dq_loop,label in DF08,render3d,,[Part 1] loop test i < [49C4] and destroyed/lights
+vgame,func,0000:e26b,r3d_matrix_from_angles,"void near(int16*m,int16 A,int16 B,int16 C)",render3d,,"[Part 1] Q15 rotation, sin/cos to 4982..498C, products mq rounded. Diff-tested"
+vgame,func,0000:e3e2,r3d_matrix_obj_side,void near(void),render3d,,[Part 1] Q15 matrix 49A0 from [496A..496E] (other composition); DF08 id 18h side tests. Diff-tested
+vgame,func,0000:e54b,r3d_transpose49A0,void near(void),render3d,,[Part 1] swap 49A2/49A6 49A4/49AC 49AA/49AE
+vgame,func,0000:e7ac,r3d_place_object,"void near(uint16 type,int16 a1,int16 a2,int16 a3,int16 X,int16 Y,int16 Z)",render3d,,"[Part 1] flags DS:0A60[bank][idx]: class->497A, bit7 -> DDFE; else shade, 1433:03A9, transpose, 11EB:00D3(idx,x,z,-y)"
+vgame,label,0000:e82c,r3d_place_draw,label in E7AC,render3d,,[Part 1] immediate draw branch
+vgame,func,0000:e8a2,r3d_cull_point,"int16 near(int16 x,int16 y,int16 z)",render3d,,"[Part 1] BP=x BX=y CX=z -> E8B5; AX 0 visible, ZF"
+vgame,func,0000:e8b5,r3d_cull_core,"near(BP=x,BX=y,CX=z,[497A]) -> AX,ZF",render3d,,"[Part 1] A,B,C=2*(M*v) s32 wrap; depth 48B6/48C6; wide 4936/4946 or E53E/E544 >>cl; [4978] dist (wide quirk). Diff-tested"
+vgame,label,0000:e9ad,r3d_cull_normal,label in E8B5,render3d,,[Part 1] normal frustum (cl=294B^1)
+vgame,label,0000:ea09,r3d_cull_dist,label in E8B5,render3d,,[Part 1] distance estimate [4978] and final test
+vgame,label,0000:ea1f,r3d_cull_reject,label in E8B5,render3d,,[Part 1] AX=1 ZF=0
+vgame,func,1001:0006,hz_fill_far,void far hz_fill_far(int colour),render3d,,"[Part 6] [0D46]=colour, hz_draw (flat two-colour sky/ground split, 1442 when detail<3)"
+vgame,func,1001:0018,hz_draw,void near hz_draw(void),render3d,,"[Part 6] horizon line from pitch/roll (H=256*sinB/cosB or 3FFh, zoom, lens), clip+line 0336, fill side 1 [0D46], side 2 0x78"
+vgame,func,1001:01ec,poly_fill_far,"void far poly_fill_far(Viewport*vp,int n,int16*pts,int colour)",render3d,,"[Part 6] clear tables, n edges via 06AC (clipped), slot 37 mode 0"
+vgame,func,1001:024c,fill_rows_far,"void far fill_rows_far(Viewport*vp,int xl,int ymin,int xr,int ymax)",render3d,,"[Part 6] page vp+0, colour vp+4, L=xl R=xr rows ymin..ymax, slot 40, restore segment"
+vgame,func,1001:02ba,fill_rows2_near,void fill_rows2_near(...),render3d,,[Part 6] dead: copy of 024C with colour vp+6 and a near ret; no callers
+vgame,func,1001:0326,line_clip_far_stub,void far line_clip_far_stub(void),render3d,,[Part 6] call 0336; retf (caller 10a8:000c)
+vgame,func,1001:032a,line_clip_far,void far line_clip_far(void),render3d,,[Part 6] saves BP SI DI ES; 0336
+vgame,func,1001:0336,line_clip_draw,bool near line_clip_draw(void) /*CF=1 rejected*/,render3d,,"[Part 6] Cohen-Sutherland clip of [2299..229F] to 0..[2293]x0..[2295], rounded intercepts, INT0 04E3; slot 31 line"
+vgame,func,1001:04c2,clip_outcode,"uint8 clip_outcode(BX=x,BP=y) -> AL,ZF",render3d,,[Part 6] AL bits 8:x<0 1:x>xmax 4:y<0 2:y>ymax (signed)
+vgame,func,1001:04e3,int0_sat_a,INT 0 handler (iret),render3d,,"[Part 6] 0336 idiv overflow: AX=+-7F00h by sign(DX^divisor), DX=0, IP+=4; divisor by faulting IP (0474 -> [228D])"
+vgame,func,1001:0504,poly_flush_far,void far poly_flush_far(int mode),render3d,,"[Part 6] slot 37 poly_fill([2615],22A1,[2617],mode) (caller c6de)"
+vgame,func,1001:051f,tables_clear_far,void far tables_clear_far(void),render3d,,[Part 6] call 0525; retf
+vgame,func,1001:0525,tables_clear,void near tables_clear(void),render3d,,"[Part 6] reset dirty rows: L=FFFFh R=0, [2615]=FFFFh [2617]=0"
+vgame,func,1001:055b,edge_column,"void near edge_column(SI=x,DI=ya,DX=yb)",render3d,,"[Part 6] x==0 -> L, x==XMAX -> R: overwrite rows min..max (clamped 0..YMAX), update 2615/2617"
+vgame,label,1001:05aa,edge_column_x,void near edge_column_x(BX=x),render3d,edge_offscreen_col,"[Part 6] x<0 -> edge_column(0,..), x>XMAX -> edge_column(XMAX,..), else nothing"
+vgame,label,1001:05b9,edge_walk,void near edge_walk(void),render3d,,"[Part 6] Bresenham of the clipped [2299..229F] into L (min) / R (max), x-major or y-major, updates 2615/2617"
+vgame,func,1001:06a0,edge_to_tables_far,void far edge_to_tables_far(void),render3d,,[Part 6] saves ES SI DI BP; 06AC
+vgame,func,1001:06ac,edge_to_tables,void near edge_to_tables(void),render3d,,"[Part 6] clip core of 0336 (vars 261A..2621, INT0 0854); border columns for parts beyond left/right; visible part -> 05B9"
+vgame,func,1001:0854,int0_sat_b,INT 0 handler (iret),render3d,,"[Part 6] 06AC idiv overflow: as 04E3, IP 07CE -> divisor [261D] else [261B]"
+vgame,func,1088:0120,r3d_depth_shade,uint16 far(void),render3d,,"[Part 1] 0 if [7D5E] or ![43B6]; else clamp((max(0,(s8)[4963])>>1)-[497A],0,31)>>1. Diff-tested"
+vgame,func,11eb:000c,r3d_set_camera,"void far(const int16*mat9,int16 zoom)",render3d,,"[Part 4] camera matrix -> 7AF8 scaled: col0 m>>1, col1 -(3/8)m, col2 floor(-far*m/2^15); far 7D2E=7FFF00h/max(abs16(2zoom),100h); 7B0A transpose dead"
+vgame,func,11eb:00d3,r3d_draw_object,"void far(uint16 obj,int16 x,int16 y,int16 z,int16*mat9,int16*vars)",render3d,,"[Part 4] draws one 3DX object: LOD by |z_hi|, radius, 02B6 cull, parts, planes, INT0 hook, vertices, edges, faces; C686|=inside"
+vgame,func,11eb:01b8,r3d_probe_object,"void far(uint16 obj,int16 x,int16 y,int16 z,int16*mat9)",render3d,,[Part 4] 00D3 without drawing (point-inside-model test for 0FFB); always runs 02B6; 7D1E stale
+vgame,func,11eb:0281,r3d_hook_div0,void near(),render3d,,[Part 4] saves IVT[0] to DS:5EB6/8 and installs 11EB:0975
+vgame,func,11eb:02a2,r3d_unhook_div0,void near(),render3d,,[Part 4] restores IVT[0] from DS:5EB6/8
+vgame,func,11eb:02b6,r3d_frustum_test,near(AX=radius)->AX=0/ZF=1 visible,render3d,,[Part 4] (abs16(zh)+1)*2 < far (u16 wrap); t=s16(2zh+r)>=0; hi16(abs32(x)) and hi16(abs32(y)) <= t unsigned. Diff-tested
+vgame,func,11eb:031b,r3d_setup_parts,"void near(CX=nparts,ES:SI)",render3d,,"[Part 4] M_k=PartRot*M_0 at 7B1C+24h*k, eyes 7C3C, lights 7C6C, origins 7CAE; max safe nparts 7 (data max 2)"
+vgame,func,11eb:0440,r3d_part_pivot,"void near(BX=eye slot,DI=slot+12h,ES:SI=pivot)",render3d,,[Part 4] origin_k = origin + pivot*M_0 - pivot*M_k (32-bit add/adc)
+vgame,func,11eb:04cd,r3d_light_root,void near(DI=mat),render3d,,[Part 4] 7C6C = 7D54 light * ObjMat^T; 7D4C=7C72
+vgame,func,11eb:04f9,r3d_light_part,void near(DI=mat),render3d,,[Part 4] [7D4C] = root light 7C6C * PartRot^T; 7D4C+=6
+vgame,label,11eb:0521,r3d_plane_vartest,label in 0565,render3d,,[Part 4] 8100 var val prefix: if (int8)val != vars[var&1F] then 7D38=7Fh
+vgame,label,11eb:0544,r3d_plane_partsw,label in 0565,render3d,,"[Part 4] 80pp prefix: eye=7C3C+6pp, 7D4C=7C6C+6pp; mask kept"
+vgame,func,11eb:0565,r3d_planes,void near(ES:SI=nplanes),render3d,,[Part 4] s=n.eye+d (imul sums mod 2^32) >=0 -> FF&7D38 into 76D2; map mode FF; marks 79D2; BSP 0E5F. Diff-tested
+vgame,label,11eb:0587,r3d_planes_loop,label in 0565,render3d,,[Part 4] plane loop head (7D38=FFh)
+vgame,func,11eb:0658,r3d_clear_vertex_flags,void near(),render3d,,[Part 4] zero (abs16(nverts)+2)>>1 words at DS:79D2
+vgame,func,11eb:0678,r3d_plane_shade,"void near(SI after d,DI=plane)",render3d,,[Part 4] 77D2[di] = bits 14..21 of n.L; dead (7D5A never read). Diff-tested
+vgame,func,11eb:06b9,r3d_xform_vertices,void near(ES:SI=vertices),render3d,,"[Part 4] needed vertices -> 0819 (C688 s32, D688 proj); part words 8000-800F not counted; nverts<0 shared path (dead)"
+vgame,label,11eb:06e6,r3d_xform_partsw,label in 06B9,render3d,,"[Part 4] part word in plane path: BX=[7D20]+24h*pp, 7CAE+0Ch*pp -> 7CA2"
+vgame,label,11eb:072e,r3d_xform_planepath,label in 06B9,render3d,,[Part 4] plane path start (DX=vertex index 0)
+vgame,label,11eb:0730,r3d_xform_loop,label in 06B9,render3d,,[Part 4] plane path loop head
+vgame,label,11eb:0751,r3d_xform_skip,label in 06B9,render3d,,[Part 4] unneeded vertex: bp+=8 di+=16 si+=6
+vgame,label,11eb:075e,r3d_xform_shared,label in 06B9,render3d,,"[Part 4] nverts<0: byte indices into DS:4EB6 + origin, project; unused by data"
+vgame,label,11eb:07cc,r3d_xform_partsw2,label in 0819,render3d,,[Part 4] part word met inside 0819 (no-plane path)
+vgame,label,11eb:0818,r3d_pad_0818,nop,render3d,,[Part 4] pad byte
+vgame,func,11eb:0819,r3d_xform_one,"void near(ES:SI,BX=mat,DI=out3d,BP=out2d)",render3d,,"[Part 4] out3d=v*M+origin (s32, no shift), 0906; si+=6 di+=16 bp+=8. Diff-tested"
+vgame,label,11eb:08bc,r3d_project_ortho_left,label in 0906,render3d,,[Part 4] map mode 7D5E<10h: (int16)(coord_hi << (10h-m))
+vgame,label,11eb:08da,r3d_project_ortho,label in 0906,render3d,,[Part 4] map mode dispatch on byte 7D5E (signed >= 10h)
+vgame,label,11eb:08e5,r3d_project_ortho_right,label in 0906,render3d,,"[Part 4] map mode m>=10h: coord_hi sar (m&0F), +1 if last bit out (CF)"
+vgame,func,11eb:0906,r3d_project,"void near(DI=v3d,BX=out2d)",render3d,,"[Part 4] zh>=100h: (x>>8)/zh; 1<=zh<100h: (x>>1)/(z>>9), #DE -> 0975; zh<1: x_hi=8000h. Diff-tested"
+vgame,func,11eb:0975,r3d_div0_handler,INT 0 handler (iret),render3d,,"[Part 4] IP+=3 (skips idiv+cwd), q=idiv(dividend>>8,cx), DX:AX=(int32)q<<8. Diff-tested"
+vgame,func,11eb:0990,r3d_near_bisect,"void far(int32 p0[3] front,int32 p1[3] behind)",render3d,,[Part 4] mid=(p0+p1+1)>>1 (wrap) until mid z_hi<=1 unsigned; x->7D42 y->7D46. Diff-tested
+vgame,func,11eb:0a37,r3d_build_edges,void near(ES:SI=nedges),render3d,,"[Part 4] edge (v0,v1): if nplanes==0 or 79D2[v0]&79D2[v1] -> 0B3F; record 5EBA+18h*i"
+vgame,label,11eb:0a81,r3d_edge_v1_behind,label in 0B3F,render3d,,"[Part 4] v1 behind: p0=proj+centre, near point (mid>>8)*2+centre -> +8/+0C and +10h/+14h, clip, |=4040h"
+vgame,func,11eb:0b3f,r3d_make_edge,"void near(BP=rec,DI=8*v0,BX=8*v1)",render3d,,"[Part 4] edge record: proj + zero-extended centre (s32), near-plane cases, 12EF:0333 clip"
+vgame,label,11eb:0bae,r3d_edge_reject,label in 0B3F,render3d,,"[Part 4] both ends behind: word rec+2 = 8080h, no clip"
+vgame,label,11eb:0bb6,r3d_edge_v0_behind,label in 0B3F,render3d,,[Part 4] v0 behind (mirror of 0A81): near point -> +0/+4 and +10h/+14h
+vgame,func,11eb:0c7a,r3d_draw_faces,void near(ES:SI),render3d,,"[Part 4] nplanes>0 file order, <0 BSP list 78D2, ==0 one list"
+vgame,func,11eb:0cac,r3d_draw_face_plane,void near(BX=plane),render3d,,"[Part 4] if 76D2[bx]>7Fh: 7D5A=77D2[bx] (dead), 0CED(es:[si+2bx])"
+vgame,label,11eb:0cc9,r3d_face_list_ret,ret,render3d,,[Part 4] return of 0CED (FFh end)
+vgame,label,11eb:0cca,r3d_face_cond,label in 0CED,render3d,,"[Part 4] 80h|v val: if vars[v&7F] != (int8)val skip next element ((l&1F)+1 bytes), FFh ends"
+vgame,func,11eb:0ced,r3d_face_list,void near(ES:SI=list),render3d,,"[Part 4] face list: 00-1F polygon (12EF:003E/010A), 40-5F lines (1359:0040/0049, 7D4E), 20h points (no draw), 80h cond, FF end"
+vgame,label,11eb:0d04,r3d_face_poly,label in 0CED,render3d,,[Part 4] polygon n edges + colour (FFh = skip)
+vgame,label,11eb:0d5f,r3d_face_lines,label in 0CED,render3d,,"[Part 4] line element 40|n: colour, n edges; 7D4E = each record"
+vgame,label,11eb:0daf,r3d_face_outline_dead,dead code in 0CED,render3d,,"[Part 4] unreachable alternative polygon end (fill + edge lines), only reader of 7D3E/7D40"
+vgame,label,11eb:0dfe,r3d_face_points,label in 0CED,render3d,,"[Part 4] point element 20|n: computes screen positions, call removed (no drawing)"
+vgame,func,11eb:0e5f,r3d_bsp_order,"void near(ES:SI=root,DI=out,BX=vis)",render3d,,"[Part 4] vis!=0: b1 subtree, node, b0; vis==0: b0, b1 (node not emitted); b0 80h-FEh emitted verbatim; FF end. Diff-tested"
+vgame,func,11eb:0ef2,r3d_object_extent,"void far(uint16 obj,int16 out[3])",render3d,,"[Part 4] unsigned max abs16 x,y,z of LOD0 vertices; no callers"
+vgame,func,11eb:0f9b,r3d_shared_verts,void far(),render3d,,[Part 4] 4EB6[k] = v*CamMat for the count at offs[n]; count 0 in all banks; retf at 12EF:0000
+vgame,func,12ef:0002,r3d_clip_add_edge,"void far(int16 x0,y0,x1,y1)",render3d,r3d_clip_line_queue,"[Part 5] sext to record DS:5EBA, 0333 clip, 003E add; no callers"
+vgame,func,12ef:003e,r3d_poly_add_edge,void far(SI=rec),render3d,,"[Part 5] 85B2|=flags; 40h->00E0; rejected: wall range of end0 side from +6/+0E; else 85BC|=4, 1359:0719 DDA, wall ranges per end"
+vgame,func,12ef:00aa,r3d_note_left,"void near(BX,CX)",render3d,,"[Part 5] left wall range: 85B6=max(.,hi) if hi>=, 85B4=min(.,lo)"
+vgame,func,12ef:00c5,r3d_note_right,"void near(BX,CX)",render3d,,[Part 5] right wall range 85B8/85BA
+vgame,func,12ef:00e0,r3d_note_zclip_point,void near(SI=rec),render3d,,[Part 5] copy rec+10h..17h to 8588 (first) else 8590; 85BE++ (3rd point overwrites 8590)
+vgame,func,12ef:010a,r3d_poly_finish,void far(int16 colour),render3d,,"[Part 5] colour via 1359:0040; closing edge if 85BE==2; walls; fill 1359:0052; reset wall ranges 7FFF/8000, 85B2/85BC/85BE=0"
+vgame,func,12ef:0185,r3d_wall_right,void near(),render3d,,"[Part 5] 1359:07D6([85BA],[85B8],xmax+1)"
+vgame,func,12ef:019b,r3d_wall_left,void near(),render3d,,"[Part 5] 1359:07D6([85B6],[85B4],xmin-1)"
+vgame,func,12ef:01b1,r3d_draw_line,"void far(int16 x0,y0,x1,y1,colour)",render3d,,"[Part 5] colour, record 5EBA, 0333 clip, 01F9 emit; no callers"
+vgame,func,12ef:01f9,r3d_line_emit,void far(SI=rec),render3d,,[Part 5] if !(rec+2&80h): push es; 1359:0049 line; pop es
+vgame,func,12ef:020b,r3d_clip_flags16,"void near(AL=c0,AH=c1,CX=y0,BP=y1,SI=rec)",render3d,,"[Part 5] rec+6/+0E clamped y (ymax wins), rec+2 = side bits*101h; preserves BX"
+vgame,label,12ef:025f,r3d_clip_noop,label in 020B/0265,render3d,,"[Part 5] BP=BX, DX=CX, CF=0"
+vgame,func,12ef:0265,r3d_clip_intercept,"near(AL=code,BX=x,CX=y)->BP=x,DX=y,CF",render3d,,"[Part 5] x border first, imul/idiv (trunc) with 85AC/85AE, y border fallback; fail AL=AH=0Ah (x<xmin) or 05h (x>xmax)"
+vgame,func,12ef:02d1,r3d_outcode16,near(BX=x CX=y)->AL,render3d,,"[Part 5] 1 y<ymin 2 y>ymax 4 x<xmin 8 x>xmax, signed; overflow of x-xmin or y-ymin sets byte 85C0=1"
+vgame,label,12ef:0301,r3d_oc16_xovf,label in 02D1,render3d,,[Part 5] 85C0=1 then jl with the same flags
+vgame,label,12ef:0308,r3d_oc16_yovf,label in 02D1,render3d,,[Part 5] 85C0=1 then jl with the same flags
+vgame,label,12ef:030f,r3d_clip_inside_bug,label in 02D1/0333,render3d,,"[Part 5] rec+2=0 then NEAR ret from far 0333: latent bug, unreachable for windows within 0..7FFFh"
+vgame,label,12ef:0315,r3d_clip_sx32,label,render3d,,"[Part 5] re-sign-extend hi words of the 4 coords, jmp 0359 (32-bit path)"
+vgame,func,12ef:0333,r3d_clip_edge,void far(SI=rec),render3d,,"[Part 5] s16 fast path 0465 (Cohen-Sutherland intercepts) or s32 path 0359 (bisection); writes clipped s16 coords, +2 flags, +6/+0E"
+vgame,label,12ef:0359,r3d_clip_path32,label in 0333,render3d,,"[Part 5] 32-bit out-codes, trivial accept(bug)/reject, bisection"
+vgame,label,12ef:0447,r3d_clip_miss32,label in 0333,render3d,,[Part 5] bisect_in failed: flags 8A if last midpoint code&4 else 85
+vgame,label,12ef:0457,r3d_clip_accept,label in 0333,render3d,,"[Part 5] rec+2=0, retf"
+vgame,label,12ef:045d,r3d_clip_reject,label in 0333,render3d,,"[Part 5] rec+2=8080h, retf"
+vgame,label,12ef:0465,r3d_clip_fast16,label in 0333,render3d,,[Part 5] 16-bit fast path
+vgame,func,12ef:04ef,r3d_bisect_in,"near(SI=P0,DI=P1)->CF,DX:AX,CX:BX",render3d,,[Part 5] <=32 floor midpoints to find an inside point; fail if midpoint shares codes with both 85A8 and 85AA
+vgame,label,12ef:0553,r3d_half_x_quirk,label in 056B,render3d,,[Part 5] x sum with lo==hi: FFFF:FFFF->0 else kept unhalved
+vgame,label,12ef:055f,r3d_half_y_quirk,label in 056B,render3d,,[Part 5] same for y
+vgame,func,12ef:056b,r3d_bisect_out,"near(SI=in,DI=out)->DX:AX,CX:BX",render3d,,"[Part 5] <=32 midpoints toward the border; returns first inside midpoint on any border, else last inside point"
+vgame,func,12ef:05d9,r3d_clip_flags32,"near(BP=c0,DI=c1,SI=rec)->AL=AH",render3d,,"[Part 5] rec+6/+0E clamped y (ymin wins), side bits"
+vgame,func,12ef:063e,r3d_on_border,"near(DX:AX,CX:BX)->ZF",render3d,,[Part 5] ZF=0 iff hi words 0 and x==xmin|xmax or y==ymin|ymax
+vgame,func,12ef:0665,r3d_outcode32,"near(DX:AX=x,CX:BX=y)->BP,ZF",render3d,,"[Part 5] hi word sign/nonzero, else unsigned lo compare; x<xmin excludes the xmax test"
+vgame,func,1359:0000,gfxlib_mode_init,void far(int16 mode_char),render3d,,[Part 5] uppercase (>='a' -20h) to 85C4; E/M/C/T row init; main passes 'M'
+vgame,label,1359:0037,gfxlib_dispatch_pixel,label,render3d,,[Part 5] call cs:[[85C2]+2]; no callers; inconsistent with far pixel routines
+vgame,func,1359:0040,gfxlib_dispatch_a,void far(AX=colour),render3d,,[Part 5] call cs:[[85C2]+4] (M: 01D4 set colour)
+vgame,func,1359:0049,gfxlib_dispatch_b,void far(SI=rec),render3d,,[Part 5] call cs:[[85C2]+6] (M: 045D line)
+vgame,func,1359:0052,gfxlib_dispatch_c,void far(),render3d,,[Part 5] call cs:[[85C2]+8] (M: 0AF7 fill)
+vgame,label,1359:005b,gfxlib_dispatch_fill2,label,render3d,,[Part 5] call cs:[[85C2]+0Ah]; no callers
+vgame,label,1359:0064,gfxlib_mode_tables,data in CS,render3d,,"[Part 5] 4 x 6 near words: E 0064, M 0070, C 007C, T 0088 (init,pixel,colour,line,fill,fill2)"
+vgame,func,1359:0094,gfxlib_alloc_dead,uint16 far(uint16 paras),render3d,,"[Part 5] INT 21/48 query, inverted 400h-reserve test; never called"
+vgame,label,1359:00b6,gfxlib_rows_vga480,label in 00E7,render3d,,"[Part 5] [913E]!=0: 480 rows x 50h, 9142=4Fh, 9144=-51h; 913E never written: dead"
+vgame,func,1359:00e7,gfxlib_rows_ega,void near(),render3d,,"[Part 5] EGA row table 200 x 28h, 85C2=0064; dead"
+vgame,func,1359:010a,gfxlib_rows_mcga,void near(),render3d,,[Part 5] DS:85EC[i]=i*320 for i<200; 85C2=0070 (the only mode used)
+vgame,func,1359:0126,gfxlib_rows_cga,void near(),render3d,,"[Part 5] CGA interleaved rows, 85C2=007C; dead"
+vgame,func,1359:0149,gfxlib_rows_tandy,void near(),render3d,,"[Part 5] Tandy 4-bank rows, 85C2=0088; dead"
+vgame,label,1359:0174,gfxlib_ega_reset,label,render3d,,[Part 5] if 85C4=='E' reset sequencer/GC registers; no callers
+vgame,func,1359:019b,r3d_set_page,void far(int16 page),render3d,,[Part 5] 85C6=page; 85EA=DS:85E2[page]; no callers
+vgame,func,1359:01b1,r3d_setcolor_E,void near(AX),render3d,,[Part 5] EGA colour (GC 3CEh from DS:9168); dead
+vgame,label,1359:01d4,r3d_setcolor_M,void near(AX=colour word),render3d,,"[Part 5] 85D6=ax; if ah==FF and al>=A0: al=max_u8((al-[4894])&FF, al&F0); ES=AX=[85EA]"
+vgame,func,1359:01f8,r3d_setcolor_C,void near(AX),render3d,,[Part 5] CGA colour pattern 914A/914C; dead
+vgame,func,1359:021d,r3d_setcolor_T,void near(AX),render3d,,[Part 5] Tandy colour pattern 914E; dead
+vgame,func,1359:023a,r3d_pixel_E,"void far(x,y,c)",render3d,,[Part 5] EGA window-clipped pixel; dead
+vgame,func,1359:027b,r3d_pixel_M,"void far(x,y,c)",render3d,,[Part 5] window-clipped pixel; BUG row offset read from DS:[2y] not 85EC; no callers
+vgame,func,1359:02b6,r3d_pixel_C,"void far(x,y,c)",render3d,,[Part 5] CGA pixel (same DS:[2y] bug); dead
+vgame,func,1359:0301,r3d_pixel_T,"void far(x,y,c)",render3d,,[Part 5] Tandy pixel (same DS:[2y] bug); dead
+vgame,func,1359:0344,r3d_ega_addr,void near(),render3d,,"[Part 5] EGA addr from 9132/9134, bit mask DS:9150; dead"
+vgame,label,1359:0369,r3d_line_E,void near(SI=rec),render3d,,[Part 5] EGA line; dead
+vgame,label,1359:045d,r3d_line_M,void near(SI=rec),render3d,,"[Part 5] Bresenham, both ends, err=-(n>>1), n=major+1, step when err>=0; no clipping; colour byte 85D6"
+vgame,label,1359:04c5,r3d_line_M_ymajor,label in 045D,render3d,,[Part 5] y-major half of line_M
+vgame,label,1359:0505,r3d_line_C,void near(SI=rec),render3d,,[Part 5] CGA line; dead
+vgame,label,1359:0607,r3d_line_T,void near(SI=rec),render3d,,[Part 5] Tandy line; dead
+vgame,func,1359:0719,r3d_edge_dda,void far(SI=rec),render3d,,[Part 5] edge into L=89AC/R=8D6E per row; rejects if an end y is outside the window; x-major runs L=first R=last; 9130=min row
+vgame,func,1359:07d6,r3d_wall_fill,"void far(int16 a,int16 b,int16 x)",render3d,,"[Part 5] rows sort(a,b) clamped: drop if hi<=ymin, lo>=ymax or single row; L=min(L,x), R=max(R,x)"
+vgame,label,1359:0834,r3d_fill_E2,void near(),render3d,,[Part 5] EGA fill variant; dead
+vgame,label,1359:0874,r3d_fill_E,void near(),render3d,,[Part 5] EGA fill; dead
+vgame,label,1359:0959,r3d_fill_none,label,render3d,,[Part 5] fill type FB: reset tables only
+vgame,label,1359:098d,r3d_fill_stipple,label,render3d,,[Part 5] fill type FC: colour lo where (x^y)&1
+vgame,label,1359:09f7,r3d_fill_and,label,render3d,,[Part 5] fill type FE: pixel &= lo
+vgame,label,1359:0a77,r3d_fill_or,label,render3d,,[Part 5] fill type FD: pixel |= lo
+vgame,label,1359:0af7,r3d_fill_M,void near(),render3d,,"[Part 5] spans from row 9130 until L==7FFF, clamp to [xmin,xmax], reset 7FFF/8001; dispatch on 85D6 hi"
+vgame,label,1359:0b29,r3d_fill_dither,label,render3d,,[Part 5] hi<FB (or FF: hi=lo): pixel = (x^y)&1 ? hi : lo; 9140 = colours
+vgame,label,1359:0bb3,r3d_fill_C,void near(),render3d,,[Part 5] CGA fill; dead
+vgame,label,1359:0ca1,r3d_fill_T,void near(),render3d,,[Part 5] Tandy fill; dead
+vgame,func,1433:0004,math_sin,int16 far math_sin(uint16 a),render3d,,"[Part 6] TS[(a>>3)&7FF] quadrant-reflected, sign by bit 15; no interpolation"
+vgame,func,1433:0031,math_cos,int16 far math_cos(uint16 a),render3d,,[Part 6] exactly math_sin(a+4000h)
+vgame,func,1433:0061,math_atan2,"uint16 far math_atan2(int16 y,int16 x)",render3d,,"[Part 6] octant base DS:9178 +- TA[floor(Q16 ratio)>>4]; equal or (0,0) -> TA[4095]=8190"
+vgame,func,1433:00d9,math_mul_sin,"int16 far math_mul_sin(int16 k,uint16 a)",render3d,,"[Part 6] dead: q15(k,sin a); the or dl,1 is a no-op"
+vgame,func,1433:011a,math_mul_cos,"int16 far math_mul_cos(int16 k,uint16 a)",render3d,,"[Part 6] dead: q15(k,cos a)"
+vgame,func,1433:015e,math_asin,int16 far math_asin(int16 x),render3d,,[Part 6] TQ[(|x|>>5)&3FF] signed; asin(-32768)=0 quirk
+vgame,func,1433:018e,math_hypot2,"uint16 far math_hypot2(int16 a,int16 b)",render3d,,[Part 6] L + (TH[hi byte of S*65536/L]*L>>16); equal -> TH[256]
+vgame,func,1433:01e0,math_hypot3,"int16 far math_hypot3(int16 x,int16 y,int16 z)",render3d,,"[Part 6] dead: hypot2(hypot2(x,y),z); if h>=8000h h+(|z|>>1)"
+vgame,func,1433:0219,mat_vec16,"void far mat_vec16(int16 v[3],const int16 M[9])",render3d,,[Part 6] in place v'k = (sum of hi words of v_j*M[3j+k]) << 1
+vgame,func,1433:0286,mat_mul,"void far mat_mul(const int16 A[9],const int16 B[9],int16 C[9])",render3d,r3d_mat_mul_fx,"[Part 6] C=A*B: 32-bit sums >>15 floor, element order stores (aliasing exact)"
+vgame,func,1433:02aa,mat_row_mul,"void near mat_row_mul(SI=A row,BX=B,DI=C row)",render3d,,[Part 6] one row of mat_mul; scratch [916A]; clobbers BP
+vgame,func,1433:02e2,mat_transpose,"void far mat_transpose(const int16 src[9],int16 dst[9])",render3d,,"[Part 6] sequential: dst[0,3,6,1,4,7,2,5,8]=src[0..8]"
+vgame,func,1433:0314,mat_copy,"void far mat_copy(const int16 src[9],int16 dst[9])",render3d,,[Part 6] rep movsw 9 words
+vgame,func,1433:032e,vec_mat32,"void far vec_mat32(const int16 v[3],const int16 M[9],int32 out[3])",render3d,,[Part 6] out_k = sum v_j*M[3j+k] 32-bit unshifted
+vgame,func,1433:03a9,mat_from_euler,"void far mat_from_euler(uint16 a,uint16 b,uint16 c,int16 out[9])",render3d,,"[Part 6] all products separate q15 (nested for triples), 16-bit sums; caches sin/cos in 916C..9176"
+vgame,func,1433:04d7,mat_to_euler,"void far mat_to_euler(const int16 M[9],uint16*a,uint16*b,uint16*c)",render3d,,"[Part 6] dead: b=asin(M5); |b|>3E80h: a=atan2(M6,M0),c=0 else a=atan2(-M2,M8),c=atan2(-M3,M4)"
+vgame,func,1433:0542,math_mulq,"int16 far math_mulq(int16 a,int16 b)",render3d,,"[Part 6] dead: q15(a,b), DX=cwd"
+vgame,func,1433:0554,math_muldiv,"int16 far math_muldiv(int16 a,int16 b,int16 c)",render3d,,[Part 6] dead: |b|>=|c| ? (b/c)*a : a*b/c; c=0 -> 1
+vgame,func,1433:058f,math_div32sat,"int16 far math_div32sat(uint16 lo,int16 hi,int16 d)",render3d,,"[Part 6] dead: (hi:lo)/|d|, saturate +-7FFFh by sign(hi) if 2(|hi|+1)>|d|; guard wraps for hi=7FFFh/8000h"
+vgame,func,1433:05c6,math_imul,"int32 far math_imul(int16 a,int16 b)",render3d,,[Part 6] dead: DX:AX=a*b
+vgame,func,1433:05d1,mat_from_euler_b,"void far mat_from_euler_b(uint16 p6,uint16 p8,uint16 pA,int16 out[9])",render3d,,[Part 6] dead: other Euler order; really ends at 06FC (index size short)
+vgame,data,14b2:0000,math_tab_sin,uint16[2048],render3d,,"[Part 6] round(32767*sin(i*pi/4096)), quadrant"
+vgame,data,14b2:1000,math_tab_atan,uint16[4096],render3d,,[Part 6] trunc(atan(i/4096)*32768/pi)
+vgame,data,14b2:3000,math_tab_hypot,uint16[257],render3d,,[Part 6] trunc((sqrt(1+(i/256)^2)-1)*65536) except [192]=16383
+vgame,data,14b2:3202,math_tab_asin,uint16[1024],render3d,,[Part 6] trunc(asin(i/1023)*16383/(pi/2))
+vgame,data,DS:0344,r3d_vp_main,Viewport*,render3d,r3d_main_vp_ptr|view_win_ptr,[Part 1] main viewport pointer (=032E)
+vgame,data,DS:0346,ds_0346_hint,u8,render3d,,[Part 1] toggled by 03CE each frame; no reader
+vgame,data,DS:0348,r3d_force_near,int16,render3d,r3d_near_flag|view_ctx_sel,"[Part 1] bf71: forces 04DA near path, 1A85 TV ctx"
+vgame,data,DS:034C,terr_cell_order,int16[8][9],render3d,,[Part 1] cell offsets per octant far->near; path A overreads to 03E7
+vgame,data,DS:04CC,terr_cell_down_x,int16[9],render3d,,[Part 1] look-down cell x order
+vgame,data,DS:04DE,terr_cell_down_y,int16[9],render3d,,[Part 1] look-down cell y order
+vgame,data,DS:04FA,terr_level_on,int16[6],render3d,,"[Part 1] 1,1,1,1,1,0"
+vgame,data,DS:0504,ds_0504_hint,int16,render3d,terr_prio,[Part 1] dead counter written by 04DA
+vgame,data,DS:0506,terr_dim,int16[6],render3d,terr_level_dim,"[Part 1] 1024,256,64,16,8,0 cells per level"
+vgame,data,DS:0510,r3d_scenery_map,uint16[128],render3d,,[Part 1] 3DT object -> bank<<8|idx (0994)
+vgame,data,DS:061E,terr_rec_count,uint16[5][32],render3d,,[Part 1] records per level and type from .3DT
+vgame,data,DS:0760,r3d_obj_flags_b0,u8[128],render3d,bank0_flags,[Part 1] STFLT flag bytes (bd24)
+vgame,data,DS:07E0,r3d_obj_flags_b1,u8[128],render3d,bank1_flags_orig,[Part 1] theatre flag bytes (0994)
+vgame,data,DS:0860,r3d_obj_flags_b2,u8[128],render3d,photo_flags,[Part 1] PHOTO flag bytes (0994)
+vgame,data,DS:08E0,r3d_obj_flags_b3,u8[128],render3d,,[Part 1] bank 3 flags (never written)
+vgame,data,DS:0960,r3d_obj_flags_slot,uint8[128],render3d,view_zoom_tbl_a|bank1_flags,[Part 3] working bank-1 flag copy (0994); bit 4 = collision-solid for 0FFB
+vgame,data,DS:09e0,bank0_attr,u8[],render3d,view_zoom_tbl_b,[S3.6] set to 6 for every bank-0 object by load_stflt_3dx (purpose unknown)
+vgame,data,DS:0A60,r3d_flag_tab,uint16[4],render3d,bank_flag_ptrs,"[Part 1] pointers 0760,07E0,0860,08E0"
+vgame,data,DS:0A62,r3d_flag_ptr_b1,uint16,render3d,,"[Part 3] = 07E0 (no writer), part of 0A60 table; 13E3 class byte bit 7"
+vgame,data,DS:0a68,l4_tile_tbl,u8[9][64],render3d,,[S3.6] level-4 8x8 tile type table per theatre
+vgame,data,DS:0CFC,map_pass_level,int16[6],render3d,,"[Part 3] 3,4,2,3,4,1: tile level per 11F2 pass (index 4..0)"
+vgame,data,DS:0D1E,r3d_scr_cx,int16,render3d,r3d_cx,[Part 6] screen centre x (w2) of the viewport (db71)
+vgame,data,DS:0D20,r3d_scr_cy,int16,render3d,r3d_cy,[Part 6] screen centre y (h2)
+vgame,data,DS:0D22,hz_sky_offs,int16[17],render3d,,"[Part 6] 0,2,3,4,6,8,11,15,20,27,36,48,64,87,119,164,0"
+vgame,data,DS:0D42,hz_corner_x,uint16,render3d,,[Part 6] corner column of the current side (0 or XMAX)
+vgame,data,DS:0D44,hz_nsinC,int16,render3d,,[Part 6] -sin(roll)
+vgame,data,DS:0D46,hz_colour,uint8,render3d,,[Part 6] first-side (sky) colour of hz_draw
+vgame,data,DS:0D48,hz_side,uint16,render3d,,[Part 6] hz_draw pass toggle 0 / FFFFh
+vgame,data,DS:11E2,ds_11E2_hint,u8,render3d,,"[Part 1] light threshold (<14h -> lights on), never written"
+vgame,data,DS:228A,clipA_oc,uint8,render3d,,[Part 6] 0336 outcode of point 1
+vgame,data,DS:228B,clipA_d,int16[4],render3d,,"[Part 6] 0336 Dx, Dy, Dx>>1, Dy>>1 (228B 228D 228F 2291)"
+vgame,data,DS:2293,clip_xmax,int16,render3d,clip_xmax|line_w,[Part 6] inclusive clip x maximum
+vgame,data,DS:2295,clip_ymax,int16,render3d,clip_ymax|line_h,[Part 6] inclusive clip y maximum (<=219)
+vgame,data,DS:2299,edge_x1,int16,render3d,edge_x1|line_x0,[Part 6] segment block x1 (then 229B x2 229D y1 229F y2)
+vgame,data,DS:229B,edge_x2,int16,render3d,line_x1,[Part 6] 
+vgame,data,DS:229D,edge_y1,int16,render3d,line_y0,[Part 6] 
+vgame,data,DS:229F,edge_y2,int16,render3d,line_y1,[Part 6] 
+vgame,data,DS:22A1,edge_L,uint16[220],render3d,edge_L_tab,[Part 6] left edge table (FFFFh empty)
+vgame,data,DS:2459,edge_R,uint16[220],render3d,edge_R_tab,[Part 6] right edge table (0 empty)
+vgame,data,DS:2611,walk_d,uint16[2],render3d,,"[Part 6] 05B9 |dx|, |dy|"
+vgame,data,DS:2615,edge_ymin,uint16,render3d,,[Part 6] dirty row min (FFFFh empty)
+vgame,data,DS:2617,edge_ymax,uint16,render3d,,[Part 6] dirty row max
+vgame,data,DS:261A,clipB_oc,uint8,render3d,,[Part 6] 06AC outcode of point 1
+vgame,data,DS:261B,clipB_d,int16[4],render3d,,"[Part 6] 06AC Dx, Dy, Dx>>1, Dy>>1 (261B 261D 261F 2621)"
+vgame,data,DS:262A,timer_frame_flag,u8,render3d,,"[Part 1] 1 after flip (1BBC), 0 at ISR frame tick (1C89); DAE8 waits"
+vgame,data,DS:2fdc,unit_model_tab,word[type][16],render3d,,"[S3.6] Model ids per unit type; word 0 near, word 1 far variant"
+vgame,data,DS:3372,wpn_model_tab,word[],render3d,,"[S3.6] Model id per weapon type, 0x12 bytes per entry"
+vgame,data,DS:3A5C,fire_puffs,8B x6,render3d,fire_puff_state,[Part 2] +0 dh +2 dp +4 frame +6 active (C73C only)
+vgame,data,DS:433a,fov_shift,byte,render3d,view_scale_shift;r3d_zoom_shift,[S3.6] FOV shift for 1442; cleared by 2f82 after each scene
+vgame,data,DS:4360,r3d_wide_mode,int16,render3d,r3d_wide|view_terrain_mode,[Part 1] selects wide cull tables 4936/4946 (bf71)
+vgame,data,DS:436A,puff_offsets,int16[8],render3d,,[Part 2] 0C00 0800 0400 0200 FE00 FC00 F800 F400; index rand_n(7)
+vgame,data,DS:43B6,r3d_haze_on,u8,render3d,,[Part 1] Alt-A; 0 disables depth shade
+vgame,data,DS:4894,r3d_shade_ofs,uint8,render3d,r3d_shade,[Part 5] ramp shade offset subtracted by 1359:01D4; from queued object [obj+4]
+vgame,data,DS:48A6,ds_48A6_hint,int16[8],render3d,,[Part 1] D76B outputs 48A6..48B4 without readers
+vgame,data,DS:48B6,r3d_far,int16,render3d,r3d_max_depth,[Part 1] max view depth (detail+1)*0D05h
+vgame,data,DS:48C6,r3d_min_depth,int16[8],render3d,r3d_min_depth_tab,"[Part 1] -1,-23,-91,-182,-363,-725,-1450,-2900"
+vgame,data,DS:48D6,r3d_xrad_n,int16[8],render3d,r3d_frustum_x_tab,[Part 1] x radius 294B=0
+vgame,data,DS:48E6,r3d_xrad_h,int16[8],render3d,,[Part 1] x radius 294B!=0
+vgame,data,DS:48F6,r3d_yrad_n,int16[8],render3d,r3d_frustum_y_tab,[Part 1] y radius 294B=0
+vgame,data,DS:4906,r3d_yrad_h,int16[8],render3d,,[Part 1] y radius 294B!=0
+vgame,data,DS:4916,r3d_yrad_nc,int16[8],render3d,,[Part 1] y radius 294B=0 with 365E
+vgame,data,DS:4926,r3d_yrad_hc,int16[8],render3d,,[Part 1] y radius 294B!=0 with 365E
+vgame,data,DS:4936,r3d_xrad_wide,int16[8],render3d,,[Part 1] x radius wide mode
+vgame,data,DS:4946,r3d_yrad_wide,int16[8],render3d,,[Part 1] y radius wide mode
+vgame,data,DS:4956,r3d_obj_type,uint16,render3d,r3d_cur_type,[Part 1] current object id
+vgame,data,DS:4958,r3d_view_A,int32,render3d,r3d_view_a,[Part 1] E8B5 view right
+vgame,data,DS:495C,r3d_view_B,int32,render3d,r3d_view_b,[Part 1] E8B5 view up
+vgame,data,DS:4960,r3d_view_C,int32,render3d,r3d_view_c,[Part 1] E8B5 view depth (queue key)
+vgame,data,DS:4964,r3d_rel,int16[3],render3d,r3d_rel_e,[Part 1] camera-relative east north up
+vgame,data,DS:4966,r3d_rel_n,s16,render3d,,[S3.6] object north relative
+vgame,data,DS:4968,r3d_rel_u,s16,render3d,,[S3.6] object up relative
+vgame,data,DS:496A,r3d_obj_ang,int16[3],render3d,r3d_ang1,[Part 1] object angles / sprite x y size
+vgame,data,DS:496c,r3d_ang2,s16,render3d,,[S3.6] object angle 2
+vgame,data,DS:496e,r3d_ang3,s16,render3d,,[S3.6] object angle 3
+vgame,data,DS:4978,r3d_dist_est,int16,render3d,r3d_dist,[Part 1] E8B5 distance estimate (no reader)
+vgame,data,DS:497A,r3d_size_class,int16,render3d,r3d_class,[Part 1] object class 0..7
+vgame,data,DS:497C,r3d_origin,int16[3],render3d,r3d_origin_x,[Part 1] origin subtracted by E7AC
+vgame,data,DS:497e,r3d_origin_y,s16,render3d,,[S3.6] camera/cell origin y
+vgame,data,DS:4980,r3d_origin_z,s16,render3d,,[S3.6] camera/cell origin z
+vgame,data,DS:4982,r3d_sincos,int16[6],render3d,r3d_sc,[Part 1] sin/cos scratch of E26B/E3E2
+vgame,data,DS:4986,sin_pitch,int,render3d,,[S3.6] Cached by e26b/e3e2
+vgame,data,DS:4988,cos_pitch,int,render3d,,[S3.6] Cached by e26b/e3e2
+vgame,data,DS:498a,sin_roll,int,render3d,,[S3.6] Cached by e26b/e3e2
+vgame,data,DS:498c,cos_roll,int,render3d,,[S3.6] Cached by e26b/e3e2
+vgame,data,DS:498E,r3d_cull_mat,int16[9],render3d,r3d_cam_matrix,[Part 1] camera/cull matrix
+vgame,data,DS:4992,cull_m2,int16,render3d,,"[Part 2] element m2 of cull matrix 498E (depth row, x); also 4998 = m5 (z), 499E = m8 (y)"
+vgame,data,DS:49A0,r3d_obj_mat,int16[9],render3d,r3d_obj_matrix,[Part 1] model matrix for 11EB:00D3
+vgame,data,DS:49B2,ds_49B2_hint,int16[9],render3d,r3d_cam_matrix_copy,[Part 1] copy of 498E by DB3E; no reader
+vgame,data,DS:49C4,r3d_queue_n,int16,render3d,r3d_queue_count|bb_count,[Part 1] queue count max 50
+vgame,data,DS:49C6,r3d_obj_flags,uint16,render3d,r3d_rec_flags|shade_class,[Part 1] record +6 flags
+vgame,data,DS:49E0,r3d_sx,int16,render3d,,[Part 2] B85D result x; 0xFFFF = not visible
+vgame,data,DS:49E8,r3d_sy,int16,render3d,,[Part 2] B85D result y (written only when in front and in the field)
+vgame,data,DS:49F0,r3d_queue_pool,QRec[50],render3d,r3d_queue_pool|bb_entries,[Part 1] 0x16-byte queue records
+vgame,data,DS:4E3C,r3d_queue_ptr,uint16[50],render3d,r3d_queue_list|bb_sorted,[Part 1] sorted record pointers (0 = farthest)
+vgame,data,DS:4EA0,r3d_spin_rate,int16,render3d,r3d_spin_step,[Part 1] constant 6 (DB3E spinner)
+vgame,data,DS:4EA2,r3d_glow_size,int16[8],render3d,,"[Part 1] 6,8,12,16,20,24,30,36 sizes for ids 25h+k"
+vgame,data,DS:4EB6,r3d_shared_vtx,int32[256][4],render3d,r3d_sharedv,[Part 4] shared vertices (dead in data)
+vgame,data,DS:5EB6,r3d_old_int0,uint16[2],render3d,,[Part 4] saved INT 0 vector
+vgame,data,DS:5EBA,r3d_edges,uint8[354][24],render3d,,[Part 4] edge records
+vgame,data,DS:76D2,r3d_plane_vis,uint8[256],render3d,r3d_vis,[Part 4] FF visible / 7F var-hidden / 00 back-facing
+vgame,data,DS:77D2,r3d_plane_shade,uint8[256],render3d,r3d_shadeb,"[Part 4] shade byte, dead"
+vgame,data,DS:78D2,r3d_bsp_list,uint8[256],render3d,r3d_bsporder,"[Part 4] BSP draw order, FF-terminated"
+vgame,data,DS:79D2,r3d_vtx_needed,uint8[256],render3d,r3d_vneed,[Part 4] 1 = vertex of a visible plane
+vgame,data,DS:7AF8,r3d_cammat,int16[9],render3d,,[Part 4] scaled camera matrix (000C)
+vgame,data,DS:7B0A,r3d_cammat_t,int16[9],render3d,,"[Part 4] transpose of unscaled camera matrix, never read"
+vgame,data,DS:7B1C,r3d_partmat,struct{int16 M[9];int16 T[9];}[8],render3d,,[Part 4] part slots 24h; slot nparts = Euler temp
+vgame,data,DS:7C3C,r3d_eye,int16[8][3],render3d,,[Part 4] eye in each part frame
+vgame,data,DS:7C6C,r3d_light,int16[8][3],render3d,r3d_light_part,[Part 4] light in each part frame
+vgame,data,DS:7C9C,r3d_objpos,int16[3],render3d,,"[Part 4] object offset from camera, world axes"
+vgame,data,DS:7CA2,r3d_origin,int32[3],render3d,r3d_viewpos,[Part 4] current origin in view space (part switches overwrite)
+vgame,data,DS:7CAE,r3d_part_origin,int32[8][3],render3d,r3d_partpos,[Part 4] part origins in view space
+vgame,data,DS:7D0E,r3d_pivot_m0,int32[3],render3d,,[Part 4] pivot*M_0 temp (0440)
+vgame,data,DS:7D1A,r3d_vtx_ptr,uint16,render3d,,"[Part 4] =C688, never read"
+vgame,data,DS:7D1C,r3d_objmat_ptr,uint16,render3d,,[Part 4] object matrix ptr
+vgame,data,DS:7D1E,r3d_vars_ptr,uint16,render3d,,[Part 4] var table ptr
+vgame,data,DS:7D20,r3d_mat_ptr,uint16,render3d,r3d_cur_slot,[Part 4] part slot ptr (7B1C or 7AF8)
+vgame,data,DS:7D26,r3d_porg_ptr,uint16,render3d,,[Part 4] current part origin ptr
+vgame,data,DS:7D28,r3d_nparts,int16,render3d,,[Part 4] nparts
+vgame,data,DS:7D2A,r3d_nplanes,int16,render3d,,[Part 4] nplanes (<0 BSP)
+vgame,data,DS:7D2C,r3d_nverts,int16,render3d,,[Part 4] nverts (<0 shared)
+vgame,data,DS:7D2E,r3d_far,uint16,render3d,,"[Part 4] far limit 7FFF00h/max(abs16(2zoom),100h); image 7FFFh"
+vgame,data,DS:7D38,r3d_plane_mask,uint8,render3d,r3d_planemask,[Part 4] FF or 7F (failed 8100 test)
+vgame,data,DS:7D3A,r3d_yflip,int16,render3d,r3d_yscale_sw,[Part 4] never written (0): 000C column-1 switch
+vgame,data,DS:7D3E,r3d_poly_n,uint16,render3d,,[Part 4] polygon edge count (read only by dead 0DAF)
+vgame,data,DS:7D40,r3d_poly_ptr,uint16,render3d,,[Part 4] polygon start (read only by dead 0DAF)
+vgame,data,DS:7D42,r3d_near_x,int32,render3d,,[Part 4] bisection result x
+vgame,data,DS:7D46,r3d_near_y,int32,render3d,,[Part 4] bisection result y
+vgame,data,DS:7D4A,r3d_bsp_vis,uint16,render3d,,[Part 4] vis array ptr (0E5F)
+vgame,data,DS:7D4C,r3d_light_ptr,uint16,render3d,,[Part 4] current light slot
+vgame,data,DS:7D4E,r3d_last_line,uint16,render3d,,[Part 4] last line edge record (DF08 reads)
+vgame,data,DS:7D50,r3d_coltab,uint16,render3d,shade_table_base;r3d_colour_tab_ptr;r3d_coltab|r3d_table_ptr,[Part 4] colour table base
+vgame,data,DS:7D54,r3d_light_dir,int16[3],render3d,r3d_lightvec,[Part 4] world light vector (DB71)
+vgame,data,DS:7D5A,r3d_cur_shade,uint8,render3d,r3d_shade,[Part 4] dead (never read)
+vgame,data,DS:7D5C,r3d_outside,uint8,render3d,r3d_flags,[Part 4] bit7 = outside/not inside
+vgame,data,DS:7D5E,r3d_ortho,int16,render3d,,[Part 4] 0 perspective; 0Eh..15h map scale (low byte used)
+vgame,data,DS:8560,r3d_bank_seg,uint16,render3d,r3d_cur_bank_seg,[Part 4] 3DX bank segment
+vgame,data,DS:8568,clip_seg_a,int32[4],render3d,,"[Part 5] bisection copy P0,P1 (updated in place)"
+vgame,data,DS:8578,clip_seg_b,int32[4],render3d,,"[Part 5] second copy of P0,P1 (outside targets)"
+vgame,data,DS:8588,zclip_pt0,int32[2],render3d,,[Part 5] first near-plane point; with 8590 forms the closing edge record
+vgame,data,DS:8590,zclip_pt1,int32[2],render3d,,[Part 5] second near-plane point
+vgame,data,DS:85A8,clip_c0,uint16,render3d,,[Part 5] out-code end0 for bisect_in
+vgame,data,DS:85AA,clip_c1,uint16,render3d,,[Part 5] out-code end1 for bisect_in
+vgame,data,DS:85AC,clip_dx,int16,render3d,,[Part 5] x1-x0 (fast path)
+vgame,data,DS:85AE,clip_dy,int16,render3d,,[Part 5] y1-y0 (fast path)
+vgame,data,DS:85B0,clip_iter,int16,render3d,,[Part 5] bisection counter (32 down to -1)
+vgame,data,DS:85B2,poly_flags,uint16,render3d,r3d_polyflags,[Part 5] OR of the polygon's edge flag words
+vgame,data,DS:85B4,wall_l_lo,int16,render3d,r3d_wallL,[Part 5] left wall min y (reset 7FFFh)
+vgame,data,DS:85B6,wall_l_hi,int16,render3d,,[Part 5] left wall max y (reset 8000h)
+vgame,data,DS:85B8,wall_r_lo,int16,render3d,r3d_wallR,[Part 5] right wall min y (reset 7FFFh)
+vgame,data,DS:85BA,wall_r_hi,int16,render3d,,[Part 5] right wall max y (reset 8000h)
+vgame,data,DS:85BC,poly_drawn,uint16,render3d,r3d_polydrawn,[Part 5] 4 once an edge was rasterised
+vgame,data,DS:85BE,zclip_n,uint16,render3d,r3d_nzclip,[Part 5] number of near-plane points saved
+vgame,data,DS:85C0,clip_ovf,uint8,render3d,,[Part 5] 16-bit compare overflow flag (forces the 32-bit path)
+vgame,data,DS:85C1,clip_c1b,uint8,render3d,,[Part 5] out-code of end1 for the second intercept
+vgame,data,DS:85C2,gfx_table,uint16,render3d,r3d_vmode_tab|gfxlib_disp,"[Part 5] CS offset of the dispatch table (image 0064h, M 0070h)"
+vgame,data,DS:85C4,gfx_mode,uint16,render3d,gfxlib_mode,[Part 5] upper-cased mode letter (image FFFFh)
+vgame,data,DS:85C6,gfx_page_no,uint16,render3d,,[Part 5] page index (1359:019B)
+vgame,data,DS:85CA,win_xmin,int16,render3d,r3d_win|r3d_vp_abs,[Part 5] clip window xmin (DB71)
+vgame,data,DS:85CC,win_ymin,int16,render3d,,[Part 5] clip window ymin
+vgame,data,DS:85CE,win_xmax,int16,render3d,,[Part 5] clip window xmax (image 13Fh)
+vgame,data,DS:85D0,win_ymax,int16,render3d,,[Part 5] clip window ymax (image C7h)
+vgame,data,DS:85D2,r3d_centre_x,uint16,render3d,r3d_centre,[Part 4] projection centre x (zero-extended)
+vgame,data,DS:85D4,r3d_centre_y,uint16,render3d,,[Part 4] projection centre y
+vgame,data,DS:85D6,gfx_colour,uint16,render3d,r3d_color,"[Part 5] lo colour, hi fill type (FF solid, FE AND, FD OR, FC stipple, FB none, else dither hi)"
+vgame,data,DS:85E2,gfx_pages,uint16[],render3d,,[Part 5] page segments
+vgame,data,DS:85EA,gfx_seg,uint16,render3d,,[Part 5] current draw segment (ES)
+vgame,data,DS:85EC,gfx_rows,uint16[480],render3d,r3d_rowtab|row_offsets,[Part 5] row start offsets (M: y*320 for 200 rows)
+vgame,data,DS:89AC,edge_L,int16[480],render3d,r3d_edge_L,[Part 5] min x per row (idle 7FFFh)
+vgame,data,DS:8D6E,edge_R,int16[480],render3d,r3d_edge_R,[Part 5] max x per row (idle 8001h)
+vgame,data,DS:9130,edge_miny,int16,render3d,r3d_miny,[Part 5] first touched row (idle 7FFFh)
+vgame,data,DS:9132,ega_px_x,int16,render3d,,[Part 5] EGA pixel scratch x
+vgame,data,DS:9134,ega_px_y,int16,render3d,,[Part 5] EGA pixel scratch y
+vgame,data,DS:913E,ega_480,uint16,render3d,,[Part 5] E 480-line switch (never written)
+vgame,data,DS:9140,fill_dither,uint16,render3d,,[Part 5] dither colours lo/hi
+vgame,data,DS:9150,ega_bitmask,uint8[8],render3d,,[Part 5] 80h..01h
+vgame,data,DS:9168,ega_coltab,uint8[16],render3d,,[Part 5] E/C colour table (zero)
+vgame,data,DS:916A,mat_scratch,uint16,render3d,,[Part 6] low word of last mat_mul sum<<1
+vgame,data,DS:916C,mat_sc,int16[6],render3d,,"[Part 6] sin/cos cache of 03A9 (sin a,cos a,sin b,cos b,sin c,cos c)"
+vgame,data,DS:9178,atan_oct_base,uint16[8],render3d,atan2_base,[Part 6] 0000 4080 0080 C000 8080 4000 8000 C080 (low byte 80h = subtract)
+vgame,data,DS:9188,fx_expl_sprites,farptr[8],render3d,,[Part 1] 1A85 sprite table
+vgame,data,DS:91D8,r3d_sprites,farptr[8],render3d,r3d_sprite_ptrs,[Part 1] 1AD6/1B1B sprite table
+vgame,data,DS:94D6,terr_cam_rel,int16[3],render3d,terr_cell_rel_x,[Part 1] camera rel. to cell centre x y and alt
+vgame,data,DS:94d8,terr_cell_rel_y,s16,render3d,,[S3.6] camera y relative to current cell centre
+vgame,data,DS:94da,terr_cell_alt,s16,render3d,,[S3.6] camera altitude in level units (min 2)
+vgame,data,DS:94DC,terr_ovr_index,int16,render3d,,[Part 1] last 0FB1 index
+vgame,data,DS:94DE,map_tile_px,int16,render3d,,[Part 3] tile size in pixels 0x1000 sar DECC (pass skipped if <=10h)
+vgame,data,DS:94E0,map_tiles_side,int16,render3d,,[Part 3] tiles per side of the pass level: 4/16/64
+vgame,data,DS:94E2,map_centre_x_px,int16,render3d,,[Part 3] map centre x in pixels (px sar shift)
+vgame,data,DS:94E4,map_centre_y_px,int16,render3d,,[Part 3] map centre y (north) in pixels (py sar shift)
+vgame,data,DS:94E6,map_class_filter,int16,render3d,,[Part 3] 0 for passes 4..2 / 0x80 for passes 1..0: required 07E0 flag bit 7 (levels >= 3)
+vgame,data,DS:94E8,map_pass,int16,render3d,,[Part 3] 11F2 pass counter 4..0 (ends 0xFFFF)
+vgame,data,DS:9500,r3d_offscreen_x,int16,render3d,proj_sx_raw,[Part 2] written by B85D on screen rejection; no reader (dead)
+vgame,data,DS:9874,r3d_lights,int16,render3d,,[Part 1] lights value for vars 10/11
+vgame,data,DS:98C8,hz_nsC,int16,render3d,,"[Part 6] -sinC cache (1442, bf71); 98E4 cosC, 98F8 sinB, 9F12 cosB"
+vgame,data,DS:98E4,hz_cC,int16,render3d,,[Part 6] cosC cache
+vgame,data,DS:98F8,hz_sB,int16,render3d,,[Part 6] sinB cache
+vgame,data,DS:9904,terr_l0_child,u8[512],render3d,terr_child0,[S3.6] .3dG level-0 child table
+vgame,data,DS:9b08,terr_l1_child,u8[512],render3d,terr_child1,[S3.6] .3dG level-1 child table
+vgame,data,DS:9d10,terr_l2_child,u8[512],render3d,terr_child2,[S3.6] .3dG level-2 child table
+vgame,data,DS:9f10,wobj_ptr,short,render3d,,[S3.6] last world object found by wobj_find (0D08)
+vgame,data,DS:9F12,hz_cB,int16,render3d,,[Part 6] cosB cache
+vgame,data,DS:9f66,terrain_hit,byte,render3d,scenery_hit,[S3.6] Camera under terrain flag set by 2f82
+vgame,data,DS:9f68,terr_l3_map,u8[256],render3d,terr_map3,[S3.6] .3dG level-3 16x16 type map
+vgame,data,DS:a06a,3dt_records,rec7[],render3d,,"[S3.6] scenery records {s16 x,y,z; u8 obj}"
+vgame,data,DS:b00c,terr_l4_tiles,u8[64],render3d,terr_map4,[S3.6] level-4 tile types of the theatre
+vgame,data,DS:B156,view_matrix,int16[9],render3d,cam_matrix,[Part 2] E26B layout; row r = m[r]*x + m[3+r]*z + m[6+r]*y (BA13)
+vgame,data,DS:b288,cam_x,long,render3d,,[S3.6] Camera X
+vgame,data,DS:b752,cam_y,long,render3d,,[S3.6] Camera Y (not inverted)
+vgame,data,DS:b75c,cam_z,int,render3d,,[S3.6] Camera altitude min 0x10
+vgame,data,DS:B75E,r3d_bank_segs,uint16[4],render3d,r3d_bank_segs|bank0_seg,[Part 1] .3DX bank segments
+vgame,data,DS:b760,bank1_seg,u16,render3d,,[S3.6] theatre .3DX segment
+vgame,data,DS:b762,bank2_seg,u16,render3d,,[S3.6] PHOTO.3DX segment
+vgame,data,DS:B766,tv_cam_pos,"int32,int32,int16",render3d,,"[Part 1] bf71 camera x (B766), y (B76A), z (B808) for BEE1"
+vgame,data,DS:b770,cam_roll,int,render3d,,[S3.6] Camera roll
+vgame,data,DS:C02E,r3d_vars,int16[32],render3d,r3d_var_tab,[Part 1] 3DX variable table
+vgame,data,DS:C040,obj_var9,int16,render3d,,[Part 2] var[9] of the C02E var table: fire puff frame for model 0x24
+vgame,data,DS:c07c,cam_pitch,int,render3d,,[S3.6] Camera pitch
+vgame,data,DS:C080,hz_band_offs,int16[16],render3d,,[Part 6] 1442 band offsets (sky copy of 0D22 then ground G[i])
+vgame,data,DS:c0a6,unit_boom_x,short,render3d,,[S3.6] unit wreck position x (71B4)
+vgame,data,DS:c0b8,unit_boom_y,short,render3d,,[S3.6] unit wreck position y
+vgame,data,DS:C686,r3d_inside,uint16,render3d,ground_hit_flag|scenery_hit_raw,[Part 4] bit7 = probe point inside a model
+vgame,data,DS:C688,r3d_vtx3d,int32[256][4],render3d,,[Part 4] view-space vertices
+vgame,data,DS:D688,r3d_vtx2d,int32[256][2],render3d,r3d_vproj,"[Part 4] projected vertices, x_hi 8000h = behind"
+vgame,data,DS:DE92,r3d_depth,int16,render3d,,[Part 2] camera depth >> 3 (negative in front); stale when B85D rejects early
+vgame,data,DS:DECC,map_shift,int16,render3d,,[Part 3] (4-L)*2+shift: pixel -> level-L unit shift; 7D5E = DECC+0Eh
+vgame,data,DS:dfde,beacon_phase,word,render3d,,[S3.6] Strip beacon phase 0..0xFFF
+vgame,data,DS:E2FC,r3d_unit_level,int16,render3d,terr_level,[Part 1] level of current coordinates (queue key scale)
+vgame,data,DS:E304,terr_rec_ptr,uint16[5][32],render3d,terr_rec_ptr|3dt_ptrs,[Part 1] first scenery record per level and type
+vgame,data,DS:E404,terr_rec_ptr_l4,uint16[32],render3d,,[Part 3] = E304+100h: first record pointer per level-4 tile type (0FFB)
+vgame,data,DS:E44A,terr_rec_cur,uint16,render3d,,[Part 1] current scenery record pointer
+vgame,data,DS:e44c,cam_yaw,int,render3d,,[S3.6] Camera yaw (03ce gets -E44C)
+vgame,data,DS:E53E,r3d_xrad_tab,uint16,render3d,r3d_frustum_x_ptr,[Part 1] x radius table pointer (DB71)
+vgame,data,DS:E544,r3d_yrad_tab,uint16,render3d,r3d_frustum_y_ptr,[Part 1] y radius table pointer (DB71)
