@@ -1,0 +1,151 @@
+exe,kind,address,name,type,owner,other_names,notes
+vgame,func,11eb:000c,r3d_set_camera,"void far(const int16*mat9,int zoom)",render3d,,"copies cam matrix to 7AF8, scales (x/y halved, z by 7D2E, y*0.75), sets far limit 7D2E=7FFF00h/max(|2zoom|,100h)"
+vgame,func,11eb:00d3,r3d_draw_object,"void far(obj,x,y,z,mat9*,vars*)",render3d,,"draws one 3DX object: LOD, cull, parts, planes, vertices, edges, faces. DS:8560=bank seg. Callers 13E3,DF08,E7AC"
+vgame,func,11eb:01b8,r3d_probe_object,"void far(obj,x,y,z,mat9*)",render3d,,"00D3 without drawing: sets C686 bit7 when the point is inside a closed model (collision/inside test, caller 0FFB)"
+vgame,func,11eb:0281,r3d_hook_div0,void near(),render3d,,saves real-mode INT0 vector to DS:5EB6/8 and installs 11EB:0975
+vgame,func,11eb:02a2,r3d_unhook_div0,void near(),render3d,,restores INT0 vector from DS:5EB6/8
+vgame,func,11eb:02b6,r3d_frustum_test,bool near(AX=radius)->ZF,render3d,,"sphere/pyramid cull: far limit 7D2E, 2*zhi+radius >= |xhi|,|yhi|; ZF=1 visible, AX=FFFF culled"
+vgame,func,11eb:031b,r3d_setup_parts,void near(CX=nparts),render3d,,"per-part matrices (7B1C+24h*k), eye vectors 7C3C, light vectors 7C6C, part origins 7CAE; uses 1433:0286/03A9/02E2/0219"
+vgame,func,11eb:0440,r3d_part_pivot,"void near(BX=eye slot,DI,ES:SI=pivot)",render3d,,origin_part = origin_obj + pivot*M_root - pivot*M_part (rotation about pivot); eye slot = -pivot
+vgame,func,11eb:04cd,r3d_light_root,void near(),render3d,,"copies light vector 7D54 to 7C6C, rotates by ObjMat^T, 7D4C=7C6C+6"
+vgame,func,11eb:04f9,r3d_light_part,void near(),render3d,,"light vector for a part: 7C6C rotated by part matrix (DI), stored at [7D4C], 7D4C+=6"
+vgame,func,11eb:0521,r3d_plane_vartest,label in 0565,render3d,,8100 var val element: if vars[var]!=val then 7D38=7Fh (next plane hidden)
+vgame,func,11eb:0544,r3d_plane_partsw,label in 0565,render3d,,80pp element: switch eye ptr BX=7C3C+6pp and light ptr 7D4C=7C6C+6pp
+vgame,func,11eb:0565,r3d_planes,void near(ES:SI=nplanes),render3d,,"plane visibility n.eye+d>=0 -> 76D2[], shade 77D2[], vertex-needed flags 79D2[], BSP order 78D2 (0E5F)"
+vgame,func,11eb:0658,r3d_clear_vertex_flags,void near(),render3d,,zeroes (|nverts|+2)/2 words at DS:79D2
+vgame,func,11eb:0678,r3d_plane_shade,void near(),render3d,,"shade byte ((n.L)<<2)>>16 into 77D2[di]; only copied to 7D5A, never used (dead)"
+vgame,func,11eb:06b9,r3d_xform_vertices,void near(ES:SI=vertices),render3d,,"transform needed vertices into C688 (s32 x3, 16B) and project into D688 (8B); handles part prefixes 8000-800F"
+vgame,func,11eb:06e6,r3d_xform_partsw,label in 06B9,render3d,,"part switch prefix in plane path: BX=7D20+36pp, origin 7CAE+12pp -> 7CA2"
+vgame,func,11eb:07cc,r3d_xform_partsw2,label in 0819,render3d,,part switch prefix met inside 0819 (no-plane path)
+vgame,func,11eb:0819,r3d_xform_one,"void near(ES:SI,BX=mat,DI=out3d,BP=outproj)",render3d,,"v*M + origin (s32), then 0906 project; advances bp+=8 di+=16 si+=6"
+vgame,func,11eb:08bc,r3d_project_ortho_left,label in 0906,render3d,,map-mode projection for 7D5E<16: x_hi << (16-cl)
+vgame,func,11eb:08da,r3d_project_ortho,label in 0906,render3d,,map-mode projection dispatch on DS:7D5E
+vgame,func,11eb:0906,r3d_project,"void near(DI=v3d,BX=out)",render3d,,"perspective x/z,y/z in 3 z ranges (>=100h,>=1,<1 => x_hi=8000h behind); map mode if 7D5E!=0; idiv overflow caught by INT0 handler"
+vgame,func,11eb:0975,r3d_div0_handler,INT0 handler,render3d,,"divide overflow recovery: skips idiv+cdq (IP+3), redoes (dx:ax>>8)/cx and returns quotient<<8"
+vgame,func,11eb:0990,r3d_near_bisect,"void far(p0[6w],p1[6w])",render3d,,bisects segment p0p1 until mid z hi is 0 or 1; result x@7D42 y@7D46; used for edges crossing the near plane
+vgame,func,11eb:0a37,r3d_build_edges,void near(ES:SI=nedges),render3d,,"for each edge (v0,v1) with both vertices needed -> 0B3F; edge records at DS:5EBA+24*i"
+vgame,func,11eb:0a81,r3d_edge_v1_behind,label in 0B3F,render3d,,"edge with v1 behind camera: v0 projected, near point by 0990 -> rec+8/+10h, flags|=4040h"
+vgame,func,11eb:0b3f,r3d_make_edge,"void near(SI=rec,DI=v0*8,BX=v1*8)",render3d,,"builds 24-byte edge record from D688 projections + centre 85D2/85D4, near-plane handling, calls 12EF:0333 clip"
+vgame,func,11eb:0bae,r3d_edge_reject,label in 0B3F,render3d,,both ends behind camera: rec+2 = 8080h
+vgame,func,11eb:0bb6,r3d_edge_v0_behind,label in 0B3F,render3d,,edge with v0 behind camera (mirror of 0A81)
+vgame,func,11eb:0c7a,r3d_draw_faces,void near(),render3d,,"planes in file order (nplanes>0), BSP order list 78D2 (<0), or single face list (=0); calls 0CAC/0CED"
+vgame,func,11eb:0cac,r3d_draw_face_plane,void near(BX=plane),render3d,,"if 76D2[plane]>7Fh: 7D5A=shade, si=face-list offset table[plane], 0CED"
+vgame,func,11eb:0cca,r3d_face_cond,label in 0CED,render3d,,conditional element 80|v val: skip next element if vars[v]!=val
+vgame,func,11eb:0ced,r3d_face_list,void near(ES:SI=list),render3d,,face-list interpreter: polygon (n<20h edges+colour) -> 12EF:003E/010A; 40h lines -> 1359:0040/0049; 20h points (dead); 80h cond; FFh end
+vgame,func,11eb:0d5f,r3d_face_lines,label in 0CED,render3d,,"line element 40|n: colour 7D50[c], n edges drawn with 1359:0049, 7D4E=last edge record"
+vgame,func,11eb:0dfe,r3d_face_points,label in 0CED,render3d,,"point element 20|n: computes screen positions, never draws"
+vgame,func,11eb:0e5f,r3d_bsp_order,"void near(ES:SI,DI=out,BX=vis)",render3d,,"iterative BSP walk: visible node -> back,self,front; hidden -> front,back; output FF-terminated list"
+vgame,func,11eb:0ef2,r3d_object_extent,"void far(obj,int16 out[3])",render3d,,"max |x|,|y|,|z| of the vertices of LOD0 model; no direct callers"
+vgame,func,11eb:0f9b,r3d_shared_verts,void far(),render3d,,builds shared-vertex table DS:4EB6 (*7AF8) from count after the 3DX offset table (0 in shipped data); caller DAE8
+vgame,func,12ef:0002,r3d_clip_line_queue,"void far(x0,y0,x1,y1)",render3d,,"builds edge record 5EBA from 4 s16, clips (0333), adds to polygon (003E); no callers"
+vgame,func,12ef:003e,r3d_poly_add_edge,void near(SI=edge rec),render3d,,accumulates flags 85B2; near pts (00E0); rasterises via 1359:0719; tracks left/right wall y ranges
+vgame,func,12ef:00aa,r3d_note_left,"void near(BX,CX)",render3d,,left wall y range min/max into 85B4/85B6
+vgame,func,12ef:00c5,r3d_note_right,"void near(BX,CX)",render3d,,right wall y range min/max into 85B8/85BA
+vgame,func,12ef:00e0,r3d_note_zclip_point,void near(SI),render3d,,"saves rec+10h..16h (near-plane point) to 8588/8590, 85BE++"
+vgame,func,12ef:010a,r3d_poly_finish,void far(colour_word),render3d,,"1359:0040 colour; close near-plane gap, wall fills 0185/019B, 1359:0052 fill, reset 85B2..85BE and wall ranges"
+vgame,func,12ef:0185,r3d_wall_right,void near(),render3d,,"1359:07D6(xmax+1,85B8,85BA)"
+vgame,func,12ef:019b,r3d_wall_left,void near(),render3d,,"1359:07D6(xmin-1,85B4,85B6)"
+vgame,func,12ef:01b1,r3d_draw_line,"void far(x0,y0,x1,y1,colour)",render3d,,"colour via 1359:0040, edge record, clip, emit via 01F9; no callers"
+vgame,func,12ef:01f9,r3d_line_emit,void near(SI),render3d,,if rec flag bit7 clear call 1359:0049
+vgame,func,12ef:020b,r3d_clip_flags16,void near,render3d,,"edge side flags (bit0 right,1 left for end0; 2,3 end1) into rec+2 and clamped y0/y1 into rec+6/+0E"
+vgame,func,12ef:025f,r3d_clip_noop,label in 0265,render3d,,no clipping needed: BP=BX DX=CX CF=0
+vgame,func,12ef:0265,r3d_clip_intercept,"void near(AL=mask,BX,CX)",render3d,,intersection of the edge with the window border selected by AL using dx/dy 85AC/85AE; CF=1 if off window
+vgame,func,12ef:02d1,r3d_outcode16,"void near(BX=x,CX=y)->AL",render3d,,Cohen-Sutherland outcode: 1 y<ymin 2 y>ymax 4 x<xmin 8 x>xmax; sets 85C0 on compare overflow
+vgame,func,12ef:030f,r3d_clip_inside_bug,label in 0333,render3d,,"rec+2=0 then NEAR ret from a far routine (latent original bug, unreachable)"
+vgame,func,12ef:0315,r3d_clip_sx32,label in 0333,render3d,,sign-extends the four coordinates and takes the 32-bit path
+vgame,func,12ef:0333,r3d_clip_edge,void far(SI=edge rec),render3d,,"clips edge to window 85CA..85D0: s16 fast path (0465), s32 bisection path (0359); writes rec+2 flags, clipped coords"
+vgame,func,12ef:04ef,r3d_bisect_in,void near,render3d,,32-step bisection moving the outside end of an s32 edge towards the window
+vgame,func,12ef:056b,r3d_bisect_out,void near,render3d,,32-step bisection variant that keeps the inside point (s32 edge)
+vgame,func,12ef:05d9,r3d_clip_flags32,"void near(BP,DI)",render3d,,side flags and clamped y for the 32-bit path
+vgame,func,12ef:063e,r3d_on_border,void near,render3d,,BP!=0 if point lies exactly on a window border
+vgame,func,12ef:0665,r3d_outcode32,"void near(DX:AX,CX:BX)->BP",render3d,,outcode of an s32 point against the window
+vgame,func,1359:019b,r3d_set_page,void far(int page),render3d,,85C6=page; 85EA=[85E2+2*page]; no callers (DB71 does it inline)
+vgame,func,1359:01b1,r3d_setcolor_E,void near(AX),render3d,,EGA mode colour setter (GC regs 3CEh); dead
+vgame,func,1359:01d4,r3d_setcolor_M,void near(AX=colour word),render3d,,"mode M colour: 85D6=ax; ramp shade al=max(al-[4894],al&F0) when ah=FF and al>=A0; es=85EA"
+vgame,func,1359:01f8,r3d_setcolor_C,void near(AX),render3d,,CGA mode colour pattern 914A/914C; dead
+vgame,func,1359:021d,r3d_setcolor_T,void near(AX),render3d,,Tandy mode colour pattern 914E; dead
+vgame,func,1359:023a,r3d_pixel_E,"void far(x,y,c)",render3d,,EGA window-clipped pixel; dead
+vgame,func,1359:027b,r3d_pixel_M,"void far(x,y,c)",render3d,,mode M window-clipped pixel; no callers
+vgame,func,1359:02b6,r3d_pixel_C,"void far(x,y,c)",render3d,,CGA pixel; dead
+vgame,func,1359:0301,r3d_pixel_T,"void far(x,y,c)",render3d,,Tandy pixel; dead
+vgame,func,1359:0344,r3d_ega_addr,void near,render3d,,EGA pixel address/mask helper of 023A; dead
+vgame,func,1359:0369,r3d_line_E,void near(SI=rec),render3d,,EGA line (dispatch table E +6)
+vgame,func,1359:045d,r3d_line_M,void near(SI=rec),render3d,,"mode M Bresenham line using y*320 table 85EC, colour 85D6.lo, no clipping"
+vgame,func,1359:0505,r3d_line_C,void near(SI=rec),render3d,,CGA line; dead
+vgame,func,1359:0607,r3d_line_T,void near(SI=rec),render3d,,Tandy line; dead
+vgame,func,1359:0719,r3d_edge_dda,void far(SI=edge rec),render3d,,"scan-converts edge into per-scanline min/max x tables L=DS:89AC+2y, R=DS:8D6E+2y; updates 9130 (min y)"
+vgame,func,1359:07d6,r3d_wall_fill,"void far(x,ya,yb)",render3d,,"vertical wall: L=min(L,x), R=max(R,x) for rows ya..yb clamped to window"
+vgame,func,1359:0834,r3d_fill_E2,void near,render3d,,EGA fill variant; dead
+vgame,func,1359:0874,r3d_fill_E,void near,render3d,,EGA fill; dead
+vgame,func,1359:0959,r3d_fill_none,label,render3d,,fill type FB: clear tables only (no pixels)
+vgame,func,1359:098d,r3d_fill_stipple,label,render3d,,fill type FC: 50% checker stipple of lo colour
+vgame,func,1359:09f7,r3d_fill_and,label,render3d,,fill type FE: AND colour onto backdrop pixels
+vgame,func,1359:0a77,r3d_fill_or,label,render3d,,fill type FD: OR colour onto backdrop pixels
+vgame,func,1359:0af7,r3d_fill_M,void near,render3d,,"mode M polygon fill from L/R tables starting at row 9130; FF solid, other hi = 2x2 dither lo/hi; resets tables (7FFF/8001)"
+vgame,func,1359:0bb3,r3d_fill_C,void near,render3d,,CGA fill; dead
+vgame,func,1359:0ca1,r3d_fill_T,void near,render3d,,Tandy fill; dead
+vgame,func,1433:0004,math_sin,int far(uint16 a),lib,,Q15 sine from quadrant table 14B2:0000 (2048 words); 65536=360deg
+vgame,func,1433:0031,math_cos,int far(uint16 a),lib,,Q15 cosine = sin(a+4000h)
+vgame,func,1433:0061,math_atan2,"uint16 far(int y,int x)",lib,,angle 0..FFFF (4000h=90deg) from octant base DS:9178 +/- atan table 14B2:1000 (4096 words)
+vgame,func,1433:00d9,math_mul_sin,"int far(int k,uint16 a)",lib,,(k*sin a)>>15
+vgame,func,1433:011a,math_mul_cos,"int far(int k,uint16 a)",lib,,(k*cos a)>>15
+vgame,func,1433:015e,math_asin,int far(int x),lib,,"arcsin of Q15 x via table 14B2:3202 (1024 words), signed result"
+vgame,func,1433:018e,math_hypot2,"int far(int a,int b)",lib,,approx sqrt(a^2+b^2) = L + L*tab(S/L) with 256-entry table 14B2:3000
+vgame,func,1433:01e0,math_hypot3,"int far(int x,int y,int z)",lib,,"hypot2(hypot2(x,y),z); negative intermediate => h+|z|/2"
+vgame,func,1433:0219,mat_vec16,"void far(int16 v[3],const int16 M[9])",lib,,in-place v=v*M>>15 (Q15 row vector times matrix)
+vgame,func,1433:0286,mat_mul,"void far(A,B,C)",lib,,C=A*B 3x3 Q15 (row i of A times columns of B)
+vgame,func,1433:02aa,mat_row_mul,"near(SI=A row,BX=B,DI=C row)",lib,,helper of mat_mul: one output row
+vgame,func,1433:02e2,mat_transpose,"void far(src,dst)",lib,,3x3 transpose
+vgame,func,1433:0314,mat_copy,"void far(src,dst)",lib,,copies 9 words
+vgame,func,1433:032e,vec_mat32,"void far(v16[3],M[9],out32[3])",lib,,"out_k = sum v_j*M[3j+k] full 32-bit, unshifted"
+vgame,func,1433:03a9,mat_from_euler,"void far(a,b,c,out[9])",lib,,"rotation matrix from 3 angles (formulas in spec); callers DC64,DF08,E7AC,13E3,0FFB,31B"
+vgame,func,1433:04d7,mat_to_euler,"void far(M,&a,&b,&c)",lib,,"inverse of 03A9: b=asin(m5), gimbal lock if |b|>3E80h"
+vgame,func,1433:0542,math_mulq,"int far(int a,int b)",lib,,(a*b)>>15
+vgame,func,1433:0554,math_muldiv,"int far(int a,int b,int c)",lib,,a*b/c with overflow-aware ordering
+vgame,func,1433:058f,math_div32sat,"int far(lo,hi,d)",lib,,(hi:lo)/|d| with saturation 7FFF^sign
+vgame,func,1433:05c6,math_imul,"long far(int a,int b)",lib,,32-bit product DX:AX
+vgame,func,1433:05d1,mat_from_euler_b,"void far(c,b,a,out[9])",lib,,alternative Euler order matrix; no callers
+vgame,data,DS:7af8,r3d_cammat,int16[9],render3d,,camera matrix (scaled) written by 000C
+vgame,data,DS:7b1c,r3d_partmat,struct{int16 M[9];int16 T[9];}[8],render3d,,"per-part matrix slots, 0x24 bytes"
+vgame,data,DS:7c3c,r3d_eye,int16[3][8],render3d,,eye position in each part frame
+vgame,data,DS:7c6c,r3d_light_part,int16[3][8],render3d,,light vector per part
+vgame,data,DS:7c9c,r3d_objpos,int16[3],render3d,,object offset relative to camera (world axes)
+vgame,data,DS:7ca2,r3d_viewpos,int32[3],render3d,,object origin in view space; z hi at 7CAC
+vgame,data,DS:7cae,r3d_partpos,int32[3][8],render3d,,part origins in view space
+vgame,data,DS:7d1c,r3d_objmat_ptr,word,render3d,,object matrix pointer
+vgame,data,DS:7d1e,r3d_vars_ptr,word,render3d,,var table pointer (DS:C02E)
+vgame,data,DS:7d20,r3d_cur_slot,word,render3d,,current part matrix slot
+vgame,data,DS:7d2a,r3d_nplanes,int16,render3d,,signed plane count of current model (negative = BSP)
+vgame,data,DS:7d2c,r3d_nverts,int16,render3d,,signed vertex count
+vgame,data,DS:7d2e,r3d_far,word,render3d,,"far limit = 7FFF00h/max(|2*zoom|,100h)"
+vgame,data,DS:7d38,r3d_planemask,byte,render3d,,"FF, 7F when plane hidden by var"
+vgame,data,DS:7d3a,r3d_yscale_sw,word,render3d,,"never written, 0"
+vgame,data,DS:7d4e,r3d_last_line,word,render3d,,pointer to last drawn line edge record
+vgame,data,DS:7d50,r3d_coltab,word,render3d,,colour table pointer (7D60/7F60/8160/8360)
+vgame,data,DS:7d54,r3d_lightvec,int16[3],render3d,,"light vector (-36,36,36) set by DB71"
+vgame,data,DS:7d5a,r3d_shade,byte,render3d,,"last plane shade, write-only"
+vgame,data,DS:7d5c,r3d_flags,byte,render3d,,"working flag byte, bit7 drives C686"
+vgame,data,DS:7d5e,r3d_ortho,word,render3d,,"0 perspective, else orthographic map mode shift"
+vgame,data,DS:76d2,r3d_vis,byte[256],render3d,,plane visibility FF/7F/00
+vgame,data,DS:77d2,r3d_shadeb,byte[256],render3d,,plane shade bytes
+vgame,data,DS:78d2,r3d_bsporder,byte[256],render3d,,"BSP draw order, FF terminated"
+vgame,data,DS:79d2,r3d_vneed,byte[256],render3d,,vertex needed flags
+vgame,data,DS:5eba,r3d_edges,struct edge[354],render3d,,24-byte edge records
+vgame,data,DS:4eb6,r3d_sharedv,int32[4][256],render3d,,shared vertex table
+vgame,data,DS:c688,r3d_v3d,int32[4][256],render3d,,view-space vertices
+vgame,data,DS:d688,r3d_vproj,int32[2][256],render3d,,projected vertices; x hi 8000h = behind
+vgame,data,DS:85b2,r3d_polyflags,word,render3d,,OR of edge flags of current polygon
+vgame,data,DS:85b4,r3d_wallL,word[2],render3d,,left wall y range
+vgame,data,DS:85b8,r3d_wallR,word[2],render3d,,right wall y range
+vgame,data,DS:85bc,r3d_polydrawn,word,render3d,,4 if an edge was rasterised
+vgame,data,DS:85be,r3d_nzclip,word,render3d,,saved near-plane points 0..2
+vgame,data,DS:85c2,r3d_vmode_tab,word,render3d,,"cs-relative dispatch table (E 64h, M 70h, C 7Ch, T 88h)"
+vgame,data,DS:85ca,r3d_win,int16[4],render3d,,"clip window xmin,ymin,xmax,ymax"
+vgame,data,DS:85d2,r3d_centre,int16[2],render3d,,"projection centre x,y"
+vgame,data,DS:85d6,r3d_color,word,render3d,,current fill colour word
+vgame,data,DS:85ea,r3d_dseg,word,render3d,,current draw segment
+vgame,data,DS:85ec,r3d_rowtab,word[480],render3d,,row offset table (mode M y*320)
+vgame,data,DS:89ac,r3d_edge_L,int16[480],render3d,,"left edge table, idle 7FFF"
+vgame,data,DS:8d6e,r3d_edge_R,int16[480],render3d,,"right edge table, idle 8001"
+vgame,data,DS:9130,r3d_miny,word,render3d,,"min scanline touched, 7FFF idle"
+vgame,data,DS:9178,atan2_base,word[8],render3d,,atan2 octant base angles

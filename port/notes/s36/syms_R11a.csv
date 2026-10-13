@@ -1,0 +1,118 @@
+exe,kind,address,name,type,owner,other_names,notes
+vgame,func,0000:04da,r3d_draw_terrain,"void r3d_draw_terrain(int heading_neg,int pitch,long x,long y,long z)",render3d,,"terrain+scenery: levels 4..1, cells far->near per view octant, records -> E7AC; cull cells with E8A2 (path A)"
+vgame,func,0000:0804,terr_to_level,"long terr_to_level(int level,long world)",render3d,,"world units -> level units (L4 >>6, L3 >>4, L2 >>2, L1 x1, L0 x2; rounded)"
+vgame,func,0000:0865,terr_tile_type,"int terr_tile_type(int level,int x,int y)",render3d,,"tile type from 8x8(B00C)/16x16(9F68)/child tables(9D10,9B08,9904); 0 if out of range"
+vgame,func,0000:0fb1,terr_scenery_override,"int terr_scenery_override(int level,int idx,int cx,int cy)",render3d,,"search mission override table DS:B772 (5-byte entries, count 9902) backwards; returns new object or 0"
+vgame,func,0000:1ad6,r3d_sprite_main,"void r3d_sprite_main(int x,int y,int size,int cls)",render3d,,"2D scaled sprite (slot 22) centred at x,y, height 3/4 size, ctx=[0344]; far ptr DS:91D8[cls]"
+vgame,func,0000:1b1b,r3d_sprite_tv,"void r3d_sprite_tv(int x,int y,int size,int cls)",render3d,,same as 1AD6 but ctx=[4042] (target camera window)
+vgame,func,0000:c6b8,r3d_scenery_id,unsigned r3d_scenery_id(unsigned id),render3d,,if bank bit set: DS:0510[id&7F] | (id&8000) (3DT object byte -> bank<<8|idx); else id
+vgame,func,0000:dae8,r3d_begin_scene,"void r3d_begin_scene(Viewport*vp,int a1,int a2,int a3,int ox,int oy,int oz,int backdrop,int focal)",render3d,,"DB71, DC64, DCA9; if backdrop: 11EB:0F9B, wait [262A], 1442 sky/ground; [49C4]=0"
+vgame,func,0000:db3e,r3d_end_scene,void r3d_end_scene(void),render3d,,"DF08 flush sorted queue, offset_clear, advance spinner vars C04C/C04E, copy matrix 498E->49B2"
+vgame,func,0000:db71,r3d_set_viewport,void r3d_set_viewport(Viewport*vp),render3d,,"screen centre 0D1E/0D20, clip max 2293/2295, draw offset, page seg 85EA, cull tables E53E/E544"
+vgame,func,0000:dc64,r3d_set_camera_matrix,"void r3d_set_camera_matrix(int a1,int a2,int a3,int focal)",render3d,,"E26B(498E,-a1,-a2,-a3); 1433:03A9(-a1,-a2,a3,49A0); 11EB:000C(49A0,focal)"
+vgame,func,0000:dca9,r3d_set_origin,"void r3d_set_origin(int x,int y,int z)",render3d,,"[497C],[497E],[4980] = camera/cell origin used by E7AC"
+vgame,func,0000:df08,r3d_draw_queued,void r3d_draw_queued(void),render3d,,"draw sorted object queue (DS:4E3C, count 49C4) far->near; sprite objects, bank-0 var setup, type 0x18 special, 11EB:00D3 calls"
+vgame,func,0000:e26b,r3d_matrix_from_angles,"void r3d_matrix_from_angles(short m[9],int A,int B,int C)",render3d,,Q15 3x3 rotation from sin/cos (109D) into m (DS:498E); also leaves sin/cos in 4982..498C
+vgame,func,0000:e3e2,r3d_matrix_obj_side,void r3d_matrix_obj_side(void),render3d,,"Q15 matrix at 49A0..49B0 from [496A],[496C],[496E]; only used for type-0x18 sub-model order decision in DF08"
+vgame,func,0000:e54b,r3d_transpose49A0,void r3d_transpose49A0(void),render3d,,transpose DS:49A0 3x3 in place
+vgame,func,0000:e7ac,r3d_place_object,"void r3d_place_object(unsigned type,int a1,int a2,int a3,int X,int Y,int Z)",render3d,,"rel pos, flag byte from DS:0A60 bank, E8B5 cull, flag bit7 -> DDFE queue else 03A9+transpose+11EB:00D3 draw now"
+vgame,func,0000:e8a2,r3d_cull_point,"int r3d_cull_point(int x,int y,int z)",render3d,,"cdecl wrapper for E8B5 (BP=x,BX=y,CX=z); 0 = visible"
+vgame,func,0000:e8b5,r3d_cull_core,"reg: BP=x BX=y CX=z -> AX,ZF",render3d,,"view vector via DS:498E -> 4958/495C/4960, depth+frustum+class tests, [4978]=distance; AX=0 visible"
+vgame,func,0000:ea26,pal_fade_step,"int pal_fade_step(RGB far*cur,RGB far*target,int count)",lib,,"moves each component of cur one step toward target, returns number changed (callers 4857,4D43)"
+vgame,func,1001:0006,hz_fill_far,void far hz_fill_far(int colour),render3d,,"[0D46]=colour then horizon split 0018 (flat sky/ground, detail<3)"
+vgame,func,1001:0018,hz_draw,void hz_draw(void),render3d,,"horizon line from pitch/roll (H=256*tan, zoom) clipped, fills sky colour [0D46] and ground 0x78 via edge tables + slot 37"
+vgame,func,1001:01ec,poly_fill_far,"void far poly_fill_far(Viewport*vp,int n,int*pts,int colour)",render3d,,"n-point polygon: clear tables, edges via 06AC, slot 37 solid; used for the 4-point backdrop bands by 1442"
+vgame,func,1001:024c,fill_rows_far,"void far fill_rows_far(Viewport*vp,int xl,int ymin,int xr,int ymax)",render3d,,"page select vp->page, colour vp+4, fill rows ymin..ymax between xl..xr via tables+slot 40"
+vgame,func,1001:02ba,fill_rows2_near,void fill_rows2_near(...),render3d,,dead near copy of 024C using colour vp+6 (never called)
+vgame,func,1001:0326,line_clip_far_stub,void far line_clip_far_stub(void),render3d,,call 0336; retf
+vgame,func,1001:032a,line_clip_far,void far line_clip_far(void),render3d,,"saves BP/SI/DI/ES, 0336: clip+draw segment [2299..229F]"
+vgame,func,1001:0336,line_clip_draw,int line_clip_draw(void),render3d,,Cohen-Sutherland clip to 0..[2293]x0..[2295] with INT0 hook 04E3; slot 31 line; CF=1 if rejected
+vgame,func,1001:04c2,clip_outcode,"byte clip_outcode(bx=x,bp=y)",render3d,,AL bits 1:x>xmax 2:y>ymax 4:y<0 8:x<0; ZF if inside
+vgame,func,1001:04e3,int0_sat_a,INT0 handler,render3d,,"divide overflow in 0336: AX=+-0x7F00, DX=0, skip faulting idiv"
+vgame,func,1001:0504,poly_flush_far,void far poly_flush_far(int mode),render3d,,"slot 37 poly_fill([2615],22A1,[2617],mode): 0 solid 1 OR 2 AND >=3 green"
+vgame,func,1001:051f,tables_clear_far,void far tables_clear_far(void),render3d,,call 0525; retf
+vgame,func,1001:0525,tables_clear,void tables_clear(void),render3d,,"reset dirty range of edge tables: L=0xFFFF R=0, [2615]=FFFF [2617]=0"
+vgame,func,1001:055b,edge_column,"void edge_column(si=x,di=ya,dx=yb)",render3d,,write border column x(0 or xmax) into L or R table for rows ya..yb; entry 05AA picks side from bx
+vgame,func,1001:06a0,edge_to_tables_far,void far edge_to_tables_far(void),render3d,,"saves ES/SI/DI/BP, 06AC, retf"
+vgame,func,1001:06ac,edge_to_tables,void edge_to_tables(void),render3d,,clip edge [2299..229F] (INT0 hook 0854) and Bresenham into L/R tables (05B9 rasteriser inside this block)
+vgame,func,1001:0854,int0_sat_b,INT0 handler,render3d,,divide overflow in 06AC (IP 0x7CE): AX=+-0x7F00
+vgame,func,1001:05b9,edge_walk,void edge_walk(void),render3d,,"local entry: Bresenham edge walk into L/R tables (x-major / y-major), updates [2615]/[2617]"
+vgame,func,1001:05aa,edge_offscreen_col,void edge_offscreen_col(bx=x),render3d,,"local entry: pick x=0 or xmax for an off-screen edge, then edge_column"
+vgame,data,DS:2084,sin_tab,s16[257],render3d,,"Q15 sine table, T[i]=round(32768*sin(2*pi*i/256)) clamped +-32767; index = angle>>8, interpolated by 109D:0090"
+vgame,data,DS:0d22,hz_band_tab,s16[16],render3d,,"0,2,3,4,6,8,11,15,20,27,36,48,64,87,119,164: horizon band offsets used by 1442"
+vgame,data,DS:0d1e,r3d_cx,s16,render3d,,"screen centre x (viewport relative) = (W+1)/2-1, set by DB71"
+vgame,data,DS:0d20,r3d_cy,s16,render3d,,"screen centre y: 100 if vp y0==0 (60/52 if [365E]) else (H+1)/2-1, set by DB71"
+vgame,data,DS:0344,r3d_main_vp_ptr,Viewport*,render3d,,"pointer to main viewport record DS:032E (+0 page,+4 bg,+E y0,+10 y1,+12 x0,+14 x1)"
+vgame,data,DS:034c,terr_cell_order,s16[8][9],render3d,,"view-octant cell offsets (x from row o, y from row (o+2)&7), far->near, last=(0,0)"
+vgame,data,DS:04cc,terr_cell_down_x,s16[9],render3d,,cell x offsets when pitch < -60 deg
+vgame,data,DS:04de,terr_cell_down_y,s16[9],render3d,,cell y offsets when pitch < -60 deg
+vgame,data,DS:0506,terr_level_dim,s16[5],render3d,,"grid dimension per level: 1024,256,64,16,8"
+vgame,data,DS:0510,scenery_id_map,u16[128],render3d,,"3DT object byte -> bank<<8|index (filled by loader 0994, identity|0x100 + PHOTO extras)"
+vgame,data,DS:061e,terr_rec_count,u16[5][32],render3d,,"record count per (level,type)"
+vgame,data,DS:0a60,bank_flag_ptrs,u16[4],render3d,,"near ptrs to flag arrays 0760 STFLT,07E0 theatre,0860 PHOTO,08E0"
+vgame,data,DS:e304,terr_rec_ptr,u16[5][32],render3d,,"near pointer to the 7-byte scenery records per (level,type)"
+vgame,data,DS:e2fc,terr_level,s16,render3d,,current terrain level 4..1 (0 after 04DA); DDFE uses it for the depth key shift
+vgame,data,DS:e44a,terr_rec_cur,u16,render3d,,current scenery record pointer
+vgame,data,DS:94d6,terr_cell_rel_x,s16,render3d,,camera x relative to current cell centre (level units)
+vgame,data,DS:94d8,terr_cell_rel_y,s16,render3d,,camera y relative to current cell centre
+vgame,data,DS:94da,terr_cell_alt,s16,render3d,,camera altitude in level units (min 2)
+vgame,data,DS:b00c,terr_map4,u8[64],render3d,,level-4 8x8 tile map
+vgame,data,DS:9f68,terr_map3,u8[256],render3d,,level-3 16x16 .3DG map
+vgame,data,DS:9d10,terr_child2,u8[512],render3d,,level-2 child tables (parent*16+(y&3)*4+(x&3))
+vgame,data,DS:9b08,terr_child1,u8[512],render3d,,level-1 child tables
+vgame,data,DS:9904,terr_child0,u8[512],render3d,,level-0 child tables
+vgame,data,DS:b772,terr_override_tab,u8[n][5],render3d,,"mission scenery overrides: level,index,cellx,celly,new object; count DS:9902"
+vgame,data,DS:98de,r3d_detail,s16,render3d,,detail level 0..3 (comm+32h; cycled by key CCD8; D76B rebuilds depth tables)
+vgame,data,DS:7d50,r3d_colour_tab_ptr,u16,render3d,,"colour byte -> fill word table: 7D60 default, 7F60 day/high, 8360 low detail (set in 03CE/bf71)"
+vgame,data,DS:48b6,r3d_max_depth,s16,render3d,,max view distance = 0x0D05*(detail+1)
+vgame,data,DS:48c6,r3d_min_depth_tab,s16[8],render3d,,"min depth per size class -1,-23,-91,-182,-363,-725,-1450,-2900"
+vgame,data,DS:48d6,r3d_frustum_x_tab,s16[8],render3d,,x radius table (294B=0); 48E6 for 294B=1; 4936 for wide mode
+vgame,data,DS:48f6,r3d_frustum_y_tab,s16[8],render3d,,y radius table (294B=0); 4906 for 294B=1; +0x20 if 365E; 4946 wide mode
+vgame,data,DS:e53e,r3d_frustum_x_ptr,u16,render3d,,pointer to current x radius table (set by DB71)
+vgame,data,DS:e544,r3d_frustum_y_ptr,u16,render3d,,pointer to current y radius table (set by DB71)
+vgame,data,DS:4360,r3d_wide,s16,render3d,,wide/target-camera frustum mode (bf71)
+vgame,data,DS:433a,r3d_zoom_shift,u8,render3d,,focal shift (zoom)
+vgame,data,DS:294b,r3d_lens_narrow,u8,render3d,,lens flag: halves focal / horizon slope when set
+vgame,data,DS:4956,r3d_cur_type,u16,render3d,,type word of the object being placed/drawn (bit15 destroyed)
+vgame,data,DS:4958,r3d_view_a,s32,render3d,,"view-space right (E8B5), hi word = value"
+vgame,data,DS:495c,r3d_view_b,s32,render3d,,view-space up
+vgame,data,DS:4960,r3d_view_c,s32,render3d,,view-space depth (forward); DDFE sort key source
+vgame,data,DS:4964,r3d_rel_e,s16,render3d,,object east relative to camera/origin
+vgame,data,DS:4966,r3d_rel_n,s16,render3d,,object north relative
+vgame,data,DS:4968,r3d_rel_u,s16,render3d,,object up relative
+vgame,data,DS:496a,r3d_ang1,s16,render3d,,object angle 1
+vgame,data,DS:496c,r3d_ang2,s16,render3d,,object angle 2
+vgame,data,DS:496e,r3d_ang3,s16,render3d,,object angle 3
+vgame,data,DS:4978,r3d_dist,s16,render3d,,distance estimate (|A|+|B|)/4+|C| from E8B5
+vgame,data,DS:497a,r3d_class,s16,render3d,,size class 0..7 (flag byte & 7)
+vgame,data,DS:497c,r3d_origin_x,s16,render3d,,camera/cell origin x (DCA9)
+vgame,data,DS:497e,r3d_origin_y,s16,render3d,,camera/cell origin y
+vgame,data,DS:4980,r3d_origin_z,s16,render3d,,camera/cell origin z
+vgame,data,DS:4982,r3d_sc,s16[6],render3d,,sin/cos temporaries: sinA cosA sinB cosB sinC cosC (E26B/E3E2); 1442 and 1001:0018 read B/C ones
+vgame,data,DS:498e,r3d_cam_matrix,s16[9],render3d,,Q15 camera/cull matrix built by E26B
+vgame,data,DS:49a0,r3d_obj_matrix,s16[9],render3d,,Q15 model matrix (03A9) transposed by E54B; E3E2 variant
+vgame,data,DS:49b2,r3d_cam_matrix_copy,s16[9],render3d,,copy of 498E made by DB3E; no reader found
+vgame,data,DS:49c4,r3d_queue_count,s16,render3d,,objects in sorted queue (max 50)
+vgame,data,DS:49c6,r3d_rec_flags,u16,render3d,,flags word stored into queue record +6
+vgame,data,DS:49f0,r3d_queue_pool,u8[50][22],render3d,,sorted-object records (see spec_R11a 3.2)
+vgame,data,DS:4e3c,r3d_queue_list,u16[50],render3d,,"sorted pointers into the pool, farthest first"
+vgame,data,DS:4ea0,r3d_spin_step,s16,render3d,,"constant 6: spinner increment base for vars 15/16 in DB3E; 4EA2 = glow size table 6,8,12,16,20,24,30,36"
+vgame,data,DS:4894,r3d_shade,u8,render3d,,distance shade (1088:0120) used as colour shift for shaded fills
+vgame,data,DS:8560,r3d_cur_bank_seg,u16,render3d,,segment of the 3DX bank being drawn (from DS:B75E[bank])
+vgame,data,DS:b75e,r3d_bank_segs,u16[3],render3d,,"segments of banks 0 STFLT, 1 theatre, 2 PHOTO"
+vgame,data,DS:c02e,r3d_var_tab,s16[32],render3d,,"3DX variable table passed to 11EB:00D3 (var1 C030 destroyed, 10/11 C042/C044 lights, 15/16 C04C/C04E spinners)"
+vgame,data,DS:9874,r3d_lights,s16,render3d,,"1 = lights on (light level [11E2] < 0x14), set by 03CE"
+vgame,data,DS:262a,r3d_frame_wait,u8,render3d,,set to 1 after the page flip by 1BBC; DAE8 spins until it is cleared (clear site U)
+vgame,data,DS:2293,clip_xmax,s16,render3d,,viewport width-1 for 1001 clipping
+vgame,data,DS:2295,clip_ymax,s16,render3d,,viewport height-1
+vgame,data,DS:2299,edge_x1,s16,render3d,,"current edge x1 (then 229D y1, 229B x2, 229F y2)"
+vgame,data,DS:22a1,edge_L_tab,s16[220],render3d,,left x per scanline; poly_fill table; R table at DS:2459
+vgame,data,DS:2459,edge_R_tab,s16[220],render3d,,right x per scanline
+vgame,data,DS:2615,edge_ymin,u16,render3d,,dirty range low (0xFFFF = empty)
+vgame,data,DS:2617,edge_ymax,u16,render3d,,dirty range high
+vgame,data,DS:91d8,r3d_sprite_ptrs,far ptr[8],render3d,,"far pointers of the 2D object sprites (off,seg)"
+vgame,data,DS:85ca,r3d_vp_abs,s16[6],render3d,,"absolute x0,y0,x1,y1,cx,cy of the current viewport for the polygon clipper"
+vgame,data,DS:85ea,r3d_draw_seg,u16,render3d,,draw segment of the current viewport page
+vgame,data,DS:0348,r3d_near_flag,s16,render3d,,forces detailed terrain path (bf71 target camera)
+vgame,data,DS:0504,terr_prio,s16,render3d,,record counter/priority written by 04DA (never read elsewhere)
+vgame,data,DS:04fa,terr_level_on,s16[6],render3d,,"level enabled flags 1,1,1,1,1,0"

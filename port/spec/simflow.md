@@ -12,7 +12,7 @@ How the document is built: Part 0 (this part, written at the merge) gives the ma
 Parts 1-11 are the reader passes (each self-contained: algorithm per function, constants, globals, structures). **Where two parts disagree, Part 0
 section 5 decides.** Rendering internals (S3.7) and the flight model / weapons / AI / detection / damage internals (S3.8) are indexed (every function has
 a row with its `owner`), the interface to the renderer is Part 12; the player flight model `1e9e` is specified in full in Part 2 because it is also the
-input handler (S3.8 starts from there and from `work/s36/r2_*.py`, an executable differential-tested reference, not committed).
+input handler (S3.8 starts from there and from `port/notes/s36/r2_*.py`, an executable differential-tested reference).
 
 ## 1 Part map
 
@@ -29,7 +29,7 @@ input handler (S3.8 starts from there and from `work/s36/r2_*.py`, an executable
 | 9 | R9 | `a17e` per-frame overlay pass (tracers, explosion, target boxes, photo, beacon), object/site/projectile structure layouts | `a17e 1a85 b339..bee1 f492` |
 | 10 | R10 | `cba0` key command interpreter (authoritative key table), `bf71` sensor window renderer | `cba0 bf71 1961 19ea c6de c73c c834` |
 | 11 | - | function index (generated from `simflow_symbols.csv`) | all 376 |
-| 12 | R11a/R11b | render3d INTERFACE only: conventions, sine table, scene call contract, `11EB:00D3` input contract, buffer map | extracts; the full index passes stay in `work/s36/spec_R11a.md`, `spec_R11b.md` (not committed, S3.7 reads them) |
+| 12 | R11a/R11b | render3d INTERFACE only: conventions, sine table, scene call contract, `11EB:00D3` input contract, buffer map | extracts; the full index passes stay in `port/notes/s36/spec_R11a.md`, `spec_R11b.md` (not committed, S3.7 reads them) |
 
 ## 2 Program map and lifecycle in one page
 
@@ -654,11 +654,11 @@ DGROUP = `1E23`, **DS:oooo = unpacked image offset 0x1E230+oooo counted from the
 
 **What was verified how.** `1e9e` is NOT only a keyboard handler: it is the per-frame *player aircraft model* (stick -> attitude ->
 speed/altitude/position, fuel, G-load, crash/touch-down checks). Everything in sections 2-4 was transcribed into Python
-(`work/s36/r2_ref.py` helpers, `work/s36/r2_fm.py` = whole `1e9e` except the Alt-Q / Alt-P / Alt-B screens) and **differential-tested against the real
-machine code under Unicorn** (`work/s36/r2_emu.py`, `r2_test_fm.py`): thousands of randomised frames (keyboard stick, joystick bytes, ground/air,
+(`port/notes/s36/r2_ref.py` helpers, `port/notes/s36/r2_fm.py` = whole `1e9e` except the Alt-Q / Alt-P / Alt-B screens) and **differential-tested against the real
+machine code under Unicorn** (`port/notes/s36/r2_emu.py`, `r2_test_fm.py`): thousands of randomised frames (keyboard stick, joystick bytes, ground/air,
 crash states, each of the throttle/brake/`c`/Esc/Alt-S keys, first-frame init), compared byte for byte over the whole 60 KB data segment plus the
 ordered list of sound commands, lamp recolours and far calls: **0 mismatches** (V). The Python files are an executable reference the porter can
-read or run (`python work/s36/r2_test_fm.py 600`). Every helper in section 2 (clamp, distance, heading, sin/cos, asin, isqrt, matrix multiply,
+read or run (`python port/notes/s36/r2_test_fm.py 600`). Every helper in section 2 (clamp, distance, heading, sin/cos, asin, isqrt, matrix multiply,
 matrix->Euler, Euler->matrix) was tested the same way.
 
 ## 0. Overview: who calls what, and the frame order
@@ -5940,7 +5940,7 @@ Callers: `bf71`.
 ---
 # Part 12: render3d interface (extracts of the R11a / R11b index passes)
 
-Only the interface is kept here (conventions, sine table, scene call contract, what the renderer reads, buffer map). The per-function index of the renderer (terrain/scenery 04DA family, 1001 edge tables, 11EB/12EF/1359/1433) is in `simflow_symbols.csv` (`owner=render3d`) and in the S3.6 working notes `work/s36/spec_R11a.md`, `spec_R11b.md` (gitignored: the S3.7 session reads them from the working tree). Note R11a: "DS:oooo is at file offset 0x1EA50+oooo" (file incl. MZ header); the image base used by `dsann.py` is 0x1E230.
+Only the interface is kept here (conventions, sine table, scene call contract, what the renderer reads, buffer map). The per-function index of the renderer (terrain/scenery 04DA family, 1001 edge tables, 11EB/12EF/1359/1433) is in `simflow_symbols.csv` (`owner=render3d`) and in the S3.6 working notes `port/notes/s36/spec_R11a.md`, `spec_R11b.md`. Note R11a: "DS:oooo is at file offset 0x1EA50+oooo" (file incl. MZ header); the image base used by `dsann.py` is 0x1E230.
 
 ## 12.1 From R11a (scene set-up, conventions, sine table)
 
