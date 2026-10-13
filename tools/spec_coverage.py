@@ -1,6 +1,6 @@
 """Spec coverage: which indexed functions have no row in any port/spec/*_symbols.csv.
 
-usage: python tools/spec_coverage.py [exe ...]        (exe = intro, ps, ap; default all three)
+usage: python tools/spec_coverage.py [exe ...]        (exe = intro, ps, ap, or for the F-117A port start, vgame, end, setup, mps_logo, player, dswap)
 
 Reads port/<exe>_functions.csv (tools/apindex.py) and every port/spec/*_symbols.csv (columns
 exe,kind,address,...). Skips what the port does not reimplement: the Borland RTL (segment 0000;
@@ -27,7 +27,12 @@ def norm(a):
         return None
 
 
+F117 = ('start', 'vgame', 'end', 'setup', 'mps_logo', 'player', 'dswap')
+
+
 def skipped(exe, seg):
+    if exe in F117:  # F-117A port: every indexed function must have a row (RTL rows live in platform_symbols.csv)
+        return False
     if seg == 0:  # Borland RTL (AP 0000 also has volume.c and DAC code: platform lists those)
         return True
     if exe == 'ap' and (seg == 0x36F6 or 0x3C59 <= seg <= 0x3EA0):
