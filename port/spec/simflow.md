@@ -545,7 +545,7 @@ Port: keyboard state -> the same two bytes; the tap/double-tap magnitude (5Ah th
 ## Open items
 | # | item |
 |---|---|
-| 1 | Values of `comm+28h` (1, 2, 5, 6) and `comm+26h` as consumed by END: needs the END reader (S3.9). |
+| 1 | Values of `comm+28h` (1, 2, 5, 6) and `comm+26h` as consumed by END: needs the END reader (S3.9). **S3.9: settled** in `debrief.md` 1.2: END dispatches on `comm+26h` (1 crashed -> cemetery, 2 ejected -> rescue if the final grid cell is friendly else captured, 3 landed); `comm+28h` picks the crash text (1 stranded, 2 terrain, 5 hard landing, 6 eject failed; 3 and 4 have texts but are never raised) and `!= 0` means the pilot is dead. |
 | 2 | `DS:09E0[i] = 6` for bank-0 objects and `DS:0CA8`: unknown consumers (render3d / terrain readers). |
 | 3 | `4B57`: assumption that the START generator reserves spare name slots (names 0x59..) for the copied target objects; check against a dump of `comm+7Ah` after START. |
 | 4 | `ea7c` 128 KB bug (see 2): confirm no shipped file exceeds 2 x 65 535 bytes (largest .3DX?). |
