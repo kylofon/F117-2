@@ -19,11 +19,12 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 | U-render3d | DOSBox-X in flight (as U-vgame), look at the original and reply what you see: (1) radar dishes / rotating parts seen up close: any faces missing or flickering? (2) left map MFD while it scrolls: is the bottom pixel row of the map ever left unpainted? (3) TV camera (F6 options): is there a mode with a flat two-colour sky/ground? which option? (4) burning targets: do glow/flame sprites appear in the main view or only in the TV window? (5) any polygon that looks cut off part-way down (a hole that shows the frame before)? `port/spec/render3d.md` section 7. | S3.7 | 15 min |
 | U-flight | DOSBox-X in flight (as U-vgame), reply what you see: (1) take a few hits (SAM/fighter) and tell me the labels of the damage lamps that turn red (cockpit buttons; which label lights for which hit if you can tell); (2) left map MFD with an enemy missile in flight: is its blip a 2x2 dot or a single pixel? (3) keys `4` and `3`: which lamps light (ECM / IR jammer), and does the `3` lamp stay dim for a while after it switches itself off? `port/spec/flight.md` section 11. | S3.8 | 10 min |
 | U-debrief | DOSBox-X: finish any mission (land, or eject so that the rescue / captured screen runs) and tell me what you see in the original debrief: (1) on the map replay, are the route line segments visible (the code draws them with colour index 0)? (2) the 48x40 event picture that appears next to each stop: what do the pictures show (takeoff, landing, kill, missile hit, photo...)? (3) the TIME: clock at the bottom: does it start at 06:00:00 (18:00:00 on a night mission) plus an odd offset, and does the hour tens digit stay 0? `port/spec/debrief.md` 6.6-6.10. | S3.9 | 10 min |
+| U-skeleton | Build and start the skeleton (`cmake --build f117port/build`, or the launcher `F-117A Nighthawk.exe` beside it) and tell me: `f117port/build/f117.exe --game-dir Game` opens a window (320x240 at 3x, 4:3) that steps through about a dozen colour-grid test screens (white blocks on top count the program: 1 SETUP ... 6 END) for about 6 s and then stays on the last one. (1) Does it open and show the grid? (2) Alt+Enter: full screen and back? (3) Esc or the close button: does it exit cleanly (console window returns)? (4) Launcher: Play starts it, 'Sound off' and the aspect 1:1 / 4:3 choice work? No game logic exists yet; this only checks the host. | S4.1 | 3 min |
 
 ## Status
 
-- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.3 (sound spec), S3.4 (front-end spec), S3.5 (shell spec), S3.6 (sim flow spec), S3.7 (render3d spec), S3.8 (flight/weapons/AI/detection/damage spec), S3.9 (debrief spec), S3.10 (hand-offs, coverage gate, symbols merge; closing pass: coverage 100 %, all conflicts settled).
-- **Next:** S4.1. Your tasks: **User to-do** above.
+- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.3 (sound spec), S3.4 (front-end spec), S3.5 (shell spec), S3.6 (sim flow spec), S3.7 (render3d spec), S3.8 (flight/weapons/AI/detection/damage spec), S3.9 (debrief spec), S3.10 (hand-offs, coverage gate, symbols merge; closing pass: coverage 100 %, all conflicts settled), S4.1 (`f117port/` skeleton: CMake, SDL3 host, mem, VGA, OPL, chain loop with placeholder programs).
+- **Next:** S4.2. Your tasks: **User to-do** above.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -136,8 +137,21 @@ can port a function from its section alone.
 ### Phase 4 — `f117port/` skeleton
 | Id | Task | Model | Size |
 |---|---|---|---|
-| S4.1 | Copy `../AcesOfThePacific/aotpport` skeleton (CMake, SDL3 host, mem, VGA, OPL); drop EMS/VROOMM; chain loop = `F117.COM`; placeholder programs run the whole chain headless | S | M |
+| S4.1 | Copy `../AcesOfThePacific/aotpport` skeleton (CMake, SDL3 host, mem, VGA, OPL); drop EMS/VROOMM; chain loop = `F117.COM`; placeholder programs run the whole chain headless | S | M | done 2026-10-13 · U-skeleton pending |
 | S4.2 | Generated `symbols_*.h`, module headers (`tools/gen_symbols.py`, `gen_module_headers.py`), `PORTING.md` | H | S |
+
+Notes:
+- S4.1 status (2026-10-13): `f117port/` builds with no warnings (`-Wall -Wextra`) and `ctest` passes 3/3 (`chain`, `tick_rate`,
+  `check_missing_files`). Copied from `aotpport` and trimmed: `host.c/h` (SDL3 window, XT keys, mouse, gamepad, OPL2 via Nuked-OPL3
+  from `third_party/`), `platform/vga.c/h`, `mem.c/h` (arena, DS accessors, far pointers; no EXE loader, EMS, VROOMM, layout or Dynamix
+  divide helpers). Written new: `prog.c` (F117.COM chain loop, HANDOFFS section 1), `comm.h` (5120-byte comm block, packed struct with static
+  offset asserts; `+32h` word and `+33h` night byte overlap in a union as in the original), `platform/timer.c` (70.09 Hz tick source and
+  `timer_set_hook()` for the S5.1/S5.9 ISR body), `programs/placeholder.c` (one stand-in per program writing plausible comm fields and exit
+  codes; START passes: 0Ch then 0Dh then 0, so START-VGAME-END-START runs twice), `main.c`. Options: `--game-dir --scale --aspect
+  --fullscreen --headless --trace --check --chain-test --tick-test`. Two changes against Aces worth knowing: the tick and the 3DAh model share one
+  exact rational period (`VGA_FRAME_NS_NUM/DEN`, avoids the 64-bit overflow after 12 minutes that `t * 25175000` would have), and the sound poll
+  is NOT on the audio thread (S3.3: it is part of the timer ISR, so it runs from the tick on the main thread). Not done here (S5.1): unpacking and
+  loading the program images into `mem[]`, DGROUP set-up, the keyboard ISR, the timer ISR body.
 
 ### Phase 5 — Port, module by module (one session per module or half-module)
 Order: S5.1 platform → S5.2 video → S5.3 front end/title (**U4 first visible milestone**) → S5.4 shell

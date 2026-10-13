@@ -28,14 +28,14 @@ keys are settled (S5).
 ## Building
 
 Needs CMake 3.24, a C++17 compiler and wxWidgets 3.2 (MSYS2 `mingw64`: `mingw-w64-x86_64-wxwidgets3.2-msw`;
-Debian and Ubuntu: `libwxgtk3.2-dev`). Until the port's own CMake project exists (S4.1) it builds on its own:
+Debian and Ubuntu: `libwxgtk3.2-dev`). It builds on its own:
 
 ```bash
 cmake -S f117port/launcher -B f117port/launcher/build -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release
 cmake --build f117port/launcher/build
 ```
 
-Then choose the program in the window or copy the launcher next to it. Once `f117port/CMakeLists.txt` exists,
+Then choose the program in the window or copy the launcher next to it. From the main project (`f117port/CMakeLists.txt`),
 `-DF117_LAUNCHER=ON` (`add_subdirectory(launcher)`) builds it beside `f117.exe`.
 
 On Windows the build copies every DLL the launcher needs beside it (`copy_dlls.cmake`): the two wxWidgets DLLs

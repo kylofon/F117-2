@@ -1,0 +1,132 @@
+/* F-117A Nighthawk Stealth Fighter 2.0 SDL3 port - entry point: F117.COM's chain loop (prog.c).
+ *
+ * usage: f117 [--game-dir DIR] [--scale N] [--aspect 4:3|1:1] [--fullscreen] [--headless]
+ *             [--trace] [--check] [--chain-test] [--tick-test [MS]]
+ *   --game-dir    folder with the original game files (default "Game"); the port never ships game data
+ *   --scale       initial window scale: 320x240 (4:3) times N (default 3)
+ *   --aspect      4:3 (default: the 200-line picture fills a 4:3 area, as on a VGA monitor) or 1:1
+ *   --fullscreen  start in full screen (Alt+Enter switches)
+ *   --headless    no window, no audio: for tests (the 70.09 Hz tick clock still runs)
+ *   --trace       print the program switches and exit codes (also F117_TRACE=1)
+ *   --check       verify that the game folder holds the files the chain needs, print a summary and exit
+ *   --chain-test  run the whole chain with the placeholder programs without waiting, print the trace and
+ *                 check it; exits 0 when the sequence was right (needs no game files)
+ *   --tick-test   count the timer ticks over MS milliseconds (default 1000), print them and exit
+ * "Sound off" in the launcher is SDL_AUDIO_DRIVER=dummy in the environment. */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "host.h"
+#include "mem.h"
+#include "platform/timer.h"
+#include "platform/vga.h"
+#include "programs/placeholder.h"
+#include "prog.h"
+
+static int usage(const char *prog)
+{
+    fprintf(stderr,
+            "usage: %s [--game-dir DIR] [--scale N] [--aspect 4:3|1:1] [--fullscreen] [--headless]\n"
+            "          [--trace] [--check] [--chain-test] [--tick-test [MS]]\n", prog);
+    return 2;
+}
+
+/* The chain with the placeholders must go SETUP, MPS_LOGO, PLAYER intro, then twice round
+ * DSWAP 0 - START - DSWAP 1 - [PLAYER title-2] - VGAME - DSWAP 2 - END, and a third DSWAP 0 - START that quits. */
+static int chain_test(int runs)
+{
+    static const int expect[PROG_COUNT] = {
+        [PROG_SETUP] = 1, [PROG_MPS_LOGO] = 1, [PROG_PLAYER] = 2, [PROG_START] = 3, [PROG_VGAME] = 2,
+        [PROG_END] = 2, [PROG_DSWAP] = 7,
+    };
+    int bad = 0, total = 0;
+    printf("chain-test: runs per program:");
+    for (int i = 0; i < PROG_COUNT; i++) {
+        printf(" %s=%d", prog_table[i].exe, prog_run_count[i]);
+        total += prog_run_count[i];
+        if (prog_run_count[i] != expect[i]) bad++;
+    }
+    printf("\n");
+    if (bad || total != runs) {
+        printf("chain-test FAILED (%d programs differ from the expected sequence)\n", bad);
+        return 1;
+    }
+    printf("chain-test OK: %d programs, START -> VGAME -> END -> START twice\n", runs);
+    return 0;
+}
+
+int main(int argc, char **argv)
+{
+    HostConfig cfg = { "Game", 3, false, true, false };
+    bool check = false, chain = false, tick = false;
+    int tick_ms = 1000;
+    for (int i = 1; i < argc; i++) {
+        const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : NULL;
+        if (!strcmp(a, "--game-dir") && v) { cfg.game_dir = v; i++; }
+        else if (!strcmp(a, "--scale") && v) { cfg.scale = atoi(v); i++; }
+        else if (!strcmp(a, "--fullscreen")) cfg.fullscreen = true;
+        else if (!strcmp(a, "--headless")) cfg.headless = true;
+        else if (!strcmp(a, "--aspect") && v) {
+            if (!strcmp(v, "4:3")) cfg.aspect_4_3 = true;
+            else if (!strcmp(v, "1:1")) cfg.aspect_4_3 = false;
+            else return usage(argv[0]);
+            i++;
+        }
+        else if (!strcmp(a, "--trace")) prog_trace = true;
+        else if (!strcmp(a, "--check")) check = true;
+        else if (!strcmp(a, "--chain-test")) chain = true;
+        else if (!strcmp(a, "--tick-test")) {
+            tick = true;
+            if (v && v[0] != '-') { tick_ms = atoi(v); i++; }
+        }
+        else return usage(argv[0]);
+    }
+    if (check || tick) cfg.headless = true;
+    if (host_trace()) prog_trace = true;
+    if (chain) prog_trace = true;
+
+    if (!host_init(&cfg)) return 1;
+
+    if (check) {
+        const char *missing = game_files_missing();
+        if (missing) {
+            fprintf(stderr, "f117: game file %s not found in %s\n", missing, host_game_dir());
+            host_shutdown();
+            return 1;
+        }
+        printf("game folder %s: all files of the chain are present\n", host_game_dir());
+        host_shutdown();
+        return 0;
+    }
+
+    mem_init_machine();       /* IVT, BIOS data area */
+    vga_init();               /* frame source, text mode */
+    timer_init();             /* the 70.09 Hz tick -> timer_isr */
+
+    if (tick) {
+        u64 end = host_ns() + (u64)tick_ms * 1000000ull;
+        host_wait_until_ns(end);
+        printf("ticks in %d ms: %u (%.2f Hz)\n", tick_ms, timer_ticks, timer_ticks * 1000.0 / tick_ms);
+        host_shutdown();
+        return 0;
+    }
+
+    if (!chain) {
+        const char *missing = game_files_missing();
+        if (missing) host_fatal("Game file %s not found in %s.\nUse --game-dir to point at the original game folder.",
+                                missing, host_game_dir());
+    }
+
+    placeholder_init();
+    placeholder_interactive = !chain && !cfg.headless;
+    int runs = chain_run("");
+    int rc = 0;
+    if (chain) rc = chain_test(runs);
+    else if (placeholder_interactive && !prog_abort && !host_quit_requested()) {
+        printf("f117: placeholder chain finished (%d programs); Esc or close the window to exit\n", runs);
+        while (!prog_abort && !host_quit_requested()) host_pump();
+    }
+    host_shutdown();
+    return rc;
+}

@@ -18,6 +18,18 @@ work\        generated output and DOSBox reference captures (not in git)
 f117port\    the port (from phase 4)
 ```
 
+## Build
+
+MSYS2 mingw64 (gcc, ninja, cmake, `mingw-w64-x86_64-sdl3`; the launcher also `mingw-w64-x86_64-wxwidgets3.2-msw`):
+
+```bash
+cmake -S f117port -B f117port/build -G Ninja -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ -DCMAKE_BUILD_TYPE=Release -DF117_LAUNCHER=ON
+cmake --build f117port/build && ctest --test-dir f117port/build
+f117port/build/f117 --game-dir Game
+```
+
+`-DF117_LAUNCHER=OFF` (the default) skips the launcher. Details: [f117port/PORTING.md](f117port/PORTING.md).
+
 ## License
 
 MIT for the code in this repository (see [LICENSE](LICENSE)). F-117A is © MicroProse.

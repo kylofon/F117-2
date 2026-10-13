@@ -1,0 +1,58 @@
+cmake_minimum_required(VERSION 3.24)
+project(f117port C)
+
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+# Faithful port of F-117A Nighthawk Stealth Fighter 2.0 (SETUP, MPS_LOGO, PLAYER, START, VGAME, END and
+# DSWAP in one process, F117.COM's chain loop in src/prog.c), VGA mode 13h with AdLib sound
+# (port/spec/platform.md). The game's data and executables are read from the game folder at run time.
+
+find_package(SDL3 REQUIRED CONFIG)
+
+# Nuked-OPL3 (LGPL-2.1), built as its own library and linked in; see third_party/nuked-opl3/README.md
+# (the repository's, one level up).
+add_library(nuked_opl3 STATIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/nuked-opl3/opl3.c)
+target_include_directories(nuked_opl3 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../third_party/nuked-opl3)
+
+# Coordinator files in src/, then one glob per module directory (PORTING.md "Source layout"): a module adds
+# <module>/<file>.c and it is built without touching this file. programs/ holds the phase 4 placeholders.
+set(F117_MODULES platform programs)
+file(GLOB F117_SOURCES CONFIGURE_DEPENDS src/*.c)
+foreach(m ${F117_MODULES})
+    file(GLOB m_sources CONFIGURE_DEPENDS src/${m}/*.c)
+    list(APPEND F117_SOURCES ${m_sources})
+endforeach()
+
+add_executable(f117 ${F117_SOURCES})
+target_include_directories(f117 PRIVATE src)
+target_link_libraries(f117 PRIVATE SDL3::SDL3 nuked_opl3)
+if(MSVC)
+    target_compile_options(f117 PRIVATE /W3)
+else()
+    # The memory model reads multi-byte values through byte pointers (see src/mem.h).
+    target_compile_options(f117 PRIVATE -Wall -Wextra -fno-strict-aliasing)
+endif()
+if(WIN32)
+    # SDL3.dll (and whatever else the build links) next to f117.exe.
+    add_custom_command(TARGET f117 POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_RUNTIME_DLLS:f117> $<TARGET_FILE_DIR:f117>
+        COMMAND_EXPAND_LISTS)
+endif()
+
+# Tests (ctest): the chain with the placeholder programs, the tick source, and the game-folder check.
+enable_testing()
+add_test(NAME chain COMMAND f117 --headless --chain-test)
+set_tests_properties(chain PROPERTIES PASS_REGULAR_EXPRESSION "chain-test OK")
+add_test(NAME tick_rate COMMAND f117 --headless --tick-test 1000)
+# 70.09 Hz: 70 or 71 ticks in a second; a loaded machine may see a few fewer, never more than 72.
+set_tests_properties(tick_rate PROPERTIES PASS_REGULAR_EXPRESSION "ticks in 1000 ms: (6[4-9]|7[0-2]) ")
+add_test(NAME check_missing_files COMMAND f117 --check --game-dir ${CMAKE_CURRENT_BINARY_DIR})
+set_tests_properties(check_missing_files PROPERTIES WILL_FAIL TRUE)
+
+# The launcher ("F-117A Nighthawk"): the game folder, the display and sound options; built beside
+# f117.exe. It needs wxWidgets 3.2 (MSYS2: mingw-w64-x86_64-wxwidgets3.2-msw) and a C++17 compiler.
+option(F117_LAUNCHER "Also build the launcher, F-117A Nighthawk.exe (wxWidgets)" OFF)
+if(F117_LAUNCHER)
+    add_subdirectory(launcher)
+endif()
