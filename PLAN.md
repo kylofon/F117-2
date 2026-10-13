@@ -225,11 +225,15 @@ Put several bugs in one message; one session then fixes them in a batch.
    Default: keep, add the switch.
 5. **Secret missions**: the port reads whatever `NC.WLD` is in `Game/`, so both builds work. Default:
    nothing to do.
-6. **GitHub**: create `kylofon/f117a-sdl3` (private?) when you want a remote; default: local only.
-7. **Simulation timing (found in S3.6)**: the original VGAME ticks once per video retrace (70 Hz) but its frame-rate estimator assumes 60 ticks/s and scales every flight-model step by `sim_rate` (4..15). Port options: (a) emulate the estimator exactly, (b) fixed `sim_rate` with a fixed 70 Hz tick, (c) fixed `sim_rate` at the original start value 4 with real-time scaling. No default: needs your decision before S3.8/phase 5 (spec: `simflow.md` Part 0 section 4 D1, Part 1 section 1, Part 4 section 1).
+6. **GitHub**: done 2026-10-13: private `kylofon/F117-2`, branch `main`.
+7. **Simulation timing (found in S3.6)**: decided 2026-10-13, see Decisions.
 
 ## Decisions
 (Settled answers from U7 go here, dated.)
+- 2026-10-13, U7 item 7 (simulation timing): the faithful port **emulates the original timing exactly**: one tick per
+  retrace at 70.09 Hz, the `[3660]` frame-rate estimator with its 60-ticks/s assumption and `sim_rate` scaling, and the
+  sound poll skipping every 7th tick (`simflow.md` Part 0 D1, Part 1 section 1, Part 4 section 1). The Enhanced repo (S6.2)
+  will likely change this, aiming for 60 fps; decide it there.
 
 ## TODO (parked)
 - [ ] Roland MT-32 (`RSOUND.117`; Munt, user ROMs), IBM/Tandy sound

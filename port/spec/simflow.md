@@ -91,8 +91,8 @@ Hand-off fields (comm = far pointer `DS:E548`, the 5120-byte block of F117.COM; 
 
 * **D1 Timing base (PLAN.md U7 item 7).** The timer ISR gives exactly one tick per video retrace (70.09 Hz in mode 13h, calibrated; 60 Hz fallback `4DAEh`), while the
   fps estimator in `39C4` (`[3660]`, Part 4 section 1.2) assumes 60 ticks per second. Sound is polled once per tick but skipped on every 7th tick (60.08 Hz at 70 Hz) and
-  `snd_noise` runs `class` times per frame in fast mode. Port timing therefore needs a decision (emulate the retrace-locked 70 Hz + estimator, or fix `sim_rate` and
-  the tick rate). **S3.3 re-check needed**: `sound.md` section 3 assumes `snd_poll` at the ISR rate with no 7th-tick skip; Part 1 section 1 shows VGAME differs.
+  `snd_noise` runs `class` times per frame in fast mode. **Decided 2026-10-13 (PLAN.md Decisions):** the port emulates this exactly: a 70.09 Hz retrace tick, the
+  60-ticks/s estimator and the 7th-tick sound skip, bugs included. (The Enhanced repo will use its own 60 fps timing.) **S3.3 re-check needed**: `sound.md` section 3 assumes `snd_poll` at the ISR rate with no 7th-tick skip; Part 1 section 1 shows VGAME differs.
 * **D2 Visual / runtime checks** are collected in the single User to-do row `U-vgame` of PLAN.md: rear-view centre piece, sensor window (position, labels, FLIR tint), moving-map
   signal bars / arcs colours, HUD tick-strip colour, tracer/explosion colour indices, nav-page ETA units, map zoom at start.
 * **Other open items** are listed at the end of each part. The meaning of a few globals stays (U): `[9B04]` bit 1, `[3D6A]`, `[E2FE]`, `[3D74]`, `[C0A2]`, `[4088]` in the shutter test.
