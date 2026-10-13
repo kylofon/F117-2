@@ -1,6 +1,6 @@
 """Spec coverage: which indexed functions have no row in any port/spec/*_symbols.csv.
 
-usage: python tools/spec_coverage.py [exe ...]        (exe = intro, ps, ap, or for the F-117A port start, vgame, end, setup, mps_logo, player, dswap)
+usage: python tools/spec_coverage.py [exe ...]        (exe = start, vgame, end, setup, mps_logo, player, dswap; default = all seven)
 
 Reads port/<exe>_functions.csv (tools/apindex.py) and every port/spec/*_symbols.csv (columns
 exe,kind,address,...). Skips what the port does not reimplement: the Borland RTL (segment 0000;
@@ -56,7 +56,7 @@ def covered_set():
 
 
 def main():
-    exes = sys.argv[1:] or ['intro', 'ps', 'ap']
+    exes = sys.argv[1:] or ['setup', 'mps_logo', 'player', 'start', 'vgame', 'end', 'dswap']
     cov = covered_set()
     os.makedirs(os.path.join(ROOT, 'work', 'coverage'), exist_ok=True)
     for exe in exes:
