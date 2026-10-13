@@ -131,6 +131,7 @@ can port a function from its section alone.
 | S3.8 | flight model, controls, weapons, AI, detection (stealth), damage | O | done 2026-10-13 · U-flight pending |
 | S3.9 | debrief (`END`): scoring, medals, promotion, death/rescue screens | S | done 2026-10-13 · U-debrief pending |
 | S3.10 | `HANDOFFS.md`: data passed between programs; coverage gate; symbols merge | H | done 2026-10-13 · coverage 100% (closing pass) |
+| S3.11 | sound re-check: `sound.md` section 3 assumes `snd_poll` at the ISR rate, but VGAME (simflow.md Part 0 D1, Part 1 section 1) and PLAYER (frontend.md 3.2, closing pass) drop every 7th tick (60.08 Hz at 70 Hz); correct the poll-rate rule per program, re-render `work/sound/*_steered.wav`, update U-sound. Needed before S5.9 | S | S |
 
 ### Phase 4 — `f117port/` skeleton
 | Id | Task | Model | Size |
