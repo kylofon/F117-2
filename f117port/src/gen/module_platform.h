@@ -258,4 +258,4 @@ void pal_set(void *pal);
 /* DSWAP 0000:0848; END 0000:42be  spec platform.md "1 Library map (code offsets; segment 0000 unless shown)" */
 void pal_set_default(void);
 /* END 0000:42e4; START 0000:8378; VGAME 14a2:000e  spec platform.md "1 Library map (code offsets; segment 0000 unless shown)" */
-void pal_write_vsync(void); /* TODO signature: spec platform.md "1 Library map (code offsets; segment 000" (type column: "void(void far *rgb, int first, int count") */
+void pal_write_vsync(void *rgb, int first, int count);

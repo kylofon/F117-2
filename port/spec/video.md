@@ -402,3 +402,29 @@ does not reach). Slot 42 (`blit_rect`) is by far the most used call.
 | 81 | 0470 | `nop` | R | `-` | retf |
 | 82 | 0471 | `nop` | R | `-` | retf |
 | 83 | 07c2 | `nop` | R | `-` | retf |
+
+## 14 S5.2 corrections (found while porting; each checked bit-for-bit against the original MGRAPHIC under Unicorn,
+`port/notes/s52/video_emu.py`, 532 scenarios, and by `f117 --video-selftest`)
+
+* **Calling convention (section 2):** the C slots expect `DS = SS` (the caller's DGROUP), not only `SS`: e.g. the sprite header
+  routine 0A02 reads its arguments through `[bx+4]` with `bx = sp` (default segment DS).
+* **Text (section 3):** (a) the draw routine (061A) first sets the driver's current colour (slot 33) to `ctx->fg` and, at the end,
+  writes the *last colour in effect* (after any colour bytes >= 80h) back into the low byte of `ctx->fg`; (b) the vertical clip
+  (037F) works on BYTES (low bytes of y, ymin, ymax, height); after a top clip the bottom clip still uses the original y
+  (`height = ymax - y_orig + 1`, too tall by `ymin - y_orig`); (c) a glyph row is read as a 16-bit word (this glyph's byte and the
+  next glyph's), so an opaque proportional glyph of width 8 takes its spacing column from the neighbour's top bit; (d) with a
+  zero visible width opaque mode still writes 256 pixels per row (byte counter), transparent mode skips the glyph (read from
+  the code; no test vector reaches it).
+* **Tick strip (section 6):** every row inside the window draws one pixel at the column; row phase 5 draws 2 pixels, phase 10
+  draws 2 plus a third when `CL == 0` (the spec had only the ticks).
+* **Lines and fills (section 5):** `line` compares x1/x2 UNSIGNED (negative x swaps the endpoints); `poly_fill` is a do-while:
+  `ymax < ymin` still fills row ymax once; row skip tests are unsigned. All row-table lookups (`cs:0004 + 2y`) are only valid for
+  y < 200; the port computes y*320.
+* **Section 4/13 register slots:** `flip` (44) takes the word count in AX (not on the stack); `flip_flag` (45) starts at 1 (the
+  image holds 1 at cs:0198); `page_es` (56) returns in ES, not AX.
+* **Program-side (section 9):** `gfx_line` (START 829A, END 4206, DSWAP 0790) is the program's own routine, not slot 31: it compares
+  x1/x2 SIGNED, clips every pixel to x 0..319 and y 0..A8h-1 (DSWAP: 140h) and reads the page segment from the program's own word
+  table (START DS:CAB0, END 55D0, DSWAP 29E0). `pic_to_seg_b(buf_seg, dst_seg)` decodes a picture held in memory (819D, 512-byte
+  blocks), the other three read a DOS handle. The RLE-90 repeat counter is a byte (`90 01` repeats 256 times; never occurs).
+  `pal_write_vsync`'s grey-scale path (BIOS 0040:0089 bit 1) rounds the weighted sum, writes grey + 1 at DAC index 255 (the `inc bx`
+  carries into BH) and returns with an unbalanced stack (no `pop bp`): the port returns normally.

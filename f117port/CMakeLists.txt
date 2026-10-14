@@ -17,7 +17,7 @@ target_include_directories(nuked_opl3 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../thir
 
 # Coordinator files in src/, then one glob per module directory (PORTING.md "Source layout"): a module adds
 # <module>/<file>.c and it is built without touching this file. programs/ holds the phase 4 placeholders.
-set(F117_MODULES platform programs)
+set(F117_MODULES platform video programs)
 file(GLOB F117_SOURCES CONFIGURE_DEPENDS src/*.c)
 foreach(m ${F117_MODULES})
     file(GLOB m_sources CONFIGURE_DEPENDS src/${m}/*.c)
@@ -64,6 +64,22 @@ add_test(NAME platform COMMAND f117 --headless --platform-test --game-dir ${CMAK
 set_tests_properties(platform PROPERTIES PASS_REGULAR_EXPRESSION "platform-test OK")
 add_test(NAME exe_load COMMAND f117 --headless --exe-test --game-dir ${CMAKE_CURRENT_SOURCE_DIR}/../Game)
 set_tests_properties(exe_load PROPERTIES SKIP_RETURN_CODE 77)
+
+# The video module (src/video, S5.2): the driver primitives bit-exact against the ORIGINAL MGRAPHIC under Unicorn (vectors from
+# port/notes/s52/video_emu.py; text scenarios are skipped without ../Game/MGRAPHIC.EXE), every PIC / PAN / PAL / font of ../Game
+# against the Phase 2 Python decoders (port/notes/s52/decoder_ref.py), and the composed screen (--video-test writes PNGs to
+# work/s52/screen for the visual check U-video). The two that need the game files skip with code 77 without them.
+add_test(NAME video_selftest COMMAND f117 --headless --video-selftest --game-dir ${CMAKE_CURRENT_SOURCE_DIR}/../Game)
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../work/s52/screen)
+add_test(NAME video_screen COMMAND f117 --headless --video-test --game-dir ${CMAKE_CURRENT_SOURCE_DIR}/../Game)
+set_tests_properties(video_screen PROPERTIES SKIP_RETURN_CODE 77
+                     ENVIRONMENT "F117_SNAPSHOT_DIR=${CMAKE_CURRENT_SOURCE_DIR}/../work/s52/screen")
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME video_decoders COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s52/decoder_ref.py
+             $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game ${CMAKE_CURRENT_BINARY_DIR}/decoder_ref)
+    set_tests_properties(video_decoders PROPERTIES SKIP_RETURN_CODE 77)
+endif()
 
 # The generated headers are current: the generators re-run in memory and fail on any difference (tools/gen_*.py).
 find_package(Python3 COMPONENTS Interpreter)

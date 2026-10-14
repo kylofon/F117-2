@@ -72,7 +72,7 @@ vgame,func,10a8:0cff,joy_scale,void(int axis /*SI*/),platform,,"raw count -> byt
 vgame,func,1199:000c,dos_open,"int(char *name, int mode)",platform,dos_open,INT 21/3D; on error prints message and exits (fatal tail 41CA); resets disk-buffer pos [1EDF]=200h
 vgame,func,1199:006a,dos_creat,"int(char *name, int attr)",platform,dos_creat,INT 21/3C; same fatal tail as dos_open
 vgame,func,1199:0157,dos_buf_fill,void(void),platform,dos_read,reads 200h bytes from handle [1EE1] into the disk buffer DS:1C77 (used by the PIC/PAN readers)
-vgame,func,14a2:000e,pal_write_vsync,"void(void far *rgb, int first, int count)",video,,writes DAC 3C8/3C9 during retrace (3DAh); [0:0489] bit1 set (VGA flag) uses the scaled 6-bit path
+vgame,func,14a2:000e,pal_write_vsync,"void(void *rgb, int first, int count)",video,,writes DAC 3C8/3C9 during retrace (3DAh); [0:0489] bit1 set (VGA flag) uses the scaled 6-bit path
 start,func,0000:40a4,mem_alloc_chk,unsigned(unsigned bytes),platform,,
 start,func,0000:40cf,mem_free_chk,void(unsigned seg),platform,,
 start,func,0000:800a,dos_allocmem,unsigned(unsigned bytes),platform,,
@@ -88,7 +88,7 @@ start,func,0000:81e7,dos_buf_setfd,void(int fd),platform,,
 start,func,0000:81ff,dos_write_far,"int(int fd, unsigned n, unsigned off, unsigned seg, unsigned add)",platform,,
 start,func,0000:829a,gfx_line,"void(int *page, int x1, int y1, int x2, int y2, int colour)",video,,
 start,func,0000:8364,pal_set,void(void *pal),video,,
-start,func,0000:8378,pal_write_vsync,"void(void far *rgb, int first, int count)",video,,
+start,func,0000:8378,pal_write_vsync,"void(void *rgb, int first, int count)",video,,
 start,func,0000:8427,pal_apply_queue,void(void),video,bios_vga_palette,
 start,func,0000:845a,joy_poll,void(void),platform,,
 start,func,0000:8469,joy_read_raw,void(void),platform,,
@@ -200,7 +200,7 @@ end,func,0000:4199,dos_write_far,"int(int fd, unsigned n, unsigned off, unsigned
 end,func,0000:4206,gfx_line,"void(int *page, int x1, int y1, int x2, int y2, int colour)",video,,"Bresenham line into page seg [55D0+2*page], clip x<320 y<168 (A8h), row offsets table DS:2234"
 end,func,0000:42be,pal_set_default,void(void),video,bios_vga_palette_2,INT 10/1012: loads 256 DAC entries from DS:1F25
 end,func,0000:42d0,pal_set,void(void *pal),video,,"es=ds; pal_write_vsync(ptr, 0, 256)"
-end,func,0000:42e4,pal_write_vsync,"void(void far *rgb, int first, int count)",video,,writes DAC 3C8/3C9 during retrace (3DAh); [0:0489] bit1 set (VGA flag) uses the scaled 6-bit path
+end,func,0000:42e4,pal_write_vsync,"void(void *rgb, int first, int count)",video,,writes DAC 3C8/3C9 during retrace (3DAh); [0:0489] bit1 set (VGA flag) uses the scaled 6-bit path
 end,func,0000:4393,pal_apply_queue,void(void),video,bios_vga_palette,"sets [50CC]=0, waits for the timer ISR flag, then applies queued DAC changes (INT 10/1012, 6-byte records at DS:1EE8, count [1F24])"
 end,func,0000:43c6,joy_poll,void(void),platform,,"joy_read_raw() then joy_scale(0), joy_scale(1)"
 end,func,0000:43d5,joy_read_raw,void(void),platform,,"game port 201h: write, count loops until axis bits fall (CX max 65535, interrupts off); [23EC]/[23EE] = X/Y counts of stick A, FFFFh on timeout"

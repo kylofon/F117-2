@@ -39,8 +39,8 @@ static u32 pal32(u8 i)
 static bool compose(u32 *xrgb)
 {
     static u32 out[320 * 200];
-    if (mode != 0x13) {
-        memset(out, 0, sizeof out);                          /* text mode: not modelled, black */
+    if (mode != 0x13 || (seq[1] & 0x20)) {
+        memset(out, 0, sizeof out);                          /* text mode: not modelled, black; sequencer clocking-mode bit 5 = screen off (video.md 8) */
     } else {
         u32 pal[256];
         for (int i = 0; i < 256; i++) pal[i] = pal32((u8)i);

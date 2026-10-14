@@ -123,6 +123,41 @@ Rules for the modules that follow:
   `snprintf`), `int86` (every call site becomes a host call), `rtl_nh_*`/`rtl_chkstk`/`rtl_initterm*`. `fcb_find` belongs to the
   shell (S5.4).
 
+## Video module (`src/video`, S5.2)
+
+Spec `port/spec/video.md` (section 14 = what the port found); prototypes in `gen/module_video.h`, the structures and helpers in
+`video/video.h`. The MGRAPHIC slots are plain C functions (names = the slot table); struct arguments are host pointers into `mem[]`
+(`TextCtx`, `BlitCtx` in `video.h` are packed overlays); a "page" is a segment, `seg_ptr(seg)` gives the host pointer (A000..AFFF =
+the VGA model, everything else `mem[]`).
+
+```
+mgraphic.c   the driver: pages/draw segment/offset/colour, text (7 fonts from MGRAPHIC.EXE's image), lines, span fills, blits,
+             RLE sprite pool and scaled sprites, flip, effects. State = C statics, reset by video_init() (once, in main before the
+             chain; fonts are read from the game folder, silently none without it). gfx_alloc(2) is wired into prog.c (comm+20h)
+proglib.c    what START/END/DSWAP carry themselves: gfx_line, gfx_fill_rect, pal_write_vsync/pal_set/pal_set_default,
+             pal_apply_queue. Their tables are in the program's DGROUP at different offsets: `vprog[]` (START, END, DSWAP; VGAME has
+             its own 14A2:000E set, simflow). The fades (pal_fade*, shell/debrief) and the palette queue push stay with their modules
+pic.c        .PIC: lzw_reset/lzw_next/rle90_fill/pic_begin/pic_row + pic_to_page/seg_a/seg_b/seg_c (DOS handle or picture in memory),
+             pic_decode_file (tests/tools), pal_read_file
+pan.c        .PAN whole-file forms: lz_decode (PLAYER 0BE2), pan_parse, pan_apply_cel (PLAYER 1006). PLAYER's streaming ring buffer is S5.3
+videotest.c  --decoder-test, --video-test;  vselftest.c  --video-selftest (+ video_vectors.h, generated)
+```
+
+Rules for the modules that follow:
+
+* Call `page_seg_set(n, seg)` for the off-screen pages the program uses (page 0 = A000 is built in); text, sprites and the blits take
+  page NUMBERS, `line`/`poly_fill`/`hud_tick_strip` the draw segment (`page_select`/`seg_set`) plus the draw offset.
+* Row offsets are y*320 (the original's table is only valid for y < 200: do not draw rows outside 0..199 through the row-table calls).
+* Palette writes: `dac_set` (no wait) or `pal_write_vsync` (waits for one retrace, grey-scale path honoured); a palette is 768
+  6-bit bytes. `pal6_to_8` is the host's expansion.
+* The grey-scale / `pal_apply_queue` details: the queue routine spins on the program's tick flag (START DS:ADFC, END 50CC), so the
+  program's ISR body (S5.4) must set it; a program that is not in `vprog[]` makes `gfx_line`/`pal_*` fatal ("not part of ...").
+* .SS sprites (MPS_LOGO 006D:0112) and VGAME's `pal_flight_load`/`pal_read_dac` are not here (frontend / simflow).
+* Tests: `ctest` `video_selftest` (532 scenarios hashed from the ORIGINAL driver and START's library under Unicorn:
+  `python port/notes/s52/video_emu.py` rewrites `video_vectors.h`; needs `Game/` and `work/unpacked/`), `video_decoders`
+  (`port/notes/s52/decoder_ref.py`: every PIC/PAL/PAN/font against `tools/picdec.py`, `panlib.py`, `mgfont.py`'s parse; skips with
+  77 without `Game/`), `video_screen` (`f117 --video-test`, PNGs in `work/s52/screen`).
+
 ## Symbol pipeline (`src/gen/`)
 
 The names and addresses of the original come from the specs, not from memory. Pipeline:

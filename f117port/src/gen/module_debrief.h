@@ -93,12 +93,12 @@ void name_table_build(void); /* TODO signature: spec debrief.md "0000:00C9 name_
 /* END 0000:1607  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_shell.h, declared there */
 /* END 0000:1708  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_shell.h, declared there */
 /* END 0000:185c  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_shell.h, declared there */
-/* END 0000:4829  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_simflow.h, declared there */
+/* END 0000:4829  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_video.h, declared there */
 /* END 0000:47fe  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 void pic_nop(void); /* TODO signature: spec debrief.md "10 UI toolkit and RTL-level helpers (map" (type column: "void pic_nop(void)") */
-/* END 0000:47ff  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_simflow.h, declared there */
-/* END 0000:4648  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_simflow.h, declared there */
-/* END 0000:4722  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_simflow.h, declared there */
+/* END 0000:47ff  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_video.h, declared there */
+/* END 0000:4648  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_video.h, declared there */
+/* END 0000:4722  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_video.h, declared there */
 /* END 0000:05ca  spec debrief.md "6.2 0000:05CA place_icons (V, differential-tested)" */
 void place_icons(void); /* TODO signature: spec debrief.md "6.2 0000:05CA place_icons (V, differenti" (type column: "void place_icons(void)") */
 /* END 0000:1cf5  spec debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md ": same name as module_frontend.h, declared there */

@@ -8,171 +8,177 @@
 
 /* ---- owner video */
 /* MGRAPHIC 019c:0ed5  spec video.md "Key findings" */
-void blit_key(void); /* TODO signature: spec video.md "Key findings" (type column: "void blit_key(BlitCtx *b)") */
+void blit_key(void *b);
 /* MGRAPHIC 019c:0e30  spec video.md "8 Key-colour blits, mode, blanking, palette, effects" */
-void blit_key_clip(void); /* TODO signature: spec video.md "8 Key-colour blits, mode, blanking, pale" (type column: "void blit_key_clip(BlitCtx *b)") */
+void blit_key_clip(void *b);
 /* MGRAPHIC 019c:0e41  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void blit_key_clip_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "BP=BlitCtx*") */
+void blit_key_clip_r(void *b);
 /* MGRAPHIC 019c:0ee6  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void blit_key_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "BP=BlitCtx*") */
+void blit_key_r(void *b);
 /* MGRAPHIC 019c:1131  spec video.md "Key findings" */
-void blit_rect(void); /* TODO signature: spec video.md "Key findings" (type column: "void blit_rect(int spage, int sx, int sy") */
+void blit_rect(int spage, int sx, int sy, int dpage, int dx, int dy, int w, int h);
 /* MGRAPHIC 019c:1118  spec video.md "Key findings" */
-void clear_es(void); /* TODO signature: spec video.md "Key findings" (type column: "ES") */
+void clear_es(unsigned es);
 /* MGRAPHIC 019c:1122  spec video.md "4 Pages, flipping, simple fills (verified)" */
-void clear_screen(void); /* TODO signature: spec video.md "4 Pages, flipping, simple fills (verifie" (type column: "-") */
+void clear_screen(void);
 /* MGRAPHIC 019c:055b  spec video.md "5 Lines and span fills (verified)" */
-void color_set(void); /* TODO signature: spec video.md "5 Lines and span fills (verified)" (type column: "void color_set(int c)") */
+void color_set(int c);
 /* MGRAPHIC 019c:0561  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void color_set_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "AH=colour") */
+void color_set_r(int c);
 /* MGRAPHIC 019c:07ed  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void data_cc_set(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "void data_cc_set(int v)") */
+void data_cc_set(int v);
 /* MGRAPHIC 019c:07f3  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void data_cc_set_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "AX=v") */
+void data_cc_set_r(int v);
 /* MGRAPHIC 019c:07fe  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void data_ce_set(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "void data_ce_set(int v)") */
+void data_ce_set(int v);
 /* MGRAPHIC 019c:0804  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void data_ce_set_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "AX=v") */
+void data_ce_set_r(int v);
 /* MGRAPHIC 019c:125c  spec video.md "8 Key-colour blits, mode, blanking, palette, effects" */
-void explosion_fx_tick(void); /* TODO signature: spec video.md "8 Key-colour blits, mode, blanking, pale" (type column: "-") */
+void explosion_fx_tick(void);
 /* MGRAPHIC 019c:11f1  spec video.md "1 Driver memory map (verified)" */
-void flip(void); /* TODO signature: spec video.md "1 Driver memory map (verified)" (type column: "AX=words") */
+void flip(int words);
 /* MGRAPHIC 019c:080f  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void flip_flag(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-> AL") */
+int flip_flag(void);
 /* MGRAPHIC 019c:023a  spec video.md "3 Text (slots 1-10, 47) ? verified" */
-void font_char_width(void); /* TODO signature: spec video.md "3 Text (slots 1-10, 47) ? verified" (type column: "int font_char_width(int ch, int font)") */
+int font_char_width(int ch, int font);
 /* MGRAPHIC 019c:048b  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void get_const_0(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-> AX") */
+int get_const_0(void);
 /* MGRAPHIC 019c:0490  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void get_const_1(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-> AX") */
+int get_const_1(void);
 /* MGRAPHIC 019c:0826  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void get_const_3(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-> AX") */
+int get_const_3(void);
 /* MGRAPHIC 019c:0480  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void get_page_bytes(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-> AX") */
+unsigned get_page_bytes(void);
 /* MGRAPHIC 019c:0486  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void get_page_bytes_b(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-> AX") */
+unsigned get_page_bytes_b(void);
 /* MGRAPHIC 019c:07e0  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void get_view_off_a(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-> AX") */
+unsigned get_view_off_a(void);
 /* MGRAPHIC 019c:07e4  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void get_view_off_b(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-> AX") */
+unsigned get_view_off_b(void);
 /* MGRAPHIC 019c:04fe  spec video.md "Key findings" */
-void gfx_alloc(void); /* TODO signature: spec video.md "Key findings" (type column: "unsigned gfx_alloc(int n)") */
+unsigned gfx_alloc(int n);
 /* START 0000:8a32  spec video.md "5 Lines and span fills (verified)" */
-void gfx_fill_rect(void); /* TODO signature: spec video.md "5 Lines and span fills (verified)" (type column: "void gfx_fill_rect(Win *w, int x0, int y") */
+void gfx_fill_rect(void *w, int x0, int y0, int x1, int y1);
 /* MGRAPHIC 019c:071a  spec video.md "6 HUD tick strip (slot 11, 071A) ? verified, semantics for S" */
-void hud_tick_strip(void); /* TODO signature: spec video.md "6 HUD tick strip (slot 11, 071A) ? verif" (type column: "SI=0|2, BX=y, CL=flag, DL=sel") */
+void hud_tick_strip(int si, int bx, int cl, int dl);
 /* MGRAPHIC 019c:0599  spec video.md "Key findings" */
-void line(void); /* TODO signature: spec video.md "Key findings" (type column: "AX=x1 BX=y1 CX=x2 DX=y2") */
+void line(int x1, int y1, int x2, int y2);
 /* START 0000:8983  spec video.md "9 Program-side video code (not in the driver)" */
-void lzw_next(void); /* TODO signature: spec video.md "9 Program-side video code (not in the dr" (type column: "int lzw_next(void)") */
+int lzw_next(void);
 /* START 0000:88d4  spec video.md "9 Program-side video code (not in the driver)" */
-void lzw_reset(void); /* TODO signature: spec video.md "9 Program-side video code (not in the dr" (type column: "void lzw_reset(void)") */
+void lzw_reset(void);
 /* MGRAPHIC 019c:04a4  spec video.md "7 RLE sprites and the pool (slots 22, 76-78, 77, 21) ? verif" */
-void mem_paras_free(void); /* TODO signature: spec video.md "7 RLE sprites and the pool (slots 22, 76" (type column: "-> AX") */
+unsigned mem_paras_free(void);
 /* MGRAPHIC 019c:04b6  spec video.md "8 Key-colour blits, mode, blanking, palette, effects" */
-void mode13_set(void); /* TODO signature: spec video.md "8 Key-colour blits, mode, blanking, pale" (type column: "-") */
+void mode13_set(void);
 /* MGRAPHIC 019c:046f  spec video.md "11 Port plan (video module video.c)" */
-void nop_019C_046F(void); /* TODO signature: spec video.md "11 Port plan (video module video.c)" (type column: "-") */
+void nop_019C_046F(void);
 /* MGRAPHIC 019c:0470  spec video.md "11 Port plan (video module video.c)" */
-void nop_019C_0470(void); /* TODO signature: spec video.md "11 Port plan (video module video.c)" (type column: "-") */
+void nop_019C_0470(void);
 /* MGRAPHIC 019c:0471  spec video.md "11 Port plan (video module video.c)" */
-void nop_019C_0471(void); /* TODO signature: spec video.md "11 Port plan (video module video.c)" (type column: "-") */
+void nop_019C_0471(void);
 /* MGRAPHIC 019c:056d  spec video.md "11 Port plan (video module video.c)" */
-void nop_019C_056D(void); /* TODO signature: spec video.md "11 Port plan (video module video.c)" (type column: "-") */
+void nop_019C_056D(void);
 /* MGRAPHIC 019c:07c2  spec video.md "11 Port plan (video module video.c)" */
-void nop_019C_07C2(void); /* TODO signature: spec video.md "11 Port plan (video module video.c)" (type column: "-") */
+void nop_019C_07C2(void);
 /* MGRAPHIC 019c:12d4  spec video.md "11 Port plan (video module video.c)" */
-void nop_019C_12D4(void); /* TODO signature: spec video.md "11 Port plan (video module video.c)" (type column: "-") */
+void nop_019C_12D4(void);
 /* MGRAPHIC 019c:12dd  spec video.md "11 Port plan (video module video.c)" */
-void nop_019C_12DD(void); /* TODO signature: spec video.md "11 Port plan (video module video.c)" (type column: "-") */
+void nop_019C_12DD(void);
 /* MGRAPHIC 019c:12de  spec video.md "11 Port plan (video module video.c)" */
-void nop_019C_12DE(void); /* TODO signature: spec video.md "11 Port plan (video module video.c)" (type column: "-") */
+void nop_019C_12DE(void);
 /* MGRAPHIC 019c:12df  spec video.md "11 Port plan (video module video.c)" */
-void nop_019C_12DF(void); /* TODO signature: spec video.md "11 Port plan (video module video.c)" (type column: "-") */
+void nop_019C_12DF(void);
 /* MGRAPHIC 019c:07cd  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void offset_clear(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-") */
+void offset_clear(void);
 /* MGRAPHIC 019c:07e8  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void offset_get(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-> AX") */
+unsigned offset_get(void);
 /* MGRAPHIC 019c:07d5  spec video.md "8 Key-colour blits, mode, blanking, palette, effects" */
-void offset_set(void); /* TODO signature: spec video.md "8 Key-colour blits, mode, blanking, pale" (type column: "void offset_set(unsigned off)") */
+void offset_set(unsigned off);
 /* MGRAPHIC 019c:07db  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void offset_set_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "AX=off") */
+void offset_set_r(unsigned off);
 /* MGRAPHIC 019c:12d5  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void page_es(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "SI=page") */
+unsigned page_es(int page);
 /* MGRAPHIC 019c:11de  spec video.md "Key findings" */
-void page_load(void); /* TODO signature: spec video.md "Key findings" (type column: "void page_load(unsigned srcseg)") */
+void page_load(unsigned srcseg);
 /* MGRAPHIC 019c:12c2  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void page_seg_set(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "void page_seg_set(int page, unsigned seg") */
+void page_seg_set(int page, unsigned seg);
 /* MGRAPHIC 019c:0791  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void page_seg_set_b(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "void page_seg_set_b(unsigned seg, int pa") */
+void page_seg_set_b(unsigned seg, int page);
 /* MGRAPHIC 019c:07ac  spec video.md "4 Pages, flipping, simple fills (verified)" */
-void page_select(void); /* TODO signature: spec video.md "4 Pages, flipping, simple fills (verifie" (type column: "void page_select(int page)") */
+void page_select(int page);
 /* MGRAPHIC 019c:07a3  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void page_select_1(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-") */
+void page_select_1(void);
 /* MGRAPHIC 019c:07b2  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void page_select_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "AX=page") */
+void page_select_r(int page);
 /* MGRAPHIC 019c:0536  spec video.md "8 Key-colour blits, mode, blanking, palette, effects" */
-void palette16_set(void); /* TODO signature: spec video.md "8 Key-colour blits, mode, blanking, pale" (type column: "void palette16_set(int n)") */
-/* START 0000:8889  spec video.md "9 Program-side video code (not in the driver)": same name as module_simflow.h, declared there */
-/* START 0000:885f  spec video.md "9 Program-side video code (not in the driver)": same name as module_simflow.h, declared there */
-/* START 0000:86a8  spec video.md "9 Program-side video code (not in the driver)": same name as module_simflow.h, declared there */
-/* START 0000:871a  spec video.md "9 Program-side video code (not in the driver)": same name as module_simflow.h, declared there */
-/* START 0000:8782  spec video.md "(no heading)": same name as module_simflow.h, declared there */
+void palette16_set(int n);
+/* START 0000:8889  spec video.md "9 Program-side video code (not in the driver)" */
+void pic_begin(void);
+/* START 0000:885f  spec video.md "9 Program-side video code (not in the driver)" */
+void pic_row(int row);
+/* START 0000:86a8  spec video.md "9 Program-side video code (not in the driver)" */
+void pic_to_page(int fh, int page);
+/* START 0000:871a  spec video.md "9 Program-side video code (not in the driver)" */
+void pic_to_seg_a(int fh, unsigned seg);
+/* START 0000:8782  spec video.md "14 S5.2 corrections (found while porting; each checked bit-f" */
+void pic_to_seg_b(unsigned buf_seg, unsigned seg);
 /* START 0000:87f6  spec video.md "(no heading)" */
-void pic_to_seg_c(void); /* TODO signature: spec video.md "(no heading)" (type column: "void pic_to_seg_c(int fh, unsigned seg)") */
+void pic_to_seg_c(int fh, unsigned seg);
 /* MGRAPHIC 019c:056e  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void pixel_last(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "-") */
+void pixel_last(void);
 /* MGRAPHIC 019c:0814  spec video.md "4 Pages, flipping, simple fills (verified)" */
-void pixel_offset(void); /* TODO signature: spec video.md "4 Pages, flipping, simple fills (verifie" (type column: "unsigned pixel_offset(int x, int y)") */
+unsigned pixel_offset(int x, int y);
 /* MGRAPHIC 019c:0f3d  spec video.md "Key findings" */
-void poly_fill(void); /* TODO signature: spec video.md "Key findings" (type column: "AX=ymin BX=tbl CX=ymax DX=mode") */
+void poly_fill(int ymin, void *tbl, int ymax, int mode);
 /* MGRAPHIC 019c:0f3b  spec video.md "5 Lines and span fills (verified)" */
-void poly_fill_solid(void); /* TODO signature: spec video.md "5 Lines and span fills (verified)" (type column: "AX=ymin BX=tbl CX=ymax") */
+void poly_fill_solid(int ymin, void *tbl, int ymax);
 /* MGRAPHIC 019c:09d4  spec video.md "7 RLE sprites and the pool (slots 22, 76-78, 77, 21) ? verif" */
-void pool_free(void); /* TODO signature: spec video.md "7 RLE sprites and the pool (slots 22, 76" (type column: "-> AX") */
+unsigned pool_free(void);
 /* MGRAPHIC 019c:09a8  spec video.md "7 RLE sprites and the pool (slots 22, 76-78, 77, 21) ? verif" */
-void pool_init(void); /* TODO signature: spec video.md "7 RLE sprites and the pool (slots 22, 76" (type column: "-> AX") */
+unsigned pool_init(void);
 /* MGRAPHIC 019c:1188  spec video.md "Key findings" */
-void rect_recolor(void); /* TODO signature: spec video.md "Key findings" (type column: "void rect_recolor(int *page, int x0, int") */
+void rect_recolor(int *page, int x0, int y0, int x1, int y1, int oldc, int newc);
 /* START 0000:890a  spec video.md "9 Program-side video code (not in the driver)" */
-void rle90_fill(void); /* TODO signature: spec video.md "9 Program-side video code (not in the dr" (type column: "void rle90_fill(unsigned n)") */
+void rle90_fill(unsigned n);
 /* MGRAPHIC 019c:12ba  spec video.md "4 Pages, flipping, simple fills (verified)" */
-void row_offset(void); /* TODO signature: spec video.md "4 Pages, flipping, simple fills (verifie" (type column: "DI=y -> AX") */
+unsigned row_offset(int y);
 /* MGRAPHIC 019c:12e0  spec video.md "8 Key-colour blits, mode, blanking, palette, effects" */
-void scanline_put(void); /* TODO signature: spec video.md "8 Key-colour blits, mode, blanking, pale" (type column: "ES:DI, SS:BP=320 bytes") */
+void scanline_put(unsigned es, unsigned di, void *src);
 /* MGRAPHIC 019c:04ca  spec video.md "8 Key-colour blits, mode, blanking, palette, effects" */
-void screen_off(void); /* TODO signature: spec video.md "8 Key-colour blits, mode, blanking, pale" (type column: "-") */
+void screen_off(void);
 /* MGRAPHIC 019c:04e4  spec video.md "8 Key-colour blits, mode, blanking, palette, effects" */
-void screen_on(void); /* TODO signature: spec video.md "8 Key-colour blits, mode, blanking, pale" (type column: "-") */
+void screen_on(void);
 /* MGRAPHIC 019c:07c8  spec video.md "4 Pages, flipping, simple fills (verified)" */
-void seg_get(void); /* TODO signature: spec video.md "4 Pages, flipping, simple fills (verifie" (type column: "-> AX") */
+unsigned seg_get(void);
 /* MGRAPHIC 019c:07c3  spec video.md "4 Pages, flipping, simple fills (verified)" */
-void seg_set(void); /* TODO signature: spec video.md "4 Pages, flipping, simple fills (verifie" (type column: "AX=seg") */
+void seg_set(unsigned seg);
 /* MGRAPHIC 019c:1251  spec video.md "8 Key-colour blits, mode, blanking, palette, effects" */
-void shake_set(void); /* TODO signature: spec video.md "8 Key-colour blits, mode, blanking, pale" (type column: "void shake_set(int frames)") */
+void shake_set(int frames);
 /* MGRAPHIC 019c:0b0c  spec video.md "7 RLE sprites and the pool (slots 22, 76-78, 77, 21) ? verif" */
-void sprite_grab(void); /* TODO signature: spec video.md "7 RLE sprites and the pool (slots 22, 76" (type column: "unsigned sprite_grab(int page, int x, in") */
+unsigned sprite_grab(int page, int x, int y, int w, int h);
 /* MGRAPHIC 019c:0b70  spec video.md "Key findings" */
-void sprite_scaled(void); /* TODO signature: spec video.md "Key findings" (type column: "RectP *sprite_scaled(SpriteCtx *w, int x") */
-/* MGRAPHIC 019c:0c95  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void sprite_scaled_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "BP=SpriteCtx*, DS:SI=sprite, DX=x, DI=y") */
+s16 *sprite_scaled(void *w, int x, int y, int dw, int dh, unsigned off, unsigned seg);
 /* MGRAPHIC 019c:01b3  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void text_clip_all(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "void text_clip_all(TextCtx *c, char *s)") */
+void text_clip_all(void *c, char *s);
 /* MGRAPHIC 019c:0203  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void text_clip_all_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "BX=str, BP=TextCtx*") */
+void text_clip_all_r(void *c, char *s);
 /* MGRAPHIC 019c:01db  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void text_clip_xl(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "void text_clip_xl(TextCtx *c, char *s)") */
+void text_clip_xl(void *c, char *s);
 /* MGRAPHIC 019c:020e  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void text_clip_xl_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "BX=str, BP=TextCtx*") */
+void text_clip_xl_r(void *c, char *s);
 /* MGRAPHIC 019c:01ef  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void text_clip_xr(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "void text_clip_xr(TextCtx *c, char *s)") */
+void text_clip_xr(void *c, char *s);
 /* MGRAPHIC 019c:0219  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void text_clip_xr_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "BX=str, BP=TextCtx*") */
+void text_clip_xr_r(void *c, char *s);
 /* MGRAPHIC 019c:01c7  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void text_clip_y(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "void text_clip_y(TextCtx *c, char *s)") */
+void text_clip_y(void *c, char *s);
 /* MGRAPHIC 019c:0224  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void text_clip_y_r(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "BX=str, BP=TextCtx*") */
+void text_clip_y_r(void *c, char *s);
 /* MGRAPHIC 019c:019a  spec video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
-void text_noclip(void); /* TODO signature: spec video.md "13 Slot table (generated: python tools/v" (type column: "void text_noclip(TextCtx *c, char *s)") */
+void text_noclip(void *c, char *s);
 /* MGRAPHIC 019c:022f  spec video.md "2 Calling conventions" */
-void text_noclip_r(void); /* TODO signature: spec video.md "2 Calling conventions" (type column: "BX=str, BP=TextCtx*") */
+void text_noclip_r(void *c, char *s);
+
+/* ---- dead: not ported (listed for the record) */
+/* DEAD MGRAPHIC 019c:0c95 sprite_scaled_r */

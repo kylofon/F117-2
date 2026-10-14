@@ -353,7 +353,7 @@
 /* 0000:8667  dos_freemem_chk                platform   platform.md "2 Start-up, exit, fatal errors (verified on END)" */
 /* 0000:86a8  pic_to_page                    video      video.md "9 Program-side video code (not in the driver)" */
 /* 0000:871a  pic_to_seg_a                   video      video.md "9 Program-side video code (not in the driver)" */
-/* 0000:8782  pic_to_seg_b                   video      video.md "(no heading)" */
+/* 0000:8782  pic_to_seg_b                   video      video.md "14 S5.2 corrections (found while porting; each checked bit-f" */
 /* 0000:87f6  pic_to_seg_c                   video      video.md "(no heading)" */
 /* 0000:885e  pic_hook_nop                   shell      shell.md "Part E: closing pass (S3.10b, 2026-10-13): the last 6 uncove" */
 /* 0000:885f  pic_row                        video      video.md "9 Program-side video code (not in the driver)" */

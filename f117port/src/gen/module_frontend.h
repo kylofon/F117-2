@@ -153,12 +153,12 @@ void pal_load(void); /* TODO signature: spec frontend.md "3 PLAYER (PLAYER.EXE, 
 void pan_decode_chunk(void); /* TODO signature: spec frontend.md "8.3.1 The PAN stream reader: ring buffer" (type column: "int pan_decode_chunk(uint32_t dst)") */
 /* PLAYER 0000:0244  spec frontend.md "8.3.1 The PAN stream reader: ring buffer and bit reader (liv" */
 void pan_play_file(void); /* TODO signature: spec frontend.md "8.3.1 The PAN stream reader: ring buffer" (type column: "void pan_play_file(char *name)") */
-/* DSWAP 0000:0ad5  spec frontend.md "(no heading)": same name as module_simflow.h, declared there */
+/* DSWAP 0000:0ad5  spec frontend.md "(no heading)": same name as module_video.h, declared there */
 /* DSWAP 0000:0aaa  spec frontend.md "8.5 Corrections made by this pass": same name as module_simflow.h, declared there */
-/* DSWAP 0000:0aab  spec frontend.md "(no heading)": same name as module_simflow.h, declared there */
-/* DSWAP 0000:08f4  spec frontend.md "(no heading)": same name as module_simflow.h, declared there */
-/* DSWAP 0000:0966  spec frontend.md "(no heading)": same name as module_simflow.h, declared there */
-/* DSWAP 0000:09ce  spec frontend.md "(no heading)": same name as module_simflow.h, declared there */
+/* DSWAP 0000:0aab  spec frontend.md "(no heading)": same name as module_video.h, declared there */
+/* DSWAP 0000:08f4  spec frontend.md "(no heading)": same name as module_video.h, declared there */
+/* DSWAP 0000:0966  spec frontend.md "(no heading)": same name as module_video.h, declared there */
+/* DSWAP 0000:09ce  spec frontend.md "(no heading)": same name as module_video.h, declared there */
 /* DSWAP 0000:0a42  spec frontend.md "(no heading)": same name as module_video.h, declared there */
 /* PLAYER 0000:01f6  spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" */
 void player_exit(void); /* TODO signature: spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" (type column: "void player_exit(int code)") */

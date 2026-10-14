@@ -1,95 +1,95 @@
 exe,kind,address,name,type,owner,other_names,notes
-mgraphic,slot,019c:04fe,gfx_alloc,unsigned gfx_alloc(int n),video,slot 0,"n=0: returns A000h. else DOS-allocs FA00h bytes (one page), returns its segment; failure prints ""Insufficient memory for MCGA graphics"" and exits"
-mgraphic,slot,019c:0224,text_clip_y_r,"BX=str, BP=TextCtx*",video,slot 1,text with vertical clip (ymin/ymax of ctx); register entry of 7
-mgraphic,slot,019c:020e,text_clip_xl_r,"BX=str, BP=TextCtx*",video,slot 2,text with left clip (xmin); register entry of 8
-mgraphic,slot,019c:0219,text_clip_xr_r,"BX=str, BP=TextCtx*",video,slot 3,text with right clip (xmax); register entry of 10
-mgraphic,slot,019c:022f,text_noclip_r,"BX=str, BP=TextCtx*",video,slot 4,text without clipping; register entry of 5
-mgraphic,slot,019c:019a,text_noclip,"void text_noclip(TextCtx *c, char *s)",video,slot 5,"draw string, no clipping; c->x updated to the end x"
-mgraphic,slot,019c:0203,text_clip_all_r,"BX=str, BP=TextCtx*",video,slot 6,text with right+left+vertical clip; register entry of 9
-mgraphic,slot,019c:01c7,text_clip_y,"void text_clip_y(TextCtx *c, char *s)",video,slot 7,vertical clip only
-mgraphic,slot,019c:01db,text_clip_xl,"void text_clip_xl(TextCtx *c, char *s)",video,slot 8,left clip only
-mgraphic,slot,019c:01b3,text_clip_all,"void text_clip_all(TextCtx *c, char *s)",video,slot 9,right + left + vertical clip
-mgraphic,slot,019c:01ef,text_clip_xr,"void text_clip_xr(TextCtx *c, char *s)",video,slot 10,right clip only
-mgraphic,slot,019c:071a,hud_tick_strip,"SI=0|2, BX=y, CL=flag, DL=sel",video,slot 11,draws a vertical tick scale (HUD tape) at one of 4 fixed columns on the draw segment (see spec)
-mgraphic,slot,019c:07a3,page_select_1,-,video,slot 12,draw segment := page table[1]
-mgraphic,slot,019c:07b2,page_select_r,AX=page,video,slot 13,draw segment := page table[AX]
-mgraphic,slot,019c:07ac,page_select,void page_select(int page),video,slot 14,draw segment := page table[page]
-mgraphic,slot,019c:07c3,seg_set,AX=seg,video,slot 15,draw segment := AX
-mgraphic,slot,019c:07c8,seg_get,-> AX,video,slot 16,AX := draw segment
-mgraphic,slot,019c:0ed5,blit_key,void blit_key(BlitCtx *b),video,slot 17,"copy rect from segment b->seg to page b->dpage, source byte 0 = transparent, no clipping"
-mgraphic,slot,019c:0ee6,blit_key_r,BP=BlitCtx*,video,slot 18,register form of 17
-mgraphic,slot,019c:0e30,blit_key_clip,void blit_key_clip(BlitCtx *b),video,slot 19,as 17 but clipped to b->clip
-mgraphic,slot,019c:0e41,blit_key_clip_r,BP=BlitCtx*,video,slot 20,register form of 19
-mgraphic,slot,019c:0c95,sprite_scaled_r,"BP=SpriteCtx*, DS:SI=sprite, DX=x, DI=y",video,slot 21,draw part of 22 (after clip); not called by the programs
-mgraphic,slot,019c:0b70,sprite_scaled,"RectP *sprite_scaled(SpriteCtx *w, int x, int y, int dw, int dh, unsigned off, unsigned seg)",video,slot 22,"clipped scaled/mirrored draw of a pool sprite; returns far ptr to visible rect (x,y,w,h words)"
-mgraphic,slot,019c:0480,get_page_bytes,-> AX,video,slot 23,returns 0FA00h
-mgraphic,slot,019c:07cd,offset_clear,-,video,slot 24,draw offset := 0 (alias of 25)
-mgraphic,slot,019c:07cd,offset_clear,-,video,slot 25,draw offset := 0
-mgraphic,slot,019c:07d5,offset_set,void offset_set(unsigned off),video,slot 26,"draw offset := off (used by line, pixel, poly, 48; NOT by text/blits/sprites)"
-mgraphic,slot,019c:07db,offset_set_r,AX=off,video,slot 27,draw offset := AX
-mgraphic,slot,019c:07e0,get_view_off_a,-> AX,video,slot 28,returns constant 5580h
-mgraphic,slot,019c:07e4,get_view_off_b,-> AX,video,slot 29,returns constant 1450h
-mgraphic,slot,019c:07e8,offset_get,-> AX,video,slot 30,AX := draw offset
-mgraphic,slot,019c:0599,line,AX=x1 BX=y1 CX=x2 DX=y2,video,slot 31,"Bresenham line in current colour on draw segment+offset, no clipping"
-mgraphic,slot,019c:0561,color_set_r,AH=colour,video,slot 32,current colour := AH
-mgraphic,slot,019c:055b,color_set,void color_set(int c),video,slot 33,current colour := (byte)c
-mgraphic,slot,019c:056d,nop,-,video,slot 34,retf
-mgraphic,slot,019c:056d,nop,-,video,slot 35,retf
-mgraphic,slot,019c:056e,pixel_last,-,video,slot 36,plot one pixel at the last line() start point (unused by programs)
-mgraphic,slot,019c:0f3d,poly_fill,AX=ymin BX=tbl CX=ymax DX=mode,video,slot 37,"span fill between edge tables; mode 0 solid, 1 OR, 2 AND, else shade 98h+"
-mgraphic,slot,019c:07f3,data_cc_set_r,AX=v,video,slot 38,driver data word [00CC] := AX (never read)
-mgraphic,slot,019c:0804,data_ce_set_r,AX=v,video,slot 39,driver data word [00CE] := AX (never read)
-mgraphic,slot,019c:0f3b,poly_fill_solid,AX=ymin BX=tbl CX=ymax,video,slot 40,= 37 with mode 0
-mgraphic,slot,019c:1188,rect_recolor,"void rect_recolor(int *page, int x0, int y0, int x1, int y1, int old, int new)",video,slot 41,replace colour old by new inside the rect of page *page
-mgraphic,slot,019c:1131,blit_rect,"void blit_rect(int spage, int sx, int sy, int dpage, int dx, int dy, int w, int h)",video,slot 42,"opaque rectangle copy between pages (row by row, no overlap handling)"
-mgraphic,slot,019c:1122,clear_screen,-,video,slot 43,zero A000:0000..F9FF
-mgraphic,slot,019c:11f1,flip,AX=words,video,slot 44,copy AX words page[1] -> A000 (unless the disable word 019C:11DC is non-zero); sets flag 45
-mgraphic,slot,019c:080f,flip_flag,-> AL,video,slot 45,"AL := 1 if the last 44 copied, 0 if it was disabled"
-mgraphic,slot,019c:125c,explosion_fx_tick,-,video,slot 46,"per-frame: DAC[13] := random red/yellow, CRTC start-address-low shake while counter 79 > 0"
-mgraphic,slot,019c:023a,font_char_width,"int font_char_width(int ch, int font)",video,slot 47,"advance width incl. spacing, 0 if the glyph does not exist"
-mgraphic,slot,019c:11de,page_load,void page_load(unsigned srcseg),video,slot 48,"copy 64000 bytes from srcseg to the draw segment (offset 0, ignores draw offset)"
-mgraphic,slot,019c:0486,get_page_bytes_b,-> AX,video,slot 49,returns 0FA00h
-mgraphic,slot,019c:04a4,mem_paras_free,-> AX,video,slot 50,largest free DOS block in paragraphs (INT 21/48 probe); 0 if none
-mgraphic,slot,019c:12e0,scanline_put,"ES:DI, SS:BP=320 bytes",video,slot 51,copy 320 bytes (160 words) from SS:BP to ES:DI
-mgraphic,slot,019c:12e0,scanline_put,"ES:DI, SS:BP=320 bytes",video,slot 52,same as 51
-mgraphic,slot,019c:12dd,nop,-,video,slot 53,retf (post-scanline hook of other drivers)
-mgraphic,slot,019c:12de,nop,-,video,slot 54,retf
-mgraphic,slot,019c:12df,nop,-,video,slot 55,retf
-mgraphic,slot,019c:12d5,page_es,SI=page,video,slot 56,ES := page table[SI]
-mgraphic,slot,019c:12c2,page_seg_set,"void page_seg_set(int page, unsigned seg)",video,slot 57,page table[page] := seg
-mgraphic,slot,019c:12ba,row_offset,DI=y -> AX,video,slot 58,AX := y*320
-mgraphic,slot,019c:1118,clear_es,ES,video,slot 59,zero ES:0000..F9FF
-mgraphic,slot,019c:04b6,mode13_set,-,video,slot 60,"INT 10h AX=0013h; verifies INT 10h/0Fh = 13h else prints ""MCGA is not supported on your machine"" and exits"
-mgraphic,slot,019c:12d4,nop,-,video,slot 61,retf
-mgraphic,slot,019c:0814,pixel_offset,"unsigned pixel_offset(int x, int y)",video,slot 62,x + y*320
-mgraphic,slot,019c:0826,get_const_3,-> AX,video,slot 63,returns 3
-mgraphic,slot,019c:07ed,data_cc_set,void data_cc_set(int v),video,slot 64,driver data word [00CC] := v (never read)
-mgraphic,slot,019c:07fe,data_ce_set,void data_ce_set(int v),video,slot 65,driver data word [00CE] := v (never read)
-mgraphic,slot,019c:048b,get_const_0,-> AX,video,slot 66,returns 0
-mgraphic,slot,019c:0490,get_const_1,-> AX,video,slot 67,returns 1
-mgraphic,slot,019c:0536,palette16_set,void palette16_set(int n),video,slot 68,"DAC 0..15 := table n (0..4) via INT 10h/1012h, then screen on (70); not called by the programs"
-mgraphic,slot,019c:04ca,screen_off,-,video,slot 69,"wait retrace, blank the display (3D8h:=2, sequencer reg1 bit5)"
-mgraphic,slot,019c:04e4,screen_on,-,video,slot 70,"wait retrace, unblank (3D8h:=0Ah, sequencer reg1 bit5 cleared)"
-mgraphic,slot,019c:0e30,blit_key_clip,alias of 19,video,slot 71,
-mgraphic,slot,019c:0e41,blit_key_clip_r,alias of 20,video,slot 72,
-mgraphic,slot,019c:0ed5,blit_key,alias of 17,video,slot 73,
-mgraphic,slot,019c:0ee6,blit_key_r,alias of 18,video,slot 74,
-mgraphic,slot,019c:0791,page_seg_set_b,"void page_seg_set_b(unsigned seg, int page)",video,slot 75,page table[page] := seg (argument order differs from 57)
-mgraphic,slot,019c:09a8,pool_init,-> AX,video,slot 76,"take ALL free DOS memory as the sprite pool; AX = base segment, 0 if none"
-mgraphic,slot,019c:0b0c,sprite_grab,"unsigned sprite_grab(int page, int x, int y, int w, int h)",video,slot 77,"RLE-compress a page rectangle into the pool; returns the sprite segment, 0 if the pool is exhausted"
-mgraphic,slot,019c:09d4,pool_free,-> AX,video,slot 78,shrink the pool to what was used (free it if nothing); clears pool state
-mgraphic,slot,019c:1251,shake_set,void shake_set(int frames),video,slot 79,shake counter := (byte)frames for 46
-mgraphic,slot,019c:046f,nop,-,video,slot 80,retf
-mgraphic,slot,019c:0470,nop,-,video,slot 81,retf
-mgraphic,slot,019c:0471,nop,-,video,slot 82,retf
-mgraphic,slot,019c:07c2,nop,-,video,slot 83,retf
-start,func,0000:86a8,pic_to_page,"void pic_to_page(int fh, int page)",video,,"decode a .PIC into page `page` (slots 56/59, rows via 51+53); reader callback 81C6"
-start,func,0000:871a,pic_to_seg_a,"void pic_to_seg_a(int fh, unsigned seg)",video,,decode a .PIC into segment (rows via 51+55)
-start,func,0000:8782,pic_to_seg_b,"void pic_to_seg_b(int fh, unsigned seg)",video,,"as above, reader 819D with buffer pos 200h"
-start,func,0000:87f6,pic_to_seg_c,"void pic_to_seg_c(int fh, unsigned seg)",video,,"as above, rows via 52+54"
-start,func,0000:885f,pic_row,void pic_row(int row),video,,decode 320 pixels into the row buffer (DS:8C20)
-start,func,0000:8889,pic_begin,void pic_begin(void),video,,"read header byte, maxbits, pixel width; LZW reset"
-start,func,0000:88d4,lzw_reset,void lzw_reset(void),video,,"width 9, free 256, clears the 2048-entry table"
-start,func,0000:890a,rle90_fill,void rle90_fill(unsigned n),video,,RLE-90 expander; writes n pixels (nibbles x2 when 4-bit)
-start,func,0000:8983,lzw_next,int lzw_next(void),video,,"next decoded byte; private stack for the string, reload via callback at [8D6A]"
-start,func,0000:8a32,gfx_fill_rect,"void gfx_fill_rect(Win *w, int x0, int y0, int x1, int y1)",video,,"solid rect via edge tables + slot 40; saves/restores the draw segment; w->page, w->colour at +4"
+mgraphic,slot,019c:04fe,gfx_alloc,unsigned(int n),video,slot 0,"n=0: returns A000h. else DOS-allocs FA00h bytes (one page), returns its segment; failure prints ""Insufficient memory for MCGA graphics"" and exits"
+mgraphic,slot,019c:0224,text_clip_y_r,"void(void *c, char *s)",video,slot 1,text with vertical clip (ymin/ymax of ctx); register entry of 7
+mgraphic,slot,019c:020e,text_clip_xl_r,"void(void *c, char *s)",video,slot 2,text with left clip (xmin); register entry of 8
+mgraphic,slot,019c:0219,text_clip_xr_r,"void(void *c, char *s)",video,slot 3,text with right clip (xmax); register entry of 10
+mgraphic,slot,019c:022f,text_noclip_r,"void(void *c, char *s)",video,slot 4,text without clipping; register entry of 5
+mgraphic,slot,019c:019a,text_noclip,"void(void *c, char *s)",video,slot 5,"draw string, no clipping; c->x updated to the end x"
+mgraphic,slot,019c:0203,text_clip_all_r,"void(void *c, char *s)",video,slot 6,text with right+left+vertical clip; register entry of 9
+mgraphic,slot,019c:01c7,text_clip_y,"void(void *c, char *s)",video,slot 7,vertical clip only
+mgraphic,slot,019c:01db,text_clip_xl,"void(void *c, char *s)",video,slot 8,left clip only
+mgraphic,slot,019c:01b3,text_clip_all,"void(void *c, char *s)",video,slot 9,right + left + vertical clip
+mgraphic,slot,019c:01ef,text_clip_xr,"void(void *c, char *s)",video,slot 10,right clip only
+mgraphic,slot,019c:071a,hud_tick_strip,"void(int si, int bx, int cl, int dl)",video,slot 11,draws a vertical tick scale (HUD tape) at one of 4 fixed columns on the draw segment (see spec)
+mgraphic,slot,019c:07a3,page_select_1,void(void),video,slot 12,draw segment := page table[1]
+mgraphic,slot,019c:07b2,page_select_r,void(int page),video,slot 13,draw segment := page table[AX]
+mgraphic,slot,019c:07ac,page_select,void(int page),video,slot 14,draw segment := page table[page]
+mgraphic,slot,019c:07c3,seg_set,void(unsigned seg),video,slot 15,draw segment := AX
+mgraphic,slot,019c:07c8,seg_get,unsigned(void),video,slot 16,AX := draw segment
+mgraphic,slot,019c:0ed5,blit_key,void(void *b),video,slot 17,"copy rect from segment b->seg to page b->dpage, source byte 0 = transparent, no clipping"
+mgraphic,slot,019c:0ee6,blit_key_r,void(void *b),video,slot 18,register form of 17
+mgraphic,slot,019c:0e30,blit_key_clip,void(void *b),video,slot 19,as 17 but clipped to b->clip
+mgraphic,slot,019c:0e41,blit_key_clip_r,void(void *b),video,slot 20,register form of 19
+mgraphic,slot,019c:0c95,sprite_scaled_r,"BP=SpriteCtx*, DS:SI=sprite, DX=x, DI=y",video,slot 21,"dead: draw half of slot 22, not called by the programs (kept inside sprite_scaled)"
+mgraphic,slot,019c:0b70,sprite_scaled,"s16 *(void *w, int x, int y, int dw, int dh, unsigned off, unsigned seg)",video,slot 22,"clipped scaled/mirrored draw of a pool sprite; returns far ptr to visible rect (x,y,w,h words)"
+mgraphic,slot,019c:0480,get_page_bytes,unsigned(void),video,slot 23,returns 0FA00h
+mgraphic,slot,019c:07cd,offset_clear,void(void),video,slot 24,draw offset := 0 (alias of 25)
+mgraphic,slot,019c:07cd,offset_clear,void(void),video,slot 25,draw offset := 0
+mgraphic,slot,019c:07d5,offset_set,void(unsigned off),video,slot 26,"draw offset := off (used by line, pixel, poly, 48; NOT by text/blits/sprites)"
+mgraphic,slot,019c:07db,offset_set_r,void(unsigned off),video,slot 27,draw offset := AX
+mgraphic,slot,019c:07e0,get_view_off_a,unsigned(void),video,slot 28,returns constant 5580h
+mgraphic,slot,019c:07e4,get_view_off_b,unsigned(void),video,slot 29,returns constant 1450h
+mgraphic,slot,019c:07e8,offset_get,unsigned(void),video,slot 30,AX := draw offset
+mgraphic,slot,019c:0599,line,"void(int x1, int y1, int x2, int y2)",video,slot 31,"Bresenham line in current colour on draw segment+offset, no clipping"
+mgraphic,slot,019c:0561,color_set_r,void(int c),video,slot 32,current colour := AH
+mgraphic,slot,019c:055b,color_set,void(int c),video,slot 33,current colour := (byte)c
+mgraphic,slot,019c:056d,nop,void(void),video,slot 34,retf
+mgraphic,slot,019c:056d,nop,void(void),video,slot 35,retf
+mgraphic,slot,019c:056e,pixel_last,void(void),video,slot 36,plot one pixel at the last line() start point (unused by programs)
+mgraphic,slot,019c:0f3d,poly_fill,"void(int ymin, void *tbl, int ymax, int mode)",video,slot 37,"span fill between edge tables; mode 0 solid, 1 OR, 2 AND, else shade 98h+"
+mgraphic,slot,019c:07f3,data_cc_set_r,void(int v),video,slot 38,driver data word [00CC] := AX (never read)
+mgraphic,slot,019c:0804,data_ce_set_r,void(int v),video,slot 39,driver data word [00CE] := AX (never read)
+mgraphic,slot,019c:0f3b,poly_fill_solid,"void(int ymin, void *tbl, int ymax)",video,slot 40,= 37 with mode 0
+mgraphic,slot,019c:1188,rect_recolor,"void(int *page, int x0, int y0, int x1, int y1, int oldc, int newc)",video,slot 41,replace colour old by new inside the rect of page *page
+mgraphic,slot,019c:1131,blit_rect,"void(int spage, int sx, int sy, int dpage, int dx, int dy, int w, int h)",video,slot 42,"opaque rectangle copy between pages (row by row, no overlap handling)"
+mgraphic,slot,019c:1122,clear_screen,void(void),video,slot 43,zero A000:0000..F9FF
+mgraphic,slot,019c:11f1,flip,void(int words),video,slot 44,copy AX words page[1] -> A000 (unless the disable word 019C:11DC is non-zero); sets flag 45
+mgraphic,slot,019c:080f,flip_flag,int(void),video,slot 45,"AL := 1 if the last 44 copied, 0 if it was disabled"
+mgraphic,slot,019c:125c,explosion_fx_tick,void(void),video,slot 46,"per-frame: DAC[13] := random red/yellow, CRTC start-address-low shake while counter 79 > 0"
+mgraphic,slot,019c:023a,font_char_width,"int(int ch, int font)",video,slot 47,"advance width incl. spacing, 0 if the glyph does not exist"
+mgraphic,slot,019c:11de,page_load,void(unsigned srcseg),video,slot 48,"copy 64000 bytes from srcseg to the draw segment (offset 0, ignores draw offset)"
+mgraphic,slot,019c:0486,get_page_bytes_b,unsigned(void),video,slot 49,returns 0FA00h
+mgraphic,slot,019c:04a4,mem_paras_free,unsigned(void),video,slot 50,largest free DOS block in paragraphs (INT 21/48 probe); 0 if none
+mgraphic,slot,019c:12e0,scanline_put,"void(unsigned es, unsigned di, void *src)",video,slot 51,copy 320 bytes (160 words) from SS:BP to ES:DI
+mgraphic,slot,019c:12e0,scanline_put,"void(unsigned es, unsigned di, void *src)",video,slot 52,same as 51
+mgraphic,slot,019c:12dd,nop,void(void),video,slot 53,retf (post-scanline hook of other drivers)
+mgraphic,slot,019c:12de,nop,void(void),video,slot 54,retf
+mgraphic,slot,019c:12df,nop,void(void),video,slot 55,retf
+mgraphic,slot,019c:12d5,page_es,unsigned(int page),video,slot 56,ES := page table[SI]
+mgraphic,slot,019c:12c2,page_seg_set,"void(int page, unsigned seg)",video,slot 57,page table[page] := seg
+mgraphic,slot,019c:12ba,row_offset,unsigned(int y),video,slot 58,AX := y*320
+mgraphic,slot,019c:1118,clear_es,void(unsigned es),video,slot 59,zero ES:0000..F9FF
+mgraphic,slot,019c:04b6,mode13_set,void(void),video,slot 60,"INT 10h AX=0013h; verifies INT 10h/0Fh = 13h else prints ""MCGA is not supported on your machine"" and exits"
+mgraphic,slot,019c:12d4,nop,void(void),video,slot 61,retf
+mgraphic,slot,019c:0814,pixel_offset,"unsigned(int x, int y)",video,slot 62,x + y*320
+mgraphic,slot,019c:0826,get_const_3,int(void),video,slot 63,returns 3
+mgraphic,slot,019c:07ed,data_cc_set,void(int v),video,slot 64,driver data word [00CC] := v (never read)
+mgraphic,slot,019c:07fe,data_ce_set,void(int v),video,slot 65,driver data word [00CE] := v (never read)
+mgraphic,slot,019c:048b,get_const_0,int(void),video,slot 66,returns 0
+mgraphic,slot,019c:0490,get_const_1,int(void),video,slot 67,returns 1
+mgraphic,slot,019c:0536,palette16_set,void(int n),video,slot 68,"DAC 0..15 := table n (0..4) via INT 10h/1012h, then screen on (70); not called by the programs"
+mgraphic,slot,019c:04ca,screen_off,void(void),video,slot 69,"wait retrace, blank the display (3D8h:=2, sequencer reg1 bit5)"
+mgraphic,slot,019c:04e4,screen_on,void(void),video,slot 70,"wait retrace, unblank (3D8h:=0Ah, sequencer reg1 bit5 cleared)"
+mgraphic,slot,019c:0e30,blit_key_clip,void(void *b),video,slot 71,
+mgraphic,slot,019c:0e41,blit_key_clip_r,void(void *b),video,slot 72,
+mgraphic,slot,019c:0ed5,blit_key,void(void *b),video,slot 73,
+mgraphic,slot,019c:0ee6,blit_key_r,void(void *b),video,slot 74,
+mgraphic,slot,019c:0791,page_seg_set_b,"void(unsigned seg, int page)",video,slot 75,page table[page] := seg (argument order differs from 57)
+mgraphic,slot,019c:09a8,pool_init,unsigned(void),video,slot 76,"take ALL free DOS memory as the sprite pool; AX = base segment, 0 if none"
+mgraphic,slot,019c:0b0c,sprite_grab,"unsigned(int page, int x, int y, int w, int h)",video,slot 77,"RLE-compress a page rectangle into the pool; returns the sprite segment, 0 if the pool is exhausted"
+mgraphic,slot,019c:09d4,pool_free,unsigned(void),video,slot 78,shrink the pool to what was used (free it if nothing); clears pool state
+mgraphic,slot,019c:1251,shake_set,void(int frames),video,slot 79,shake counter := (byte)frames for 46
+mgraphic,slot,019c:046f,nop,void(void),video,slot 80,retf
+mgraphic,slot,019c:0470,nop,void(void),video,slot 81,retf
+mgraphic,slot,019c:0471,nop,void(void),video,slot 82,retf
+mgraphic,slot,019c:07c2,nop,void(void),video,slot 83,retf
+start,func,0000:86a8,pic_to_page,"void(int fh, int page)",video,,"decode a .PIC into page `page` (slots 56/59, rows via 51+53); reader callback 81C6"
+start,func,0000:871a,pic_to_seg_a,"void(int fh, unsigned seg)",video,,decode a .PIC into segment (rows via 51+55)
+start,func,0000:8782,pic_to_seg_b,"void(unsigned buf_seg, unsigned seg)",video,,"as above, reader 819D with buffer pos 200h"
+start,func,0000:87f6,pic_to_seg_c,"void(int fh, unsigned seg)",video,,"as above, rows via 52+54"
+start,func,0000:885f,pic_row,void(int row),video,,decode 320 pixels into the row buffer (DS:8C20)
+start,func,0000:8889,pic_begin,void(void),video,,"read header byte, maxbits, pixel width; LZW reset"
+start,func,0000:88d4,lzw_reset,void(void),video,,"width 9, free 256, clears the 2048-entry table"
+start,func,0000:890a,rle90_fill,void(unsigned n),video,,RLE-90 expander; writes n pixels (nibbles x2 when 4-bit)
+start,func,0000:8983,lzw_next,int(void),video,,"next decoded byte; private stack for the string, reload via callback at [8D6A]"
+start,func,0000:8a32,gfx_fill_rect,"void(void *w, int x0, int y0, int x1, int y1)",video,,"solid rect via edge tables + slot 40; saves/restores the draw segment; w->page, w->colour at +4"

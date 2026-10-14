@@ -19,11 +19,12 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 | U-render3d | DOSBox-X in flight (as U-vgame), look at the original and reply what you see: (1) radar dishes / rotating parts seen up close: any faces missing or flickering? (2) left map MFD while it scrolls: is the bottom pixel row of the map ever left unpainted? (3) TV camera (F6 options): is there a mode with a flat two-colour sky/ground? which option? (4) burning targets: do glow/flame sprites appear in the main view or only in the TV window? (5) any polygon that looks cut off part-way down (a hole that shows the frame before)? `port/spec/render3d.md` section 7. | S3.7 | 15 min |
 | U-flight | DOSBox-X in flight (as U-vgame), reply what you see: (1) take a few hits (SAM/fighter) and tell me the labels of the damage lamps that turn red (cockpit buttons; which label lights for which hit if you can tell); (2) left map MFD with an enemy missile in flight: is its blip a 2x2 dot or a single pixel? (3) keys `4` and `3`: which lamps light (ECM / IR jammer), and does the `3` lamp stay dim for a while after it switches itself off? `port/spec/flight.md` section 11. | S3.8 | 10 min |
 | U-debrief | DOSBox-X: finish any mission (land, or eject so that the rescue / captured screen runs) and tell me what you see in the original debrief: (1) on the map replay, are the route line segments visible (the code draws them with colour index 0)? (2) the 48x40 event picture that appears next to each stop: what do the pictures show (takeoff, landing, kill, missile hit, photo...)? (3) the TIME: clock at the bottom: does it start at 06:00:00 (18:00:00 on a night mission) plus an odd offset, and does the hour tens digit stay 0? `port/spec/debrief.md` 6.6-6.10. | S3.9 | 10 min |
+| U-video | Run `f117port/build/f117.exe --video-test --game-dir Game` (add `F117_SNAPSHOT_DIR=work/s52/screen` to get PNGs instead of a window). You should see: (1) the FLAG picture with a black panel on top; (2) in the panel the line `F-117A Nighthawk 0123456789 :/-.` in each of the 7 MGRAPHIC fonts (white, left) and `red yellow green` colour-byte lines (right), plus an opaque and a clipped line; (3) below, a 48x40 piece of the picture as sprites: plain, 2x, mirrored, flipped at the bottom edge; (4) two yellow lines, a red frame and a small polygon; then the palette fades to black and back (end colours = the start colours). Compare the picture/colours with `work/pic/FLAG.png` and the glyph shapes with `work/s32/fonts_sheet.png`; tell me what looks wrong (wrong colours, glyph shapes or spacing, a mirrored sprite facing the wrong way, a fade that does not return). | S5.2 | 5 min |
 
 ## Status
 
-- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.3 (sound spec), S3.4 (front-end spec), S3.5 (shell spec), S3.6 (sim flow spec), S3.7 (render3d spec), S3.8 (flight/weapons/AI/detection/damage spec), S3.9 (debrief spec), S3.10 (hand-offs, coverage gate, symbols merge; closing pass: coverage 100 %, all conflicts settled), S4.1 (`f117port/` skeleton: CMake, SDL3 host, mem, VGA, OPL, chain loop with placeholder programs), S4.2 (generated symbol and module headers in `f117port/src/gen/`, symbol pipeline in `PORTING.md`), S5.1 (platform layer in `f117port/src/platform`: loader, RTL, DOS files, keyboard/joystick/mouse, timer hook).
-- **Next:** S5.2. Your tasks: **User to-do** above.
+- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.3 (sound spec), S3.4 (front-end spec), S3.5 (shell spec), S3.6 (sim flow spec), S3.7 (render3d spec), S3.8 (flight/weapons/AI/detection/damage spec), S3.9 (debrief spec), S3.10 (hand-offs, coverage gate, symbols merge; closing pass: coverage 100 %, all conflicts settled), S4.1 (`f117port/` skeleton: CMake, SDL3 host, mem, VGA, OPL, chain loop with placeholder programs), S4.2 (generated symbol and module headers in `f117port/src/gen/`, symbol pipeline in `PORTING.md`), S5.1 (platform layer in `f117port/src/platform`: loader, RTL, DOS files, keyboard/joystick/mouse, timer hook), S5.2 (video: MGRAPHIC driver, program-side line/palette routines, PIC/PAN/PAL readers in `f117port/src/video`).
+- **Next:** S5.3. Your tasks: **User to-do** above.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -168,7 +169,7 @@ S5.9 sound. Model: S for 5.1–5.5, 5.8, 5.9; O for 5.6, 5.7. Each ends with a U
 | Id | Task | Model | Size |
 |---|---|---|---|
 | S5.1 | Platform layer: RTL pieces, start-up/exit and program loader, memory model, timer hook, keyboard, joystick, mouse, DOS files, overlay chain wiring | S | L | done 2026-10-14 |
-| S5.2 | Video: MGRAPHIC drivers (slots 0-83), palette, picture decoders, text and sprites | S | L |
+| S5.2 | Video: MGRAPHIC drivers (slots 0-83), palette, picture decoders, text and sprites | S | L | done 2026-10-14 · U-video pending |
 | S5.3 | Front end / title screens (SETUP, MPS_LOGO, PLAYER) - **U4 first visible milestone** | S | L |
 | S5.4 | Shell (START, END, DSWAP: menus, roster, mission planning) | S | L |
 | S5.5 | Sim flow with a static 3D view (VGAME frame loop, HUD, MFDs) | S | L |
@@ -199,6 +200,25 @@ Notes:
   `fcb_find` is shell (S5.4); `gfx_line`/`pal_*` are video (S5.2). Deviations marked `PORT:` in the code: joystick counts are
   synthesised from the gamepad (500..1500, no gamepad = FFFFh timeout), `joy_scale` skips the divide by an uncalibrated slope, files
   open read-only where the original used "r+b". No in-window check yet: keys and gamepad can first be seen in S5.3 (U4).
+- S5.2 status (2026-10-14): `f117port/src/video` has the video module; `ctest` 10/10 (new: `video_selftest`, `video_decoders`, `video_screen`), no warnings
+  under `-Wall -Wextra`. **Ported:** all 84 MGRAPHIC slots (text in the 7 fonts read from MGRAPHIC.EXE, blits, line, span fills, tick strip,
+  RLE sprite pool + scaled/mirrored sprites, flip and flag, effects, screen off/on; slot 21 is dead, it is the draw half of 22), the
+  programs' own `gfx_line`, `gfx_fill_rect`, `pal_write_vsync`, `pal_set`, `pal_set_default`, `pal_apply_queue` (START/END/DSWAP tables in
+  `vprog[]`), the .PIC decoder with its layers and four front ends, `.PAL` reader, `.PAN` LZ decoder + cel player. **Left:** VGAME's own
+  `pal_read_dac`/flight palettes (simflow S5.5), `pal_fade*`/`pal_queue_push` (shell/debrief), MPS_LOGO's .SS sprites and PLAYER's streaming
+  ring buffer (frontend S5.3), `pic_hook_nop`. **Tests:** (1) `video_selftest`: 532 scenarios whose hashes come from running the ORIGINAL MGRAPHIC.EXE
+  (and START's `gfx_line`/`pal_write_vsync`) under Unicorn (`port/notes/s52/video_emu.py` -> `src/video/video_vectors.h`): lines, polygon
+  modes, rect copy/recolour, blits (plain and clipped), tick strips, 160 text scenarios over all fonts/variants/clip windows, 24 sprite
+  scenarios (grab, scaled/mirrored/flipped/clipped draw, pool exhaustion), flip/misc/constants, explosion FX, 48 program-side lines, 14 palette
+  writes; all match bit for bit; plus hand checks of `gfx_fill_rect`, `pal_set_default`, `pal_apply_queue`. (2) `video_decoders`
+  (`port/notes/s52/decoder_ref.py`): 52 PIC (also through the four front ends), 13 PAL, 6 PAN (1666 frames, CRC32 per frame), 7 fonts (800
+  glyphs) equal the Phase 2 Python decoders. (3) `video_screen`: `f117 --video-test` composes a screen and writes PNGs to `work/s52/screen`.
+  **Spec corrections** (video.md section 14): text writes the last colour back to `ctx->fg`, sets the driver colour, clips vertically on bytes
+  with a too-tall bottom clip; the tick strip draws a pixel on every row; `line` compares x unsigned, `poly_fill` is a do-while; `flip` takes AX,
+  its flag starts at 1; `page_es` returns ES; the C slots need DS=SS; program-side `gfx_line` is a different (signed, per-pixel clipped) routine; the
+  grey-scale DAC path of `pal_write_vsync` has an index-255 carry bug and an unbalanced stack. **Open:** shake unit and the DAC-13 flash look
+  (`explosion_fx_tick`, U-video cannot show it; needs VGAME); `pal_write_vsync` waits for one retrace per call, the original spreads long writes
+  over several frames (the fade calibration adapts). Wired: `video_init()` in `main`, `gfx_alloc(2)` in `prog.c` (comm+20h).
 - S5.6 render3d test plan (golden frames, 2026-10-13). The leaf routines are already bit-exact against the original
   (`port/notes/s37/R7*_emu.py`, 0 mismatches, re-run by the user); the six routines that call the object renderer
   (DF08, 04DA, DCC0, BD8F, 9ACA, 0CED) are only read. S5.6 closes that gap with whole-frame comparisons:

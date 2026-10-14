@@ -25,6 +25,7 @@
 #include "comm.h"
 #include "host.h"
 #include "mem.h"
+#include "gen/module_video.h"
 #include "platform/platform.h"
 
 const ProgDef prog_table[PROG_COUNT] = {
@@ -106,8 +107,7 @@ int chain_run(const char *f117_tail)
     /* The drivers: MGRAPHIC, the sound driver and MISC are bound (platform.md §6: static C function tables in the
      * port, so nothing is loaded), and comm+20h = the off-screen page, the result of graphics entry 0 (2):
      * 0FA00h bytes = 0FA0h paragraphs. */
-    u16 page_seg;
-    if (!dos_mem_alloc(0x0FA0, &page_seg)) host_fatal("F117.COM: not enough memory for the off-screen page");
+    u16 page_seg = (u16)gfx_alloc(2);                          /* MGRAPHIC slot 0: dies with "Insufficient memory for MCGA graphics" */
     comm_get()->seg_offscreen = page_seg;
     prog_log("[chain] drivers bound (function tables); off-screen page at %04X:0000", page_seg);
 

@@ -12,6 +12,9 @@
  *   --chain-test  run the whole chain with the placeholder programs without waiting, print the trace and
  *                 check it; exits 0 when the sequence was right (needs no game files)
  *   --tick-test   count the timer ticks over MS milliseconds (default 1000), print them and exit
+ *   --video-test  a composed screen (picture, fonts, sprites, lines, palette fade); F117_SNAPSHOT_DIR writes it as PNG
+ *   --video-selftest  the driver primitives against vectors from the original MGRAPHIC under Unicorn (video/videotest.c)
+ *   --decoder-test DIR  every PIC / PAN / PAL / font in --game-dir against the Phase 2 Python decoders' output in DIR (77 = no game files)
  *   --platform-test  headless checks of the platform layer (RTL, DOS files in --game-dir (a scratch folder!), keyboard,
  *                 joystick, timer); --exe-test loads the seven programs from --game-dir and checks their DGROUP (77 = no files)
  * "Sound off" in the launcher is SDL_AUDIO_DRIVER=dummy in the environment. */
@@ -26,6 +29,7 @@
 #include "platform/vga.h"
 #include "programs/placeholder.h"
 #include "prog.h"
+#include "video/video.h"
 
 static int usage(const char *prog)
 {
@@ -62,7 +66,8 @@ static int chain_test(int runs)
 int main(int argc, char **argv)
 {
     HostConfig cfg = { "Game", 3, false, true, false };
-    bool check = false, chain = false, tick = false, ptest = false, etest = false;
+    bool check = false, chain = false, tick = false, ptest = false, etest = false, vtest = false, vself = false;
+    const char *decref = NULL;
     int tick_ms = 1000;
     for (int i = 1; i < argc; i++) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : NULL;
@@ -81,13 +86,16 @@ int main(int argc, char **argv)
         else if (!strcmp(a, "--chain-test")) chain = true;
         else if (!strcmp(a, "--platform-test")) ptest = true;
         else if (!strcmp(a, "--exe-test")) etest = true;
+        else if (!strcmp(a, "--video-test")) vtest = true;
+        else if (!strcmp(a, "--video-selftest")) vself = true;
+        else if (!strcmp(a, "--decoder-test") && v) { decref = v; i++; }
         else if (!strcmp(a, "--tick-test")) {
             tick = true;
             if (v && v[0] != '-') { tick_ms = atoi(v); i++; }
         }
         else return usage(argv[0]);
     }
-    if (check || tick || ptest || etest) cfg.headless = true;
+    if (check || tick || ptest || etest || vself || decref) cfg.headless = true;
     if (host_trace()) prog_trace = true;
     if (chain) prog_trace = true;
 
@@ -108,6 +116,14 @@ int main(int argc, char **argv)
     mem_init_machine();       /* IVT, BIOS data area */
     vga_init();               /* frame source, text mode */
     platform_init();          /* the 70.09 Hz tick -> timer_isr, the keyboard model */
+
+    video_init();             /* the driver's state, the fonts of MGRAPHIC.EXE (silently none without the game files) */
+
+    if (vself || decref || vtest) {
+        int rc = vself ? video_selftest() : decref ? video_decoder_test(decref) : video_screen_test(!cfg.headless);
+        host_shutdown();
+        return rc;
+    }
 
     if (ptest || etest) {
         int rc = ptest ? platform_selftest() : platform_exe_test();

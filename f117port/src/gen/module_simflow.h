@@ -105,22 +105,17 @@ void load_error_msg(const char *msg);
 void load_stflt_3dx(void);
 /* VGAME 0000:097a  spec simflow.md "0000:097A load_theatre_data(void) (V)" */
 void load_theatre_data(void);
-/* VGAME 11ce:0034  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9" */
-void pic_begin(void);
+/* VGAME 11ce:0034  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9": same name as module_video.h, declared there */
 /* VGAME 11ce:012b  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9" */
 void pic_lzw_next(void);
 /* VGAME 11ce:00b2  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9" */
 void pic_rle90_fill(void);
-/* VGAME 11ce:000a  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9" */
-void pic_row(void);
+/* VGAME 11ce:000a  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9": same name as module_video.h, declared there */
 /* VGAME 0000:d7f4  spec simflow.md "0000:d7f4 pic_show(const char *name, int page): h = dos_open" */
 void pic_show(void); /* TODO signature: spec simflow.md "0000:d7f4 pic_show(const char *name, int" (type column: "void(name,page)") */
-/* VGAME 11b9:000e  spec simflow.md "0000:d7f4 pic_show(const char *name, int page): h = dos_open" */
-void pic_to_page(int handle, int page);
-/* VGAME 11b9:0083  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9" */
-void pic_to_seg_a(int handle, u16 seg);
-/* VGAME 11b9:00ee  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9" */
-void pic_to_seg_b(int handle, u16 seg);
+/* VGAME 11b9:000e  spec simflow.md "0000:d7f4 pic_show(const char *name, int page): h = dos_open": same name as module_video.h, declared there */
+/* VGAME 11b9:0083  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9": same name as module_video.h, declared there */
+/* VGAME 11b9:00ee  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9": same name as module_video.h, declared there */
 /* VGAME 0000:00f0  spec simflow.md "0.2 sim_init (00f0) - load order (V)" */
 void sim_init(void);
 

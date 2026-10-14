@@ -320,7 +320,7 @@ end,func,0000:4199,dos_write_far,"int(int fd, unsigned n, unsigned off, unsigned
 end,func,0000:4206,gfx_line,"void(int *page, int x1, int y1, int x2, int y2, int colour)",video,,"Bresenham line into page seg [55D0+2*page], clip x<320 y<168 (A8h), row offsets table DS:2234",platform
 end,func,0000:42be,pal_set_default,void(void),video,bios_vga_palette_2,INT 10/1012: loads 256 DAC entries from DS:1F25,platform
 end,func,0000:42d0,pal_set,void(void *pal),video,,"es=ds; pal_write_vsync(ptr, 0, 256)",platform
-end,func,0000:42e4,pal_write_vsync,"void(void far *rgb, int first, int count)",video,,writes DAC 3C8/3C9 during retrace (3DAh); [0:0489] bit1 set (VGA flag) uses the scaled 6-bit path,platform
+end,func,0000:42e4,pal_write_vsync,"void(void *rgb, int first, int count)",video,,writes DAC 3C8/3C9 during retrace (3DAh); [0:0489] bit1 set (VGA flag) uses the scaled 6-bit path,platform
 end,func,0000:4393,pal_apply_queue,void(void),video,bios_vga_palette,"sets [50CC]=0, waits for the timer ISR flag, then applies queued DAC changes (INT 10/1012, 6-byte records at DS:1EE8, count [1F24])",platform
 end,func,0000:43c6,joy_poll,void(void),platform,,"joy_read_raw() then joy_scale(0), joy_scale(1)",platform
 end,func,0000:43d5,joy_read_raw,void(void),platform,,"game port 201h: write, count loops until axis bits fall (CX max 65535, interrupts off); [23EC]/[23EE] = X/Y counts of stick A, FFFFh on timeout",platform
@@ -532,83 +532,83 @@ end,global,DS:7220,buf_seg,word,debrief,,file buffer segment,debrief
 end,global,DS:7222,comm_ptr,far ptr,debrief,,,debrief
 end,global,DS:7226,spr_removable,word,debrief,,,debrief
 end,global,DS:7228,display_name,char[],debrief,,short rank + name,debrief
-mgraphic,func,019c:019a,text_noclip,"void text_noclip(TextCtx *c, char *s)",video,,"draw string, no clipping; c->x updated to the end x",video
-mgraphic,func,019c:01b3,text_clip_all,"void text_clip_all(TextCtx *c, char *s)",video,,right + left + vertical clip,video
-mgraphic,func,019c:01c7,text_clip_y,"void text_clip_y(TextCtx *c, char *s)",video,,vertical clip only,video
-mgraphic,func,019c:01db,text_clip_xl,"void text_clip_xl(TextCtx *c, char *s)",video,,left clip only,video
-mgraphic,func,019c:01ef,text_clip_xr,"void text_clip_xr(TextCtx *c, char *s)",video,,right clip only,video
-mgraphic,func,019c:0203,text_clip_all_r,"BX=str, BP=TextCtx*",video,,text with right+left+vertical clip; register entry of 9,video
-mgraphic,func,019c:020e,text_clip_xl_r,"BX=str, BP=TextCtx*",video,,text with left clip (xmin); register entry of 8,video
-mgraphic,func,019c:0219,text_clip_xr_r,"BX=str, BP=TextCtx*",video,,text with right clip (xmax); register entry of 10,video
-mgraphic,func,019c:0224,text_clip_y_r,"BX=str, BP=TextCtx*",video,,text with vertical clip (ymin/ymax of ctx); register entry of 7,video
-mgraphic,func,019c:022f,text_noclip_r,"BX=str, BP=TextCtx*",video,,text without clipping; register entry of 5,video
-mgraphic,func,019c:023a,font_char_width,"int font_char_width(int ch, int font)",video,,"advance width incl. spacing, 0 if the glyph does not exist",video
-mgraphic,func,019c:046f,nop,-,video,,retf,video
-mgraphic,func,019c:0470,nop,-,video,,retf,video
-mgraphic,func,019c:0471,nop,-,video,,retf,video
-mgraphic,func,019c:0480,get_page_bytes,-> AX,video,,returns 0FA00h,video
-mgraphic,func,019c:0486,get_page_bytes_b,-> AX,video,,returns 0FA00h,video
-mgraphic,func,019c:048b,get_const_0,-> AX,video,,returns 0,video
-mgraphic,func,019c:0490,get_const_1,-> AX,video,,returns 1,video
-mgraphic,func,019c:04a4,mem_paras_free,-> AX,video,,largest free DOS block in paragraphs (INT 21/48 probe); 0 if none,video
-mgraphic,func,019c:04b6,mode13_set,-,video,,"INT 10h AX=0013h; verifies INT 10h/0Fh = 13h else prints ""MCGA is not supported on your machine"" and exits",video
-mgraphic,func,019c:04ca,screen_off,-,video,,"wait retrace, blank the display (3D8h:=2, sequencer reg1 bit5)",video
-mgraphic,func,019c:04e4,screen_on,-,video,,"wait retrace, unblank (3D8h:=0Ah, sequencer reg1 bit5 cleared)",video
-mgraphic,func,019c:04fe,gfx_alloc,unsigned gfx_alloc(int n),video,,"n=0: returns A000h. else DOS-allocs FA00h bytes (one page), returns its segment; failure prints ""Insufficient memory for MCGA graphics"" and exits",video
-mgraphic,func,019c:0536,palette16_set,void palette16_set(int n),video,,"DAC 0..15 := table n (0..4) via INT 10h/1012h, then screen on (70); not called by the programs",video
-mgraphic,func,019c:055b,color_set,void color_set(int c),video,,current colour := (byte)c,video
-mgraphic,func,019c:0561,color_set_r,AH=colour,video,,current colour := AH,video
-mgraphic,func,019c:056d,nop,-,video,,retf,video
-mgraphic,func,019c:056e,pixel_last,-,video,,plot one pixel at the last line() start point (unused by programs),video
-mgraphic,func,019c:0599,line,AX=x1 BX=y1 CX=x2 DX=y2,video,,"Bresenham line in current colour on draw segment+offset, no clipping",video
-mgraphic,func,019c:071a,hud_tick_strip,"SI=0|2, BX=y, CL=flag, DL=sel",video,,draws a vertical tick scale (HUD tape) at one of 4 fixed columns on the draw segment (see spec),video
-mgraphic,func,019c:0791,page_seg_set_b,"void page_seg_set_b(unsigned seg, int page)",video,,page table[page] := seg (argument order differs from 57),video
-mgraphic,func,019c:07a3,page_select_1,-,video,,draw segment := page table[1],video
-mgraphic,func,019c:07ac,page_select,void page_select(int page),video,,draw segment := page table[page],video
-mgraphic,func,019c:07b2,page_select_r,AX=page,video,,draw segment := page table[AX],video
-mgraphic,func,019c:07c2,nop,-,video,,retf,video
-mgraphic,func,019c:07c3,seg_set,AX=seg,video,,draw segment := AX,video
-mgraphic,func,019c:07c8,seg_get,-> AX,video,,AX := draw segment,video
-mgraphic,func,019c:07cd,offset_clear,-,video,,draw offset := 0 (alias of 25),video
-mgraphic,func,019c:07d5,offset_set,void offset_set(unsigned off),video,,"draw offset := off (used by line, pixel, poly, 48; NOT by text/blits/sprites)",video
-mgraphic,func,019c:07db,offset_set_r,AX=off,video,,draw offset := AX,video
-mgraphic,func,019c:07e0,get_view_off_a,-> AX,video,,returns constant 5580h,video
-mgraphic,func,019c:07e4,get_view_off_b,-> AX,video,,returns constant 1450h,video
-mgraphic,func,019c:07e8,offset_get,-> AX,video,,AX := draw offset,video
-mgraphic,func,019c:07ed,data_cc_set,void data_cc_set(int v),video,,driver data word [00CC] := v (never read),video
-mgraphic,func,019c:07f3,data_cc_set_r,AX=v,video,,driver data word [00CC] := AX (never read),video
-mgraphic,func,019c:07fe,data_ce_set,void data_ce_set(int v),video,,driver data word [00CE] := v (never read),video
-mgraphic,func,019c:0804,data_ce_set_r,AX=v,video,,driver data word [00CE] := AX (never read),video
-mgraphic,func,019c:080f,flip_flag,-> AL,video,,"AL := 1 if the last 44 copied, 0 if it was disabled",video
-mgraphic,func,019c:0814,pixel_offset,"unsigned pixel_offset(int x, int y)",video,,x + y*320,video
-mgraphic,func,019c:0826,get_const_3,-> AX,video,,returns 3,video
-mgraphic,func,019c:09a8,pool_init,-> AX,video,,"take ALL free DOS memory as the sprite pool; AX = base segment, 0 if none",video
-mgraphic,func,019c:09d4,pool_free,-> AX,video,,shrink the pool to what was used (free it if nothing); clears pool state,video
-mgraphic,func,019c:0b0c,sprite_grab,"unsigned sprite_grab(int page, int x, int y, int w, int h)",video,,"RLE-compress a page rectangle into the pool; returns the sprite segment, 0 if the pool is exhausted",video
-mgraphic,func,019c:0b70,sprite_scaled,"RectP *sprite_scaled(SpriteCtx *w, int x, int y, int dw, int dh, unsigned off, unsigned seg)",video,,"clipped scaled/mirrored draw of a pool sprite; returns far ptr to visible rect (x,y,w,h words)",video
-mgraphic,func,019c:0c95,sprite_scaled_r,"BP=SpriteCtx*, DS:SI=sprite, DX=x, DI=y",video,,draw part of 22 (after clip); not called by the programs,video
-mgraphic,func,019c:0e30,blit_key_clip,void blit_key_clip(BlitCtx *b),video,,as 17 but clipped to b->clip,video
-mgraphic,func,019c:0e41,blit_key_clip_r,BP=BlitCtx*,video,,register form of 19,video
-mgraphic,func,019c:0ed5,blit_key,void blit_key(BlitCtx *b),video,,"copy rect from segment b->seg to page b->dpage, source byte 0 = transparent, no clipping",video
-mgraphic,func,019c:0ee6,blit_key_r,BP=BlitCtx*,video,,register form of 17,video
-mgraphic,func,019c:0f3b,poly_fill_solid,AX=ymin BX=tbl CX=ymax,video,,= 37 with mode 0,video
-mgraphic,func,019c:0f3d,poly_fill,AX=ymin BX=tbl CX=ymax DX=mode,video,,"span fill between edge tables; mode 0 solid, 1 OR, 2 AND, else shade 98h+",video
-mgraphic,func,019c:1118,clear_es,ES,video,,zero ES:0000..F9FF,video
-mgraphic,func,019c:1122,clear_screen,-,video,,zero A000:0000..F9FF,video
-mgraphic,func,019c:1131,blit_rect,"void blit_rect(int spage, int sx, int sy, int dpage, int dx, int dy, int w, int h)",video,,"opaque rectangle copy between pages (row by row, no overlap handling)",video
-mgraphic,func,019c:1188,rect_recolor,"void rect_recolor(int *page, int x0, int y0, int x1, int y1, int old, int new)",video,,replace colour old by new inside the rect of page *page,video
-mgraphic,func,019c:11de,page_load,void page_load(unsigned srcseg),video,,"copy 64000 bytes from srcseg to the draw segment (offset 0, ignores draw offset)",video
-mgraphic,func,019c:11f1,flip,AX=words,video,,copy AX words page[1] -> A000 (unless the disable word 019C:11DC is non-zero); sets flag 45,video
-mgraphic,func,019c:1251,shake_set,void shake_set(int frames),video,,shake counter := (byte)frames for 46,video
-mgraphic,func,019c:125c,explosion_fx_tick,-,video,,"per-frame: DAC[13] := random red/yellow, CRTC start-address-low shake while counter 79 > 0",video
-mgraphic,func,019c:12ba,row_offset,DI=y -> AX,video,,AX := y*320,video
-mgraphic,func,019c:12c2,page_seg_set,"void page_seg_set(int page, unsigned seg)",video,,page table[page] := seg,video
-mgraphic,func,019c:12d4,nop,-,video,,retf,video
-mgraphic,func,019c:12d5,page_es,SI=page,video,,ES := page table[SI],video
-mgraphic,func,019c:12dd,nop,-,video,,retf (post-scanline hook of other drivers),video
-mgraphic,func,019c:12de,nop,-,video,,retf,video
-mgraphic,func,019c:12df,nop,-,video,,retf,video
-mgraphic,func,019c:12e0,scanline_put,"ES:DI, SS:BP=320 bytes",video,,copy 320 bytes (160 words) from SS:BP to ES:DI,video
+mgraphic,func,019c:019a,text_noclip,"void(void *c, char *s)",video,,"draw string, no clipping; c->x updated to the end x",video
+mgraphic,func,019c:01b3,text_clip_all,"void(void *c, char *s)",video,,right + left + vertical clip,video
+mgraphic,func,019c:01c7,text_clip_y,"void(void *c, char *s)",video,,vertical clip only,video
+mgraphic,func,019c:01db,text_clip_xl,"void(void *c, char *s)",video,,left clip only,video
+mgraphic,func,019c:01ef,text_clip_xr,"void(void *c, char *s)",video,,right clip only,video
+mgraphic,func,019c:0203,text_clip_all_r,"void(void *c, char *s)",video,,text with right+left+vertical clip; register entry of 9,video
+mgraphic,func,019c:020e,text_clip_xl_r,"void(void *c, char *s)",video,,text with left clip (xmin); register entry of 8,video
+mgraphic,func,019c:0219,text_clip_xr_r,"void(void *c, char *s)",video,,text with right clip (xmax); register entry of 10,video
+mgraphic,func,019c:0224,text_clip_y_r,"void(void *c, char *s)",video,,text with vertical clip (ymin/ymax of ctx); register entry of 7,video
+mgraphic,func,019c:022f,text_noclip_r,"void(void *c, char *s)",video,,text without clipping; register entry of 5,video
+mgraphic,func,019c:023a,font_char_width,"int(int ch, int font)",video,,"advance width incl. spacing, 0 if the glyph does not exist",video
+mgraphic,func,019c:046f,nop,void(void),video,,retf,video
+mgraphic,func,019c:0470,nop,void(void),video,,retf,video
+mgraphic,func,019c:0471,nop,void(void),video,,retf,video
+mgraphic,func,019c:0480,get_page_bytes,unsigned(void),video,,returns 0FA00h,video
+mgraphic,func,019c:0486,get_page_bytes_b,unsigned(void),video,,returns 0FA00h,video
+mgraphic,func,019c:048b,get_const_0,int(void),video,,returns 0,video
+mgraphic,func,019c:0490,get_const_1,int(void),video,,returns 1,video
+mgraphic,func,019c:04a4,mem_paras_free,unsigned(void),video,,largest free DOS block in paragraphs (INT 21/48 probe); 0 if none,video
+mgraphic,func,019c:04b6,mode13_set,void(void),video,,"INT 10h AX=0013h; verifies INT 10h/0Fh = 13h else prints ""MCGA is not supported on your machine"" and exits",video
+mgraphic,func,019c:04ca,screen_off,void(void),video,,"wait retrace, blank the display (3D8h:=2, sequencer reg1 bit5)",video
+mgraphic,func,019c:04e4,screen_on,void(void),video,,"wait retrace, unblank (3D8h:=0Ah, sequencer reg1 bit5 cleared)",video
+mgraphic,func,019c:04fe,gfx_alloc,unsigned(int n),video,,"n=0: returns A000h. else DOS-allocs FA00h bytes (one page), returns its segment; failure prints ""Insufficient memory for MCGA graphics"" and exits",video
+mgraphic,func,019c:0536,palette16_set,void(int n),video,,"DAC 0..15 := table n (0..4) via INT 10h/1012h, then screen on (70); not called by the programs",video
+mgraphic,func,019c:055b,color_set,void(int c),video,,current colour := (byte)c,video
+mgraphic,func,019c:0561,color_set_r,void(int c),video,,current colour := AH,video
+mgraphic,func,019c:056d,nop,void(void),video,,retf,video
+mgraphic,func,019c:056e,pixel_last,void(void),video,,plot one pixel at the last line() start point (unused by programs),video
+mgraphic,func,019c:0599,line,"void(int x1, int y1, int x2, int y2)",video,,"Bresenham line in current colour on draw segment+offset, no clipping",video
+mgraphic,func,019c:071a,hud_tick_strip,"void(int si, int bx, int cl, int dl)",video,,draws a vertical tick scale (HUD tape) at one of 4 fixed columns on the draw segment (see spec),video
+mgraphic,func,019c:0791,page_seg_set_b,"void(unsigned seg, int page)",video,,page table[page] := seg (argument order differs from 57),video
+mgraphic,func,019c:07a3,page_select_1,void(void),video,,draw segment := page table[1],video
+mgraphic,func,019c:07ac,page_select,void(int page),video,,draw segment := page table[page],video
+mgraphic,func,019c:07b2,page_select_r,void(int page),video,,draw segment := page table[AX],video
+mgraphic,func,019c:07c2,nop,void(void),video,,retf,video
+mgraphic,func,019c:07c3,seg_set,void(unsigned seg),video,,draw segment := AX,video
+mgraphic,func,019c:07c8,seg_get,unsigned(void),video,,AX := draw segment,video
+mgraphic,func,019c:07cd,offset_clear,void(void),video,,draw offset := 0 (alias of 25),video
+mgraphic,func,019c:07d5,offset_set,void(unsigned off),video,,"draw offset := off (used by line, pixel, poly, 48; NOT by text/blits/sprites)",video
+mgraphic,func,019c:07db,offset_set_r,void(unsigned off),video,,draw offset := AX,video
+mgraphic,func,019c:07e0,get_view_off_a,unsigned(void),video,,returns constant 5580h,video
+mgraphic,func,019c:07e4,get_view_off_b,unsigned(void),video,,returns constant 1450h,video
+mgraphic,func,019c:07e8,offset_get,unsigned(void),video,,AX := draw offset,video
+mgraphic,func,019c:07ed,data_cc_set,void(int v),video,,driver data word [00CC] := v (never read),video
+mgraphic,func,019c:07f3,data_cc_set_r,void(int v),video,,driver data word [00CC] := AX (never read),video
+mgraphic,func,019c:07fe,data_ce_set,void(int v),video,,driver data word [00CE] := v (never read),video
+mgraphic,func,019c:0804,data_ce_set_r,void(int v),video,,driver data word [00CE] := AX (never read),video
+mgraphic,func,019c:080f,flip_flag,int(void),video,,"AL := 1 if the last 44 copied, 0 if it was disabled",video
+mgraphic,func,019c:0814,pixel_offset,"unsigned(int x, int y)",video,,x + y*320,video
+mgraphic,func,019c:0826,get_const_3,int(void),video,,returns 3,video
+mgraphic,func,019c:09a8,pool_init,unsigned(void),video,,"take ALL free DOS memory as the sprite pool; AX = base segment, 0 if none",video
+mgraphic,func,019c:09d4,pool_free,unsigned(void),video,,shrink the pool to what was used (free it if nothing); clears pool state,video
+mgraphic,func,019c:0b0c,sprite_grab,"unsigned(int page, int x, int y, int w, int h)",video,,"RLE-compress a page rectangle into the pool; returns the sprite segment, 0 if the pool is exhausted",video
+mgraphic,func,019c:0b70,sprite_scaled,"s16 *(void *w, int x, int y, int dw, int dh, unsigned off, unsigned seg)",video,,"clipped scaled/mirrored draw of a pool sprite; returns far ptr to visible rect (x,y,w,h words)",video
+mgraphic,func,019c:0c95,sprite_scaled_r,"BP=SpriteCtx*, DS:SI=sprite, DX=x, DI=y",video,,"dead: draw half of slot 22, not called by the programs (kept inside sprite_scaled)",video
+mgraphic,func,019c:0e30,blit_key_clip,void(void *b),video,,as 17 but clipped to b->clip,video
+mgraphic,func,019c:0e41,blit_key_clip_r,void(void *b),video,,register form of 19,video
+mgraphic,func,019c:0ed5,blit_key,void(void *b),video,,"copy rect from segment b->seg to page b->dpage, source byte 0 = transparent, no clipping",video
+mgraphic,func,019c:0ee6,blit_key_r,void(void *b),video,,register form of 17,video
+mgraphic,func,019c:0f3b,poly_fill_solid,"void(int ymin, void *tbl, int ymax)",video,,= 37 with mode 0,video
+mgraphic,func,019c:0f3d,poly_fill,"void(int ymin, void *tbl, int ymax, int mode)",video,,"span fill between edge tables; mode 0 solid, 1 OR, 2 AND, else shade 98h+",video
+mgraphic,func,019c:1118,clear_es,void(unsigned es),video,,zero ES:0000..F9FF,video
+mgraphic,func,019c:1122,clear_screen,void(void),video,,zero A000:0000..F9FF,video
+mgraphic,func,019c:1131,blit_rect,"void(int spage, int sx, int sy, int dpage, int dx, int dy, int w, int h)",video,,"opaque rectangle copy between pages (row by row, no overlap handling)",video
+mgraphic,func,019c:1188,rect_recolor,"void(int *page, int x0, int y0, int x1, int y1, int oldc, int newc)",video,,replace colour old by new inside the rect of page *page,video
+mgraphic,func,019c:11de,page_load,void(unsigned srcseg),video,,"copy 64000 bytes from srcseg to the draw segment (offset 0, ignores draw offset)",video
+mgraphic,func,019c:11f1,flip,void(int words),video,,copy AX words page[1] -> A000 (unless the disable word 019C:11DC is non-zero); sets flag 45,video
+mgraphic,func,019c:1251,shake_set,void(int frames),video,,shake counter := (byte)frames for 46,video
+mgraphic,func,019c:125c,explosion_fx_tick,void(void),video,,"per-frame: DAC[13] := random red/yellow, CRTC start-address-low shake while counter 79 > 0",video
+mgraphic,func,019c:12ba,row_offset,unsigned(int y),video,,AX := y*320,video
+mgraphic,func,019c:12c2,page_seg_set,"void(int page, unsigned seg)",video,,page table[page] := seg,video
+mgraphic,func,019c:12d4,nop,void(void),video,,retf,video
+mgraphic,func,019c:12d5,page_es,unsigned(int page),video,,ES := page table[SI],video
+mgraphic,func,019c:12dd,nop,void(void),video,,retf (post-scanline hook of other drivers),video
+mgraphic,func,019c:12de,nop,void(void),video,,retf,video
+mgraphic,func,019c:12df,nop,void(void),video,,retf,video
+mgraphic,func,019c:12e0,scanline_put,"void(unsigned es, unsigned di, void *src)",video,,copy 320 bytes (160 words) from SS:BP to ES:DI,video
 misc,func,0007:0000,getche_misc,int getche(void),frontend,,slot 92: INT 21h AH=1; AX returned as DOS leaves it (AH not cleared) - see frontend.md 6,frontend
 misc,func,0007:0005,kbd_get_misc,int kbd_get(void),frontend,,slot 91: INT 16h AH=0 -> scan:ascii,frontend
 misc,func,0007:000a,kbd_empty_misc,int kbd_empty(void),frontend,,slot 90: INT 16h AH=1 -> 0 if a key is waiting else FFFFh,frontend
@@ -1093,7 +1093,7 @@ start,func,0000:81ff,dos_write_far,"int(int fd, unsigned n, unsigned off, unsign
 start,func,0000:826c,pal_select,void(int n),shell,,"library: copies palette n (n clamped to 8, 768 bytes each) from far [D092] (palettes.pal) into pal_cur 64E3; used by ui_show_screen",shell
 start,func,0000:829a,gfx_line,"void(int *page, int x1, int y1, int x2, int y2, int colour)",video,,,platform
 start,func,0000:8364,pal_set,void(void *pal),video,,,platform
-start,func,0000:8378,pal_write_vsync,"void(void far *rgb, int first, int count)",video,,,platform
+start,func,0000:8378,pal_write_vsync,"void(void *rgb, int first, int count)",video,,,platform
 start,func,0000:8427,pal_apply_queue,void(void),video,bios_vga_palette,,platform
 start,func,0000:845a,joy_poll,void(void),platform,,,platform
 start,func,0000:8469,joy_read_raw,void(void),platform,,,platform
@@ -1108,17 +1108,17 @@ start,func,0000:85f8,break_isr,void(void),platform,,,platform
 start,func,0000:8607,bios_timer,unsigned(void),platform,,,platform
 start,func,0000:860e,ovl_bind,void(unsigned seg),platform,,,platform
 start,func,0000:8667,dos_freemem_chk,void(unsigned seg),platform,,,platform
-start,func,0000:86a8,pic_to_page,"void pic_to_page(int fh, int page)",video,,"decode a .PIC into page `page` (slots 56/59, rows via 51+53); reader callback 81C6",video
-start,func,0000:871a,pic_to_seg_a,"void pic_to_seg_a(int fh, unsigned seg)",video,,decode a .PIC into segment (rows via 51+55),video
-start,func,0000:8782,pic_to_seg_b,"void pic_to_seg_b(int fh, unsigned seg)",video,,"as above, reader 819D with buffer pos 200h",video
-start,func,0000:87f6,pic_to_seg_c,"void pic_to_seg_c(int fh, unsigned seg)",video,,"as above, rows via 52+54",video
+start,func,0000:86a8,pic_to_page,"void(int fh, int page)",video,,"decode a .PIC into page `page` (slots 56/59, rows via 51+53); reader callback 81C6",video
+start,func,0000:871a,pic_to_seg_a,"void(int fh, unsigned seg)",video,,decode a .PIC into segment (rows via 51+55),video
+start,func,0000:8782,pic_to_seg_b,"void(unsigned buf_seg, unsigned seg)",video,,"as above, reader 819D with buffer pos 200h",video
+start,func,0000:87f6,pic_to_seg_c,"void(int fh, unsigned seg)",video,,"as above, rows via 52+54",video
 start,func,0000:885e,pic_hook_nop,void pic_hook_nop(void),shell,,1-byte ret called once at the start of every pic_to_* decoder (S3.10 mapped it to a VGAME stub: corrected S3.10b),shell
-start,func,0000:885f,pic_row,void pic_row(int row),video,,decode 320 pixels into the row buffer (DS:8C20),video
-start,func,0000:8889,pic_begin,void pic_begin(void),video,,"read header byte, maxbits, pixel width; LZW reset",video
-start,func,0000:88d4,lzw_reset,void lzw_reset(void),video,,"width 9, free 256, clears the 2048-entry table",video
-start,func,0000:890a,rle90_fill,void rle90_fill(unsigned n),video,,RLE-90 expander; writes n pixels (nibbles x2 when 4-bit),video
-start,func,0000:8983,lzw_next,int lzw_next(void),video,,"next decoded byte; private stack for the string, reload via callback at [8D6A]",video
-start,func,0000:8a32,gfx_fill_rect,"void gfx_fill_rect(Win *w, int x0, int y0, int x1, int y1)",video,,"solid rect via edge tables + slot 40; saves/restores the draw segment; w->page, w->colour at +4",video
+start,func,0000:885f,pic_row,void(int row),video,,decode 320 pixels into the row buffer (DS:8C20),video
+start,func,0000:8889,pic_begin,void(void),video,,"read header byte, maxbits, pixel width; LZW reset",video
+start,func,0000:88d4,lzw_reset,void(void),video,,"width 9, free 256, clears the 2048-entry table",video
+start,func,0000:890a,rle90_fill,void(unsigned n),video,,RLE-90 expander; writes n pixels (nibbles x2 when 4-bit),video
+start,func,0000:8983,lzw_next,int(void),video,,"next decoded byte; private stack for the string, reload via callback at [8D6A]",video
+start,func,0000:8a32,gfx_fill_rect,"void(void *w, int x0, int y0, int x1, int y1)",video,,"solid rect via edge tables + slot 40; saves/restores the draw segment; w->page, w->colour at +4",video
 start,func,0000:8aa0,edge_table_clear,void edge_table_clear(void),shell,,"(= END 0000:4a40, byte-shape copy; partner in debrief_symbols.csv)",shell
 start,func,0000:8ad1,fill_rows2_near,void fill_rows2_near(...),shell,,"(= VGAME 1001:02ba, byte-shape copy; partner in render3d_symbols.csv)",shell
 start,func,0000:8b3e,mem_zero,"void(void *dst, unsigned n)",platform,,,platform
@@ -1848,7 +1848,7 @@ vgame,func,1433:0554,math_muldiv,"int16 far math_muldiv(int16 a,int16 b,int16 c)
 vgame,func,1433:058f,math_div32sat,"int16 far math_div32sat(uint16 lo,int16 hi,int16 d)",render3d,,"[Part 6] dead: (hi:lo)/|d|, saturate +-7FFFh by sign(hi) if 2(|hi|+1)>|d|; guard wraps for hi=7FFFh/8000h",render3d
 vgame,func,1433:05c6,math_imul,"int32 far math_imul(int16 a,int16 b)",render3d,,[Part 6] dead: DX:AX=a*b,render3d
 vgame,func,1433:05d1,mat_from_euler_b,"void far mat_from_euler_b(uint16 p6,uint16 p8,uint16 pA,int16 out[9])",render3d,,[Part 6] dead: other Euler order; really ends at 06FC (index size short),render3d
-vgame,func,14a2:000e,pal_write_vsync,"void(void far *rgb, int first, int count)",video,,writes DAC 3C8/3C9 during retrace (3DAh); [0:0489] bit1 set (VGA flag) uses the scaled 6-bit path,platform
+vgame,func,14a2:000e,pal_write_vsync,"void(void *rgb, int first, int count)",video,,writes DAC 3C8/3C9 during retrace (3DAh); [0:0489] bit1 set (VGA flag) uses the scaled 6-bit path,platform
 vgame,func,14a2:00c5,pal_read_dac,void(void far *dst),simflow,,"wait retrace, read 768 bytes of DAC from index 0 into dst (6-bit)",simflow
 vgame,global,14b2:0000,math_tab_sin,uint16[2048],render3d,,"[Part 6] round(32767*sin(i*pi/4096)), quadrant",render3d
 vgame,global,14b2:1000,math_tab_atan,uint16[4096],render3d,,[Part 6] trunc(atan(i/4096)*32768/pi),render3d

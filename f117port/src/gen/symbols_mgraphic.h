@@ -60,7 +60,7 @@
 /* 019c:09d4  pool_free                      video      video.md "7 RLE sprites and the pool (slots 22, 76-78, 77, 21) ? verif" */
 /* 019c:0b0c  sprite_grab                    video      video.md "7 RLE sprites and the pool (slots 22, 76-78, 77, 21) ? verif" */
 /* 019c:0b70  sprite_scaled                  video      video.md "Key findings" */
-/* 019c:0c95  sprite_scaled_r                video      video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
+/* 019c:0c95  sprite_scaled_r                video      video.md "13 Slot table (generated: python tools/video_syms.py ? work/"  DEAD */
 /* 019c:0e30  blit_key_clip                  video      video.md "8 Key-colour blits, mode, blanking, palette, effects" */
 /* 019c:0e41  blit_key_clip_r                video      video.md "13 Slot table (generated: python tools/video_syms.py ? work/" */
 /* 019c:0ed5  blit_key                       video      video.md "Key findings" */
