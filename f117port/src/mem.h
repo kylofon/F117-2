@@ -79,7 +79,9 @@ void dos_arena_reset(u16 psp_seg, u16 psp_paras);     /* the PSP block (psp_para
 bool dos_mem_alloc(u16 paras, u16 *seg_or_largest);   /* AH=48h: false = CF (value = largest block) */
 bool dos_mem_free(u16 seg);                           /* AH=49h */
 bool dos_mem_resize(u16 seg, u16 paras, u16 *largest);/* AH=4Ah */
-u16  dos_mem_largest(void);                           /* AH=48h BX=FFFFh result */
+u16  dos_mem_largest(void);
+extern u16 dos_owner;                                 /* owner (PSP segment) recorded in the MCB of new blocks */
+void dos_mem_free_owned(u16 owner);                   /* INT 21h/4Ch: free every block of a terminated program */                           /* AH=48h BX=FFFFh result */
 
 /* Interrupt vector table entries (INT 21h 25h/35h). */
 static inline FarPtr ivt_get(u8 n) { return far_rd(0, (u16)(n * 4)); }

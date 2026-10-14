@@ -14,6 +14,7 @@
 #include "comm.h"
 #include "host.h"
 #include "mem.h"
+#include "platform/platform.h"
 #include "platform/timer.h"
 #include "platform/vga.h"
 #include "prog.h"
@@ -29,7 +30,7 @@ static void key_isr(u8 xt)
 
 void placeholder_init(void)
 {
-    host_set_kbd_handler(key_isr);
+    kbd_set_observer(key_isr);
 }
 
 static void screen(int number)

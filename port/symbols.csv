@@ -138,7 +138,7 @@ dswap,func,0000:0506,dos_freemem,int(unsigned seg),platform,dos_freemem_2,,platf
 dswap,func,0000:0523,break_hook_install,void(void),platform,dos_setvect,,platform
 dswap,func,0000:0546,break_hook_remove,void(void),platform,dos_setvect_2,,platform
 dswap,func,0000:0557,ivt_read,unsigned long(int off /*SI*/),platform,,,platform
-dswap,func,0000:0563,break_isr,void interrupt(void),platform,,,platform
+dswap,func,0000:0563,break_isr,void(void),platform,,,platform
 dswap,func,0000:0599,dos_open,"int(char *name, int mode)",platform,,,platform
 dswap,func,0000:05f0,dos_creat,"int(char *name, int attr)",platform,,,platform
 dswap,func,0000:0647,dos_close,void(int fd),platform,dos_close_2,,platform
@@ -325,7 +325,7 @@ end,func,0000:4393,pal_apply_queue,void(void),video,bios_vga_palette,"sets [50CC
 end,func,0000:43c6,joy_poll,void(void),platform,,"joy_read_raw() then joy_scale(0), joy_scale(1)",platform
 end,func,0000:43d5,joy_read_raw,void(void),platform,,"game port 201h: write, count loops until axis bits fall (CX max 65535, interrupts off); [23EC]/[23EE] = X/Y counts of stick A, FFFFh on timeout",platform
 end,func,0000:441d,joy_scale,void(int axis /*SI*/),platform,,"raw count -> byte [23F4+axis]: 0..7F below centre, 80..FF above; tracks min/max in the calibration table [23C4..23E4]",platform
-end,func,0000:448e,joy_set_calib,void(void far *tbl),platform,,copies 20 words (40 bytes) to the calibration table DS:23C4 (comm block +48h),platform
+end,func,0000:448e,joy_set_calib,void(const void *tbl),platform,,copies 20 words (40 bytes) to the calibration table DS:23C4 (comm block +48h),platform
 end,func,0000:44a4,mouse_button,int(int n),platform,,returns [23F8] (n=0 left) or [23F9] (right),platform
 end,func,0000:44b9,mouse_poll,void(void),platform,mouse_reset,"INT 33/03: [7214]=x/2, [7216]=y, [23F8]/[23F9] = left/right pressed",platform
 end,func,0000:44e7,mouse_init,void(void),platform,mouse_reset_2,"INT 33/00, range x 0..280h y 0..C7h (07/08), ratio 8:16 (0F), position (04) from [7214],[7216]",platform
@@ -334,7 +334,7 @@ end,func,0000:452c,dist_approx,"int(int x1, int y1, int x2, int y2)",platform,,"
 end,func,0000:4557,break_hook_install,void(void),platform,dos_setvect,"saves vector INT 1Bh (read from IVT 0:006C) in [2609], installs break_isr (INT 21/25)",platform
 end,func,0000:457a,break_hook_remove,void(void),platform,dos_setvect_2,restores INT 1Bh from [2609],platform
 end,func,0000:458b,ivt_read,unsigned long(int off /*SI*/),platform,,"reads the vector at 0:SI -> BX=off, AX=seg",platform
-end,func,0000:4597,break_isr,void interrupt(void),platform,,"INT 1Bh handler: [2608] = 1 (polled by the game loop, which then exits)",platform
+end,func,0000:4597,break_isr,void(void),platform,,"INT 1Bh handler: [2608] = 1 (polled by the game loop, which then exits)",platform
 end,func,0000:45a6,bios_timer,unsigned(void),platform,,"INT 1A/00, returns the low word of the BIOS tick count",platform
 end,func,0000:45ad,ovl_bind,void(unsigned seg),platform,,fills the 5-byte JMP FAR stubs from the driver header at seg (RE_GUIDE 2.3): stub = table + 5*(hdr[1C]+i); table is DS:23FA in END,platform
 end,func,0000:4606,dos_freemem_chk,void(unsigned seg),platform,,INT 21/49; on failure prints a message (INT 21/09) and exits 4C00,platform
@@ -357,7 +357,7 @@ end,func,0000:4b0c,mem_copy,"void(void *src, void *dst, unsigned n)",platform,,"
 end,func,0000:4b26,mem_copy_w,"void(void *src, void *dst, unsigned nwords)",platform,,rep movsw,platform
 end,func,0000:4b40,mem_fill,"void(void *dst, int val, unsigned n)",platform,,"rep stosb but AL is cleared first (xor al,al): ALWAYS fills 0, val ignored (original quirk)",platform
 end,func,0000:4b5a,mem_fill_w,"void(void *dst, int val, unsigned nwords)",platform,,rep stosw with val,platform
-end,func,0000:4b72,str_copy_far,"void(char *dst, char far *src)",platform,,copies up to and including the NUL; ES must equal DS (caller),platform
+end,func,0000:4b72,str_copy_far,"void(char *dst, const char *src)",platform,,copies up to and including the NUL; ES must equal DS (caller),platform
 end,func,0000:4b8c,timer_install,void(void),platform,,"sets [50D8]=1,[50E2]=1,[50CE:50D0]=0, calls timer_calibrate, saves INT 8 in cs:4C51 and installs timer_isr (cs:4BEC); [50CB]=1",platform
 end,func,0000:4bca,timer_remove,void(void),platform,dos_setvect_4,"PIT ch0 back to mode 3 count 0 (18.2 Hz), restores INT 8; [50CB]=0",platform
 end,func,0000:4cbc,timer_calibrate,void(void),platform,,"measures PIT counts per vertical retrace (16 samples via pit_read), derives the retrace rate (4..6 -> 56..70 Hz class else fallback 5) and the PIT reload [50D4]/[50D2], tick divisor [50D8]",platform
@@ -385,7 +385,7 @@ end,func,0000:52ca,srand,void(unsigned seed),platform,,[5158:515A] = seed,platfo
 end,func,0000:52dc,rand,int(void),platform,,seed = seed*343FDh + 269EC3h; returns (seed>>16)&7FFF,platform
 end,func,0000:5302,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,MSC long divide (C operator `/` on longs),platform
 end,func,0000:539c,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,MSC long multiply (operator `*`),platform
-end,func,0000:53ce,rtl_aFlshr,"long(long ax, cl)",platform,,"sar dx:ax, cl (operator `>>` on long)",platform
+end,func,0000:53ce,rtl_aFlshr,"long(long a, int n)",platform,,"sar dx:ax, cl (operator `>>` on long)",platform
 end,func,0000:53da,rtl_FF_MSGBANNER,void(void),platform,,"writes message 252 (""\r\nrun-time error ""), calls hook [515C], writes message 255",platform
 end,func,0000:5400,rtl_nullcheck,int(void),platform,,"xor-sums DS:0..41h and compares with 55h (""NULL assignment"" check at exit); mismatch prints the banner",platform
 end,func,0000:5422,rtl_NMSG_TEXT,char *(int msgno),platform,,looks msgno up in the table at DS:535E,platform
@@ -666,7 +666,7 @@ mps_logo,func,0146:02ba,rtl_fclose_core,int(FILE *f),frontend,,"(= START 9164 rt
 mps_logo,func,0146:0374,rtl_fsopen,"FILE *(char *name, char *mode, int shflag)",frontend,,"(= START 9212 rtl_fsopen, large-model variant)",frontend
 mps_logo,func,0146:03a0,fopen,"FILE *(char *name, char *mode)",frontend,,"(= START 923A fopen, large-model variant)",frontend
 mps_logo,func,0146:03b6,fread,"unsigned(void *buf, unsigned size, unsigned n, FILE *f)",platform,,,platform
-mps_logo,func,0146:049a,fwrite,"unsigned fwrite(void *buf, unsigned size, unsigned n, FILE *f)",frontend,,"(= START 932E fwrite, large-model variant); reached only from the dead file_copy",frontend
+mps_logo,func,0146:049a,fwrite,"unsigned fwrite(void *buf, unsigned size, unsigned n, FILE *f)",frontend,,"dead: reached only from the dead file_copy; (= START 932E fwrite, large-model variant)",frontend
 mps_logo,func,0146:05a0,printf,"int(char *fmt, ...)",platform,,,platform
 mps_logo,func,0146:05de,strcat,"char *(char *d, char *s)",platform,,,platform
 mps_logo,func,0146:061e,strcpy,"char *(char *d, char *s)",platform,,,platform
@@ -863,11 +863,11 @@ setup,func,0000:0bfb,dos_freemem_chk,void(unsigned seg),frontend,,"(= PLAYER 000
 setup,func,0000:0c35,break_hook_install,void(void),platform,dos_setvect,,platform
 setup,func,0000:0c58,break_hook_remove,void(void),platform,dos_setvect_2,,platform
 setup,func,0000:0c69,ivt_read,unsigned long(int off /*SI*/),platform,,,platform
-setup,func,0000:0c75,break_isr,void interrupt(void),platform,,,platform
+setup,func,0000:0c75,break_isr,void(void),platform,,,platform
 setup,func,0000:0c84,fcb_find,int(void),platform,,,platform
-setup,func,0000:0cb2,ui_load_file_near,"unsigned(char *name, void *buf)",frontend,,"(= START 0000:289a, byte-shape copy; partner in shell_symbols.csv)",frontend
-setup,func,0000:0ce5,ui_load_file_far,"unsigned(char *name, unsigned off, unsigned seg)",frontend,,"(= START 0000:2864, byte-shape copy; partner in shell_symbols.csv)",frontend
-setup,func,0000:0d1b,save_file_far,"unsigned save_file_far(char *name, ...)",frontend,,"(= END 0000:10c1, byte-shape copy; partner in debrief_symbols.csv)",frontend
+setup,func,0000:0cb2,ui_load_file_near,"unsigned(char *name, void *buf)",frontend,,"dead: (= START 0000:289a, byte-shape copy; partner in shell_symbols.csv)",frontend
+setup,func,0000:0ce5,ui_load_file_far,"unsigned(char *name, unsigned off, unsigned seg)",frontend,,"dead: (= START 0000:2864, byte-shape copy; partner in shell_symbols.csv)",frontend
+setup,func,0000:0d1b,save_file_far,"unsigned save_file_far(char *name, ...)",frontend,,"dead: (= END 0000:10c1, byte-shape copy; partner in debrief_symbols.csv)",frontend
 setup,func,0000:0d53,file_open,"int(char *name, int mode)",frontend,,dead: wrapper of dos_open 0DC7,frontend
 setup,func,0000:0d65,file_creat,"int(char *name, int attr)",frontend,,dead: wrapper of dos_creat 0E1E (the only file-creating code in SETUP),frontend
 setup,func,0000:0d77,file_close,void(int fd),frontend,,dead: wrapper of dos_close 0E75,frontend
@@ -921,7 +921,7 @@ setup,func,0000:17b0,rand,int(void),platform,,,platform
 setup,func,0000:17d6,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,,platform
 setup,func,0000:1870,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,,platform
 setup,func,0000:18a2,rtl_aFlrem,"long rtl_aFlrem(long a, long b) /*pascal*/",frontend,,dead: signed long remainder (sibling of rtl_aFldiv 17D6),frontend
-setup,func,0000:1942,rtl_aFlshr,"long(long ax, cl)",platform,,,platform
+setup,func,0000:1942,rtl_aFlshr,"long(long a, int n)",platform,,,platform
 setup,func,0000:194e,ldiv_assign,"void(long *p, long d) /*pascal*/",frontend,,dead: *p /= d through rtl_aFldiv,frontend
 setup,func,0000:196e,rtl_FF_MSGBANNER,void(void),platform,,,platform
 setup,func,0000:1994,rtl_nullcheck,int(void),platform,,,platform
@@ -946,7 +946,7 @@ setup,func,0237:004d,joy_calib_track,void joy_calib_track(void),frontend,,"joy_r
 setup,func,0237:005c,joy_read_raw,void(void),platform,,,platform
 setup,func,0237:00a4,joy_scale,void(int axis /*SI*/),platform,,,platform
 setup,func,0237:0115,joy_calib_get,void joy_calib_get(uint16_t far dst[20]),frontend,,copies the 28h-byte calibration block (DS:0DF4) to comm+48h,frontend
-setup,func,0237:0127,joy_set_calib,void(void far *tbl),platform,,,platform
+setup,func,0237:0127,joy_set_calib,void(const void *tbl),platform,,,platform
 start,func,0000:0010,ui_main,void ui_main(void),shell,,"shell main: init, (removed quiz call), pilot save, arming roll, ready room, save temp.wld, exit(0Ch/0Dh by site[E062].hi&2)",shell
 start,func,0000:008d,roster_home_card_draw,void(void),shell,,"hook of homescrn: rank+surname, theatre, war, mission type, skill, crash, flight model, rating",shell
 start,func,0000:020f,ui_ready_room,void(void),shell,,"homescrn loop, 5 hotspots (tbl 6F42) -> orders 5BF0 / briefing 0FA3 / arming 0963 / roster 623E / hangar 038C",shell
@@ -1098,13 +1098,13 @@ start,func,0000:8427,pal_apply_queue,void(void),video,bios_vga_palette,,platform
 start,func,0000:845a,joy_poll,void(void),platform,,,platform
 start,func,0000:8469,joy_read_raw,void(void),platform,,,platform
 start,func,0000:84b1,joy_scale,void(int axis /*SI*/),platform,,,platform
-start,func,0000:851a,joy_set_calib,void(void far *tbl),platform,,,platform
+start,func,0000:851a,joy_set_calib,void(const void *tbl),platform,,,platform
 start,func,0000:8530,mouse_button,int(int n),platform,,,platform
 start,func,0000:8545,mouse_poll,void(void),platform,mouse_reset,,platform
 start,func,0000:8573,mouse_init,void(void),platform,mouse_reset_2,,platform
 start,func,0000:85a7,mouse_set_pos,void(void),platform,mouse_reset_3,,platform
 start,func,0000:85db,break_hook_remove,void(void),platform,dos_setvect_2,,platform
-start,func,0000:85f8,break_isr,void interrupt(void),platform,,,platform
+start,func,0000:85f8,break_isr,void(void),platform,,,platform
 start,func,0000:8607,bios_timer,unsigned(void),platform,,,platform
 start,func,0000:860e,ovl_bind,void(unsigned seg),platform,,,platform
 start,func,0000:8667,dos_freemem_chk,void(unsigned seg),platform,,,platform
@@ -1169,10 +1169,10 @@ start,func,0000:96bc,srand,void(unsigned seed),platform,,,platform
 start,func,0000:96ce,rand,int(void),platform,,,platform
 start,func,0000:96f4,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,,platform
 start,func,0000:978e,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,,platform
-start,func,0000:97c0,rtl_aFlshl,"long(long ax, cl)",platform,,,platform
-start,func,0000:97cc,rtl_aFlshr,"long(long ax, cl)",platform,,,platform
+start,func,0000:97c0,rtl_aFlshl,"long(long a, int n)",platform,,,platform
+start,func,0000:97cc,rtl_aFlshr,"long(long a, int n)",platform,,,platform
 start,func,0000:97d8,rtl_lshl_mem,"void(long *p, int n)",platform,,,platform
-start,func,0000:97f4,rtl_aFulshr,"long(long ax, cl)",platform,,,platform
+start,func,0000:97f4,rtl_aFulshr,"unsigned long(unsigned long a, int n)",platform,,,platform
 start,func,0000:9800,rtl_FF_MSGBANNER,void(void),platform,,,platform
 start,func,0000:9826,rtl_nullcheck,int(void),platform,,,platform
 start,func,0000:9848,rtl_NMSG_TEXT,char *(int msgno),platform,,,platform
@@ -1439,7 +1439,7 @@ vgame,func,0000:1b1b,r3d_sprite_tv,"void near(int16 x,int16 y,int16 size,int16 c
 vgame,func,0000:1b60,break_hook_install,void(void),platform,dos_setvect,"saves vector INT 1Bh (read from IVT 0:006C) in [2609], installs break_isr (INT 21/25)",platform
 vgame,func,0000:1b83,break_hook_remove,void(void),platform,dos_setvect_2,restores INT 1Bh from [2609],platform
 vgame,func,0000:1b94,ivt_read,unsigned long(int off /*SI*/),platform,,"reads the vector at 0:SI -> BX=off, AX=seg",platform
-vgame,func,0000:1ba0,break_isr,void interrupt(void),platform,,"INT 1Bh handler: [2608] = 1 (polled by the game loop, which then exits)",platform
+vgame,func,0000:1ba0,break_isr,void(void),platform,,"INT 1Bh handler: [2608] = 1 (polled by the game loop, which then exits)",platform
 vgame,func,0000:1bb0,frame_loop,void(void),simflow,,saves bp si di es and calls frame_loop_body,simflow
 vgame,func,0000:1bbc,frame_loop_body,void(void),simflow,,"THE frame loop: 2F82,7898,[C07A]==0:(10A8:0000,D9A3,17A3),flip,[262A]=1,1E9E,39C4 until [E552]",simflow
 vgame,func,0000:1bfc,timer_install,void(void),simflow,,"[2636]=[2640]=1, clock=0, timer_calibrate, save INT 8 in cs:1CEB, install timer_isr, [262B]=1",simflow
@@ -1662,12 +1662,12 @@ vgame,func,0000:f360,bios_keyboard,int(int cmd),platform,,INT 16h (MPS_LOGO/PLAY
 vgame,func,0000:f384,dos_freemem,int(unsigned seg),platform,,INT 21/49,platform
 vgame,func,0000:f392,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,MSC long divide (C operator `/` on longs),platform
 vgame,func,0000:f42c,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,MSC long multiply (operator `*`),platform
-vgame,func,0000:f45e,rtl_aFlshl,"long(long ax, cl)",platform,,"shl dx:ax, cl (operator `<<` on long)",platform
-vgame,func,0000:f46a,rtl_aFlshr,"long(long ax, cl)",platform,,"sar dx:ax, cl (operator `>>` on long)",platform
+vgame,func,0000:f45e,rtl_aFlshl,"long(long a, int n)",platform,,"shl dx:ax, cl (operator `<<` on long)",platform
+vgame,func,0000:f46a,rtl_aFlshr,"long(long a, int n)",platform,,"sar dx:ax, cl (operator `>>` on long)",platform
 vgame,func,0000:f476,rtl_lshl_mem,"void(long *p, int n)",platform,,*p <<= n,platform
 vgame,func,0000:f492,rtl_aFlshr_mem,"void(long *p,int n)",lib,,"*p = rtl_aFlshr(*p,n) (in-place arithmetic shift right); partner of f476",simflow
 vgame,func,0000:f4ae,rtl_aFuldiv,"u32(u32 a,u32 b)",lib,,unsigned 32/32 divide helper,simflow
-vgame,func,0000:f50e,rtl_aFulshr,"long(long ax, cl)",platform,,"shr dx:ax, cl (unsigned long `>>`)",platform
+vgame,func,0000:f50e,rtl_aFulshr,"unsigned long(unsigned long a, int n)",platform,,"shr dx:ax, cl (unsigned long `>>`)",platform
 vgame,func,0000:f51a,rtl_FF_MSGBANNER,void(void),platform,,"writes message 252 (""\r\nrun-time error ""), calls hook [515C], writes message 255",platform
 vgame,func,0000:f540,rtl_nullcheck,int(void),platform,,"xor-sums DS:0..41h and compares with 55h (""NULL assignment"" check at exit); mismatch prints the banner",platform
 vgame,func,0000:f562,rtl_NMSG_TEXT,char *(int msgno),platform,,looks msgno up in the table at DS:535E,platform

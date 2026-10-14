@@ -2,7 +2,7 @@ exe,kind,address,name,type,owner,other_names,notes
 vgame,func,0000:1b60,break_hook_install,void(void),platform,dos_setvect,"saves vector INT 1Bh (read from IVT 0:006C) in [2609], installs break_isr (INT 21/25)"
 vgame,func,0000:1b83,break_hook_remove,void(void),platform,dos_setvect_2,restores INT 1Bh from [2609]
 vgame,func,0000:1b94,ivt_read,unsigned long(int off /*SI*/),platform,,"reads the vector at 0:SI -> BX=off, AX=seg"
-vgame,func,0000:1ba0,break_isr,void interrupt(void),platform,,"INT 1Bh handler: [2608] = 1 (polled by the game loop, which then exits)"
+vgame,func,0000:1ba0,break_isr,void(void),platform,,"INT 1Bh handler: [2608] = 1 (polled by the game loop, which then exits)"
 vgame,func,0000:1d76,timer_calibrate,void(void),platform,,"measures PIT counts per vertical retrace (16 samples via pit_read), derives the retrace rate (4..6 -> 56..70 Hz class else fallback 5) and the PIT reload [50D4]/[50D2], tick divisor [50D8]"
 vgame,func,0000:1e60,bios_timer,unsigned(void),platform,bios_timer,"INT 1A/00, returns the low word of the BIOS tick count"
 vgame,func,0000:ebb4,c0_start,void(void),platform,,"MSC c0: DOS>=2 check, SS=DGROUP, stack size from PSP[2], INT 21/4A shrink, BSS clear (5438..7250), _cinit, main(argc,argv,envp) at 0000:0010, exit(); carries the divide-error ISR at 4E8A = _amsg_exit(3) target"
@@ -35,10 +35,10 @@ vgame,func,0000:f360,bios_keyboard,int(int cmd),platform,bios_keyboard,INT 16h (
 vgame,func,0000:f384,dos_freemem,int(unsigned seg),platform,dos_freemem,INT 21/49
 vgame,func,0000:f392,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,MSC long divide (C operator `/` on longs)
 vgame,func,0000:f42c,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,MSC long multiply (operator `*`)
-vgame,func,0000:f45e,rtl_aFlshl,"long(long ax, cl)",platform,,"shl dx:ax, cl (operator `<<` on long)"
-vgame,func,0000:f46a,rtl_aFlshr,"long(long ax, cl)",platform,,"sar dx:ax, cl (operator `>>` on long)"
+vgame,func,0000:f45e,rtl_aFlshl,"long(long a, int n)",platform,,"shl dx:ax, cl (operator `<<` on long)"
+vgame,func,0000:f46a,rtl_aFlshr,"long(long a, int n)",platform,,"sar dx:ax, cl (operator `>>` on long)"
 vgame,func,0000:f476,rtl_lshl_mem,"void(long *p, int n)",platform,,*p <<= n
-vgame,func,0000:f50e,rtl_aFulshr,"long(long ax, cl)",platform,,"shr dx:ax, cl (unsigned long `>>`)"
+vgame,func,0000:f50e,rtl_aFulshr,"unsigned long(unsigned long a, int n)",platform,,"shr dx:ax, cl (unsigned long `>>`)"
 vgame,func,0000:f51a,rtl_FF_MSGBANNER,void(void),platform,,"writes message 252 (""\r\nrun-time error ""), calls hook [515C], writes message 255"
 vgame,func,0000:f540,rtl_nullcheck,int(void),platform,,"xor-sums DS:0..41h and compares with 55h (""NULL assignment"" check at exit); mismatch prints the banner"
 vgame,func,0000:f562,rtl_NMSG_TEXT,char *(int msgno),platform,,looks msgno up in the table at DS:535E
@@ -93,13 +93,13 @@ start,func,0000:8427,pal_apply_queue,void(void),video,bios_vga_palette,
 start,func,0000:845a,joy_poll,void(void),platform,,
 start,func,0000:8469,joy_read_raw,void(void),platform,,
 start,func,0000:84b1,joy_scale,void(int axis /*SI*/),platform,,
-start,func,0000:851a,joy_set_calib,void(void far *tbl),platform,,
+start,func,0000:851a,joy_set_calib,void(const void *tbl),platform,,
 start,func,0000:8530,mouse_button,int(int n),platform,,
 start,func,0000:8545,mouse_poll,void(void),platform,mouse_reset,
 start,func,0000:8573,mouse_init,void(void),platform,mouse_reset_2,
 start,func,0000:85a7,mouse_set_pos,void(void),platform,mouse_reset_3,
 start,func,0000:85db,break_hook_remove,void(void),platform,dos_setvect_2,
-start,func,0000:85f8,break_isr,void interrupt(void),platform,,
+start,func,0000:85f8,break_isr,void(void),platform,,
 start,func,0000:8607,bios_timer,unsigned(void),platform,bios_timer,
 start,func,0000:860e,ovl_bind,void(unsigned seg),platform,,
 start,func,0000:8667,dos_freemem_chk,void(unsigned seg),platform,,
@@ -141,10 +141,10 @@ start,func,0000:96bc,srand,void(unsigned seed),platform,,
 start,func,0000:96ce,rand,int(void),platform,,
 start,func,0000:96f4,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,
 start,func,0000:978e,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,
-start,func,0000:97c0,rtl_aFlshl,"long(long ax, cl)",platform,,
-start,func,0000:97cc,rtl_aFlshr,"long(long ax, cl)",platform,,
+start,func,0000:97c0,rtl_aFlshl,"long(long a, int n)",platform,,
+start,func,0000:97cc,rtl_aFlshr,"long(long a, int n)",platform,,
 start,func,0000:97d8,rtl_lshl_mem,"void(long *p, int n)",platform,,
-start,func,0000:97f4,rtl_aFulshr,"long(long ax, cl)",platform,,
+start,func,0000:97f4,rtl_aFulshr,"unsigned long(unsigned long a, int n)",platform,,
 start,func,0000:9800,rtl_FF_MSGBANNER,void(void),platform,,
 start,func,0000:9826,rtl_nullcheck,int(void),platform,,
 start,func,0000:9848,rtl_NMSG_TEXT,char *(int msgno),platform,,
@@ -205,7 +205,7 @@ end,func,0000:4393,pal_apply_queue,void(void),video,bios_vga_palette,"sets [50CC
 end,func,0000:43c6,joy_poll,void(void),platform,,"joy_read_raw() then joy_scale(0), joy_scale(1)"
 end,func,0000:43d5,joy_read_raw,void(void),platform,,"game port 201h: write, count loops until axis bits fall (CX max 65535, interrupts off); [23EC]/[23EE] = X/Y counts of stick A, FFFFh on timeout"
 end,func,0000:441d,joy_scale,void(int axis /*SI*/),platform,,"raw count -> byte [23F4+axis]: 0..7F below centre, 80..FF above; tracks min/max in the calibration table [23C4..23E4]"
-end,func,0000:448e,joy_set_calib,void(void far *tbl),platform,,copies 20 words (40 bytes) to the calibration table DS:23C4 (comm block +48h)
+end,func,0000:448e,joy_set_calib,void(const void *tbl),platform,,copies 20 words (40 bytes) to the calibration table DS:23C4 (comm block +48h)
 end,func,0000:44a4,mouse_button,int(int n),platform,,returns [23F8] (n=0 left) or [23F9] (right)
 end,func,0000:44b9,mouse_poll,void(void),platform,mouse_reset,"INT 33/03: [7214]=x/2, [7216]=y, [23F8]/[23F9] = left/right pressed"
 end,func,0000:44e7,mouse_init,void(void),platform,mouse_reset_2,"INT 33/00, range x 0..280h y 0..C7h (07/08), ratio 8:16 (0F), position (04) from [7214],[7216]"
@@ -214,7 +214,7 @@ end,func,0000:452c,dist_approx,"int(int x1, int y1, int x2, int y2)",platform,,"
 end,func,0000:4557,break_hook_install,void(void),platform,dos_setvect,"saves vector INT 1Bh (read from IVT 0:006C) in [2609], installs break_isr (INT 21/25)"
 end,func,0000:457a,break_hook_remove,void(void),platform,dos_setvect_2,restores INT 1Bh from [2609]
 end,func,0000:458b,ivt_read,unsigned long(int off /*SI*/),platform,,"reads the vector at 0:SI -> BX=off, AX=seg"
-end,func,0000:4597,break_isr,void interrupt(void),platform,,"INT 1Bh handler: [2608] = 1 (polled by the game loop, which then exits)"
+end,func,0000:4597,break_isr,void(void),platform,,"INT 1Bh handler: [2608] = 1 (polled by the game loop, which then exits)"
 end,func,0000:45a6,bios_timer,unsigned(void),platform,bios_timer,"INT 1A/00, returns the low word of the BIOS tick count"
 end,func,0000:45ad,ovl_bind,void(unsigned seg),platform,,fills the 5-byte JMP FAR stubs from the driver header at seg (RE_GUIDE 2.3): stub = table + 5*(hdr[1C]+i); table is DS:23FA in END
 end,func,0000:4606,dos_freemem_chk,void(unsigned seg),platform,,INT 21/49; on failure prints a message (INT 21/09) and exits 4C00
@@ -224,7 +224,7 @@ end,func,0000:4b0c,mem_copy,"void(void *src, void *dst, unsigned n)",platform,,"
 end,func,0000:4b26,mem_copy_w,"void(void *src, void *dst, unsigned nwords)",platform,,rep movsw
 end,func,0000:4b40,mem_fill,"void(void *dst, int val, unsigned n)",platform,,"rep stosb but AL is cleared first (xor al,al): ALWAYS fills 0, val ignored (original quirk)"
 end,func,0000:4b5a,mem_fill_w,"void(void *dst, int val, unsigned nwords)",platform,,rep stosw with val
-end,func,0000:4b72,str_copy_far,"void(char *dst, char far *src)",platform,,copies up to and including the NUL; ES must equal DS (caller)
+end,func,0000:4b72,str_copy_far,"void(char *dst, const char *src)",platform,,copies up to and including the NUL; ES must equal DS (caller)
 end,func,0000:4b8c,timer_install,void(void),platform,,"sets [50D8]=1,[50E2]=1,[50CE:50D0]=0, calls timer_calibrate, saves INT 8 in cs:4C51 and installs timer_isr (cs:4BEC); [50CB]=1"
 end,func,0000:4bca,timer_remove,void(void),platform,dos_setvect_4,"PIT ch0 back to mode 3 count 0 (18.2 Hz), restores INT 8; [50CB]=0"
 end,func,0000:4cbc,timer_calibrate,void(void),platform,,"measures PIT counts per vertical retrace (16 samples via pit_read), derives the retrace rate (4..6 -> 56..70 Hz class else fallback 5) and the PIT reload [50D4]/[50D2], tick divisor [50D8]"
@@ -252,7 +252,7 @@ end,func,0000:52ca,srand,void(unsigned seed),platform,,[5158:515A] = seed
 end,func,0000:52dc,rand,int(void),platform,,seed = seed*343FDh + 269EC3h; returns (seed>>16)&7FFF
 end,func,0000:5302,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,MSC long divide (C operator `/` on longs)
 end,func,0000:539c,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,MSC long multiply (operator `*`)
-end,func,0000:53ce,rtl_aFlshr,"long(long ax, cl)",platform,,"sar dx:ax, cl (operator `>>` on long)"
+end,func,0000:53ce,rtl_aFlshr,"long(long a, int n)",platform,,"sar dx:ax, cl (operator `>>` on long)"
 end,func,0000:53da,rtl_FF_MSGBANNER,void(void),platform,,"writes message 252 (""\r\nrun-time error ""), calls hook [515C], writes message 255"
 end,func,0000:5400,rtl_nullcheck,int(void),platform,,"xor-sums DS:0..41h and compares with 55h (""NULL assignment"" check at exit); mismatch prints the banner"
 end,func,0000:5422,rtl_NMSG_TEXT,char *(int msgno),platform,,looks msgno up in the table at DS:535E
@@ -289,7 +289,7 @@ setup,func,0000:0ba2,ovl_bind,void(unsigned seg),platform,,
 setup,func,0000:0c35,break_hook_install,void(void),platform,dos_setvect,
 setup,func,0000:0c58,break_hook_remove,void(void),platform,dos_setvect_2,
 setup,func,0000:0c69,ivt_read,unsigned long(int off /*SI*/),platform,,
-setup,func,0000:0c75,break_isr,void interrupt(void),platform,,
+setup,func,0000:0c75,break_isr,void(void),platform,,
 setup,func,0000:0c84,fcb_find,int(void),platform,,
 setup,func,0000:0dc7,dos_open,"int(char *name, int mode)",platform,dos_open,
 setup,func,0000:0e1e,dos_creat,"int(char *name, int attr)",platform,dos_creat,
@@ -316,7 +316,7 @@ setup,func,0000:179e,srand,void(unsigned seed),platform,,
 setup,func,0000:17b0,rand,int(void),platform,,
 setup,func,0000:17d6,rtl_aFldiv,"long(long a, long b) /*pascal*/",platform,,
 setup,func,0000:1870,rtl_aFlmul,"long(long a, long b) /*pascal*/",platform,,
-setup,func,0000:1942,rtl_aFlshr,"long(long ax, cl)",platform,,
+setup,func,0000:1942,rtl_aFlshr,"long(long a, int n)",platform,,
 setup,func,0000:196e,rtl_FF_MSGBANNER,void(void),platform,,
 setup,func,0000:1994,rtl_nullcheck,int(void),platform,,
 setup,func,0000:19b6,rtl_setargv,void(void),platform,,
@@ -331,7 +331,7 @@ setup,func,0000:1d69,rtl_nmalloc,void *(unsigned n),platform,,
 setup,func,0000:1d92,rtl_nh_search,internal,platform,,
 setup,func,0237:005c,joy_read_raw,void(void),platform,,
 setup,func,0237:00a4,joy_scale,void(int axis /*SI*/),platform,,
-setup,func,0237:0127,joy_set_calib,void(void far *tbl),platform,,
+setup,func,0237:0127,joy_set_calib,void(const void *tbl),platform,,
 player,func,0000:0f32,mouse_button,int(int n),platform,,
 player,func,0000:0f6c,ovl_bind,void(unsigned seg),platform,,
 player,func,0000:0fc5,dos_freemem_chk,void(unsigned seg),platform,,
@@ -396,7 +396,7 @@ dswap,func,0000:0506,dos_freemem,int(unsigned seg),platform,dos_freemem_2,
 dswap,func,0000:0523,break_hook_install,void(void),platform,dos_setvect,
 dswap,func,0000:0546,break_hook_remove,void(void),platform,dos_setvect_2,
 dswap,func,0000:0557,ivt_read,unsigned long(int off /*SI*/),platform,,
-dswap,func,0000:0563,break_isr,void interrupt(void),platform,,
+dswap,func,0000:0563,break_isr,void(void),platform,,
 dswap,func,0000:0599,dos_open,"int(char *name, int mode)",platform,dos_open,
 dswap,func,0000:05f0,dos_creat,"int(char *name, int attr)",platform,dos_creat,
 dswap,func,0000:0647,dos_close,void(int fd),platform,dos_close_2,

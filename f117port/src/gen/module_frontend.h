@@ -193,7 +193,7 @@ void rtl_dosmaperr_al(unsigned char al);
 void rtl_sig_lookup_mps_logo(void); /* TODO signature: spec frontend.md "8.4.3 C runtime (mapped to platform.md)" (type column: "void far") */
 /* PLAYER 0000:257b  spec frontend.md "8.3.4 RTL and library pieces (live, mapped)" */
 void rtl_sig_lookup_player(void);
-/* DSWAP 0000:045b; SETUP 0000:0d1b  spec frontend.md "(no heading)" */
+/* DSWAP 0000:045b  spec frontend.md "(no heading)" */
 void save_file_far(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "unsigned save_file_far(char *name, ...)") */
 /* PLAYER 0000:0db0  spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)": same name as module_video.h, declared there */
 /* PLAYER 0000:0dca  spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)": same name as module_video.h, declared there */
@@ -249,9 +249,9 @@ void tick_callback(void); /* TODO signature: spec frontend.md "8.3.3 Input, vide
 /* PLAYER 026b:004d  spec frontend.md "8.3.3 Input, video, break handler, timer (live)": same name as module_platform.h, declared there */
 /* PLAYER 026b:0336  spec frontend.md "8.3.3 Input, video, break handler, timer (live)" */
 void timer_step(void); /* TODO signature: spec frontend.md "8.3.3 Input, video, break handler, timer" (type column: "void far timer_step(void)") */
-/* DSWAP 0000:033e; SETUP 0000:0ce5  spec frontend.md "(no heading)" */
+/* DSWAP 0000:033e  spec frontend.md "(no heading)" */
 unsigned ui_load_file_far(char *name, unsigned off, unsigned seg);
-/* DSWAP 0000:0374; SETUP 0000:0cb2  spec frontend.md "8.4.3 C runtime (mapped to platform.md)" */
+/* DSWAP 0000:0374  spec frontend.md "8.4.3 C runtime (mapped to platform.md)" */
 unsigned ui_load_file_near(char *name, void *buf);
 /* SETUP 0000:0582  spec frontend.md "(no heading)" */
 void ui_text(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void(TextCtx *c, char *s, int x, int y)") */
@@ -298,6 +298,9 @@ void wait_ticks(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, 
 /* DEAD SETUP 0000:0811 ui_text_width */
 /* DEAD SETUP 0000:0851 fmt_long_commas */
 /* DEAD SETUP 0000:0979 fmt_int_commas */
+/* DEAD SETUP 0000:0cb2 ui_load_file_near */
+/* DEAD SETUP 0000:0ce5 ui_load_file_far */
+/* DEAD SETUP 0000:0d1b save_file_far */
 /* DEAD SETUP 0000:0d53 file_open */
 /* DEAD SETUP 0000:0d65 file_creat */
 /* DEAD SETUP 0000:0d77 file_close */

@@ -22,8 +22,8 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 
 ## Status
 
-- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.3 (sound spec), S3.4 (front-end spec), S3.5 (shell spec), S3.6 (sim flow spec), S3.7 (render3d spec), S3.8 (flight/weapons/AI/detection/damage spec), S3.9 (debrief spec), S3.10 (hand-offs, coverage gate, symbols merge; closing pass: coverage 100 %, all conflicts settled), S4.1 (`f117port/` skeleton: CMake, SDL3 host, mem, VGA, OPL, chain loop with placeholder programs), S4.2 (generated symbol and module headers in `f117port/src/gen/`, symbol pipeline in `PORTING.md`).
-- **Next:** S5.1. Your tasks: **User to-do** above.
+- **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.3 (sound spec), S3.4 (front-end spec), S3.5 (shell spec), S3.6 (sim flow spec), S3.7 (render3d spec), S3.8 (flight/weapons/AI/detection/damage spec), S3.9 (debrief spec), S3.10 (hand-offs, coverage gate, symbols merge; closing pass: coverage 100 %, all conflicts settled), S4.1 (`f117port/` skeleton: CMake, SDL3 host, mem, VGA, OPL, chain loop with placeholder programs), S4.2 (generated symbol and module headers in `f117port/src/gen/`, symbol pipeline in `PORTING.md`), S5.1 (platform layer in `f117port/src/platform`: loader, RTL, DOS files, keyboard/joystick/mouse, timer hook).
+- **Next:** S5.2. Your tasks: **User to-do** above.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -165,7 +165,40 @@ Order: S5.1 platform → S5.2 video → S5.3 front end/title (**U4 first visible
 → S5.5 sim flow with a static 3D view → S5.6 render3d → S5.7 flight/weapons/AI → S5.8 debrief →
 S5.9 sound. Model: S for 5.1–5.5, 5.8, 5.9; O for 5.6, 5.7. Each ends with a U6 playtest request.
 
+| Id | Task | Model | Size |
+|---|---|---|---|
+| S5.1 | Platform layer: RTL pieces, start-up/exit and program loader, memory model, timer hook, keyboard, joystick, mouse, DOS files, overlay chain wiring | S | L | done 2026-10-14 |
+| S5.2 | Video: MGRAPHIC drivers (slots 0-83), palette, picture decoders, text and sprites | S | L |
+| S5.3 | Front end / title screens (SETUP, MPS_LOGO, PLAYER) - **U4 first visible milestone** | S | L |
+| S5.4 | Shell (START, END, DSWAP: menus, roster, mission planning) | S | L |
+| S5.5 | Sim flow with a static 3D view (VGAME frame loop, HUD, MFDs) | S | L |
+| S5.6 | Render3d (object renderer, polygon clipper, golden-frame tests below) | O | L |
+| S5.7 | Flight, weapons, AI, detection, damage | O | L |
+| S5.8 | Debrief | S | M |
+| S5.9 | Sound (AdLib driver, sound poll in the tick) | S | M |
+
 Notes:
+- S5.1 status (2026-10-14): `f117port/src/platform` has the platform layer; `ctest` 7/7 (new: `platform`, 326 checks; `exe_load`, 31
+  checks on the real programs, skipped with code 77 when `Game/` is absent), no warnings under `-Wall -Wextra`. 85 of the 119
+  platform-owner prototypes are ported (the rest is libc, see PORTING.md "Platform layer"). **What it does:** `platform_exec()` is
+  the INT 21h/4Bh of F117.COM (wired into `prog_run`): unpacks the LZEXE image from the game folder, relocates it into `mem[]` at
+  PSP+10h, sets `cur_dgroup`, the stack/near-heap model and the per-program offsets of the library state (rand seed, break flag,
+  joystick table, mouse words, decoder buffer: `ProgDs` in `startup.c`), runs `<name>_main`, and `exit_fn(n)` from any depth ends the
+  program (longjmp); at exit the program's DOS blocks and handles are freed, timer hook and INT 9 hook removed. Without game files
+  (the placeholder chain test) it runs without an image. **Bit-exact** against the original code under Unicorn
+  (`port/notes/s51/platform_emu.py` -> `selftest_vectors.h`): rand/srand/rand_n (6 seeds), dist_approx (51 cases), `rtl_aFldiv/aFlmul/aFlshl/aFlshr/aFulshr`,
+  `joy_scale` incl. the learning of min/max/slope. Loader check: the xor-sum of DS:0..41h is 55h for all seven programs.
+  **Findings:** (1) DGROUP is NOT the EXE header's SS (that is a separate stack segment after the image); it is the `mov di,imm16`
+  at the entry point (END 5FA, SETUP 24C, MPS_LOGO 332, PLAYER 2A3, START A95, VGAME 1E23, DSWAP 225). (2) VGAME's rand seed is DS:926E
+  (platform.md quoted END's 5158); the other seeds: SETUP 0EB4, START AE8C. (3) `rand_n` zero-extends its argument (negative n = 65536+n).
+  (4) `file_load_paras` chunk bug: only the THIRD and later 0FFFFh chunks are misplaced (chunk 2 at seg:FFFF happens to be contiguous);
+  the test keeps it. (5) The break-flag byte is 1 in END/START and FFh in SETUP/DSWAP/VGAME. **Hand-offs:** keypad_stick_*
+  (flight, S5.7) use `kbd_set_int9_hook()`; MISC slots 90/91/93 (frontend) are `kbd_key_waiting/kbd_key_get/joy_port_201`;
+  `file_load_paras` (simflow) calls `platform_load_file_paras`; per-program ISR bodies (frame counter, 7th-tick skip, `[3660]`
+  estimator, sound poll) go in via `timer_set_hook(); timer_install();` and call their sub-ticks themselves (class 4 = 4 per retrace);
+  `fcb_find` is shell (S5.4); `gfx_line`/`pal_*` are video (S5.2). Deviations marked `PORT:` in the code: joystick counts are
+  synthesised from the gamepad (500..1500, no gamepad = FFFFh timeout), `joy_scale` skips the divide by an uncalibrated slope, files
+  open read-only where the original used "r+b". No in-window check yet: keys and gamepad can first be seen in S5.3 (U4).
 - S5.6 render3d test plan (golden frames, 2026-10-13). The leaf routines are already bit-exact against the original
   (`port/notes/s37/R7*_emu.py`, 0 mismatches, re-run by the user); the six routines that call the object renderer
   (DF08, 04DA, DCC0, BD8F, 9ACA, 0CED) are only read. S5.6 closes that gap with whole-frame comparisons:

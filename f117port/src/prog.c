@@ -25,6 +25,7 @@
 #include "comm.h"
 #include "host.h"
 #include "mem.h"
+#include "platform/platform.h"
 
 const ProgDef prog_table[PROG_COUNT] = {
     [PROG_SETUP]    = { "SETUP.EXE",    setup_main },
@@ -55,7 +56,7 @@ int prog_run(ProgId id, const char *tail)
 {
     prog_log("[chain] EXEC %-12s tail \"%s\"", prog_table[id].exe, tail);
     prog_run_count[id]++;
-    int code = prog_table[id].main(tail);
+    int code = platform_exec(id, prog_table[id].main, tail);
     prog_log("[chain]   %s exit code %02Xh", prog_table[id].exe, code);
     return code;
 }

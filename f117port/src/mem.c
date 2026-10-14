@@ -7,6 +7,7 @@
 u8 mem[MEM_SIZE];
 u16 cur_dgroup;
 u16 dg_sp;
+u16 dos_owner = PSP_SEG;
 
 u16 stk_alloc(u16 bytes)
 {
@@ -88,7 +89,7 @@ bool dos_mem_alloc(u16 paras, u16 *seg_or_largest)
                     mcb_set((u16)(m + 1 + paras), c.type, 0, (u16)(c.size - paras - 1));
                     c.type = 'M';
                 }
-                mcb_set(m, c.type, PSP_SEG, paras);
+                mcb_set(m, c.type, dos_owner, paras);
                 *seg_or_largest = (u16)(m + 1);
                 return true;
             }
@@ -142,4 +143,16 @@ u16 dos_mem_largest(void)
     u16 v;
     if (dos_mem_alloc(0xFFFF, &v)) host_fatal("DOS arena: 0FFFFh paragraphs allocated?");
     return v;
+}
+
+/* INT 21h/4Ch: DOS frees every block the terminating process owns (S5.1: prog_image_free). */
+void dos_mem_free_owned(u16 owner)
+{
+    for (u16 m = MCB_FIRST;;) {
+        Mcb c = mcb_get(m);
+        mcb_check(m, c);
+        if (c.owner == owner) mcb_set(m, c.type, 0, c.size);
+        if (c.type == 'Z') break;
+        m = (u16)(m + 1 + c.size);
+    }
 }

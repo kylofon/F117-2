@@ -89,6 +89,40 @@ report (`check_missing_files`). Developer aids (environment, `host.h`): `F117_SN
 presented frames as PNG, `F117_KEYS` scripts XT key presses, `F117_TRACE=1` logs program switches. Throwaway
 verification programs go in your scratch area; do not create HTML pages.
 
+## Platform layer (`src/platform`, S5.1)
+
+Spec `port/spec/platform.md`; prototypes in `gen/module_platform.h`, the port's own API in `platform/platform.h`.
+
+```
+exeload.c    LZEXE 0.91 / MZ reader and the DOS loader: PSP, image at PSP+10h, relocations, DGROUP (the `mov di,imm16` of the
+             c0 start-up, NOT the EXE header's SS), BSS zero. Blocks are owned by the program and freed at exit
+startup.c    platform_exec() = INT 21h/4Bh + c0_start + exit(): exit_fn() anywhere ends the program with its code (longjmp);
+             per-program DGROUP offsets of the library state (ProgDs: rand seed, break flag, joystick table, mouse, decoder
+             buffer); the near heap in DGROUP (offsets, rtl_malloc_ds); run-time error messages R60xx
+rtl.c        mem_*/str*/movedata (forward copies, mem_fill zero quirk), rand/srand/rand_n (exact LCG), the long helpers,
+             dist_approx, the 8086 DIV rules (rtl_div32_16 -> R6003)
+dosio.c      INT 21h file/memory wrappers (fatal on error, case-insensitive names under --game-dir), the 512-byte decoder
+             buffer, platform_load_file_paras (simflow.md 2 chunk bug), low-level open/read/write with text mode
+kbd.c        BIOS INT 9 / INT 16h model on the XT byte stream; kbd_set_int9_hook() = a program's own INT 9 handler
+input.c      joystick (gamepad -> synthetic 201h counts -> the original joy_scale incl. its learning), mouse, Ctrl-Break
+timer.c      tick source, BIOS clock 0040:006C, timer_set_hook/timer_install/timer_remove
+selftest.c   --platform-test (scratch --game-dir!) and --exe-test (reads Game/); vectors from the ORIGINAL code under
+             Unicorn: `python port/notes/s51/platform_emu.py` writes selftest_vectors.h
+```
+
+Rules for the modules that follow:
+
+* Pointer arguments of the platform routines are host pointers into `mem[]` (`DSP(off)`, `mp(seg, off)`); `ds_off(p)` goes back.
+* A program body is `int <name>_main(const char *tail)`; `exit_fn(n)` from any depth ends it (do not call `exit()`).
+  Programs install what the original installs and remove it: `timer_set_hook(body); timer_install(); ... timer_remove();`,
+  `break_hook_install()/remove()`, `kbd_set_int9_hook(h)` (VGAME's keypad-as-stick ISR, flight.md 2.4: reads `raw`, the BIOS
+  part runs after it). The chain removes them at program exit anyway.
+* The keyboard words are `scan << 8 | ascii`; `bios_keyboard()` returns a 16-bit `int` (F-keys above 8000h are negative, as in the
+  original). The MISC slots 90/91 are `kbd_key_waiting()` / `kbd_key_get()`, slot 93 is `joy_port_201()`.
+* Not ported (platform.md section 7): the MSC stdio/printf internals (`rtl_output*`, `rtl_stbuf`, `rtl_flsbuf` ...: use libc
+  `snprintf`), `int86` (every call site becomes a host call), `rtl_nh_*`/`rtl_chkstk`/`rtl_initterm*`. `fcb_find` belongs to the
+  shell (S5.4).
+
 ## Symbol pipeline (`src/gen/`)
 
 The names and addresses of the original come from the specs, not from memory. Pipeline:

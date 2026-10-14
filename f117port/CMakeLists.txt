@@ -56,6 +56,14 @@ add_test(NAME tick_rate COMMAND f117 --headless --tick-test 1000)
 set_tests_properties(tick_rate PROPERTIES PASS_REGULAR_EXPRESSION "ticks in 1000 ms: (6[4-9]|7[0-2]) ")
 add_test(NAME check_missing_files COMMAND f117 --check --game-dir ${CMAKE_CURRENT_BINARY_DIR})
 set_tests_properties(check_missing_files PROPERTIES WILL_FAIL TRUE)
+# The platform layer (src/platform, S5.1): RTL against vectors computed from the original under Unicorn
+# (port/notes/s51/platform_emu.py), DOS files in a scratch folder, keyboard scan codes, joystick scaling, timer; and the
+# loader on the real programs in ../Game (skipped, code 77, when the game files are not there).
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/platform_test_dir)
+add_test(NAME platform COMMAND f117 --headless --platform-test --game-dir ${CMAKE_CURRENT_BINARY_DIR}/platform_test_dir)
+set_tests_properties(platform PROPERTIES PASS_REGULAR_EXPRESSION "platform-test OK")
+add_test(NAME exe_load COMMAND f117 --headless --exe-test --game-dir ${CMAKE_CURRENT_SOURCE_DIR}/../Game)
+set_tests_properties(exe_load PROPERTIES SKIP_RETURN_CODE 77)
 
 # The generated headers are current: the generators re-run in memory and fail on any difference (tools/gen_*.py).
 find_package(Python3 COMPONENTS Interpreter)

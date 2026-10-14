@@ -19,7 +19,7 @@ void break_hook_install(void);
 /* DSWAP 0000:0546; END 0000:457a; SETUP 0000:0c58; START 0000:85db; VGAME 0000:1b83  spec platform.md "(no heading)" */
 void break_hook_remove(void);
 /* DSWAP 0000:0563; END 0000:4597; SETUP 0000:0c75; START 0000:85f8; VGAME 0000:1ba0  spec platform.md "5.4 Ctrl-Break and clock" */
-void break_isr(void); /* TODO signature: spec platform.md "5.4 Ctrl-Break and clock" (type column: "void interrupt(void)") */
+void break_isr(void);
 /* DSWAP 0000:0c7e; END 0000:4dd2; PLAYER 0000:1096; SETUP 0000:1516; START 0000:8edc; VGAME 0000:ebb4  spec platform.md "1 Library map (code offsets; segment 0000 unless shown)" */
 void c0_start(void);
 /* END 0000:452c; START 0000:8bea  spec platform.md "(no heading)" */
@@ -71,7 +71,7 @@ void joy_read_raw(void);
 /* END 0000:441d; SETUP 0237:00a4; START 0000:84b1; VGAME 10a8:0cff  spec platform.md "1 Library map (code offsets; segment 0000 unless shown)" */
 void joy_scale(int axis);
 /* END 0000:448e; SETUP 0237:0127; START 0000:851a  spec platform.md "1 Library map (code offsets; segment 0000 unless shown)" */
-void joy_set_calib(void); /* TODO signature: spec platform.md "1 Library map (code offsets; segment 000" (type column: "void(void far *tbl)") */
+void joy_set_calib(const void *tbl);
 /* DSWAP 0000:0f7e; END 0000:5096; MPS_LOGO 0146:181a; PLAYER 0000:2304; START 0000:a520; VGAME 0000:f8d4  spec platform.md "1 Library map (code offsets; segment 0000 unless shown)" */
 long lseek_fn(int fd, long off, int whence);
 /* DSWAP 0000:1c3c; END 0000:5daa; PLAYER 0000:1fe8; SETUP 0000:1c22  spec platform.md "1 Library map (code offsets; segment 0000 unless shown)" */
@@ -125,11 +125,11 @@ long rtl_aFldiv(long a, long b);
 /* END 0000:539c; MPS_LOGO 0146:07f0; PLAYER 0000:1588; SETUP 0000:1870; START 0000:978e; VGAME 0000:f42c  spec platform.md "(no heading)" */
 long rtl_aFlmul(long a, long b);
 /* START 0000:97c0; VGAME 0000:f45e  spec platform.md "(no heading)" */
-void rtl_aFlshl(void); /* TODO signature: spec platform.md "(no heading)" (type column: "long(long ax, cl)") */
+long rtl_aFlshl(long a, int n);
 /* END 0000:53ce; SETUP 0000:1942; START 0000:97cc; VGAME 0000:f46a  spec platform.md "(no heading)" */
-void rtl_aFlshr(void); /* TODO signature: spec platform.md "(no heading)" (type column: "long(long ax, cl)") */
+long rtl_aFlshr(long a, int n);
 /* START 0000:97f4; VGAME 0000:f50e  spec platform.md "(no heading)" */
-void rtl_aFulshr(void); /* TODO signature: spec platform.md "(no heading)" (type column: "long(long ax, cl)") */
+unsigned long rtl_aFulshr(unsigned long a, int n);
 /* DSWAP 0000:0e4f; END 0000:4fa3; MPS_LOGO 0146:01ec; PLAYER 0000:1267; SETUP 0000:16e7; START 0000:90ad; VGAME 0000:ed85  spec platform.md "(no heading)" */
 void rtl_c_exit(void);
 /* DSWAP 0000:0e45; END 0000:4f99; MPS_LOGO 0146:01e2; PLAYER 0000:125d; SETUP 0000:16dd; START 0000:90a3; VGAME 0000:ed7b  spec platform.md "(no heading)" */
@@ -232,7 +232,7 @@ void srand_fn(unsigned seed);
 /* DSWAP 0000:2064; END 0000:5dae; PLAYER 0000:237e; START 0000:a756; VGAME 0000:fdfe  spec platform.md "3.2 MSC runtime (verified on END; stdio file layer likely, f" */
 unsigned stackavail(void);
 /* END 0000:4b72  spec platform.md "(no heading)" */
-void str_copy_far(void); /* TODO signature: spec platform.md "(no heading)" (type column: "void(char *dst, char far *src)") */
+void str_copy_far(char *dst, const char *src);
 /* END 0000:5110; MPS_LOGO 0146:05de; START 0000:946c; VGAME 0000:f006  spec platform.md "1 Library map (code offsets; segment 0000 unless shown)" */
 char *strcat_fn(char *d, char *s);
 /* END 0000:5150; MPS_LOGO 0146:061e; START 0000:94ac; VGAME 0000:f046  spec platform.md "1 Library map (code offsets; segment 0000 unless shown)" */

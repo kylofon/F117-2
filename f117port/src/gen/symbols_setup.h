@@ -29,9 +29,9 @@
 /* 0000:0c69  ivt_read                       platform   platform.md "(no heading)" */
 /* 0000:0c75  break_isr                      platform   platform.md "5.4 Ctrl-Break and clock" */
 /* 0000:0c84  fcb_find                       platform   platform.md "9 Open questions" */
-/* 0000:0cb2  ui_load_file_near              frontend   frontend.md "8.2 SETUP (38 functions)" */
-/* 0000:0ce5  ui_load_file_far               frontend   frontend.md "8.2 SETUP (38 functions)" */
-/* 0000:0d1b  save_file_far                  frontend   frontend.md "8.2 SETUP (38 functions)" */
+/* 0000:0cb2  ui_load_file_near              frontend   frontend.md "8.2 SETUP (38 functions)"  DEAD */
+/* 0000:0ce5  ui_load_file_far               frontend   frontend.md "8.2 SETUP (38 functions)"  DEAD */
+/* 0000:0d1b  save_file_far                  frontend   frontend.md "8.2 SETUP (38 functions)"  DEAD */
 /* 0000:0d53  file_open                      frontend   frontend.md "8.2 SETUP (38 functions)"  DEAD */
 /* 0000:0d65  file_creat                     frontend   frontend.md "8.2 SETUP (38 functions)"  DEAD */
 /* 0000:0d77  file_close                     frontend   frontend.md "8.2 SETUP (38 functions)"  DEAD */
