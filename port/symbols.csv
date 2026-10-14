@@ -119,8 +119,8 @@ asound117,global,0000:1b06,eff,byte[8][7],sound,,,sound
 asound117,global,01b6:0911,cmd_table,word[46],sound,,snd_cmd dispatch (cs:0911),sound
 asound117,global,01b6:09aa,speech_clip_lists,record[],sound,,records end/start/para (words); 0-terminated lists 9AA 9B2 9BA 9C8 9D6 9E4,sound
 asound117,global,01b6:173a,event_table,word[13],sound,,events F3..FF,sound
-dswap,func,0000:0010,dswap_main,"int dswap_main(int argc, char **argv)",frontend,,"argv[1] = ""0""/""1""/""2"" -> start.exe/vgame.exe/end.exe; exit(1) when the program is reachable",frontend
-dswap,func,0000:0219,dswap_exit,void dswap_exit(int code),frontend,,"screen_off (slot 69), free [2BF4] disk buffer, break_hook_remove, exit(code); code 0 only on the two fatal memory errors (frontend.md 8.1)",frontend
+dswap,func,0000:0010,dswap_main,int(const char *tail),frontend,,"argv[1] = ""0""/""1""/""2"" -> start.exe/vgame.exe/end.exe; exit(1) when the program is reachable",frontend
+dswap,func,0000:0219,dswap_exit,void(int code),frontend,,"screen_off (slot 69), free [2BF4] disk buffer, break_hook_remove, exit(code); code 0 only on the two fatal memory errors (frontend.md 8.1)",frontend
 dswap,func,0000:023e,swap_screen_show,void swap_screen_show(int msg),frontend,,"SWAP.PIC + SWAP.PAL, then the prompt text",frontend
 dswap,func,0000:030a,break_check,void break_check(void),frontend,,"dead: unindexed; if [00C8] (set by break_isr) then break_hook_remove, set_text_mode3, exit(0); nobody calls it",frontend
 dswap,func,0000:031f,set_text_mode3,void set_text_mode3(void),frontend,,dead: int86(10h) AX=0003; only caller is the dead break_check 030A,frontend
@@ -174,7 +174,7 @@ dswap,func,0000:0f06,rtl_fsopen,"FILE *(char *name, char *mode, int shflag)",pla
 dswap,func,0000:0f2e,fopen,"FILE *(char *name, char *mode)",platform,,,platform
 dswap,func,0000:0f42,printf,"int(char *fmt, ...)",platform,,,platform
 dswap,func,0000:0f7e,lseek,"long(int fd, long off, int whence)",platform,dos_lseek,,platform
-dswap,func,0000:0ff8,atoi,int atoi(char *s),frontend,,3-byte entry: jmp atol 1BD0 (S3.10 mapped it as free: corrected S3.10b),frontend
+dswap,func,0000:0ff8,atoi,int(const char *s),frontend,,3-byte entry: jmp atol 1BD0 (S3.10 mapped it as free: corrected S3.10b),frontend
 dswap,func,0000:0ffc,int86,"int(int intno, union REGS *in, union REGS *out)",platform,,,platform
 dswap,func,0000:107a,sprintf,"int(char *buf, char *fmt, ...)",platform,,,platform
 dswap,func,0000:10d0,dos_getdisk,int dos_getdisk(void),frontend,,INT 21h/19h: AL+1 (1 = A:),frontend
@@ -202,7 +202,7 @@ dswap,func,0000:1b2a,rtl_output_write,internal,platform,,,platform
 dswap,func,0000:1b48,rtl_output_pad,internal,platform,,,platform
 dswap,func,0000:1b64,rtl_output_digits,internal,platform,,,platform
 dswap,func,0000:1b9c,rtl_getstream,FILE *(void),platform,,,platform
-dswap,func,0000:1bd0,atol,long atol(char *s),frontend,,"blanks/tabs, sign, digits, 32-bit accumulate without overflow check; 0FF8 is the atoi entry",frontend
+dswap,func,0000:1bd0,atol,long(const char *s),frontend,,"blanks/tabs, sign, digits, 32-bit accumulate without overflow check; 0FF8 is the atoi entry",frontend
 dswap,func,0000:1c24,rtl_chkstk,void(void),platform,,,platform
 dswap,func,0000:1c3c,malloc,void *(unsigned n),platform,,,platform
 dswap,func,0000:1c60,rtl_getbuf,void(FILE *f),platform,,,platform
@@ -609,40 +609,40 @@ mgraphic,func,019c:12dd,nop,void(void),video,,retf (post-scanline hook of other 
 mgraphic,func,019c:12de,nop,void(void),video,,retf,video
 mgraphic,func,019c:12df,nop,void(void),video,,retf,video
 mgraphic,func,019c:12e0,scanline_put,"void(unsigned es, unsigned di, void *src)",video,,copy 320 bytes (160 words) from SS:BP to ES:DI,video
-misc,func,0007:0000,getche_misc,int getche(void),frontend,,slot 92: INT 21h AH=1; AX returned as DOS leaves it (AH not cleared) - see frontend.md 6,frontend
-misc,func,0007:0005,kbd_get_misc,int kbd_get(void),frontend,,slot 91: INT 16h AH=0 -> scan:ascii,frontend
-misc,func,0007:000a,kbd_empty_misc,int kbd_empty(void),frontend,,slot 90: INT 16h AH=1 -> 0 if a key is waiting else FFFFh,frontend
-misc,func,0007:0018,kbd_locks_clear,void kbd_locks_clear(void),frontend,,slot 94: 0040:0017 &= F0h (slots 94 and 95 are the same routine),frontend
-misc,func,0007:0029,joy_button_misc,int joy_button(int n),frontend,,slot 93: port 201h bit n+4 inverted: 1 = pressed,frontend
+misc,func,0007:0000,getche_misc,int(void),frontend,,slot 92: INT 21h AH=1; AX returned as DOS leaves it (AH not cleared) - see frontend.md 6,frontend
+misc,func,0007:0005,kbd_get_misc,int(void),frontend,,slot 91: INT 16h AH=0 -> scan:ascii,frontend
+misc,func,0007:000a,kbd_empty_misc,int(void),frontend,,slot 90: INT 16h AH=1 -> 0 if a key is waiting else FFFFh,frontend
+misc,func,0007:0018,kbd_locks_clear,void(void),frontend,,slot 94: 0040:0017 &= F0h (slots 94 and 95 are the same routine),frontend
+misc,func,0007:0029,joy_button_misc,int(int n),frontend,,slot 93: port 201h bit n+4 inverted: 1 = pressed,frontend
 mps_logo,func,0000:0000,file_copy_w,long far(...),frontend,,dead: far-call veneer of 0045:01FE,frontend
 mps_logo,func,0000:0030,huge_fread_w,long far(...),frontend,,dead: far-call veneer of huge_fread 0045:0116 (element size 1),frontend
-mps_logo,func,0006:000c,logo_fatal,void logo_fatal(char *msg),frontend,,"prints ""LABS.EXE Version 1.32"" and ""ERROR: msg"", exit(-1)",frontend
-mps_logo,func,0006:0044,text_clear_b800,void text_clear_b800(void),frontend,,"fills B800:0000, 7D00h words, with 0",frontend
-mps_logo,func,0006:0072,logo_main,"int logo_main(int argc, char **argv)",frontend,,"argv[1][0] = driver letter R/A/T/I/N; plays LABSLOGO.SS; returns 0 no key, 1 Esc, 2 Alt-Q, 3 other key",frontend
+mps_logo,func,0006:000c,logo_fatal,void(const char *msg),frontend,,"prints ""LABS.EXE Version 1.32"" and ""ERROR: msg"", exit(-1)",frontend
+mps_logo,func,0006:0044,text_clear_b800,void(void),frontend,,"fills B800:0000, 7D00h words, with 0",frontend
+mps_logo,func,0006:0072,logo_main,"int(int argc, char **argv)",frontend,,"argv[1][0] = driver letter R/A/T/I/N; plays LABSLOGO.SS; returns 0 no key, 1 Esc, 2 Alt-Q, 3 other key",frontend
 mps_logo,func,0006:033a,pal_set,void pal_set(uint8_t far *rgb768),frontend,,"DAC write: port 3C8=0, 256x3 bytes to 3C9 (6-bit)",frontend
-mps_logo,func,0006:038e,pal_get,void pal_get(uint8_t far *rgb768),frontend,,"DAC read: 3C7=0, 256x3 from 3C9",frontend
-mps_logo,func,0006:03e4,set_video_mode,void set_video_mode(int mode),frontend,,INT 10h AH=0,frontend
+mps_logo,func,0006:038e,pal_get,void(u8 *rgb768),frontend,,"DAC read: 3C7=0, 256x3 from 3C9",frontend
+mps_logo,func,0006:03e4,set_video_mode,void(int mode),frontend,,INT 10h AH=0,frontend
 mps_logo,func,0045:000e,huge_norm,"void far *huge_norm(unsigned off, unsigned seg)",frontend,,seg += off>>4; off &= 0Fh when off > 0Fh; DX:AX,frontend
 mps_logo,func,0045:003a,strpos,"int strpos(char *hay, char *needle)",frontend,,"1-based index through strstr, 0 when absent (ss_load looks for ""."")",frontend
-mps_logo,func,0045:0062,bios_ticks,uint32_t bios_ticks(void),frontend,,0040:006C dword (18.2 Hz BIOS tick count),frontend
+mps_logo,func,0045:0062,bios_ticks,u32(void),frontend,,0040:006C dword (18.2 Hz BIOS tick count),frontend
 mps_logo,func,0045:008e,strcpy_to_seg,"void strcpy_to_seg(unsigned off, unsigned seg, char *src)",frontend,,copies a near string to seg:off (ss_load name copy),frontend
 mps_logo,func,0045:00bc,huge_alloc,void far *huge_alloc(uint32_t bytes),frontend,,DOS alloc (bytes>>4)+1 paragraphs; NULL on failure,frontend
 mps_logo,func,0045:0102,huge_free,int huge_free(void far *p),frontend,,DOS free,frontend
 mps_logo,func,0045:0116,huge_fread,"uint32_t huge_fread(FILE *f, void far *dst, uint32_t n)",frontend,,"reads in 512-byte chunks, normalising the far pointer",frontend
 mps_logo,func,0045:01fe,file_copy,"long file_copy(FILE *src, FILE *dst, long n)",frontend,,dead: copies n bytes through the 512-byte buffer DS:0C76 (fread/fwrite),frontend
-mps_logo,func,006d:0002,ss_remap_rows_a,"void ss_remap_rows_a(uint8_t far *p, int base)",frontend,,adds base-1 to every non-FCh pixel (row markers F9/FE/FF),frontend
-mps_logo,func,006d:0084,ss_remap_rows_b,"void ss_remap_rows_b(uint8_t far *p, int base)",frontend,,second variant of the same walk (FA/FD/FC grammar),frontend
-mps_logo,func,006d:0112,ss_load,"SS far *ss_load(char *name, int mode, uint8_t *pal768)",frontend,,".SS loader (""MADSS1""); name without extension; merges the sprite palette into pal768; error code in [0C74] 1..5; see frontend.md 2.3",frontend
-mps_logo,func,006d:05a2,ss_free,void ss_free(SS far **p),frontend,,frees the series,frontend
-mps_logo,func,006d:05be,ss_draw,"void ss_draw(SS far *s, int frame, int x, int y, Screen scr)",frontend,,"x==3E7h or y==3E7h -> frame own x,y; key-colour blit (value FCh skipped); Screen = {h=200,w=320,off=0,seg=A000h}",frontend
+mps_logo,func,006d:0002,ss_remap_rows_a,"void(u8 *p, int base)",frontend,,adds base-1 to every non-FCh pixel (row markers F9/FE/FF),frontend
+mps_logo,func,006d:0084,ss_remap_rows_b,"void(u8 *p, int base)",frontend,,second variant of the same walk (FA/FD/FC grammar),frontend
+mps_logo,func,006d:0112,ss_load,"void *(const char *name, int mode, u8 *pal768)",frontend,,".SS loader (""MADSS1""); name without extension; merges the sprite palette into pal768; error code in [0C74] 1..5; see frontend.md 2.3",frontend
+mps_logo,func,006d:05a2,ss_free,void(void **p),frontend,,frees the series,frontend
+mps_logo,func,006d:05be,ss_draw,"void(void *series, int frame, int x, int y, const void *screen)",frontend,,"x==3E7h or y==3E7h -> frame own x,y; key-colour blit (value FCh skipped); Screen = {h=200,w=320,off=0,seg=A000h}",frontend
 mps_logo,func,006d:0678,ss_draw_rle,"void /* DS:SI data, ES:DI dest, BX width */",frontend,,"RLE row loop of ss_draw (fall-through of 05BE): FF end, FE end of row, row marker FA = literal mode (FC skip, FD n v run), else pair mode (count,value; value FC skips); count 0 = 256 pixels",frontend
 mps_logo,func,00da:000e,ovl_call,void /* thunk trampoline */,frontend,,overlay call trampoline for the 7-byte thunks {E8 rel16; dw off; dw seg}: pops the return address as the ljmp operand,frontend
 mps_logo,func,00da:0088,ovl_thunk_9,void,frontend,,dead: thunk table slots 9 (data),frontend
 mps_logo,func,00da:00b9,ovl_thunk_10,void,frontend,,dead: thunk table slots 10 (data),frontend
 mps_logo,func,00da:0129,ovl_thunk_20,void,frontend,,dead: thunk table slots 20..21 (data),frontend
-mps_logo,func,00da:0307,snd_init_log,"int snd_init_log(int,int)",frontend,,thunk to LOG slot 100; main repeats until AX==0,frontend
-mps_logo,func,00da:030e,snd_cmd_log,void snd_cmd_log(int cmd),frontend,,"thunk to LOG slot 101; 2 = play jingle, 0 = stop",frontend
-mps_logo,func,00da:0315,snd_shutdown_log,void snd_shutdown_log(void),frontend,,thunk to LOG slot 102,frontend
+mps_logo,func,00da:0307,snd_init_log,"int(int a1, int a2)",frontend,,thunk to LOG slot 100; main repeats until AX==0,frontend
+mps_logo,func,00da:030e,snd_cmd_log,void(int cmd),frontend,,"thunk to LOG slot 101; 2 = play jingle, 0 = stop",frontend
+mps_logo,func,00da:0315,snd_shutdown_log,void(void),frontend,,thunk to LOG slot 102,frontend
 mps_logo,func,00da:0352,ovl_load_log,"unsigned ovl_load_log(char *name, char *name2)",frontend,,"overlay loader (RE_GUIDE 2.2); returns load segment, 0 on failure; used for ?SOUND.LOG",frontend
 mps_logo,func,00da:043d,ovl_read_file,unsigned /* BX=segment -> BX */,frontend,,"INT 21h/3D00h open [0082], one read of up to 8000h bytes to BX:0, close; BX = first free segment",frontend
 mps_logo,func,00da:0491,ovl_bind_log,void ovl_bind_log(unsigned seg),frontend,,"fills 7-byte JMP FAR thunks at 00DA:0049+7*slot (slot base 100); entries from header +32h, cseg +28h, n +30h",frontend
@@ -731,22 +731,22 @@ mps_logo,func,0146:1cb8,signal,"void far *far signal(int sig, void far *h)",fron
 mps_logo,func,0146:1d66,rtl_sig_lookup,void far,frontend,,"(= PLAYER 257B, large-model variant)",frontend
 mps_logo,func,0146:1db6,rtl_sig_unwind,void far,frontend,,dead: (= PLAYER 25C7 exact),frontend
 mps_logo,func,0146:1e2e,rtl_nh_search,internal,platform,,,platform
-player,func,0000:0010,player_main,"int player_main(int argc, char **argv)",frontend,,"argv[1..] = .PAN names without extension; usage text ""player pan_file(s)""",frontend
-player,func,0000:005c,player_init,void player_init(void),frontend,,"allocates all free memory (>= 2000h paragraphs) as ring buffer, comm=[0:4F0], binds sound, timer_install, video mode 13h only if not already 13h",frontend
-player,func,0000:019a,player_run,void player_run(int argc),frontend,,loop poll_input until all cels are shown; if argc>2 waits for snd_cmd(2)==0; then player_exit(0),frontend
-player,func,0000:01f6,player_exit,void player_exit(int code),frontend,,"snd_cmd(0), restore INT 8/1B/23, video mode restore (only if it was not 13h), free buffer, exit(code)",frontend
-player,func,0000:0244,pan_play_file,void pan_play_file(char *name),frontend,,"name + "".PAN""; streams/decodes (LZ bit stream, RE_GUIDE 4) into the ring buffer while the tick callback consumes cels",frontend
-player,func,0000:03fe,ring_make_room,int ring_make_room(void),frontend,,"1 when 0C000h bytes can be decoded at the write position A, wrapping the unread tail to the buffer start when needed; 0 when the tail blocks (frontend.md 8.3.1)",frontend
-player,func,0000:0520,video_get_mode,int video_get_mode(void),frontend,,"INT 10h AH=0Fh, returns AL",frontend
-player,func,0000:0540,video_set_mode,void video_set_mode(int mode),frontend,,INT 10h AH=00h,frontend
+player,func,0000:0010,player_main,int(const char *tail),frontend,,"argv[1..] = .PAN names without extension; usage text ""player pan_file(s)""",frontend
+player,func,0000:005c,player_init,void(void),frontend,,"allocates all free memory (>= 2000h paragraphs) as ring buffer, comm=[0:4F0], binds sound, timer_install, video mode 13h only if not already 13h",frontend
+player,func,0000:019a,player_run,void(int argc),frontend,,loop poll_input until all cels are shown; if argc>2 waits for snd_cmd(2)==0; then player_exit(0),frontend
+player,func,0000:01f6,player_exit,void(int code),frontend,,"snd_cmd(0), restore INT 8/1B/23, video mode restore (only if it was not 13h), free buffer, exit(code)",frontend
+player,func,0000:0244,pan_play_file,void(const char *name),frontend,,"name + "".PAN""; streams/decodes (LZ bit stream, RE_GUIDE 4) into the ring buffer while the tick callback consumes cels",frontend
+player,func,0000:03fe,ring_make_room,int(void),frontend,,"1 when 0C000h bytes can be decoded at the write position A, wrapping the unread tail to the buffer start when needed; 0 when the tail blocks (frontend.md 8.3.1)",frontend
+player,func,0000:0520,video_get_mode,int(void),frontend,,"INT 10h AH=0Fh, returns AL",frontend
+player,func,0000:0540,video_set_mode,void(int mode),frontend,,INT 10h AH=00h,frontend
 player,func,0000:0560,break_isr,void interrupt break_isr(void),frontend,,"INT 1Bh/23h handler: DS=02A3, [2092]=3 (role of platform break_isr)",frontend
-player,func,0000:0583,break_hooks_install,void break_hooks_install(void),frontend,,INT 1Bh and INT 23h -> ISR 0560 (sets [2092]=3),frontend
-player,func,0000:05d0,break_hooks_restore,void break_hooks_restore(void),frontend,,"dos_setvect(1Bh,[1E76]); dos_setvect(23h,[208E]) (role of break_hook_remove)",frontend
-player,func,0000:05f6,huge_copy,"void huge_copy(uint32_t src, uint32_t dst, unsigned n)",frontend,,"forward byte copy between linear addresses (seg=L>>4, off=L&15)",frontend
-player,func,0000:0664,huge_peek_word,unsigned huge_peek_word(uint32_t lin),frontend,,word at a linear address,frontend
-player,func,0000:0696,poll_input,void poll_input(void),frontend,,"first call starts the sound (snd_cmd 3) and arms the tick callback ([1E7A]:=0); polls joystick buttons 0/1 (comm+72h bit 0), mouse buttons (bit 1), keyboard; any input -> player_exit(key or 1Bh)",frontend
-player,func,0000:0738,tick_callback,void far tick_callback(void),frontend,,"called from the timer ISR each tick: fade step, or countdown [1DEA] then cel_show; ++[1DEE] tick counter; ++[1DF0] after the last cel",frontend
-player,func,0000:07ea,cel_show,uint32_t cel_show(uint32_t p),frontend,,"'Z' header: speed -> [1DEC]=60/speed, palette (cel base - 768) loaded with the screen blanked, then fade in; 'B' cel: asserts bytes 42h,0,1,0; RLE-draws the delta onto A000 (1006); returns the next cel pointer",frontend
+player,func,0000:0583,break_hooks_install,void(void),frontend,,INT 1Bh and INT 23h -> ISR 0560 (sets [2092]=3),frontend
+player,func,0000:05d0,break_hooks_restore,void(void),frontend,,"dos_setvect(1Bh,[1E76]); dos_setvect(23h,[208E]) (role of break_hook_remove)",frontend
+player,func,0000:05f6,huge_copy,"void(u32 src, u32 dst, unsigned n)",frontend,,"forward byte copy between linear addresses (seg=L>>4, off=L&15)",frontend
+player,func,0000:0664,huge_peek_word,unsigned(u32 linear),frontend,,word at a linear address,frontend
+player,func,0000:0696,poll_input,void(void),frontend,,"first call starts the sound (snd_cmd 3) and arms the tick callback ([1E7A]:=0); polls joystick buttons 0/1 (comm+72h bit 0), mouse buttons (bit 1), keyboard; any input -> player_exit(key or 1Bh)",frontend
+player,func,0000:0738,tick_callback,void(void),frontend,,"called from the timer ISR each tick: fade step, or countdown [1DEA] then cel_show; ++[1DEE] tick counter; ++[1DF0] after the last cel",frontend
+player,func,0000:07ea,cel_show,u32(u32 p),frontend,,"'Z' header: speed -> [1DEC]=60/speed, palette (cel base - 768) loaded with the screen blanked, then fade in; 'B' cel: asserts bytes 42h,0,1,0; RLE-draws the delta onto A000 (1006); returns the next cel pointer",frontend
 player,func,0000:0908,dbg_reset,void(void),frontend,,dead: [1E56]=1DF2 (debug line buffer),frontend
 player,func,0000:0910,dbg_putc,void(int c),frontend,,dead: append a character,frontend
 player,func,0000:092a,dbg_puts,void(char *s),frontend,,dead: append a string,frontend
@@ -755,24 +755,24 @@ player,func,0000:0984,dbg_put_dec,void(long v),frontend,,"dead: ltoa radix 10, a
 player,func,0000:09b8,dbg_put_hex,void(long v),frontend,,"dead: ltoa radix 16, advance",frontend
 player,func,0000:09ee,dbg_put_dec_pad,"void(int v, int width)",frontend,,dead: padded decimal,frontend
 player,func,0000:0a20,dbg_status_line,void(char far *row),frontend,,dead: ring buffer status line to text video memory,frontend
-player,func,0000:0b84,bits_refill,void /* SI=read ptr */,frontend,,"refills the 4 KB file buffer DS:01B8 (1000h bytes, INT 21h/3Fh), carries the pending byte",frontend
-player,func,0000:0ba2,bits_open,int bits_open(char *name),frontend,,"INT 21h/3Dh, resets the bit reader; 1 = ok",frontend
-player,func,0000:0bcd,bits_close,int bits_close(void),frontend,,INT 21h/3Eh; 1 = ok,frontend
-player,func,0000:0bdc,bits_eof,int bits_eof(void),frontend,,"returns [11BE], the end-of-file flag set by pan_decode_chunk",frontend
-player,func,0000:0be2,pan_decode_chunk,int pan_decode_chunk(uint32_t dst),frontend,,LZ-stream decoder step (see tools/lzs.py),frontend
-player,func,0000:0d0c,pal_load,"void pal_load(int first, int count, uint8_t far *rgb)",frontend,,writes DAC; while a fade is pending ([13D4]!=0) writes black and keeps the target palette in [13DA],frontend
-player,func,0000:0db0,screen_off,void screen_off(void),frontend,,wait vblank; port 3C4 reg 1 |= 20h (screen off),frontend
-player,func,0000:0dca,screen_on,void screen_on(void),frontend,,wait vblank; reg 1 &= ~20h,frontend
+player,func,0000:0b84,bits_refill,u16(u16 si),frontend,,"refills the 4 KB file buffer DS:01B8 (1000h bytes, INT 21h/3Fh), carries the pending byte",frontend
+player,func,0000:0ba2,bits_open,int(const char *name),frontend,,"INT 21h/3Dh, resets the bit reader; 1 = ok",frontend
+player,func,0000:0bcd,bits_close,int(void),frontend,,INT 21h/3Eh; 1 = ok,frontend
+player,func,0000:0bdc,bits_eof,int(void),frontend,,"returns [11BE], the end-of-file flag set by pan_decode_chunk",frontend
+player,func,0000:0be2,pan_decode_chunk,int(u32 dst),frontend,,LZ-stream decoder step (see tools/lzs.py),frontend
+player,func,0000:0d0c,pal_load,"void(int first, int count, const u8 *rgb)",frontend,,writes DAC; while a fade is pending ([13D4]!=0) writes black and keeps the target palette in [13DA],frontend
+player,func,0000:0db0,screen_off,void(void),frontend,,wait vblank; port 3C4 reg 1 |= 20h (screen off),frontend
+player,func,0000:0dca,screen_on,void(void),frontend,,wait vblank; reg 1 &= ~20h,frontend
 player,func,0000:0de4,fade_measure,void fade_measure(void),frontend,,counts DAC data writes between two retraces -> [13D2],frontend
-player,func,0000:0e0c,fade_init,void fade_init(int secs),frontend,,steps = |secs|*60 -> [13D4]; builds per-tick colour slice from the vblank-measured loop speed,frontend
-player,func,0000:0e65,fade_slice,void fade_slice(void),frontend,,next [13D0] colours of the faded palette: (v*factor+8000h)>>16; factor += step per full 256-colour pass,frontend
-player,func,0000:0ee3,fade_step,void fade_step(void),frontend,,"writes one slice of the scaled palette, --[13D4]",frontend
-player,func,0000:0f1a,joy_button,int joy_button(int n),frontend,,((inp(201h)>>(n+4))&1)^1; local copy of MISC slot 93,frontend
+player,func,0000:0e0c,fade_init,void(int secs),frontend,,steps = |secs|*60 -> [13D4]; builds per-tick colour slice from the vblank-measured loop speed,frontend
+player,func,0000:0e65,fade_slice,void(void),frontend,,next [13D0] colours of the faded palette: (v*factor+8000h)>>16; factor += step per full 256-colour pass,frontend
+player,func,0000:0ee3,fade_step,void(void),frontend,,"writes one slice of the scaled palette, --[13D4]",frontend
+player,func,0000:0f1a,joy_button,int(int n),frontend,,((inp(201h)>>(n+4))&1)^1; local copy of MISC slot 93,frontend
 player,func,0000:0f32,mouse_button,int(int n),platform,,,platform
 player,func,0000:0f47,mouse_poll_buttons,void(void),frontend,,"(near twin of START 8545 mouse_poll without the coordinates): INT 33h/3, [19DA]=left, [19DB]=right",frontend
 player,func,0000:0f6c,ovl_bind,void(unsigned seg),platform,,,platform
 player,func,0000:0fc5,dos_freemem_chk,void(unsigned seg),platform,,,platform
-player,func,0000:1006,cel_rle_draw,"uint32_t cel_rle_draw(uint32_t src, unsigned dseg, unsigned doff)",frontend,,"PAN cel RLE (RE_GUIDE 4): 00 n v fill, 1..7F literal, 81..FF skip, 80 w long op",frontend
+player,func,0000:1006,cel_rle_draw,"u32(u32 src, u16 dseg, u16 doff)",frontend,,"PAN cel RLE (RE_GUIDE 4): 00 n v fill, 1..7F literal, 81..FF skip, 80 w long op",frontend
 player,func,0000:1096,c0_start,void(void),platform,,,platform
 player,func,0000:1180,rtl_cinit,void(void),platform,,,platform
 player,func,0000:124e,exit,void(int code),platform,,,platform
@@ -841,11 +841,11 @@ player,func,026b:000a,timer_install,void far timer_install(void),frontend,,"plat
 player,func,026b:004d,timer_remove,void far timer_remove(void),frontend,,"PIT ch0 mode 3 count 0, restore INT 8",frontend
 player,func,026b:0272,timer_calibrate,void(void),platform,,,platform
 player,func,026b:0307,pit_read,unsigned(void),platform,,,platform
-player,func,026b:0336,timer_step,void far timer_step(void),frontend,,"per-tick work called by the ISR: class 4 drops every 7th tick (no tick_callback, no sound poll) -> 60.08 ticks/s at 70 Hz; else tick_callback + snd_poll steering [1A0E]/[1A08]",frontend
-setup,func,0000:0010,setup_main,int setup_main(void),frontend,,"text-mode configuration; exit(24h) = configured, exit(0) = abort",frontend
-setup,func,0000:0503,break_check,void break_check(void),frontend,,if Ctrl-Break flag [0AC8] set -> exit(0),frontend
-setup,func,0000:0512,text_gotoxy,"void text_gotoxy(int row, int col)",frontend,,INT 10h AH=2 (via int86 0x1387),frontend
-setup,func,0000:053b,setup_exit,void setup_exit(int code),frontend,,"break_hook_remove, release MISC overlay, timer_remove if installed, exit(code)",frontend
+player,func,026b:0336,timer_step,void(void),frontend,,"per-tick work called by the ISR: class 4 drops every 7th tick (no tick_callback, no sound poll) -> 60.08 ticks/s at 70 Hz; else tick_callback + snd_poll steering [1A0E]/[1A08]",frontend
+setup,func,0000:0010,setup_main,int(const char *tail),frontend,,"text-mode configuration; exit(24h) = configured, exit(0) = abort",frontend
+setup,func,0000:0503,break_check,void(void),frontend,,if Ctrl-Break flag [0AC8] set -> exit(0),frontend
+setup,func,0000:0512,text_gotoxy,"void(int row, int col)",frontend,,INT 10h AH=2 (via int86 0x1387),frontend
+setup,func,0000:053b,setup_exit,void(int code),frontend,,"break_hook_remove, release MISC overlay, timer_remove if installed, exit(code)",frontend
 setup,func,0000:0562,ui_text_far,"void(TextCtx *c, char far *s, int x, int y)",frontend,,"dead: c->x=x; c->y=y; ui_text_far_buf (library text routine, slots 5/47 unbound in SETUP)",frontend
 setup,func,0000:0582,ui_text,"void(TextCtx *c, char *s, int x, int y)",frontend,,"(= START 0000:3567, byte-shape copy; partner in shell_symbols.csv)",frontend
 setup,func,0000:05a3,ui_text_far_buf,"void(TextCtx *c, char far *s)",frontend,,"dead: copies the far string to a 200-byte stack buffer, MGRAPHIC slot 5 text_noclip",frontend
@@ -854,7 +854,7 @@ setup,func,0000:070a,ui_text_wrap,"int(TextCtx *c, char *s, int width, int x, in
 setup,func,0000:0811,ui_text_width,"int(TextCtx *c, char *s)",frontend,,dead: near twin of START ui_text_width 373C (sum of slot 47 font_char_width),frontend
 setup,func,0000:0851,fmt_long_commas,"void(long v, char *out)",frontend,,"dead: 6 digits with a comma after the thousands, high digits of >= 1e6 lost",frontend
 setup,func,0000:0979,fmt_int_commas,"void(int v, char *out)",frontend,,dead: 16-bit variant of fmt_long_commas,frontend
-setup,func,0000:0a4b,wait_ticks,void wait_ticks(int n),frontend,,timer_install; wait until [0782] > n; timer_remove ([0782] is bumped by the timer tick),frontend
+setup,func,0000:0a4b,wait_ticks,void(int n),frontend,,timer_install; wait until [0782] > n; timer_remove ([0782] is bumped by the timer tick),frontend
 setup,func,0000:0a70,rand_n,int(int n),platform,,,platform
 setup,func,0000:0a9f,ovl_load,unsigned ovl_load(char *name),frontend,,"overlay loader (RE_GUIDE 2.2), returns segment",frontend
 setup,func,0000:0b83,ovl_load_tail,unsigned(void) /* epilogue of ovl_load */,frontend,,"exit epilogue of ovl_load 0A9F (jumped to from 0B77): DS=ES=024C, AX=[0786]; unwinds the frame when [078E]==0; 0B9D = fatal INT 21h/4C",frontend
@@ -905,8 +905,8 @@ setup,func,0000:13ec,itoa_radix,"int(int v, char *buf, int radix)",frontend,,"de
 setup,func,0000:1429,itoa_dec,"int(void) /* BX=buf, [bp+4]=v */",frontend,,"dead: signed decimal body of itoa_radix, returns the digit count",frontend
 setup,func,0000:1454,itoa_hex4,"int(void) /* BX=buf, [bp+4]=v */",frontend,,"dead: four hex digits, adds only 30h (A-F come out as :;<=>?), returns 4",frontend
 setup,func,0000:149c,itoa_bin16,"int(void) /* BX=buf, [bp+4]=v */",frontend,,"dead: 16 binary digits MSB first, returns 16",frontend
-setup,func,0000:14be,text_puts_at,"void text_puts_at(int row, int col, char *s)",frontend,,BIOS teletype writer; byte FFh in the string switches the attribute to the next byte (kept in cs:14BD),frontend
-setup,func,0000:1509,dos_puts,void dos_puts(char *s),frontend,,INT 21h AH=9 ($-terminated),frontend
+setup,func,0000:14be,text_puts_at,"void(int row, int col, const char *s)",frontend,,BIOS teletype writer; byte FFh in the string switches the attribute to the next byte (kept in cs:14BD),frontend
+setup,func,0000:1509,dos_puts,void(const char *s),frontend,,INT 21h AH=9 ($-terminated),frontend
 setup,func,0000:1516,c0_start,void(void),platform,,,platform
 setup,func,0000:1600,rtl_cinit,void(void),platform,,,platform
 setup,func,0000:16ce,exit,void(int code),platform,,,platform
@@ -939,13 +939,13 @@ setup,func,0000:1d69,rtl_nmalloc,void *(unsigned n),platform,,,platform
 setup,func,0000:1d92,rtl_nh_search,internal,platform,,,platform
 setup,func,0000:1e4f,stub_1e4f,void far(void),frontend,,dead: far stub calling 1F51,frontend
 setup,func,0000:1f51,data_1f51,void,frontend,,"dead: 4 bytes F9 42 5F CF, data not code",frontend
-setup,func,0237:0004,mouse_present,int mouse_present(void),frontend,,INT 33h/0 after checking the vector is neither 0 nor IRET; 1 if the driver answers FFFFh,frontend
-setup,func,0237:002c,joy_calib_center,void joy_calib_center(void),frontend,,joy_read_raw then both axes: centre := min := max := raw,frontend
+setup,func,0237:0004,mouse_present,int(void),frontend,,INT 33h/0 after checking the vector is neither 0 nor IRET; 1 if the driver answers FFFFh,frontend
+setup,func,0237:002c,joy_calib_center,void(void),frontend,,joy_read_raw then both axes: centre := min := max := raw,frontend
 setup,func,0237:003a,joy_set_centre_axis,SI axis,frontend,,"(= VGAME 10a8:0c95, byte-shape copy; partner in flight_symbols.csv)",frontend
-setup,func,0237:004d,joy_calib_track,void joy_calib_track(void),frontend,,"joy_read_raw then joy_scale for X and Y (widens min/max, writes scaled 0..FF to DS:E24/E25)",frontend
+setup,func,0237:004d,joy_calib_track,void(void),frontend,,"joy_read_raw then joy_scale for X and Y (widens min/max, writes scaled 0..FF to DS:E24/E25)",frontend
 setup,func,0237:005c,joy_read_raw,void(void),platform,,,platform
 setup,func,0237:00a4,joy_scale,void(int axis /*SI*/),platform,,,platform
-setup,func,0237:0115,joy_calib_get,void joy_calib_get(uint16_t far dst[20]),frontend,,copies the 28h-byte calibration block (DS:0DF4) to comm+48h,frontend
+setup,func,0237:0115,joy_calib_get,void(u16 *dst),frontend,,copies the 28h-byte calibration block (DS:0DF4) to comm+48h,frontend
 setup,func,0237:0127,joy_set_calib,void(const void *tbl),platform,,,platform
 start,func,0000:0010,ui_main,void ui_main(void),shell,,"shell main: init, (removed quiz call), pilot save, arming roll, ready room, save temp.wld, exit(0Ch/0Dh by site[E062].hi&2)",shell
 start,func,0000:008d,roster_home_card_draw,void(void),shell,,"hook of homescrn: rank+surname, theatre, war, mission type, skill, crash, flight model, rating",shell

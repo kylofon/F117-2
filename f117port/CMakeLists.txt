@@ -17,7 +17,7 @@ target_include_directories(nuked_opl3 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../thir
 
 # Coordinator files in src/, then one glob per module directory (PORTING.md "Source layout"): a module adds
 # <module>/<file>.c and it is built without touching this file. programs/ holds the phase 4 placeholders.
-set(F117_MODULES platform video programs)
+set(F117_MODULES platform video frontend programs)
 file(GLOB F117_SOURCES CONFIGURE_DEPENDS src/*.c)
 foreach(m ${F117_MODULES})
     file(GLOB m_sources CONFIGURE_DEPENDS src/${m}/*.c)
@@ -79,6 +79,19 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME video_decoders COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s52/decoder_ref.py
              $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game ${CMAKE_CURRENT_BINARY_DIR}/decoder_ref)
     set_tests_properties(video_decoders PROPERTIES SKIP_RETURN_CODE 77)
+endif()
+
+# The front end (src/frontend, S5.3): SETUP, MPS_LOGO and PLAYER against the ORIGINAL programs run under Unicorn (port/notes/s53/frontend_ref.py:
+# the text screens and the comm block of SETUP, the screen + DAC CRC of each of the 82 logo frames) and the Phase 2 PAN decoder (every cel of every
+# .PAN through PLAYER's ring buffer), the fade formula, the 60.08 Hz animation clock and the logo pacing; `frontend_chain` is the scripted run
+# (F117_KEYS answers SETUP, keys end the PLAYER runs) through the chain up to the START placeholder. Both skip (77) without ../Game.
+find_package(Python3 COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME frontend COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s53/frontend_ref.py
+             $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game ${CMAKE_CURRENT_BINARY_DIR}/frontend_ref)
+    add_test(NAME frontend_chain COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s53/frontend_ref.py --chain
+             $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game)
+    set_tests_properties(frontend frontend_chain PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 150)
 endif()
 
 # The generated headers are current: the generators re-run in memory and fail on any difference (tools/gen_*.py).

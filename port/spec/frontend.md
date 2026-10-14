@@ -502,3 +502,28 @@ covered through their `dead` rows and are tallied separately). The 127 functions
 Plus 1 unindexed dead function (DSWAP `030A`). The 37 twin rows of S3.10 stay as they are, except the seven corrected in 8.5
 (of the eleven that are only 1-6 bytes long, four were right: `rtl_dosmaperr_al` in PLAYER, START and DSWAP, and START `A76C`
 `free`).
+
+
+## 9 Port findings (S5.3, 2026-10-14)
+
+Found while porting and testing the front end (`f117port/src/frontend`, `port/notes/s53/`); each was checked against the original code under Unicorn
+or against the disassembly.
+
+* **`bios_ticks` (MPS_LOGO `0045:0062`, section 2.1) is not a dword read.** It builds the value with 8-bit `shl ah, 8` instructions (which give 0),
+  so it returns the LOW WORD of `0040:006C` sign-extended by `cdq` (it jumps from 7FFFh to FFFF8000h after 30 minutes of clock). The logo's
+  `while (bios_ticks() < t)` compares signed 32-bit values. The port keeps the quirk.
+* **Logo timing:** the 82 delays add up to 146 BIOS ticks (8.0 s); frame 1 waits its own 5 ticks first, so frame 1 appears at 0.27 s and frame 82
+  at 8.0 s (frames 1 to 82 are 141 ticks = 7.74 s apart; measured in the port: 7.743 s).
+* **`ss_load` (section 2.3):** file header = `"MADSS1" 1Ah`, series name at +7 (9 bytes, compared with the argument by `strcmp`: a difference only sets
+  the error code 5, the load goes on), u32 at +10h, frame count u16 at +14h, **u32 at +16h = size of the sprite data**, u16 at +1Ah and +1Ch
+  (unused), mode byte at +1Eh (1..5, else error 7), then 14-byte frame records at +1Fh (u32 data offset, delay, x, y, width - 1, height - 1), the
+  colour count byte, 4 bytes per colour and the sprite data. `ss_remap_rows_a` (mode byte other than 1) treats row marker F9 as "(count, value) pairs"
+  and every other marker as literals, `ss_draw` treats FA as literals and every other marker as pairs: the shipped data only has F9 and FA rows.
+* **Fade (section 8.3.2):** the first tick writes BLACK (the slice made by `fade_init` before the palette existed); from the second tick the DAC is
+  `(v * min(FFFFh, 219 * t) + 8000h) >> 16`. The fade ends after 300 ticks = 4.99 s at 60.08 ticks/s. `pal_load` also copies the palette to `DS:13DA`.
+* **Tick drop (8.3.3):** the 7th-tick counter `DS:1A1E` starts at 0, so the very first tick is dropped; then 6 run, 1 is dropped. The callback runs
+  at 6/7 of the retrace rate: 60.08 /s (measured 60.08 callbacks and 70.09 ISR ticks per second in the port).
+* **PLAYER ends when the last cel is SHOWN** (`player_run` waits for tail == head), not after its frame time. The file name is `name + "."`, cut at
+  the first `.`, plus `.PAN` (so `strchr` always finds a dot).
+* **SETUP (section 1):** the blank line printed by `dos_puts([0780])` (DS:006E) is 76 characters wide, so clearing rows 9-22 leaves the last 4 columns:
+  the final `.` of "...Technical Supplement." stays on row 20 (also in the original). `fcb_find` is a FindFirst on an FCB at DS:0AD7 that fails on a hard disk.

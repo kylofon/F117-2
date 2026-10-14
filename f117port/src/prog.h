@@ -33,7 +33,8 @@ typedef struct {
 
 extern const ProgDef prog_table[PROG_COUNT];
 
-/* The program entry points. Real implementations replace the placeholders (programs/placeholder.c). */
+/* The program entry points. SETUP, MPS_LOGO, PLAYER and DSWAP are the real ports (src/frontend, S5.3); START, VGAME and END are still
+ * the placeholders of programs/placeholder.c (replaced by S5.4, S5.5 + S5.7, S5.8). */
 int setup_main(const char *tail);
 int mps_logo_main(const char *tail);
 int player_main(const char *tail);
@@ -41,6 +42,12 @@ int start_main(const char *tail);
 int vgame_main(const char *tail);
 int end_main(const char *tail);
 int dswap_main(const char *tail);
+
+/* true: --chain-test runs the stand-ins of programs/placeholder.c instead of the real ports (it needs no game files). */
+extern bool prog_use_stubs;
+
+/* F117.COM's start-up part: the PSP block shrunk to 7Ch paragraphs, the comm block allocated and zeroed, 0000:04F0..04F4 set. */
+void prog_comm_init(void);
 
 /* How often each program ran (the chain test checks the sequence). */
 extern int prog_run_count[PROG_COUNT];

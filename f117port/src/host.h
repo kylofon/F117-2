@@ -32,8 +32,8 @@ u64  host_ticks(void);                       /* ticks delivered since host_init 
 
 /* Source of the displayed image: fills a w x h XRGB8888 frame and returns true if it changed since the
  * last call. Installed by the VGA model (platform/vga.c). Shown with 4:3 aspect unless --aspect 1:1. */
-#define HOST_FRAME_MAX_W 320
-#define HOST_FRAME_MAX_H 200
+#define HOST_FRAME_MAX_W 640            /* S5.3: 640 x 400 = the text-mode screen (SETUP); mode 13h is 320 x 200 */
+#define HOST_FRAME_MAX_H 400
 void host_set_frame_source(bool (*compose)(u32 *xrgb), int w, int h);
 
 /* Runs due timer ticks, handles window/input events, runs the scripted keys and presents the screen

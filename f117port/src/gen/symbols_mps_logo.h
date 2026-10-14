@@ -16,13 +16,13 @@
 /* 0006:03e4  set_video_mode                 frontend   frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
 /* 0045:000e  huge_norm                      frontend   frontend.md "8.4.1 Live program code" */
 /* 0045:003a  strpos                         frontend   frontend.md "8.4.1 Live program code" */
-/* 0045:0062  bios_ticks                     frontend   frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
+/* 0045:0062  bios_ticks                     frontend   frontend.md "9 Port findings (S5.3, 2026-10-14)" */
 /* 0045:008e  strcpy_to_seg                  frontend   frontend.md "8.4.1 Live program code" */
 /* 0045:00bc  huge_alloc                     frontend   frontend.md "(no heading)" */
 /* 0045:0102  huge_free                      frontend   frontend.md "(no heading)" */
 /* 0045:0116  huge_fread                     frontend   frontend.md "8.4.1 Live program code" */
 /* 0045:01fe  file_copy                      frontend   frontend.md "8.4.3 C runtime (mapped to platform.md)"  DEAD */
-/* 006d:0002  ss_remap_rows_a                frontend   frontend.md "(no heading)" */
+/* 006d:0002  ss_remap_rows_a                frontend   frontend.md "9 Port findings (S5.3, 2026-10-14)" */
 /* 006d:0084  ss_remap_rows_b                frontend   frontend.md "(no heading)" */
 /* 006d:0112  ss_load                        frontend   frontend.md "2.3 ss_load and ss_draw (006D:0112, 006D:05BE)" */
 /* 006d:05a2  ss_free                        frontend   frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */

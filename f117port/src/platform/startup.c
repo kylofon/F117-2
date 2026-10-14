@@ -32,7 +32,7 @@ static const ProgDs ds_table[PROG_COUNT] = {
     [PROG_SETUP]    = { .rand_seed = 0x0EB4, .break_flag = 0x0AC8, .break_value = 0xFF, .joy_cal = 0x0DF4,
                         .dosbuf = 0x0B88, .dosbuf_fd = 0x0DF2 },
     [PROG_MPS_LOGO] = { 0 },
-    [PROG_PLAYER]   = { 0 },
+    [PROG_PLAYER]   = { .break_flag = 0x2092, .break_value = 3 },     /* PLAYER break_isr 0560 sets [2092] = 3 (frontend.md 8.3.3) */
     [PROG_START]    = { .rand_seed = 0xAE8C, .break_flag = 0x73F2, .break_value = 1, .joy_cal = 0x6982,
                         .mouse_x = 0xE08A, .mouse_y = 0xE08C, .mouse_btn = 0x69B6,
                         .dosbuf = 0x6235, .dosbuf_fd = 0x649F },

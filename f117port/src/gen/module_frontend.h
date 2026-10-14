@@ -13,68 +13,68 @@ void abort_fn_mps_logo(void); /* TODO signature: spec frontend.md "8.4.3 C runti
 /* PLAYER 0000:1f54  spec frontend.md "8.3.4 RTL and library pieces (live, mapped)" */
 void abort_fn_player(void); /* TODO signature: spec frontend.md "8.3.4 RTL and library pieces (live, mapp" (type column: "void abort(void)") */
 /* DSWAP 0000:0ff8  spec frontend.md "8.1 DSWAP (7 functions)" */
-void atoi_fn(void); /* TODO signature: spec frontend.md "8.1 DSWAP (7 functions)" (type column: "int atoi(char *s)") */
+int atoi_fn(const char *s);
 /* DSWAP 0000:1bd0  spec frontend.md "8.1 DSWAP (7 functions)" */
-void atol_fn(void); /* TODO signature: spec frontend.md "8.1 DSWAP (7 functions)" (type column: "long atol(char *s)") */
+long atol_fn(const char *s);
 /* DSWAP 0000:10f4  spec frontend.md "4 DSWAP (DSWAP.EXE, DGROUP 0225)" */
 void bios_disk(void); /* TODO signature: spec frontend.md "4 DSWAP (DSWAP.EXE, DGROUP 0225)" (type column: "unsigned bios_disk(int cmd, DiskReq *r)") */
 /* SETUP 0000:1387  spec frontend.md "8.2 SETUP (38 functions)" */
 void bios_int4(void); /* TODO signature: spec frontend.md "8.2 SETUP (38 functions)" (type column: "int bios_int4(int intno, Regs4 *in, Regs") */
-/* MPS_LOGO 0045:0062  spec frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
-void bios_ticks(void); /* TODO signature: spec frontend.md "2.1 Main (0006:0072, argc/argv from the " (type column: "uint32_t bios_ticks(void)") */
+/* MPS_LOGO 0045:0062  spec frontend.md "9 Port findings (S5.3, 2026-10-14)" */
+u32 bios_ticks(void);
 /* PLAYER 0000:0bcd  spec frontend.md "8.3.1 The PAN stream reader: ring buffer and bit reader (liv" */
-void bits_close(void); /* TODO signature: spec frontend.md "8.3.1 The PAN stream reader: ring buffer" (type column: "int bits_close(void)") */
+int bits_close(void);
 /* PLAYER 0000:0bdc  spec frontend.md "8.3.1 The PAN stream reader: ring buffer and bit reader (liv" */
-void bits_eof(void); /* TODO signature: spec frontend.md "8.3.1 The PAN stream reader: ring buffer" (type column: "int bits_eof(void)") */
+int bits_eof(void);
 /* PLAYER 0000:0ba2  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void bits_open(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "int bits_open(char *name)") */
+int bits_open(const char *name);
 /* PLAYER 0000:0b84  spec frontend.md "8.3.1 The PAN stream reader: ring buffer and bit reader (liv" */
-void bits_refill(void);
+u16 bits_refill(u16 si);
 /* SETUP 0000:0503  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void break_check(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "void break_check(void)") */
+void break_check(void);
 /* PLAYER 0000:0583  spec frontend.md "8.3.3 Input, video, break handler, timer (live)" */
-void break_hooks_install(void); /* TODO signature: spec frontend.md "8.3.3 Input, video, break handler, timer" (type column: "void break_hooks_install(void)") */
+void break_hooks_install(void);
 /* PLAYER 0000:05d0  spec frontend.md "8.3.3 Input, video, break handler, timer (live)" */
-void break_hooks_restore(void); /* TODO signature: spec frontend.md "8.3.3 Input, video, break handler, timer" (type column: "void break_hooks_restore(void)") */
+void break_hooks_restore(void);
 /* PLAYER 0000:0560  spec frontend.md "8.3.3 Input, video, break handler, timer (live)": same name as module_platform.h, declared there */
 /* MPS_LOGO 0146:0016  spec frontend.md "8.4.3 C runtime (mapped to platform.md)": same name as module_platform.h, declared there */
 /* PLAYER 0000:1006  spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" */
-void cel_rle_draw(void); /* TODO signature: spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" (type column: "uint32_t cel_rle_draw(uint32_t src, unsi") */
+u32 cel_rle_draw(u32 src, u16 dseg, u16 doff);
 /* PLAYER 0000:07ea  spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" */
-void cel_show(void); /* TODO signature: spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" (type column: "uint32_t cel_show(uint32_t p)") */
+u32 cel_show(u32 p);
 /* SETUP 0000:0bfb  spec frontend.md "(no heading)": same name as module_platform.h, declared there */
 /* DSWAP 0000:10d0  spec frontend.md "8.1 DSWAP (7 functions)" */
 void dos_getdisk(void); /* TODO signature: spec frontend.md "8.1 DSWAP (7 functions)" (type column: "int dos_getdisk(void)") */
 /* PLAYER 0000:14b8  spec frontend.md "8.3.4 RTL and library pieces (live, mapped)" */
 void dos_getvect(void); /* TODO signature: spec frontend.md "8.3.4 RTL and library pieces (live, mapp" (type column: "void far *dos_getvect(int n)") */
-/* SETUP 0000:1509  spec frontend.md "(no heading)" */
-void dos_puts(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void dos_puts(char *s)") */
+/* SETUP 0000:1509  spec frontend.md "9 Port findings (S5.3, 2026-10-14)" */
+void dos_puts(const char *s);
 /* DSWAP 0000:1120  spec frontend.md "8.1 DSWAP (7 functions)" */
 void dos_select_disk(void); /* TODO signature: spec frontend.md "8.1 DSWAP (7 functions)" (type column: "int dos_select_disk(int drive1, int *nlo") */
 /* PLAYER 0000:14ca  spec frontend.md "8.3.4 RTL and library pieces (live, mapped)" */
 void dos_setvect(void); /* TODO signature: spec frontend.md "8.3.4 RTL and library pieces (live, mapp" (type column: "int dos_setvect(int n, void far *h)") */
 /* DSWAP 0000:0219  spec frontend.md "8.1 DSWAP (7 functions)" */
-void dswap_exit(void); /* TODO signature: spec frontend.md "8.1 DSWAP (7 functions)" (type column: "void dswap_exit(int code)") */
+void dswap_exit(int code);
 /* DSWAP 0000:0010  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void dswap_main(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "int dswap_main(int argc, char **argv)") */
+int dswap_main(const char *tail);
 /* PLAYER 0000:0e0c  spec frontend.md "8.3.2 Fade helpers (live)" */
-void fade_init(void); /* TODO signature: spec frontend.md "8.3.2 Fade helpers (live)" (type column: "void fade_init(int secs)") */
+void fade_init(int secs);
 /* PLAYER 0000:0de4  spec frontend.md "8.3.2 Fade helpers (live)" */
 void fade_measure(void); /* TODO signature: spec frontend.md "8.3.2 Fade helpers (live)" (type column: "void fade_measure(void)") */
 /* PLAYER 0000:0e65  spec frontend.md "8.3.2 Fade helpers (live)" */
-void fade_slice(void); /* TODO signature: spec frontend.md "8.3.2 Fade helpers (live)" (type column: "void fade_slice(void)") */
+void fade_slice(void);
 /* PLAYER 0000:0ee3  spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" */
-void fade_step(void); /* TODO signature: spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" (type column: "void fade_step(void)") */
+void fade_step(void);
 /* MPS_LOGO 0146:03a0  spec frontend.md "8.4.3 C runtime (mapped to platform.md)": same name as module_platform.h, declared there */
 /* MPS_LOGO 0146:1a6a  spec frontend.md "8.4.3 C runtime (mapped to platform.md)": same name as module_shell.h, declared there */
 /* MISC 0007:0000  spec frontend.md "5 MISC.EXE (6 entries, slot base 90, code segment image 0070" */
-void getche_misc(void); /* TODO signature: spec frontend.md "5 MISC.EXE (6 entries, slot base 90, cod" (type column: "int getche(void)") */
+int getche_misc(void);
 /* MPS_LOGO 0146:0822  spec frontend.md "8.4.3 C runtime (mapped to platform.md)" */
 void hmemcpy(void); /* TODO signature: spec frontend.md "8.4.3 C runtime (mapped to platform.md)" (type column: "void far *hmemcpy(void far *dst, void fa") */
 /* MPS_LOGO 0045:00bc  spec frontend.md "(no heading)" */
 void huge_alloc(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void far *huge_alloc(uint32_t bytes)") */
 /* PLAYER 0000:05f6  spec frontend.md "8.3.1 The PAN stream reader: ring buffer and bit reader (liv" */
-void huge_copy(void); /* TODO signature: spec frontend.md "8.3.1 The PAN stream reader: ring buffer" (type column: "void huge_copy(uint32_t src, uint32_t ds") */
+void huge_copy(u32 src, u32 dst, unsigned n);
 /* MPS_LOGO 0045:0116  spec frontend.md "8.4.1 Live program code" */
 void huge_fread(void); /* TODO signature: spec frontend.md "8.4.1 Live program code" (type column: "uint32_t huge_fread(FILE *f, void far *d") */
 /* MPS_LOGO 0045:0102  spec frontend.md "(no heading)" */
@@ -82,25 +82,25 @@ void huge_free(void); /* TODO signature: spec frontend.md "(no heading)" (type c
 /* MPS_LOGO 0045:000e  spec frontend.md "8.4.1 Live program code" */
 void huge_norm(void); /* TODO signature: spec frontend.md "8.4.1 Live program code" (type column: "void far *huge_norm(unsigned off, unsign") */
 /* PLAYER 0000:0664  spec frontend.md "8.3.1 The PAN stream reader: ring buffer and bit reader (liv" */
-void huge_peek_word(void); /* TODO signature: spec frontend.md "8.3.1 The PAN stream reader: ring buffer" (type column: "unsigned huge_peek_word(uint32_t lin)") */
+unsigned huge_peek_word(u32 linear);
 /* PLAYER 0000:0f1a  spec frontend.md "3.1 Input and exit" */
-void joy_button(void); /* TODO signature: spec frontend.md "3.1 Input and exit" (type column: "int joy_button(int n)") */
+int joy_button(int n);
 /* MISC 0007:0029  spec frontend.md "5 MISC.EXE (6 entries, slot base 90, code segment image 0070" */
-void joy_button_misc(void); /* TODO signature: spec frontend.md "5 MISC.EXE (6 entries, slot base 90, cod" (type column: "int joy_button(int n)") */
+int joy_button_misc(int n);
 /* SETUP 0237:002c  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void joy_calib_center(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "void joy_calib_center(void)") */
+void joy_calib_center(void);
 /* SETUP 0237:0115  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void joy_calib_get(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "void joy_calib_get(uint16_t far dst[20])") */
+void joy_calib_get(u16 *dst);
 /* SETUP 0237:004d  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void joy_calib_track(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "void joy_calib_track(void)") */
+void joy_calib_track(void);
 /* SETUP 0237:003a  spec frontend.md "(no heading)" */
 void joy_set_centre_axis(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "SI axis") */
 /* MISC 0007:000a  spec frontend.md "5 MISC.EXE (6 entries, slot base 90, code segment image 0070" */
-void kbd_empty_misc(void); /* TODO signature: spec frontend.md "5 MISC.EXE (6 entries, slot base 90, cod" (type column: "int kbd_empty(void)") */
+int kbd_empty_misc(void);
 /* MISC 0007:0005  spec frontend.md "5 MISC.EXE (6 entries, slot base 90, code segment image 0070" */
-void kbd_get_misc(void); /* TODO signature: spec frontend.md "5 MISC.EXE (6 entries, slot base 90, cod" (type column: "int kbd_get(void)") */
+int kbd_get_misc(void);
 /* MISC 0007:0018  spec frontend.md "5 MISC.EXE (6 entries, slot base 90, code segment image 0070" */
-void kbd_locks_clear(void); /* TODO signature: spec frontend.md "5 MISC.EXE (6 entries, slot base 90, cod" (type column: "void kbd_locks_clear(void)") */
+void kbd_locks_clear(void);
 /* DSWAP 0000:03a7  spec frontend.md "(no heading)" */
 void load_pic(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void load_pic(char *name, int page)") */
 /* DSWAP 0000:03d3  spec frontend.md "(no heading)" */
@@ -110,9 +110,9 @@ void load_pic_seg_c(void); /* TODO signature: spec frontend.md "(no heading)" (t
 /* DSWAP 0000:0423  spec frontend.md "(no heading)" */
 void load_pic_seg_c_at(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void load_pic_seg_c_at(char *name, unsig") */
 /* MPS_LOGO 0006:000c  spec frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
-void logo_fatal(void); /* TODO signature: spec frontend.md "2.1 Main (0006:0072, argc/argv from the " (type column: "void logo_fatal(char *msg)") */
+void logo_fatal(const char *msg);
 /* MPS_LOGO 0006:0072  spec frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
-void logo_main(void); /* TODO signature: spec frontend.md "2.1 Main (0006:0072, argc/argv from the " (type column: "int logo_main(int argc, char **argv)") */
+int logo_main(int argc, char **argv);
 /* PLAYER 0000:1376  spec frontend.md "8.3.4 RTL and library pieces (live, mapped)" */
 char *ltoa(long v, char *buf, int radix);
 /* DSWAP 0000:0bcf  spec frontend.md "(no heading)": same name as module_video.h, declared there */
@@ -121,7 +121,7 @@ char *ltoa(long v, char *buf, int radix);
 /* PLAYER 0000:0f47  spec frontend.md "3.1 Input and exit" */
 void mouse_poll_buttons(void);
 /* SETUP 0237:0004  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void mouse_present(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "int mouse_present(void)") */
+int mouse_present(void);
 /* DSWAP 0000:2060  spec frontend.md "8.5 Corrections made by this pass" */
 void nmalloc_dswap(void); /* TODO signature: spec frontend.md "8.5 Corrections made by this pass" (type column: "void *nmalloc(unsigned n)") */
 /* MPS_LOGO 0146:1a64  spec frontend.md "8.4.3 C runtime (mapped to platform.md)" */
@@ -145,14 +145,14 @@ unsigned ovl_load_tail(void);
 /* MPS_LOGO 00da:043d  spec frontend.md "8.4.1 Live program code" */
 unsigned ovl_read_file(void);
 /* MPS_LOGO 0006:038e  spec frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
-void pal_get(void); /* TODO signature: spec frontend.md "2.1 Main (0006:0072, argc/argv from the " (type column: "void pal_get(uint8_t far *rgb768)") */
+void pal_get(u8 *rgb768);
 /* PLAYER 0000:0d0c  spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" */
-void pal_load(void); /* TODO signature: spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" (type column: "void pal_load(int first, int count, uint") */
+void pal_load(int first, int count, const u8 *rgb);
 /* MPS_LOGO 0006:033a  spec frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")": same name as module_platform.h, declared there */
 /* PLAYER 0000:0be2  spec frontend.md "8.3.1 The PAN stream reader: ring buffer and bit reader (liv" */
-void pan_decode_chunk(void); /* TODO signature: spec frontend.md "8.3.1 The PAN stream reader: ring buffer" (type column: "int pan_decode_chunk(uint32_t dst)") */
+int pan_decode_chunk(u32 dst);
 /* PLAYER 0000:0244  spec frontend.md "8.3.1 The PAN stream reader: ring buffer and bit reader (liv" */
-void pan_play_file(void); /* TODO signature: spec frontend.md "8.3.1 The PAN stream reader: ring buffer" (type column: "void pan_play_file(char *name)") */
+void pan_play_file(const char *name);
 /* DSWAP 0000:0ad5  spec frontend.md "(no heading)": same name as module_video.h, declared there */
 /* DSWAP 0000:0aaa  spec frontend.md "8.5 Corrections made by this pass": same name as module_simflow.h, declared there */
 /* DSWAP 0000:0aab  spec frontend.md "(no heading)": same name as module_video.h, declared there */
@@ -161,21 +161,21 @@ void pan_play_file(void); /* TODO signature: spec frontend.md "8.3.1 The PAN str
 /* DSWAP 0000:09ce  spec frontend.md "(no heading)": same name as module_video.h, declared there */
 /* DSWAP 0000:0a42  spec frontend.md "(no heading)": same name as module_video.h, declared there */
 /* PLAYER 0000:01f6  spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" */
-void player_exit(void); /* TODO signature: spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" (type column: "void player_exit(int code)") */
+void player_exit(int code);
 /* PLAYER 0000:005c  spec frontend.md "(no heading)" */
-void player_init(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void player_init(void)") */
+void player_init(void);
 /* PLAYER 0000:0010  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void player_main(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "int player_main(int argc, char **argv)") */
+int player_main(const char *tail);
 /* PLAYER 0000:019a  spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" */
-void player_run(void); /* TODO signature: spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)" (type column: "void player_run(int argc)") */
+void player_run(int argc);
 /* PLAYER 0000:0696  spec frontend.md "3.1 Input and exit" */
-void poll_input(void); /* TODO signature: spec frontend.md "3.1 Input and exit" (type column: "void poll_input(void)") */
+void poll_input(void);
 /* MPS_LOGO 0146:1adc  spec frontend.md "8.4.3 C runtime (mapped to platform.md)" */
 void raise_fn_mps_logo(void); /* TODO signature: spec frontend.md "8.4.3 C runtime (mapped to platform.md)" (type column: "int far raise(int sig)") */
 /* PLAYER 0000:223a  spec frontend.md "8.3.4 RTL and library pieces (live, mapped)" */
 void raise_fn_player(void); /* TODO signature: spec frontend.md "8.3.4 RTL and library pieces (live, mapp" (type column: "int raise(int sig)") */
 /* PLAYER 0000:03fe  spec frontend.md "8.3.1 The PAN stream reader: ring buffer and bit reader (liv" */
-void ring_make_room(void); /* TODO signature: spec frontend.md "8.3.1 The PAN stream reader: ring buffer" (type column: "int ring_make_room(void)") */
+int ring_make_room(void);
 /* DSWAP 0000:0b56  spec frontend.md "(no heading)": same name as module_video.h, declared there */
 /* MPS_LOGO 0146:0880  spec frontend.md "8.4.3 C runtime (mapped to platform.md)": same name as module_platform.h, declared there */
 /* MPS_LOGO 0146:0b07  spec frontend.md "8.4.3 C runtime (mapped to platform.md)": same name as module_platform.h, declared there */
@@ -198,29 +198,29 @@ void save_file_far(void); /* TODO signature: spec frontend.md "(no heading)" (ty
 /* PLAYER 0000:0db0  spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)": same name as module_video.h, declared there */
 /* PLAYER 0000:0dca  spec frontend.md "3 PLAYER (PLAYER.EXE, DGROUP 02A3)": same name as module_video.h, declared there */
 /* MPS_LOGO 0006:03e4  spec frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
-void set_video_mode(void); /* TODO signature: spec frontend.md "2.1 Main (0006:0072, argc/argv from the " (type column: "void set_video_mode(int mode)") */
+void set_video_mode(int mode);
 /* SETUP 0000:053b  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void setup_exit(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "void setup_exit(int code)") */
+void setup_exit(int code);
 /* SETUP 0000:0010  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void setup_main(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "int setup_main(void)") */
+int setup_main(const char *tail);
 /* MPS_LOGO 00da:030e  spec frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
-void snd_cmd_log(void); /* TODO signature: spec frontend.md "2.1 Main (0006:0072, argc/argv from the " (type column: "void snd_cmd_log(int cmd)") */
+void snd_cmd_log(int cmd);
 /* MPS_LOGO 00da:0307  spec frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
-void snd_init_log(void); /* TODO signature: spec frontend.md "2.1 Main (0006:0072, argc/argv from the " (type column: "int snd_init_log(int,int)") */
+int snd_init_log(int a1, int a2);
 /* MPS_LOGO 00da:0315  spec frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
-void snd_shutdown_log(void); /* TODO signature: spec frontend.md "2.1 Main (0006:0072, argc/argv from the " (type column: "void snd_shutdown_log(void)") */
+void snd_shutdown_log(void);
 /* MPS_LOGO 006d:05be  spec frontend.md "2.3 ss_load and ss_draw (006D:0112, 006D:05BE)" */
-void ss_draw(void); /* TODO signature: spec frontend.md "2.3 ss_load and ss_draw (006D:0112, 006D" (type column: "void ss_draw(SS far *s, int frame, int x") */
+void ss_draw(void *series, int frame, int x, int y, const void *screen);
 /* MPS_LOGO 006d:0678  spec frontend.md "8.4.1 Live program code" */
 void ss_draw_rle(void);
 /* MPS_LOGO 006d:05a2  spec frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
-void ss_free(void); /* TODO signature: spec frontend.md "2.1 Main (0006:0072, argc/argv from the " (type column: "void ss_free(SS far **p)") */
+void ss_free(void **p);
 /* MPS_LOGO 006d:0112  spec frontend.md "2.3 ss_load and ss_draw (006D:0112, 006D:05BE)" */
-void ss_load(void); /* TODO signature: spec frontend.md "2.3 ss_load and ss_draw (006D:0112, 006D" (type column: "SS far *ss_load(char *name, int mode, ui") */
-/* MPS_LOGO 006d:0002  spec frontend.md "(no heading)" */
-void ss_remap_rows_a(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void ss_remap_rows_a(uint8_t far *p, int") */
+void *ss_load(const char *name, int mode, u8 *pal768);
+/* MPS_LOGO 006d:0002  spec frontend.md "9 Port findings (S5.3, 2026-10-14)" */
+void ss_remap_rows_a(u8 *p, int base);
 /* MPS_LOGO 006d:0084  spec frontend.md "(no heading)" */
-void ss_remap_rows_b(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void ss_remap_rows_b(uint8_t far *p, int") */
+void ss_remap_rows_b(u8 *p, int base);
 /* MPS_LOGO 0146:1a50  spec frontend.md "8.4.3 C runtime (mapped to platform.md)": same name as module_platform.h, declared there */
 /* SETUP 0000:125f  spec frontend.md "8.2 SETUP (38 functions)" */
 void str_copy_to_far(void); /* TODO signature: spec frontend.md "8.2 SETUP (38 functions)" (type column: "void(char far *dst, char *src)") */
@@ -238,17 +238,17 @@ void strstr_fn(void); /* TODO signature: spec frontend.md "8.4.3 C runtime (mapp
 /* DSWAP 0000:023e  spec frontend.md "4 DSWAP (DSWAP.EXE, DGROUP 0225)" */
 void swap_screen_show(void); /* TODO signature: spec frontend.md "4 DSWAP (DSWAP.EXE, DGROUP 0225)" (type column: "void swap_screen_show(int msg)") */
 /* MPS_LOGO 0006:0044  spec frontend.md "2.1 Main (0006:0072, argc/argv from the EXEC tail " X")" */
-void text_clear_b800(void); /* TODO signature: spec frontend.md "2.1 Main (0006:0072, argc/argv from the " (type column: "void text_clear_b800(void)") */
+void text_clear_b800(void);
 /* SETUP 0000:0512  spec frontend.md "8.2 SETUP (38 functions)" */
-void text_gotoxy(void); /* TODO signature: spec frontend.md "8.2 SETUP (38 functions)" (type column: "void text_gotoxy(int row, int col)") */
+void text_gotoxy(int row, int col);
 /* SETUP 0000:14be  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void text_puts_at(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "void text_puts_at(int row, int col, char") */
+void text_puts_at(int row, int col, const char *s);
 /* PLAYER 0000:0738  spec frontend.md "8.3.3 Input, video, break handler, timer (live)" */
-void tick_callback(void); /* TODO signature: spec frontend.md "8.3.3 Input, video, break handler, timer" (type column: "void far tick_callback(void)") */
+void tick_callback(void);
 /* PLAYER 026b:000a  spec frontend.md "3.2 Timer": same name as module_platform.h, declared there */
 /* PLAYER 026b:004d  spec frontend.md "8.3.3 Input, video, break handler, timer (live)": same name as module_platform.h, declared there */
 /* PLAYER 026b:0336  spec frontend.md "8.3.3 Input, video, break handler, timer (live)" */
-void timer_step(void); /* TODO signature: spec frontend.md "8.3.3 Input, video, break handler, timer" (type column: "void far timer_step(void)") */
+void timer_step(void);
 /* DSWAP 0000:033e  spec frontend.md "(no heading)" */
 unsigned ui_load_file_far(char *name, unsigned off, unsigned seg);
 /* DSWAP 0000:0374  spec frontend.md "8.4.3 C runtime (mapped to platform.md)" */
@@ -256,11 +256,11 @@ unsigned ui_load_file_near(char *name, void *buf);
 /* SETUP 0000:0582  spec frontend.md "(no heading)" */
 void ui_text(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void(TextCtx *c, char *s, int x, int y)") */
 /* PLAYER 0000:0520  spec frontend.md "8.3.3 Input, video, break handler, timer (live)" */
-void video_get_mode(void); /* TODO signature: spec frontend.md "8.3.3 Input, video, break handler, timer" (type column: "int video_get_mode(void)") */
+int video_get_mode(void);
 /* PLAYER 0000:0540  spec frontend.md "8.3.3 Input, video, break handler, timer (live)" */
-void video_set_mode(void); /* TODO signature: spec frontend.md "8.3.3 Input, video, break handler, timer" (type column: "void video_set_mode(int mode)") */
+void video_set_mode(int mode);
 /* SETUP 0000:0a4b  spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-void wait_ticks(void); /* TODO signature: spec frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGRO" (type column: "void wait_ticks(int n)") */
+void wait_ticks(int n);
 
 /* ---- dead: not ported (listed for the record) */
 /* DEAD DSWAP 0000:030a break_check */

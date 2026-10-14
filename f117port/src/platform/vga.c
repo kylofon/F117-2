@@ -17,7 +17,8 @@ static u8 dac_windex, dac_wsub, dac_rindex, dac_rsub, dac_state;
 static u8 dac_wbuf[3];
 
 /* Composition cache: report "changed" only when the picture really changed. */
-static u32 last_frame[320 * 200];
+static u32 last_frame[640 * 400];
+static int frame_w = 320, frame_h = 200;       /* 640 x 400 in text mode (vgatext.c), else 320 x 200 */
 static bool dirty = true;
 
 /* 70.086 Hz: frame = 800 x 449 pixel clocks at 25.175 MHz (host.h: the same period as the timer tick);
@@ -38,9 +39,12 @@ static u32 pal32(u8 i)
 
 static bool compose(u32 *xrgb)
 {
-    static u32 out[320 * 200];
-    if (mode != 0x13 || (seq[1] & 0x20)) {
-        memset(out, 0, sizeof out);                          /* text mode: not modelled, black; sequencer clocking-mode bit 5 = screen off (video.md 8) */
+    static u32 out[640 * 400];
+    const size_t nbytes = (size_t)frame_w * (size_t)frame_h * sizeof(u32);
+    if (mode == 0x03 && !(seq[1] & 0x20)) {
+        vga_text_render(out);                                /* S5.3: the 80 x 25 text screen of SETUP (vgatext.c) */
+    } else if (mode != 0x13 || (seq[1] & 0x20)) {
+        memset(out, 0, nbytes);                              /* other modes are not modelled: black; sequencer clocking-mode bit 5 = screen off (video.md 8) */
     } else {
         u32 pal[256];
         for (int i = 0; i < 256; i++) pal[i] = pal32((u8)i);
@@ -57,10 +61,10 @@ static bool compose(u32 *xrgb)
             }
         }
     }
-    if (!dirty && memcmp(out, last_frame, sizeof out) == 0) return false;
+    if (!dirty && memcmp(out, last_frame, nbytes) == 0) return false;
     dirty = false;
-    memcpy(last_frame, out, sizeof out);
-    memcpy(xrgb, out, sizeof out);
+    memcpy(last_frame, out, nbytes);
+    memcpy(xrgb, out, nbytes);
     return true;
 }
 
@@ -74,7 +78,8 @@ void vga_init(void)
     memset(attr, 0, sizeof attr);
     attr_flipflop = false;
     dirty = true;
-    host_set_frame_source(compose, 320, 200);
+    frame_w = 640; frame_h = 400;                           /* text mode first */
+    host_set_frame_source(compose, frame_w, frame_h);
 }
 
 u8 *vga_vram(void) { return vram; }
@@ -95,10 +100,13 @@ void vga_latch_copy(u16 dst, u16 src, u16 n)
 void vga_set_mode(u8 m)
 {
     mode = m;
+    if (m == 0x03 && frame_w != 640) { frame_w = 640; frame_h = 400; host_set_frame_source(compose, frame_w, frame_h); }
+    if (m != 0x03 && frame_w != 320) { frame_w = 320; frame_h = 200; host_set_frame_source(compose, frame_w, frame_h); }
     memset(crtc, 0, sizeof crtc);
     crtc[0x13] = 40;
     memset(attr, 0, sizeof attr);
     attr_flipflop = false;
+    seq[1] &= (u8)~0x20;                                   /* the BIOS mode set programs the sequencer: the display is on (S5.3: DSWAP leaves it off) */
     if (m == 0x13) {
         memset(vram, 0, 0x10000);                          /* BIOS clears the chained 64000 bytes */
         for (int i = 0; i < 256; i++) dac[i][0] = dac[i][1] = dac[i][2] = 0;   /* PORT: default palette not modelled */

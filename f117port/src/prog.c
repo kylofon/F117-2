@@ -27,6 +27,7 @@
 #include "mem.h"
 #include "gen/module_video.h"
 #include "platform/platform.h"
+#include "programs/placeholder.h"
 
 const ProgDef prog_table[PROG_COUNT] = {
     [PROG_SETUP]    = { "SETUP.EXE",    setup_main },
@@ -41,6 +42,7 @@ const ProgDef prog_table[PROG_COUNT] = {
 bool prog_trace;
 int prog_run_count[PROG_COUNT];
 bool prog_abort;
+bool prog_use_stubs;
 
 void prog_log(const char *fmt, ...)
 {
@@ -57,7 +59,7 @@ int prog_run(ProgId id, const char *tail)
 {
     prog_log("[chain] EXEC %-12s tail \"%s\"", prog_table[id].exe, tail);
     prog_run_count[id]++;
-    int code = platform_exec(id, prog_table[id].main, tail);
+    int code = platform_exec(id, prog_use_stubs ? placeholder_main(id) : prog_table[id].main, tail);
     prog_log("[chain]   %s exit code %02Xh", prog_table[id].exe, code);
     return code;
 }
@@ -80,11 +82,8 @@ static void f117_quit(const char *why)
     prog_log("[chain] quit: %s", why);
 }
 
-int chain_run(const char *f117_tail)
+void prog_comm_init(void)
 {
-    int runs = 0;
-#define RUN(id, tail) (runs++, prog_run((id), (tail)))
-
     /* F117.COM start-up: SP = 07B8, own block shrunk to 7Ch paragraphs, then the comm block. */
     dos_arena_reset(PSP_SEG, 0x7C);
     u16 comm_seg;
@@ -94,6 +93,14 @@ int chain_run(const char *f117_tail)
     wr16(0, COMM_INIT_DONE, 0);
     memset(mp(comm_seg, 0), 0, COMM_SIZE);     /* PORT: DOS gives the original uncleared memory; the port starts from zero */
     prog_log("[chain] F117.COM: comm block %04X:0000 (%u bytes), 0000:04F0 = %04X", comm_seg, COMM_SIZE, comm_seg);
+}
+
+int chain_run(const char *f117_tail)
+{
+    int runs = 0;
+#define RUN(id, tail) (runs++, prog_run((id), (tail)))
+
+    prog_comm_init();
 
     if (RUN(PROG_SETUP, f117_tail) != EXIT_SETUP_OK) { f117_quit("SETUP did not return 24h"); return runs; }
     if (prog_abort) { f117_quit("aborted"); return runs; }

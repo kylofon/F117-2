@@ -81,6 +81,7 @@ typedef struct PanFile {
 } PanFile;
 bool pan_parse(const u8 *file, size_t len, PanFile *out);      /* LZ stream -> header, palette, cel table */
 u32  pan_apply_cel(const PanFile *p, int cel, u8 *screen64000);/* PLAYER 0000:1006 on one cel; returns the end position */
+u32  pan_rle_draw(const u8 *src, u32 pos, u32 end, u8 *screen64000);   /* the same on a stream src[pos..end) (PLAYER's ring buffer in mem[]) */
 void pan_free(PanFile *p);
 size_t lz_decode(const u8 *in, size_t n, u8 **out);            /* PLAYER 0BE2 (tools/lzs.py): returns the length; *out malloc'd */
 

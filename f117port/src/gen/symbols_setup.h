@@ -70,7 +70,7 @@
 /* 0000:1454  itoa_hex4                      frontend   frontend.md "8.2 SETUP (38 functions)"  DEAD */
 /* 0000:149c  itoa_bin16                     frontend   frontend.md "8.2 SETUP (38 functions)"  DEAD */
 /* 0000:14be  text_puts_at                   frontend   frontend.md "1 SETUP (SETUP.EXE, image 13 437 B, DGROUP 024C)" */
-/* 0000:1509  dos_puts                       frontend   frontend.md "(no heading)" */
+/* 0000:1509  dos_puts                       frontend   frontend.md "9 Port findings (S5.3, 2026-10-14)" */
 /* 0000:1516  c0_start                       platform   platform.md "1 Library map (code offsets; segment 0000 unless shown)" */
 /* 0000:1600  rtl_cinit                      platform   platform.md "1 Library map (code offsets; segment 0000 unless shown)" */
 /* 0000:16ce  exit_fn                        platform   platform.md "2 Start-up, exit, fatal errors (verified on END)" */

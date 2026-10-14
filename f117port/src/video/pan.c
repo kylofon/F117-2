@@ -120,13 +120,11 @@ void pan_free(PanFile *p)
     memset(p, 0, sizeof *p);
 }
 
-/* PLAYER 0000:1006 on one cel: fill pairs, literal runs, skips and the long forms; the screen is updated in place. */
-u32 pan_apply_cel(const PanFile *p, int cel, u8 *scr)
+/* PLAYER 0000:1006 (cel_rle_draw) on a cel's RLE stream src[pos..end): fill pairs, literal runs, skips and the long forms; the
+ * 320 x 200 screen is updated in place. Returns the position after the terminator. S5.3 added this src / pos / end form so that
+ * PLAYER's ring buffer (mem[], linear addresses) can use it; pan_apply_cel below is the whole-file wrapper. */
+u32 pan_rle_draw(const u8 *src, u32 pos, u32 end, u8 *scr)
 {
-    if (cel < 0 || cel >= p->ncels) return 0;
-    const u8 *src = p->data;
-    u32 pos = p->cel_start[cel] + 4;                           /* the cel header B 00 01 00 */
-    u32 end = p->len;
     long di = 0;
     const long N = 64000;
 #define NEED(k) do { if (pos + (u32)(k) > end) return pos; } while (0)
@@ -181,4 +179,11 @@ u32 pan_apply_cel(const PanFile *p, int cel, u8 *scr)
 #undef NEED
 #undef PUT_RUN
 #undef PUT_FILL
+}
+
+/* PLAYER 0000:1006 on one cel of a whole decoded file */
+u32 pan_apply_cel(const PanFile *p, int cel, u8 *scr)
+{
+    if (cel < 0 || cel >= p->ncels) return 0;
+    return pan_rle_draw(p->data, p->cel_start[cel] + 4, p->len, scr);       /* +4: the cel header B 00 01 00 */
 }

@@ -25,7 +25,8 @@ host.h/.c         SDL3: window/present (4:3 or 1:1), 70.09 Hz tick, XT key bytes
 platform/vga.*    VGA model: 256 KB planar memory as linear pages, CRTC start/offset, pel panning,
                   DAC, 70.09 Hz retrace on port 3DAh                                              (coordinator)
 platform/timer.*  the tick source: timer_ticks and a hook for the ported ISR body                 (platform)
-programs/         PHASE 4 ONLY: placeholder.c has a stand-in for each program                     (replaced in S5)
+programs/         PHASE 4 ONLY: placeholder.c has a stand-in for START, VGAME, END (S5.4 .. S5.8 replace them); the front-end
+                  stand-ins (*_stub) are used only by --chain-test, which needs no game files
 launcher/         the wxWidgets launcher "F-117A Nighthawk" (-DF117_LAUNCHER=ON, launcher/README.md)
 ../third_party/nuked-opl3   the OPL2 emulator (LGPL-2.1), a separate static library
 ```
@@ -83,7 +84,7 @@ Needs SDL3 (`mingw-w64-x86_64-sdl3`); the launcher also wxWidgets 3.2 (`mingw-w6
 it); keep them together in a release.
 
 Options: `--game-dir DIR`, `--scale N`, `--aspect 4:3|1:1`, `--fullscreen` (what the launcher passes), `--headless` (no window or
-audio), `--trace`, `--check` (are the files of the chain in the game folder?), `--chain-test`, `--tick-test [MS]`.
+audio), `--trace`, `--check` (are the files of the chain in the game folder?), `--chain-test`, `--tick-test [MS]`, `--frontend-test DIR`.
 ctest runs the chain with the placeholders (`chain`), counts ticks over a second (`tick_rate`) and the missing-file
 report (`check_missing_files`). Developer aids (environment, `host.h`): `F117_SNAPSHOT_DIR` (+ `F117_SNAPSHOT_MS`) saves
 presented frames as PNG, `F117_KEYS` scripts XT key presses, `F117_TRACE=1` logs program switches. Throwaway
@@ -157,6 +158,40 @@ Rules for the modules that follow:
   `python port/notes/s52/video_emu.py` rewrites `video_vectors.h`; needs `Game/` and `work/unpacked/`), `video_decoders`
   (`port/notes/s52/decoder_ref.py`: every PIC/PAL/PAN/font against `tools/picdec.py`, `panlib.py`, `mgfont.py`'s parse; skips with
   77 without `Game/`), `video_screen` (`f117 --video-test`, PNGs in `work/s52/screen`).
+
+## Front end (`src/frontend`, S5.3)
+
+Spec `port/spec/frontend.md` (section 8 = the closing pass); prototypes in `gen/module_frontend.h`, the DGROUP offsets, the sound call points
+and the test hooks in `frontend/fe.h`. SETUP, MPS_LOGO, PLAYER and DSWAP are real now (`prog_table`); START, VGAME and END are still the
+placeholders; `--chain-test` swaps the four front-end programs for their `*_stub` stand-ins (`prog_use_stubs`) because it runs without game files.
+
+```
+textmode.c   BIOS text mode 03h on B800:0000 (INT 10h 00/02/09/0E, INT 21h/09): cursor, teletype with wrap and scroll
+misc.c       MISC.EXE slots 90-95 (kbd_empty_misc, kbd_get_misc, getche_misc, joy_button_misc, kbd_locks_clear)
+setup.c      SETUP: banner, joystick question + calibration, sound menu, comm block; exit 24h. Strings and layout are read from the loaded
+             image's DGROUP (DSP(0x4BA) ...), the DOS console is textmode.c
+mpslogo.c    MPS_LOGO: the .SS loader (ss_load, palette merge into the DAC slots, remap), ss_draw (the RLE grammar of 006D:05BE), the
+             BIOS-clock paced animation, exit 0 / 1 / 2 / 3
+player.c     PLAYER: tick ISR body (timer_step, 6 of 7 retraces), tick_callback, cel_show, the fade, the PAN ring buffer
+             (ring_make_room, pan_decode_chunk reading the 4 KB file buffer, pan_play_file), poll_input, player_exit
+dswap.c      DSWAP: exit 1 (the floppy swap prompt is never shown), atoi / atol
+sndstub.c    the sound call points (fe_snd_*, snd_*_log): no-ops marked TODO(S5.9)
+fetest.c     --frontend-test (below)
+platform/vgatext.c  the text screen on the window (640 x 400, 8 x 16 cells from an 8 x 8 font, CGA colours, no cursor)
+```
+
+* PLAYER's variables live in its DGROUP at the original offsets (`PLAYER_DS_*`), linear addresses are `u32`; the ring buffer is the largest
+  free DOS block. `fade_measure` is not ported (PORT: 256 colours per tick). The timer ISR body is installed with `timer_set_hook(timer_step)`;
+  PLAYER does not use `pal_apply_queue` (no tick flag needed). Names shared with MGRAPHIC (`screen_off`, `screen_on`) are the video module's.
+* Sound: `fe_snd_cmd(3)` at the first `poll_input`, `fe_snd_cmd(0)` in `player_exit`, `fe_snd_cmd(2)` polled before the exit when several files played,
+  `fe_snd_poll()` in `timer_step`, `snd_init_log / snd_cmd_log(2) / snd_cmd_log(0) / snd_shutdown_log` in MPS_LOGO. S5.9 fills them in.
+* `FeTest fe_test` (fe.h) holds the hooks of the tests (scripted getche answers, logo without waiting, PLAYER without the fade and with a small
+  ring, per-frame callbacks); all idle in a normal run.
+* Tests: `ctest` `frontend` (`python port/notes/s53/frontend_ref.py f117 Game`): the ORIGINAL SETUP and MPS_LOGO run under Unicorn on a small
+  DOS/BIOS machine (`port/notes/s53/dos_emu.py`; needs `work/unpacked/`): the port's text screens and comm block, and the screen + DAC CRC of all
+  82 logo frames, must equal them; every cel of the 6 .PAN files through PLAYER's ring buffer (a 160 KB ring that wraps) equals the Phase 2
+  decoder; the fade formula, the 60.08 Hz clock and the logo pacing are measured. `frontend_chain` is the scripted run
+  (`F117_KEYS`), SETUP -> MPS_LOGO -> PLAYER -> DSWAP -> START placeholder -> ... -> quit. Both skip (77) without `Game/`.
 
 ## Symbol pipeline (`src/gen/`)
 

@@ -51,3 +51,8 @@ bool vga_in_vretrace(void);
 void vga_wait_vretrace_start(void);          /* "while (in 3DAh & 8); while (!(in 3DAh & 8));" */
 void vga_wait_vretrace_active(void);         /* "while (!(in 3DAh & 8));" */
 void vga_wait_vretrace_end(void);            /* "while (in 3DAh & 8);" */
+
+/* Text mode 03h (S5.3, vgatext.c): the 80 x 25 screen at B800:0000 (mem[]) composed into a 640 x 400 XRGB frame, 8 x 16 cells
+ * (the 8 x 8 font with doubled rows, CP437 box drawing for SETUP's frame), the 16 standard colours. PORT: no cursor, no blink. */
+void vga_text_render(u32 *xrgb640x400);
+#define VGA_TEXT_BASE 0xB8000u

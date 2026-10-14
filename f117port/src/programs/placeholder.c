@@ -1,4 +1,6 @@
-/* PHASE 4 ONLY: placeholder programs. Each one logs its name, writes into the comm block (and the BIOS
+/* PHASE 4 ONLY: placeholder programs. S5.3 replaced SETUP, MPS_LOGO, PLAYER and DSWAP by the real ports (src/frontend); their
+ * stand-ins below (*_stub) are used only by `--chain-test` (prog_use_stubs), which runs the chain without game files.
+ * Each one logs its name, writes into the comm block (and the BIOS
  * words) what a plausible run of the real program would, and returns the real program's exit code
  * (HANDOFFS.md sections 1-6). The chain is driven by what they write:
  *
@@ -75,7 +77,7 @@ static int start_calls;                                 /* host-side: which pass
 
 /* ---- SETUP: asks the configuration questions, keeps the answers only in the comm block --------- */
 
-int setup_main(const char *tail)
+int setup_stub(const char *tail)
 {
     Comm *c = comm_get();
     prog_log("[SETUP] tail \"%s\": hardware questions, answers into the comm block", tail);
@@ -95,7 +97,7 @@ int setup_main(const char *tail)
 
 /* ---- MPS_LOGO: the logo animation; no key pressed -> 0 (the PLAYER intro follows) -------------- */
 
-int mps_logo_main(const char *tail)
+int mps_logo_stub(const char *tail)
 {
     char letter = tail[0] == ' ' ? tail[1] : tail[0];
     prog_log("[MPS_LOGO] sound driver letter '%c' (LABSLOGO.SS and the .LOG of that driver): no key pressed", letter);
@@ -105,7 +107,7 @@ int mps_logo_main(const char *tail)
 
 /* ---- PLAYER: the .PAN animation player; its exit code is ignored -------------------------------- */
 
-int player_main(const char *tail)
+int player_stub(const char *tail)
 {
     prog_log("[PLAYER] animations:%s", tail);
     hold(3);
@@ -114,7 +116,7 @@ int player_main(const char *tail)
 
 /* ---- DSWAP: swaps the program into memory (hard-disk install: always found) --------------------- */
 
-int dswap_main(const char *tail)
+int dswap_stub(const char *tail)
 {
     static const char *const names[3] = { "start.exe", "vgame.exe", "end.exe" };
     int n = tail_number(tail);
@@ -206,4 +208,19 @@ int end_main(const char *tail)
         pilot_wr(PILOT_CAREER + 2, (u16)(career >> 16));
     }
     return EXIT_END_RESTART;
+}
+
+/* The stand-in of a program (the chain test): the front-end stubs, and START / VGAME / END which are still only placeholders. */
+ProgMain placeholder_main(ProgId id)
+{
+    switch (id) {
+    case PROG_SETUP:    return setup_stub;
+    case PROG_MPS_LOGO: return mps_logo_stub;
+    case PROG_PLAYER:   return player_stub;
+    case PROG_DSWAP:    return dswap_stub;
+    case PROG_START:    return start_main;
+    case PROG_VGAME:    return vgame_main;
+    case PROG_END:      return end_main;
+    default:            return NULL;
+    }
 }
