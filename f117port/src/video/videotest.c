@@ -285,7 +285,7 @@ int video_screen_test(bool wait)
     for (int f = 0; f < 7; f++) {
         strcpy(buf, sample);
         put_text(tc, f, 8, 8 + f * 13, 15, 0, 0, buf);                       /* transparent, white */
-        strcpy(buf, "\x8C" "red " "\x8E" "yellow " "\x8A" "green");
+        strcpy(buf, "\x8C" "col12 " "\x8E" "col14 " "\x8A" "col10");          /* entries of the picture's palette */
         put_text(tc, f, 190, 8 + f * 13, 15, 0, 0, buf);                      /* colour bytes */
     }
     strcpy(buf, "opaque text, font 4");
