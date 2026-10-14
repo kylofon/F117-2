@@ -1400,7 +1400,7 @@ start,global,DS:E090,cursor_old_y,int,shell,,last drawn cursor y,shell
 start,global,DS:E092,cursor_w,uint8_t,shell,,cursor width (sprite byte 0),shell
 start,global,DS:E093,cursor_h,uint8_t,shell,,cursor height (sprite byte 2),shell
 start,global,DS:E096,ptr_comm,far ptr,shell,,comm block,shell
-vgame,func,0000:0010,main,void(void),simflow,,"VGAME entry from c0_start: comm/pilot ptrs, bind drivers, pages, gfxlib init, sim_init, sim_run, joystick calib copy-back, exit(DS:008D)",simflow
+vgame,func,0000:0010,vgame_start,void(void),simflow,,"VGAME entry from c0_start: comm/pilot ptrs, bind drivers, pages, gfxlib init, sim_init, sim_run, joystick calib copy-back, exit(DS:008D)",simflow
 vgame,func,0000:00f0,sim_init,void(void),loader,,"all loading: world import, STFLT.3DX, theatre files, speech.117, palette, 256pit.PIC, ordnance panel, cockpit blit",simflow
 vgame,func,0000:01b7,cockpit_palette_refresh,void(void),simflow,,pal_flight_load() then falls into cockpit_daynight_recolor; called from cba0,simflow
 vgame,func,0000:01bf,cockpit_daynight_recolor,void(void),simflow,,"10A8:0004 asm HUD init then 3 rect_recolor (day 0F->0A, night 0A->0F) on page-2 ctx 4012",simflow
@@ -1410,7 +1410,7 @@ vgame,func,0000:02c1,stub_ret_02c1,void(void),lib,,single ret (unused),simflow
 vgame,func,0000:02c2,gfx_pages_init,void(void),simflow,,"page0=A000 -> 85E2/85EA, page1=gfx_alloc(1) -> 85E4, page2=comm[20h] -> 85E6; page_seg_set_b for 1 and 2",simflow
 vgame,func,0000:02fe,ordnance_panel_build,void(void),simflow,,"ordnance.pic -> page 1; 2 or 4 weapon strips 77x15 to page 2 at (169,110+15i); sprite_grab 77x60 -> BA0E",simflow
 vgame,func,0000:03ce,r3d_scene_draw,"void near(int16 a1,int16 a2,int16 a3,int32 x,int32 y,int32 z,int16 x0,int16 y0,int16 w,int16 h)",render3d,,"[Part 1] main 3D view: viewport 0344, 04BB delay, 7D50 table, lights, DAE8, 04DA, 9ACA, DB3E, A17E (simflow Part 3 s3)",render3d
-vgame,func,0000:04bb,frame_delay,void frame_delay(int ticks),simflow,,Busy-wait ticks increments of byte DS:264A (timer tick); arg = DS:43B8 frame-rate menu value,simflow
+vgame,func,0000:04bb,frame_delay,void(int ticks),simflow,,Busy-wait ticks increments of byte DS:264A (timer tick); arg = DS:43B8 frame-rate menu value,simflow
 vgame,func,0000:04da,r3d_draw_terrain,"void near(int16 a1,int16 pitch,int32 x,int32 y,int32 z)",render3d,,"[Part 1] levels 4..1, cells per octant table 034C (path A 15 cells + E8A2 cull, path B 9), records -> E7AC; 0FB1 overrides",render3d
 vgame,func,0000:0804,terr_to_level,"int32 near(int16 level,uint32 v)",render3d,,"[Part 1] L0 v<<1, L1 v, L2 (v+2)>>2, L3 (v+8)>>4, L4 (v+20h)>>6 (shr32). Diff-tested",render3d
 vgame,func,0000:0865,terr_tile_type,"uint16 near(int16 level,int16 x,int16 y)",render3d,,"[Part 1] L4 +2 offset, bounds vs DS:0506, maps B00C/9F68, child tables 9D10/9B08/9904 (recursive). Diff-tested",render3d
@@ -1420,8 +1420,8 @@ vgame,func,0000:0af9,load_3dt_scenery,void(char *stem),loader,,".3dT: type count
 vgame,func,0000:0c2c,load_3dg_terrain,void(void),loader,,".3dG: L3 map 9F68, L2 9D10, L1 9B08, L0 9904; copies 64-byte L4 theatre table 0A68+64*t to B00C",simflow
 vgame,func,0000:0cd1,load_error_msg,void(const char *msg),loader,,"8AA2(msg,0,0x60,0xF) then getch; returns (no exit)",simflow
 vgame,func,0000:0ce7,set_file_ext,"void(char *name,const char *ext)",lib,,replace text from first . (or NUL) with ext; used on the stem buffer,simflow
-vgame,func,0000:0d08,terr_find_scenery_at,"hit_t *terr_find_scenery_at(long x,long y_inv)",damage,,"[flight.md 6.3] nearest destroyable scenery object around a world point: levels 1-2, 3x3 tiles, Manhattan, override table, hit record DS:BA14 (full pseudocode)",flight
-vgame,func,0000:0f31,terr_set_scenery_state,"void terr_set_scenery_state(hit_t *h,byte newid)",damage,,[flight.md 6.4] store a new id for the hit scenery object: override table DS:B772 (wreck ids) or tile record byte +6; sets bit 7,flight
+vgame,func,0000:0d08,terr_find_scenery_at,"unsigned(long x,long y_inv)",damage,,"[flight.md 6.3] nearest destroyable scenery object around a world point: levels 1-2, 3x3 tiles, Manhattan, override table, hit record DS:BA14 (full pseudocode)",flight
+vgame,func,0000:0f31,terr_set_scenery_state,"void(unsigned h,unsigned newid)",damage,,[flight.md 6.4] store a new id for the hit scenery object: override table DS:B772 (wreck ids) or tile record byte +6; sets bit 7,flight
 vgame,func,0000:0fb1,terr_scenery_override,"uint16 near(int16 level,int16 idx,int16 cx,int16 cy)",render3d,,[Part 1] backward search DS:B772 x [9902]; AH = hi(count-1): returns FF00h when count 0 (quirk); [94DC]=index,render3d
 vgame,func,0000:0ffb,terr_probe_point,"void near(uint32 x,uint32 y,uint32 z)",render3d,,"[Part 3] nearest flag-0x10 record of the level-4 tile (records 0..n-2, id&0x50 skipped), 11EB:01B8 inside test -> byte C686=0x80",render3d
 vgame,func,0000:119c,map_render_terrain,"void near(Viewport*ctx,int16 px,int16 py,int16 shift)",render3d,,"[Part 3] map MFD: 4894=0, DAE8 top-down camera (pitch C000, z 2000h, backdrop), 11F2, DB3E, 7D5E=0; only caller 8387",render3d
@@ -1430,7 +1430,7 @@ vgame,func,0000:1353,map_tile_bounds,"void near(int16*x0,int16*x1,int16*y0,int16
 vgame,func,0000:13ac,map_pixel_to_tile,"void near(int16 px,int16 py,int16*tx,int16*ty)",render3d,,"[Part 3] tx=idiv(94E2-0D1E+px,94DE); ty=idiv(idiv((py-0D20)<<2,3)+94E4,94DE); trunc toward 0",render3d
 vgame,func,0000:13e3,map_draw_object,"void near(uint16 obj,int16 x,int16 y)",render3d,,"[Part 3] L>=3: 07E0[obj]&80h must equal 94E6; 8560=B760; identity 49A0; 11EB:00D3(obj&FF,x,0,-y,49A0,C02E)",render3d
 vgame,func,0000:1442,r3d_draw_sky_ground,void near r3d_draw_sky_ground(Viewport*ctx),render3d,,[Part 6] detail<3: hz_fill_far(ctx+4); else 16 sky bands 80h+i and 16 ground bands 70h+i (mono 88h/7Ch) via 1001:01EC,render3d
-vgame,func,0000:17a3,cockpit_draw_adi,void cockpit_draw_adi(void),simflow,,"Attitude indicator 32x28 at (265,140): horizon polygon col 1 on col 9, bezel 91a4, copy back page to screen; only C07A==0",simflow
+vgame,func,0000:17a3,cockpit_draw_adi,void(void),simflow,,"Attitude indicator 32x28 at (265,140): horizon polygon col 1 on col 9, bezel 91a4, copy back page to screen; only C07A==0",simflow
 vgame,func,0000:1961,mfd_view_sky_bands,void(int horizon),simflow,,"up to 16 sky quads colours 80h+i above horizon row, clamped at y=6Eh; table DS:0D22",simflow
 vgame,func,0000:19ea,mfd_view_ground_bands,"void(int horizon,int mode)",simflow,,"up to 16 ground quads colours 70h+i (F0h if mode==1) below horizon, clamped at y=A9h",simflow
 vgame,func,0000:1a85,fx_explosion_sprite,"void near(int16 x,int16 y,int16 size,int16 cls)",render3d,,"[Part 1] sprite_scaled centred, h=size-size/4, table DS:9188, ctx [0348]?[4042]:[0344]; caller A17E",render3d
@@ -1454,12 +1454,12 @@ vgame,func,0000:2e64,fx_ratio_q15,"int(int x,int y)",lib,,x/y in Q15 with signs,
 vgame,func,0000:2ebe,fx_asin,u16(int q15),lib,,inverse sine via table 2084,simflow
 vgame,func,0000:2f2f,fx_acos,u16(int q15),lib,,0x4000-asin,simflow
 vgame,func,0000:2f40,fx_isqrt,int(int n),lib,,Babylonian isqrt,simflow
-vgame,func,0000:2f82,view_frame,void view_frame(void),simflow,,"View+cockpit frame: camera per C07A mode, matrix B156, picture reload, calls 03ce, cockpit overlays, sets 2E34",simflow
+vgame,func,0000:2f82,view_frame,void(void),simflow,,"View+cockpit frame: camera per C07A mode, matrix B156, picture reload, calls 03ce, cockpit overlays, sets 2E34",simflow
 vgame,func,0000:38ab,hud_number_draw,"void(int slot,int v)",simflow,,3-digit zero padded number via d92d,simflow
 vgame,func,0000:38f8,hud_draw_fuel,void(void),simflow,,"slot 3 = min(fuel,9999)/10",simflow
 vgame,func,0000:3926,hud_draw_throttle,void(void),simflow,,slot 4 = throttle,simflow
 vgame,func,0000:3939,sim_pause_wait,void(void),simflow,,"snd 25, wait key != Alt-P, restore 2646",simflow
-vgame,func,0000:3968,cockpit_refresh_panels,void cockpit_refresh_panels(void),simflow,,"After pit picture reload: re-light lit lamps (tab 46D8), 80a0(DEDA), 8113(DFDC), 38f8, 3926, 44a9",simflow
+vgame,func,0000:3968,cockpit_refresh_panels,void(void),simflow,,"After pit picture reload: re-light lit lamps (tab 46D8), 80a0(DEDA), 8113(DFDC), 38f8, 3926, 44a9",simflow
 vgame,func,0000:39c4,sim_frame_step,void(void),simflow,,"Per-frame simulation step (once per 1bbc iteration): grid pos, init, map markers, updaters, airfield/landing/ground checks, 1 Hz clock, fps estimator, 43ee",simflow
 vgame,func,0000:43ee,sim_key_and_signature,void(void),detect,,"[flight.md 3.1] cba0(key) then the radar signature [3D5C]: speed, bank, bay +24, ECM +16, MicroProse altitude term / Lockheed +20 when [9B04]==0",flight
 vgame,func,0000:44a9,hud_draw_store_counts,void(void),simflow,,Redraw flare/chaff/decoy counters (a=1..3 via 44c4),simflow
@@ -1474,7 +1474,7 @@ vgame,func,0000:48dd,mission_cheat_rearm,void(void),simflow,,"Training cheat (Al
 vgame,func,0000:4926,mission_end,void(int code),simflow,,"Set E552=1, write comm+28/26/74/76/34/36, log event 8; code 7 aborts; non-zero codes ignored while C06E!=0",simflow
 vgame,func,0000:499e,mission_log_event,"void(int code,int aux)",simflow,,"Append 6-byte record {98E2,px>>7,py>>7,code,aux} to DS:BA2A (max 255), terminator code=0",simflow
 vgame,func,0000:49e7,msg_site_label,void(int site),simflow,,"Build ""Noun at Place"" label for site in DS:9876 (max 24 chars + ""."")",simflow
-vgame,func,0000:4a73,site_name,void site_name(int site),simflow,,"builds site place/noun name into DS:9876 (max 18 chars + ""."")",simflow
+vgame,func,0000:4a73,site_name,void(int site),simflow,,"builds site place/noun name into DS:9876 (max 18 chars + ""."")",simflow
 vgame,func,0000:4ad0,mission_world_import,void(void),simflow,,"unpack comm+7Ah blob, build name pointer table DEDC, start position BA10/BA12 and C02A/C02C from slot0 anchor site",simflow
 vgame,func,0000:4b57,mission_name_targets,void(void),simflow,,"Give each mission target object its own name entry (clone class attr + string, re-class world cell, T.+14)",simflow
 vgame,func,0000:4c29,mission_world_export,void(void),simflow,,blob fields to comm+7Ah plus 0x600-byte event log BA2A; called at the end of sim_run (also on quit),simflow
@@ -1503,16 +1503,16 @@ vgame,func,0000:753f,wpn_release,void(void),weapons,,"[flight.md 5.2] fire key: 
 vgame,func,0000:77d9,terr_probe_cell,"void near(int16 cellx,int16 celly,int16 alt)",render3d,,"[Part 3] 0FFB((long)cx<<5,(0x8000-(long)cy)<<5,(long)alt); callers 5730 (unit flag 0x2000), 671a (impact)",render3d
 vgame,func,0000:780a,dmg_wobj_destroyable,int(int o),damage,,[flight.md 6.2] 1 if the world object found in [9F10] is not yet the wreck shape (C0AC or DEA4 by class),flight
 vgame,func,0000:784a,cockpit_widgets_reset,void(void),simflow,,"mission-start reset of panel widgets (d83e x4), [409C]=0, [DFDC]=0x18; called from 4857",simflow
-vgame,func,0000:7898,hud_overlay_frame,void hud_overlay_frame(void),simflow,,"per-frame HUD C part: flash, lamps 0-2, stall lamp, weapon/gun line, crosshair, tapes, AAM circle, speed/alt numbers, waypoint caret, message, view 42 altitude",simflow
-vgame,func,0000:80a0,mfd_left_select,void mfd_left_select(int mode),simflow,,left MFD mode 0 map / 1 scope; lamp 22/23 via d83e; F3,simflow
-vgame,func,0000:8113,mfd_right_select,void mfd_right_select(int page),simflow,,right MFD page 0x13 TV 0x14 nav 0x15 weapons 0x18 objectives; lamp via DS:4068,simflow
-vgame,func,0000:81f6,mfd_tv_label,void mfd_tv_label(void),simflow,,"Ahead/Right/Rear/Left label at (197,193) on ctx0 from DS:E556",simflow
-vgame,func,0000:829d,mfd_refresh,void mfd_refresh(int page),simflow,,page 0x16 = update 7 damage lamps (898b 10..16); redraw right MFD if page == DFDC,simflow
-vgame,func,0000:82e9,mfd_init_geometry,void mfd_init_geometry(void),simflow,,sets DEDA=0 and left MFD rect vars then tail-jumps into 8498 (one zoom-in),simflow
+vgame,func,0000:7898,hud_overlay_frame,void(void),simflow,,"per-frame HUD C part: flash, lamps 0-2, stall lamp, weapon/gun line, crosshair, tapes, AAM circle, speed/alt numbers, waypoint caret, message, view 42 altitude",simflow
+vgame,func,0000:80a0,mfd_left_select,void(int mode),simflow,,left MFD mode 0 map / 1 scope; lamp 22/23 via d83e; F3,simflow
+vgame,func,0000:8113,mfd_right_select,void(int page),simflow,,right MFD page 0x13 TV 0x14 nav 0x15 weapons 0x18 objectives; lamp via DS:4068,simflow
+vgame,func,0000:81f6,mfd_tv_label,void(void),simflow,,"Ahead/Right/Rear/Left label at (197,193) on ctx0 from DS:E556",simflow
+vgame,func,0000:829d,mfd_refresh,void(int page),simflow,,page 0x16 = update 7 damage lamps (898b 10..16); redraw right MFD if page == DFDC,simflow
+vgame,func,0000:82e9,mfd_init_geometry,void(void),simflow,,sets DEDA=0 and left MFD rect vars then tail-jumps into 8498 (one zoom-in),simflow
 vgame,func,0000:8316,hud_threat_bar,"void(int val,int color,int y0,int y1)",simflow,,"Signal bar: x 0x56..0x56+val/2 (val>0) or 0x88+val/2..0x88 (val<0), rows 0xBB+y0..0xBB+y1 via 1001:024C on ctx [3FE2]",simflow
-vgame,func,0000:8387,mfd_map_redraw,"void mfd_map_redraw(int cellx,int celly)",simflow,,"Left MFD map: centre (4084,4086) clamped ahead of aircraft, 119c terrain, site icons 8548, 973c; DEDA=0",simflow
-vgame,func,0000:8498,mfd_zoom_in,void mfd_zoom_in(void),simflow,,z key: map zoom DS:4080 <9 / scope zoom DS:4082 <7 / camera range 3D70-- in views with bit 0x80,simflow
-vgame,func,0000:84d6,mfd_zoom_out,void mfd_zoom_out(void),simflow,,x key: map zoom >2 / scope zoom !=0 / 3D70++,simflow
+vgame,func,0000:8387,mfd_map_redraw,"void(int cellx,int celly)",simflow,,"Left MFD map: centre (4084,4086) clamped ahead of aircraft, 119c terrain, site icons 8548, 973c; DEDA=0",simflow
+vgame,func,0000:8498,mfd_zoom_in,void(void),simflow,,z key: map zoom DS:4080 <9 / scope zoom DS:4082 <7 / camera range 3D70-- in views with bit 0x80,simflow
+vgame,func,0000:84d6,mfd_zoom_out,void(void),simflow,,x key: map zoom >2 / scope zoom !=0 / 3D70++,simflow
 vgame,func,0000:8514,mfd_map_sx,int(int wx),simflow,,((wx-[4084])>>(10-[4080]))+0x70,simflow
 vgame,func,0000:852b,mfd_map_sy,int(int wy),simflow,,((((wy-[4086])>>(10-[4080]))*3)>>2)+0x8B,simflow
 vgame,func,0000:8548,mfd_map_plot,"int(int wx,int wy,int color,int big)",simflow,,"World point on moving map; 1 if off window, 0 else; big = 2x2 dot; skips if [DEDA] or !cockpit",simflow
@@ -1520,42 +1520,42 @@ vgame,func,0000:85ed,mfd_map_to_screen,"int(int wx,int wy,int*sx,int*sy)",simflo
 vgame,func,0000:863c,mfd_map_arc,"void(int cx,int cy,int r,int color,int solid,int a0,int a1)",simflow,,"Arc a0..a1 (1/256 turn, step 16) radius r in world units; dots or solid polyline (Doppler)",simflow
 vgame,func,0000:86e5,mfd_map_line,"void(int wx0,int wy0,int wx1,int wy1)",simflow,,"World line on map via 87a9 clipped to map window, both pages",simflow
 vgame,func,0000:871f,hud_line_full,"void(int x0,int y0,int x1,int y1)",simflow,,"87a9 with full screen clip 0..319,0..199, one page",simflow
-vgame,func,0000:873f,hud_line_view,"void hud_line_view(int x0,int y0,int x1,int y1)",simflow,,"line in ctx0 colour clipped to ctx0 window (0,0)-(319,90) via 1001:032A",simflow
+vgame,func,0000:873f,hud_line_view,"void(int x0,int y0,int x1,int y1)",simflow,,"line in ctx0 colour clipped to ctx0 window (0,0)-(319,90) via 1001:032A",simflow
 vgame,func,0000:87a9,hud_line_clip,"void(int x0,int y0,int x1,int y1,int xmin,int xmax,int ymin,int ymax,int both)",simflow,,"Set clip window/offset, args into DS:2293..229F, call 1001:032A; optionally also on the other page",simflow
 vgame,func,0000:8888,hud_line_full2,"void(int x0,int y0,int x1,int y1)",simflow,,Duplicate of 871f,simflow
-vgame,func,0000:88a8,hud_box,"void hud_box(int x0,int y0,int x1,int y1,int col)",simflow,,outline rectangle with four 8888 lines,simflow
-vgame,func,0000:88f6,hud_line_win,"void hud_line_win(int x0,int y0,int x1,int y1)",simflow,,87a9 line clipped to HUD window (48..271 x 15..90) or (99..220 x 30..90) if 294B,simflow
+vgame,func,0000:88a8,hud_box,"void(int x0,int y0,int x1,int y1,int col)",simflow,,outline rectangle with four 8888 lines,simflow
+vgame,func,0000:88f6,hud_line_win,"void(int x0,int y0,int x1,int y1)",simflow,,87a9 line clipped to HUD window (48..271 x 15..90) or (99..220 x 30..90) if 294B,simflow
 vgame,func,0000:8929,gfx_set_fg,void(int c),simflow,,fg of ctx 3FE2 and 3FFA,simflow
-vgame,func,0000:893f,gfx_fill_rect,"void(x0,y0,x1,y1)",simflow,,1001:024C on page0 and page1 ctx,simflow
+vgame,func,0000:893f,hud_fill_rect,"void(int x0,int y0,int x1,int y1)",simflow,,1001:024C on page0 and page1 ctx,simflow
 vgame,func,0000:8970,hud_pixel,"void(int x,int y,int color)",simflow,,"8929(color); 871f(x,y,x,y)",simflow
 vgame,func,0000:898b,hud_lamp_update,"void(int idx,int state)",simflow,,"lamp state table 3F02, drawn via d83e",simflow
-vgame,func,0000:89fe,mfd_text,"void mfd_text(int mode,int col,int row,char *s,int colour)",simflow,,MFD text cell x=col*4+4A|A9 (mode 1|2) y=row*6+6E via 8aa2,simflow
-vgame,func,0000:8a4e,mfd_clear,"void mfd_clear(int which,int colour)",simflow,,forwards to 8a5e,simflow
-vgame,func,0000:8a5e,mfd_fill,"void mfd_fill(int which,int colour)",simflow,,"set_color then fill left (74,110)-(150,169) or right (169,110)-(245,169) MFD",simflow
-vgame,func,0000:8aa2,hud_text,"void hud_text(char *s,int x,int y,int col)",simflow,,text on ctx0 or ctx1 chosen by DS:4088 via 8b04,simflow
-vgame,func,0000:8ad3,hud_text2,"void hud_text2(char *s,int x,int y,int col)",simflow,,duplicate of 8aa2,simflow
-vgame,func,0000:8b04,txt_draw,"void txt_draw(TextCtx *c,char *s,int x,int y,int col)",simflow,,"font 0, strupr in place, text_noclip (4 px per char)",simflow
-vgame,func,0000:8b3b,hud_num_left,"void hud_num_left(int v,int x,int y,int col)",simflow,,itoa to DS:C5D8 and draw left aligned,simflow
-vgame,func,0000:8b5c,hud_num_right,"void hud_num_right(unsigned v,int xr,int y,int col)",simflow,,"ltoa unsigned, right aligned x = xr - 4*len",simflow
-vgame,func,0000:8b93,msg_post,void msg_post(char *text),simflow,,"strcpy(DS:C578,text); DS:409E = 3*DS:3660 frames",simflow
+vgame,func,0000:89fe,mfd_text,"void(int mode,int col,int row,char *s,int colour)",simflow,,MFD text cell x=col*4+4A|A9 (mode 1|2) y=row*6+6E via 8aa2,simflow
+vgame,func,0000:8a4e,mfd_clear,"void(int which,int colour)",simflow,,forwards to 8a5e,simflow
+vgame,func,0000:8a5e,mfd_fill,"void(int which,int colour)",simflow,,"set_color then fill left (74,110)-(150,169) or right (169,110)-(245,169) MFD",simflow
+vgame,func,0000:8aa2,hud_text,"void(char *s,int x,int y,int col)",simflow,,text on ctx0 or ctx1 chosen by DS:4088 via 8b04,simflow
+vgame,func,0000:8ad3,hud_text2,"void(char *s,int x,int y,int col)",simflow,,duplicate of 8aa2,simflow
+vgame,func,0000:8b04,txt_draw,"void(void *c,char *s,int x,int y,int col)",simflow,,"font 0, strupr in place, text_noclip (4 px per char)",simflow
+vgame,func,0000:8b3b,hud_num_left,"void(int v,int x,int y,int col)",simflow,,itoa to DS:C5D8 and draw left aligned,simflow
+vgame,func,0000:8b5c,hud_num_right,"void(unsigned v,int xr,int y,int col)",simflow,,"ltoa unsigned, right aligned x = xr - 4*len",simflow
+vgame,func,0000:8b93,msg_post,void(char *text),simflow,,"strcpy(DS:C578,text); DS:409E = 3*DS:3660 frames",simflow
 vgame,func,0000:8bab,wpn_suit,"int wpn_suit(int wpn,int site)",weapons,,[flight.md 5.4] weapon suitability DS:386A[wpn*16 + class[site type]],flight
-vgame,func,0000:8bd3,gfx_restore_rect,"void(x,y,w,h)",simflow,,page2 -> page0 and page1,simflow
-vgame,func,0000:8c10,mfd_scope_draw,void mfd_scope_draw(int flip),simflow,,"left MFD mode 1 scope: grid, air units, missile tracks, sites, ownship, countermeasure marks",simflow
-vgame,func,0000:903f,mfd_target_box,"void mfd_target_box(int x,int y,int col)",simflow,,9x7 selection frame around a scope icon,simflow
-vgame,func,0000:90b9,mfd_w2s,"void mfd_w2s(int wx,int wy)",simflow,,"world to scope: DS:49E0/49E8, outside flag DS:DE92; ownship at (112,152) heading up",simflow
-vgame,func,0000:9154,mfd_icon,"void mfd_icon(int cx,int cy,int x,int y)",simflow,,"7x7 keyed icon from panel sheet (cx*8+1, cy*8+0x29) clipped to left MFD",simflow
-vgame,func,0000:91a4,cockpit_keyblit,"void cockpit_keyblit(int dx,int dy,int sx,int sy,int w,int h,int clip)",simflow,,Key-colour blit from picture page E558 to back page 4088 using BlitCtx at DS:4062,simflow
-vgame,func,0000:9208,mfd_nav_page,void mfd_nav_page(void),simflow,,"right MFD page 0x14 route list: TIME, 4 waypoint legs, ETA, arrival clock, fuel bars",simflow
+vgame,func,0000:8bd3,gfx_restore_rect,"void(int x,int y,int w,int h)",simflow,,page2 -> page0 and page1,simflow
+vgame,func,0000:8c10,mfd_scope_draw,void(int flip),simflow,,"left MFD mode 1 scope: grid, air units, missile tracks, sites, ownship, countermeasure marks",simflow
+vgame,func,0000:903f,mfd_target_box,"void(int x,int y,int col)",simflow,,9x7 selection frame around a scope icon,simflow
+vgame,func,0000:90b9,mfd_w2s,"void(int wx,int wy)",simflow,,"world to scope: DS:49E0/49E8, outside flag DS:DE92; ownship at (112,152) heading up",simflow
+vgame,func,0000:9154,mfd_icon,"void(int cx,int cy,int x,int y)",simflow,,"7x7 keyed icon from panel sheet (cx*8+1, cy*8+0x29) clipped to left MFD",simflow
+vgame,func,0000:91a4,cockpit_keyblit,"void(int dx,int dy,int sx,int sy,int w,int h,int clip)",simflow,,Key-colour blit from picture page E558 to back page 4088 using BlitCtx at DS:4062,simflow
+vgame,func,0000:9208,mfd_nav_page,void(void),simflow,,"right MFD page 0x14 route list: TIME, 4 waypoint legs, ETA, arrival clock, fuel bars",simflow
 vgame,func,0000:94a5,mfd_map_route,void(void),simflow,,"Draws player -> waypoints DS:2E6C (4 x,y) from index [2E7C]; colour 15 first leg then 10",simflow
-vgame,func,0000:950e,mfd_fuel_bar,"void mfd_fuel_bar(int v,int col)",simflow,,bar y 164..167 from x=170 width v/135 (v clamped 0..10000),simflow
-vgame,func,0000:955c,fmt_clock_hhmm,void fmt_clock_hhmm(unsigned t),simflow,,"DS:9876 = ""HH:MM"" mission clock (t in 2 s units; +6 h day / +18 h night)",simflow
-vgame,func,0000:95c4,fmt_clock_hhmmss,void fmt_clock_hhmmss(unsigned t),simflow,,"DS:9876 = ""HH:MM:SS""",simflow
-vgame,func,0000:9641,fmt_2digit,void fmt_2digit(int n),simflow,,append n%60 as two digits to DS:9876,simflow
-vgame,func,0000:9678,mfd_weapons_page,void mfd_weapons_page(void),simflow,,"right MFD page 0x15: per slot name line and quantity line, colour 0x2F",simflow
+vgame,func,0000:950e,mfd_fuel_bar,"void(int v,int col)",simflow,,bar y 164..167 from x=170 width v/135 (v clamped 0..10000),simflow
+vgame,func,0000:955c,fmt_clock_hhmm,void(unsigned t),simflow,,"DS:9876 = ""HH:MM"" mission clock (t in 2 s units; +6 h day / +18 h night)",simflow
+vgame,func,0000:95c4,fmt_clock_hhmmss,void(unsigned t),simflow,,"DS:9876 = ""HH:MM:SS""",simflow
+vgame,func,0000:9641,fmt_2digit,void(int n),simflow,,append n%60 as two digits to DS:9876,simflow
+vgame,func,0000:9678,mfd_weapons_page,void(void),simflow,,"right MFD page 0x15: per slot name line and quantity line, colour 0x2F",simflow
 vgame,func,0000:973c,mfd_map_save_bg,void(void),simflow,,"blit_rect map window (74,110) 77x60 from draw page to backup page ctx [4012]",simflow
 vgame,func,0000:9770,mfd_map_restore_bg,void(void),simflow,,Reverse of 973c: backup page -> draw page,simflow
-vgame,func,0000:97a4,mfd_objectives_page,void mfd_objectives_page(void),simflow,,"right MFD page 0x18 mission orders text builder (PRIMARY/SECONDARY Mission, verb phrase, noun at place, Before time, Return to)",simflow
-vgame,func,0000:99a7,hud_ils,void hud_ils(void),simflow,,"F9 ILS needles: localiser x 139..181, glide slope y 40..72, label ""ILS""",simflow
+vgame,func,0000:97a4,mfd_objectives_page,void(void),simflow,,"right MFD page 0x18 mission orders text builder (PRIMARY/SECONDARY Mission, verb phrase, noun at place, Before time, Return to)",simflow
+vgame,func,0000:99a7,hud_ils,void(void),simflow,,"F9 ILS needles: localiser x 139..181, glide slope y 40..72, label ""ILS""",simflow
 vgame,func,0000:9aca,r3d_draw_world_objects,void near(void),render3d,,"[Part 2] per-frame object pass (03CE): own F-117, smoke billboards, units+shadows, projectiles, wreck 0x0B; embeds ground/air target designator (weapons logic)",render3d
 vgame,func,0000:a17e,obj_overlay_frame,void(void),simflow,,"Per-frame (from 03ce after db3e): projectile markers, cannon tracers+hit tests, explosion sprite, ground/air target box+readouts, photo, bomb cue, radio beacon",simflow
 vgame,func,0000:b339,hud_draw_diamond,void(void),simflow,,"4-line diamond +-4 px around (DS:49E0,49E8) in HUD colour [2CA0]",simflow
@@ -1587,29 +1587,29 @@ vgame,func,0000:c6de,mfd_view_flir_tint,"void(int x,int y)",simflow,,"Shade-fill
 vgame,func,0000:c73c,fx_fire_puffs,"void near(int16 hdg,int16 pitch,int16 roll,int16 X,int16 Y,int16 Z)",render3d,,"[Part 2] 6 puffs DS:3A5C -> E7AC 0x25+frame (0..3) / 0x24 with C040=frame (4,5); consumes game RNG cb62",render3d
 vgame,func,0000:c834,fx_smoke_draw,"void near(int16 cx,int16 cy,int16 cz)",render3d,,"[Part 2] 16 smoke puffs DS:39DA for TV camera: BA67 depth gate, 49C6=size<<8|class, BEE1(0x25)",render3d
 vgame,func,0000:c8fa,lib_scale_eighths,"int(int mode,int v)",lib,,"mode 0..3 -> v*0.5/0.625/0.75/0.875 (sar), else v",simflow
-vgame,func,0000:c94e,fx_clamp_wrap,"int(v,lo,hi)",lib,,clamp with wrap quirk (v<=-0x4000 -> hi),simflow
-vgame,func,0000:c96d,fx_clamp,"int(v,lo,hi)",lib,,plain clamp,simflow
-vgame,func,0000:c987,fx_dist,"int(a,b)",lib,,max+min/2 capped 7FFF,simflow
-vgame,func,0000:c9d6,fx_heading,"u16(x,y)",lib,,"angle from +y, polynomial atan",simflow
-vgame,func,0000:caee,fx_sin_mul,"int(a,m)",lib,,"mul15(m,sin16(a))",simflow
-vgame,func,0000:cb07,fx_cos_mul,"int(a,m)",lib,,"fx_sin_mul(a+0x4000,m)",simflow
+vgame,func,0000:c94e,fx_clamp_wrap,"int(int v,int lo,int hi)",lib,,clamp with wrap quirk (v<=-0x4000 -> hi),simflow
+vgame,func,0000:c96d,fx_clamp,"int(int v,int lo,int hi)",lib,,plain clamp,simflow
+vgame,func,0000:c987,fx_dist,"int(int a,int b)",lib,,max+min/2 capped 7FFF,simflow
+vgame,func,0000:c9d6,fx_heading,"u16(int x,int y)",lib,,"angle from +y, polynomial atan",simflow
+vgame,func,0000:caee,fx_sin_mul,"int(u16 a,int m)",lib,,"mul15(m,sin16(a))",simflow
+vgame,func,0000:cb07,fx_cos_mul,"int(u16 a,int m)",lib,,"fx_sin_mul(a+0x4000,m)",simflow
 vgame,func,0000:cb1b,fx_sext8,int(int x),lib,,sign-extend low byte,simflow
 vgame,func,0000:cb39,lib_sign,int(int v),lib,,signum,simflow
 vgame,func,0000:cb56,rand_seed_timer,void(void),lib,,srand(bios_timer),simflow
 vgame,func,0000:cb62,rand_n,int(int n),lib,,rand()*n>>15,simflow
 vgame,func,0000:cb72,input_button,int(int n),flight,,[flight.md 2.4] key pulse 43BE+2n plus joy_button(n),flight
 vgame,func,0000:cba0,input_command_key,void(unsigned key),simflow,,"Per-frame key command interpreter called from 43ee with [DE90]: 1-9, F1-F10, Alt/Shift keys, debug keys, nav map keys, then tail (fire button, chaff/flare timers, bay doors, gear, lamps). NOT a menu.",simflow
-vgame,func,0000:d6bf,snd_cue,"void(cmd,prio)",simflow,,snd_cmd gated by snd_level 43C2 and eject state,simflow
+vgame,func,0000:d6bf,snd_cue,"void(int cmd,int prio)",simflow,,snd_cmd gated by snd_level 43C2 and eject state,simflow
 vgame,func,0000:d6e5,snd_engine_refresh,void(void),simflow,,snd_cmd 24 or 25,simflow
 vgame,func,0000:d707,frame_params_update,void(void),simflow,,clamp rate 4-3D7A..15; 43B8 B16C B286 9F64,simflow
 vgame,func,0000:d76b,view_range_setup,void near(void),render3d,,"[Part 1] 48A6[k]=20h<<(k+detail) k<6, 48B2, 48B4 (no readers); [48B6]=(detail+1)*0D05h max depth",render3d
 vgame,func,0000:d7bb,frame_rate_halve,void(void),simflow,,"3D7A 2->1, rate<<=1",simflow
-vgame,func,0000:d7d0,nav_copy_xy,"void(dst,src)",simflow,,copy site xy to 2E6C+4*dst,simflow
-vgame,func,0000:d7f4,pic_show,"void(name,page)",loader,,open + 11B9:000E decode + close,simflow
-vgame,func,0000:d81d,file_open_ro,"int(name,mode)",loader,,1199:000C dos_open,simflow
-vgame,func,0000:d82f,file_close,void(h),loader,,1199:00C8 dos_close,simflow
-vgame,func,0000:d83e,hud_lamp_recolor,"void(ctx,lamp,on)",simflow,,"rect_recolor lamp rect, table 46D8/4672",simflow
-vgame,func,0000:d92d,hud_digits_draw,"void(page,slot,str)",simflow,,blit 4x7 digits from page2 strip,simflow
+vgame,func,0000:d7d0,nav_copy_xy,"void(int dst,int src)",simflow,,copy site xy to 2E6C+4*dst,simflow
+vgame,func,0000:d7f4,pic_show,"void(char *name,int page)",loader,,open + 11B9:000E decode + close,simflow
+vgame,func,0000:d81d,file_open_ro,"int(char *name,int mode)",loader,,1199:000C dos_open,simflow
+vgame,func,0000:d82f,file_close,void(int h),loader,,1199:00C8 dos_close,simflow
+vgame,func,0000:d83e,hud_lamp_recolor,"void(void *ctx,int lamp,int on)",simflow,,"rect_recolor lamp rect, table 46D8/4672",simflow
+vgame,func,0000:d92d,hud_digits_draw,"void(int page,int slot,char *s)",simflow,,blit 4x7 digits from page2 strip,simflow
 vgame,func,0000:d9a3,hud_side_strips,void(int page),simflow,,side bars + store highlight 46C2,simflow
 vgame,func,0000:dae8,r3d_begin_scene,"void near(Viewport*vp,int16 a1,int16 a2,int16 a3,int16 ox,int16 oy,int16 oz,int16 backdrop,int16 focal)",render3d,,"[Part 1] DB71, DC64, DCA9; backdrop: C686=0, 8560=B760, 11EB:0F9B, wait byte[262A]==0, 1442; [49C4]=0",render3d
 vgame,func,0000:db3e,r3d_end_scene,void near(void),render3d,,"[Part 1] DF08, offset_clear, C04E+=1800h C04C+=1B00h ([4EA0]=6), memcpy(49B2,498E,18)",render3d
@@ -1626,7 +1626,7 @@ vgame,func,0000:e578,mat_mul,"void(A,B,C)",flight,,[flight.md 2.2] 3x3 Q15 C=AxB
 vgame,func,0000:e7ac,r3d_place_object,"void near(uint16 type,int16 a1,int16 a2,int16 a3,int16 X,int16 Y,int16 Z)",render3d,,"[Part 1] flags DS:0A60[bank][idx]: class->497A, bit7 -> DDFE; else shade, 1433:03A9, transpose, 11EB:00D3(idx,x,z,-y)",render3d
 vgame,func,0000:e8a2,r3d_cull_point,"int16 near(int16 x,int16 y,int16 z)",render3d,,"[Part 1] BP=x BX=y CX=z -> E8B5; AX 0 visible, ZF",render3d
 vgame,func,0000:e8b5,r3d_cull_core,"near(BP=x,BX=y,CX=z,[497A]) -> AX,ZF",render3d,,"[Part 1] A,B,C=2*(M*v) s32 wrap; depth 48B6/48C6; wide 4936/4946 or E53E/E544 >>cl; [4978] dist (wide quirk). Diff-tested",render3d
-vgame,func,0000:ea26,pal_fade_step,"int pal_fade_step(RGB far*cur,RGB far*target,int count)",lib,,"moves each component of cur one step toward target, returns number changed (callers 4857,4D43)",simflow
+vgame,func,0000:ea26,pal_fade_step,"int(void *cur,void *target,int count)",lib,,"moves each component of cur one step toward target, returns number changed (callers 4857,4D43)",simflow
 vgame,func,0000:ea7c,file_load_paras,u16(const char *name),loader,,"fopen r+b, filelength, check free paragraphs, alloc, int86x read loop (64K chunk bug); returns segment or 0; size in C074/C076",simflow
 vgame,func,0000:ebb4,c0_start,void(void),platform,,"MSC c0: DOS>=2 check, SS=DGROUP, stack size from PSP[2], INT 21/4A shrink, BSS clear (5438..7250), _cinit, main(argc,argv,envp) at 0000:0010, exit(); carries the divide-error ISR at 4E8A = _amsg_exit(3) target",platform
 vgame,func,0000:ec9e,rtl_cinit,void(void),platform,,"saves INT 0 vector, installs the divide handler, runs init tables (_initterm 5038/5047), parses env ""_C_FILE_INFO="" into handle flags, queries INT 21/4400 for the 3 std handles",platform
@@ -1725,11 +1725,11 @@ vgame,func,1088:00d7,pal_save,void(void),simflow,,pal_read_dac -> DS:0D4A (768 B
 vgame,func,1088:00ee,pal_restore,void(void),simflow,,set DAC 0..255 from DS:0D4A,simflow
 vgame,func,1088:0107,pal_set_adv,void(void),simflow,,"set DAC 0..255 from DS:134A (ADV.PAL, quit requester)",simflow
 vgame,func,1088:0120,r3d_depth_shade,uint16 far(void),render3d,,"[Part 1] 0 if [7D5E] or ![43B6]; else clamp((max(0,(s8)[4963])>>1)-[497A],0,31)>>1. Diff-tested",render3d
-vgame,func,109d:0006,fx_mul15,"int(a,b)",lib,,(a*b+0x4000)>>15,simflow
-vgame,func,109d:006c,fx_cos16,int(a),lib,,sin16(a+0x4000),simflow
-vgame,func,109d:007c,fx_sin16,int(a),lib,,table interpolation 2084,simflow
-vgame,func,109d:0088,fx_sin16_reg,reg BX,lib,,register entry of 0090,simflow
-vgame,func,109d:0090,fx_sin_interp,reg BX,lib,,T[i]+round(d*frac/256),simflow
+vgame,func,109d:0006,fx_mul15,"int(int a,int b)",lib,,(a*b+0x4000)>>15,simflow
+vgame,func,109d:006c,fx_cos16,int(int a),lib,,sin16(a+0x4000),simflow
+vgame,func,109d:007c,fx_sin16,int(int a),lib,,table interpolation 2084,simflow
+vgame,func,109d:0088,fx_sin16_reg,int(int a),lib,,register entry of 0090,simflow
+vgame,func,109d:0090,fx_sin_interp,int(int a),lib,,T[i]+round(d*frac/256),simflow
 vgame,func,10a8:0000,hud_draw_far,void(void),simflow,,Far thunk to hud_draw_front; called by frame loop 1bbc when [C07A]==0,simflow
 vgame,func,10a8:0004,hud_color_init_far,void(void),simflow,,Far thunk to hud_color_init; called from 01bf (cockpit recolour),simflow
 vgame,func,10a8:0008,hud_layout_init_far,void(void),simflow,,Far thunk to hud_layout_init; called by the C-key handler in 1e9e (start-up init is the fall-through of 09CE),simflow
@@ -1741,7 +1741,7 @@ vgame,func,10a8:0c95,joy_set_centre_axis,SI axis,flight,,[flight.md 2.4] centre/
 vgame,func,10a8:0ca8,joy_poll,void(void),flight,,"[flight.md 2.4] raw read + joy_scale X,Y -> 2CD2/2CD3",flight
 vgame,func,10a8:0cb7,joy_read_raw,void(void),platform,,"game port 201h: write, count loops until axis bits fall (CX max 65535, interrupts off); [23EC]/[23EE] = X/Y counts of stick A, FFFFh on timeout",platform
 vgame,func,10a8:0cff,joy_scale,void(int axis /*SI*/),platform,,"raw count -> byte [23F4+axis]: 0..7F below centre, 80..FF above; tracks min/max in the calibration table [23C4..23E4]",platform
-vgame,func,10a8:0d70,joy_get_calib,void(void far *dst),lib,,copy 20 words DS:2CA2 -> far dst (comm+48h),simflow
+vgame,func,10a8:0d70,joy_get_calib,void(void *dst),lib,,copy 20 words DS:2CA2 -> far dst (comm+48h),simflow
 vgame,func,10a8:0d82,joy_set_calib,void(void far *src),lib,,copy 20 words far src (comm+48h) -> DS:2CA2,simflow
 vgame,func,1181:0008,keypad_stick_install,void(void),flight,,"[flight.md 2.4] NumLock off, clear state, 2CD6/2CD7=80h, save INT 9, install keypad_stick_isr",flight
 vgame,func,1181:0058,keypad_stick_remove,void(void),flight,,[flight.md 2.4] restore INT 9 from cs:0187,flight
@@ -1849,7 +1849,7 @@ vgame,func,1433:058f,math_div32sat,"int16 far math_div32sat(uint16 lo,int16 hi,i
 vgame,func,1433:05c6,math_imul,"int32 far math_imul(int16 a,int16 b)",render3d,,[Part 6] dead: DX:AX=a*b,render3d
 vgame,func,1433:05d1,mat_from_euler_b,"void far mat_from_euler_b(uint16 p6,uint16 p8,uint16 pA,int16 out[9])",render3d,,[Part 6] dead: other Euler order; really ends at 06FC (index size short),render3d
 vgame,func,14a2:000e,pal_write_vsync,"void(void *rgb, int first, int count)",video,,writes DAC 3C8/3C9 during retrace (3DAh); [0:0489] bit1 set (VGA flag) uses the scaled 6-bit path,platform
-vgame,func,14a2:00c5,pal_read_dac,void(void far *dst),simflow,,"wait retrace, read 768 bytes of DAC from index 0 into dst (6-bit)",simflow
+vgame,func,14a2:00c5,pal_read_dac,void(void *dst),simflow,,"wait retrace, read 768 bytes of DAC from index 0 into dst (6-bit)",simflow
 vgame,global,14b2:0000,math_tab_sin,uint16[2048],render3d,,"[Part 6] round(32767*sin(i*pi/4096)), quadrant",render3d
 vgame,global,14b2:1000,math_tab_atan,uint16[4096],render3d,,[Part 6] trunc(atan(i/4096)*32768/pi),render3d
 vgame,global,14b2:3000,math_tab_hypot,uint16[257],render3d,,[Part 6] trunc((sqrt(1+(i/256)^2)-1)*65536) except [192]=16383,render3d

@@ -161,11 +161,13 @@ int start_stub(const char *tail)
 
 /* ---- VGAME: the flight; writes the result for END ---------------------------------------------- */
 
-int vgame_main(const char *tail)
+/* the real VGAME (src/sim) tells the stand-in END that a pass happened (the real START does not count its passes) */
+void placeholder_note_vgame_pass(void) { start_calls++; }
+
+int vgame_stub(const char *tail)
 {
     (void)tail;
     Comm *c = comm_get();
-    if (!prog_use_stubs) start_calls++;                  /* the real START (S5.4) does not count its passes: VGAME does */
     hold(5);
     c->damage_mask = start_calls == 1 ? 0x0000 : 0x0013;                    /* 34 */
     c->hits_taken = start_calls == 1 ? 0 : 3;                               /* 36 */
@@ -220,7 +222,7 @@ ProgMain placeholder_main(ProgId id)
     case PROG_PLAYER:   return player_stub;
     case PROG_DSWAP:    return dswap_stub;
     case PROG_START:    return start_stub;
-    case PROG_VGAME:    return vgame_main;
+    case PROG_VGAME:    return vgame_stub;
     case PROG_END:      return end_main;
     default:            return NULL;
     }

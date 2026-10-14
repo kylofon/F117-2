@@ -21,37 +21,37 @@ u16 fx_acos(int q15);
 /* VGAME 0000:2ebe  spec simflow.md "0000:2ebe fx_asin(int v) -> u16 inverse of the sine table; v" */
 u16 fx_asin(int q15);
 /* VGAME 0000:c96d  spec simflow.md "0000:c96d fx_clamp(int v,int lo,int hi) - plain signed clamp" */
-void fx_clamp(void); /* TODO signature: spec simflow.md "0000:c96d fx_clamp(int v,int lo,int hi) " (type column: "int(v,lo,hi)") */
+int fx_clamp(int v, int lo, int hi);
 /* VGAME 0000:c94e  spec simflow.md "0000:c94e fx_clamp_wrap(int v, int lo, int hi) -> int (cdecl" */
-void fx_clamp_wrap(void); /* TODO signature: spec simflow.md "0000:c94e fx_clamp_wrap(int v, int lo, i" (type column: "int(v,lo,hi)") */
+int fx_clamp_wrap(int v, int lo, int hi);
 /* VGAME 109d:006c  spec simflow.md "109d:006c fx_cos16(int a), 109d:007c fx_sin16(int a), 109d:0" */
-void fx_cos16(void); /* TODO signature: spec simflow.md "109d:006c fx_cos16(int a), 109d:007c fx_" (type column: "int(a)") */
+int fx_cos16(int a);
 /* VGAME 0000:cb07  spec simflow.md "0000:caee fx_sin_mul(u16 a, int m) -> int = mul15(m, sin16(a" */
-void fx_cos_mul(void); /* TODO signature: spec simflow.md "0000:caee fx_sin_mul(u16 a, int m) -> in" (type column: "int(a,m)") */
+int fx_cos_mul(u16 a, int m);
 /* VGAME 0000:c987  spec simflow.md "0000:c987 fx_dist(int a,int b) - cheap length |a|,|b|: max +" */
-void fx_dist(void); /* TODO signature: spec simflow.md "0000:c987 fx_dist(int a,int b) - cheap l" (type column: "int(a,b)") */
+int fx_dist(int a, int b);
 /* VGAME 0000:c9d6  spec simflow.md "0000:c9d6 fx_heading(int x,int y) -> u16 heading angle of th" */
-void fx_heading(void); /* TODO signature: spec simflow.md "0000:c9d6 fx_heading(int x,int y) -> u16" (type column: "u16(x,y)") */
+u16 fx_heading(int x, int y);
 /* VGAME 0000:2f40  spec simflow.md "0000:2f40 fx_isqrt(int n) -> int Babylonian integer square r" */
 int fx_isqrt(int n);
 /* VGAME 109d:0006  spec simflow.md "109d:0006 fx_mul15(int a, int b) -> int (far, retf; stack ar" */
-void fx_mul15(void); /* TODO signature: spec simflow.md "109d:0006 fx_mul15(int a, int b) -> int " (type column: "int(a,b)") */
+int fx_mul15(int a, int b);
 /* VGAME 0000:2e64  spec simflow.md "0000:2e64 fx_ratio(int x,int y) -> int = sign(x)*sign(y) * (" */
 int fx_ratio_q15(int x, int y);
 /* VGAME 0000:cb1b  spec simflow.md "0000:cb1b fx_sext8(int x) -> int = (int)(int8_t)(x & 0xFF); " */
 int fx_sext8(int x);
 /* VGAME 109d:007c  spec simflow.md "109d:006c fx_cos16(int a), 109d:007c fx_sin16(int a), 109d:0" */
-void fx_sin16(void); /* TODO signature: spec simflow.md "109d:006c fx_cos16(int a), 109d:007c fx_" (type column: "int(a)") */
+int fx_sin16(int a);
 /* VGAME 109d:0088  spec simflow.md "109d:006c fx_cos16(int a), 109d:007c fx_sin16(int a), 109d:0" */
-void fx_sin16_reg(void); /* TODO signature: spec simflow.md "109d:006c fx_cos16(int a), 109d:007c fx_" (type column: "reg BX") */
+int fx_sin16_reg(int a);
 /* VGAME 109d:0090  spec simflow.md "109d:006c fx_cos16(int a), 109d:007c fx_sin16(int a), 109d:0" */
-void fx_sin_interp(void); /* TODO signature: spec simflow.md "109d:006c fx_cos16(int a), 109d:007c fx_" (type column: "reg BX") */
+int fx_sin_interp(int a);
 /* VGAME 0000:caee  spec simflow.md "0000:caee fx_sin_mul(u16 a, int m) -> int = mul15(m, sin16(a" */
-void fx_sin_mul(void); /* TODO signature: spec simflow.md "0000:caee fx_sin_mul(u16 a, int m) -> in" (type column: "int(a,m)") */
+int fx_sin_mul(u16 a, int m);
 /* VGAME 0000:f206  spec simflow.md "8. RTL / library leftovers (rows only; platform.md names the" */
 void int86x(void); /* TODO signature: spec simflow.md "8. RTL / library leftovers (rows only; p" (type column: "int(int n,REGS *in,REGS *out,SREGS *s)") */
 /* VGAME 10a8:0d70  spec simflow.md "Part 1: lifecycle, timer, loading, world import/export, pale" */
-void joy_get_calib(void); /* TODO signature: spec simflow.md "Part 1: lifecycle, timer, loading, world" (type column: "void(void far *dst)") */
+void joy_get_calib(void *dst);
 /* VGAME 10a8:0d82  spec simflow.md "0.1 main (0010) - start-up order (V)": same name as module_platform.h, declared there */
 /* VGAME 0000:c8fa  spec simflow.md "0000:C8FA int scale_by_mode(int mode, int v); 0000:CB39 int " */
 int lib_scale_eighths(int mode, int v);
@@ -60,7 +60,7 @@ int lib_sign(int v);
 /* VGAME 0000:f0b0  spec simflow.md "0000:38ab hud_number_draw(int slot, int value): s = ltoa(val": same name as module_frontend.h, declared there */
 /* VGAME 0000:fe10  spec simflow.md "8. RTL / library leftovers (rows only; platform.md names the": same name as module_platform.h, declared there */
 /* VGAME 0000:ea26  spec simflow.md "0000:4857 sim_reset_clock_palette void(void) (V)" */
-void pal_fade_step(void); /* TODO signature: spec simflow.md "0000:4857 sim_reset_clock_palette void(v" (type column: "int pal_fade_step(RGB far*cur,RGB far*ta") */
+int pal_fade_step(void *cur, void *target, int count);
 /* VGAME 11ce:0009  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9" */
 void pic_hook_nop(void);
 /* VGAME 0000:1e0b  spec simflow.md "1. Timer / frame pacing (0000:1bfc .. 1e0b, ISR code in inde" */
@@ -88,11 +88,11 @@ void stub_ret_02c1(void);
 /* VGAME 0ffd:0008  spec simflow.md "0FFD:0008 drv_bind(u16 seg) (V) - called 3x from main" */
 void drv_bind(u16 seg);
 /* VGAME 0000:d82f  spec simflow.md "0000:d7f4 pic_show(const char *name, int page): h = dos_open" */
-void file_close(void); /* TODO signature: spec simflow.md "0000:d7f4 pic_show(const char *name, int" (type column: "void(h)") */
+void file_close(int h);
 /* VGAME 0000:ea7c  spec simflow.md "0000:EA7C file_load_paras(const char *name) -> u16 seg (V)" */
 u16 file_load_paras(const char *name);
 /* VGAME 0000:d81d  spec simflow.md "0000:d7f4 pic_show(const char *name, int page): h = dos_open" */
-void file_open_ro(void); /* TODO signature: spec simflow.md "0000:d7f4 pic_show(const char *name, int" (type column: "int(name,mode)") */
+int file_open_ro(char *name, int mode);
 /* VGAME 0000:0c2c  spec simflow.md "0000:0C2C load_3dg_terrain(void) (V)" */
 void load_3dg_terrain(void);
 /* VGAME 0000:0af9  spec simflow.md "0000:0AF9 load_3dt_scenery(char *stem) (V)" */
@@ -112,7 +112,7 @@ void pic_lzw_next(void);
 void pic_rle90_fill(void);
 /* VGAME 11ce:000a  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9": same name as module_video.h, declared there */
 /* VGAME 0000:d7f4  spec simflow.md "0000:d7f4 pic_show(const char *name, int page): h = dos_open" */
-void pic_show(void); /* TODO signature: spec simflow.md "0000:d7f4 pic_show(const char *name, int" (type column: "void(name,page)") */
+void pic_show(char *name, int page);
 /* VGAME 11b9:000e  spec simflow.md "0000:d7f4 pic_show(const char *name, int page): h = dos_open": same name as module_video.h, declared there */
 /* VGAME 11b9:0083  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9": same name as module_video.h, declared there */
 /* VGAME 11b9:00ee  spec simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9": same name as module_video.h, declared there */
@@ -123,23 +123,23 @@ void sim_init(void);
 /* VGAME 0000:01bf  spec simflow.md "0000:01BF cockpit_daynight_recolor(void) and 0000:01B7 cockp" */
 void cockpit_daynight_recolor(void);
 /* VGAME 0000:17a3  spec simflow.md "7 0000:17a3 cockpit_draw_adi(void) (owner simflow, 446 bytes" */
-void cockpit_draw_adi(void); /* TODO signature: spec simflow.md "7 0000:17a3 cockpit_draw_adi(void) (owne" (type column: "void cockpit_draw_adi(void)") */
+void cockpit_draw_adi(void);
 /* VGAME 0000:91a4  spec simflow.md "6 0000:91a4 cockpit_keyblit(dx, dy, sx, sy, w, h, clip) (own" */
-void cockpit_keyblit(void); /* TODO signature: spec simflow.md "6 0000:91a4 cockpit_keyblit(dx, dy, sx, " (type column: "void cockpit_keyblit(int dx,int dy,int s") */
+void cockpit_keyblit(int dx, int dy, int sx, int sy, int w, int h, int clip);
 /* VGAME 0000:01b7  spec simflow.md "0000:01BF cockpit_daynight_recolor(void) and 0000:01B7 cockp" */
 void cockpit_palette_refresh(void);
 /* VGAME 0000:3968  spec simflow.md "5 0000:3968 cockpit_refresh_panels(void) (owner simflow, 92 " */
-void cockpit_refresh_panels(void); /* TODO signature: spec simflow.md "5 0000:3968 cockpit_refresh_panels(void)" (type column: "void cockpit_refresh_panels(void)") */
+void cockpit_refresh_panels(void);
 /* VGAME 0000:784a  spec simflow.md "0000:784A cockpit_widgets_reset - void cockpit_widgets_reset" */
 void cockpit_widgets_reset(void);
 /* VGAME 0000:9641  spec simflow.md "0000:9641 fmt_2digit(int n) (V)" */
-void fmt_2digit(void); /* TODO signature: spec simflow.md "0000:9641 fmt_2digit(int n) (V)" (type column: "void fmt_2digit(int n)") */
+void fmt_2digit(int n);
 /* VGAME 0000:955c  spec simflow.md "0000:955c fmt_clock_hhmm(unsigned t) and 0000:95c4 fmt_clock" */
-void fmt_clock_hhmm(void); /* TODO signature: spec simflow.md "0000:955c fmt_clock_hhmm(unsigned t) and" (type column: "void fmt_clock_hhmm(unsigned t)") */
+void fmt_clock_hhmm(unsigned t);
 /* VGAME 0000:95c4  spec simflow.md "0000:955c fmt_clock_hhmm(unsigned t) and 0000:95c4 fmt_clock" */
-void fmt_clock_hhmmss(void); /* TODO signature: spec simflow.md "0000:955c fmt_clock_hhmm(unsigned t) and" (type column: "void fmt_clock_hhmmss(unsigned t)") */
+void fmt_clock_hhmmss(unsigned t);
 /* VGAME 0000:04bb  spec simflow.md "0000:04BB timer_wait_ticks(n) (not in R1's list; used by 023" */
-void frame_delay(void); /* TODO signature: spec simflow.md "0000:04BB timer_wait_ticks(n) (not in R1" (type column: "void frame_delay(int ticks)") */
+void frame_delay(int ticks);
 /* VGAME 0000:1bb0  spec simflow.md "1 Part map" */
 void frame_loop(void);
 /* VGAME 0000:1bbc  spec simflow.md "0.4 Frame order (frame_loop_body 1bbc, loops until [E552] !=" */
@@ -152,21 +152,20 @@ void frame_rate_halve(void);
 void fx_fall_update(void);
 /* VGAME 0000:479c  spec simflow.md "0000:479c fx_smoke_update void(void) (V)" */
 void fx_smoke_update(void);
-/* VGAME 0000:893f  spec simflow.md "0000:8929 gfx_set_fg(int c): ctx[3FE2].fg = ctx[3FFA].fg = c": same name as module_video.h, declared there */
 /* VGAME 0000:02c2  spec simflow.md "0000:02C2 gfx_pages_init(void) and stubs (V)" */
 void gfx_pages_init(void);
 /* VGAME 0000:8bd3  spec simflow.md "0000:8bd3 gfx_restore_rect(x, y, w, h): blit_rect(page2 -> p" */
-void gfx_restore_rect(void); /* TODO signature: spec simflow.md "0000:8bd3 gfx_restore_rect(x, y, w, h): " (type column: "void(x,y,w,h)") */
+void gfx_restore_rect(int x, int y, int w, int h);
 /* VGAME 0000:8929  spec simflow.md "0000:8929 gfx_set_fg(int c): ctx[3FE2].fg = ctx[3FFA].fg = c" */
 void gfx_set_fg(int c);
 /* VGAME 0000:88a8  spec simflow.md "0000:88a8 hud_box(int x0, int y0, int x1, int y1, int col) (" */
-void hud_box(void); /* TODO signature: spec simflow.md "0000:88a8 hud_box(int x0, int y0, int x1" (type column: "void hud_box(int x0,int y0,int x1,int y1") */
+void hud_box(int x0, int y0, int x1, int y1, int col);
 /* VGAME 10a8:09ce  spec simflow.md "10A8:09CE void hud_color_init(void) (V) [thunk 10A8:0004]" */
 void hud_color_init(void);
 /* VGAME 10a8:0004  spec simflow.md "10A8:09CE void hud_color_init(void) (V) [thunk 10A8:0004]" */
 void hud_color_init_far(void);
 /* VGAME 0000:d92d  spec simflow.md "0000:d92d hud_digits_draw(int page, int slot, const char *s)" */
-void hud_digits_draw(void); /* TODO signature: spec simflow.md "0000:d92d hud_digits_draw(int page, int " (type column: "void(page,slot,str)") */
+void hud_digits_draw(int page, int slot, char *s);
 /* VGAME 0000:b339  spec simflow.md "0000:b339 hud_draw_diamond() (V)" */
 void hud_draw_diamond(void);
 /* VGAME 10a8:0000  spec simflow.md "1 Part map" */
@@ -181,14 +180,16 @@ void hud_draw_store_count(int type);
 void hud_draw_store_counts(void);
 /* VGAME 0000:3926  spec simflow.md "0.4 Frame order (frame_loop_body 1bbc, loops until [E552] !=" */
 void hud_draw_throttle(void);
+/* VGAME 0000:893f  spec simflow.md "0000:8929 gfx_set_fg(int c): ctx[3FE2].fg = ctx[3FFA].fg = c" */
+void hud_fill_rect(int x0, int y0, int x1, int y1);
 /* VGAME 0000:b7f8  spec simflow.md "0000:b7f8 hud_format_range(dist) (V)" */
 void hud_format_range(int dist);
 /* VGAME 0000:4e0f  spec simflow.md "0000:4e0f hud_glideslope_update void(void) (V)" */
 void hud_glideslope_update(void);
 /* VGAME 0000:99a7  spec simflow.md "5. ILS: 0000:99a7 hud_ils() (V) -- F9 overlay, called by 789" */
-void hud_ils(void); /* TODO signature: spec simflow.md "5. ILS: 0000:99a7 hud_ils() (V) -- F9 ov" (type column: "void hud_ils(void)") */
+void hud_ils(void);
 /* VGAME 0000:d83e  spec simflow.md "0000:d83e hud_lamp_recolor(TextCtx *ctx, int lamp, int on) (" */
-void hud_lamp_recolor(void); /* TODO signature: spec simflow.md "0000:d83e hud_lamp_recolor(TextCtx *ctx," (type column: "void(ctx,lamp,on)") */
+void hud_lamp_recolor(void *ctx, int lamp, int on);
 /* VGAME 0000:4f05  spec simflow.md "0000:4f05 hud_lamp_set void hud_lamp_set(int lamp, int on) (" */
 void hud_lamp_set(int lamp, int on);
 /* VGAME 0000:4ebc  spec simflow.md "0000:4ebc hud_lamp_timers void(void) (V)" */
@@ -206,21 +207,21 @@ void hud_line_full(int x0, int y0, int x1, int y1);
 /* VGAME 0000:8888  spec simflow.md "Part 5: detection, threat events, moving map primitives (R5)" */
 void hud_line_full2(int x0, int y0, int x1, int y1);
 /* VGAME 0000:873f  spec simflow.md "0000:873f hud_line_view(int x0, int y0, int x1, int y1) (V)" */
-void hud_line_view(void); /* TODO signature: spec simflow.md "0000:873f hud_line_view(int x0, int y0, " (type column: "void hud_line_view(int x0,int y0,int x1,") */
+void hud_line_view(int x0, int y0, int x1, int y1);
 /* VGAME 0000:88f6  spec simflow.md "0000:88f6 hud_line_win(x0,y0,x1,y1) (V)" */
-void hud_line_win(void); /* TODO signature: spec simflow.md "0000:88f6 hud_line_win(x0,y0,x1,y1) (V)" (type column: "void hud_line_win(int x0,int y0,int x1,i") */
+void hud_line_win(int x0, int y0, int x1, int y1);
 /* VGAME 0000:b5af  spec simflow.md "0000:b5af hud_lock_bracket(animate) (V) converging square (r" */
 void hud_lock_bracket(int animate);
 /* VGAME 0000:b6ae  spec simflow.md "0000:b6ae hud_lock_indicator(mode, lock) (V)" */
 void hud_lock_indicator(int mode, int lock);
 /* VGAME 0000:8b3b  spec simflow.md "0000:8b3b hud_num_left(int v, int x, int y, int col) (V)" */
-void hud_num_left(void); /* TODO signature: spec simflow.md "0000:8b3b hud_num_left(int v, int x, int" (type column: "void hud_num_left(int v,int x,int y,int ") */
+void hud_num_left(int v, int x, int y, int col);
 /* VGAME 0000:8b5c  spec simflow.md "0000:8b5c hud_num_right(unsigned v, int xr, int y, int col) " */
-void hud_num_right(void); /* TODO signature: spec simflow.md "0000:8b5c hud_num_right(unsigned v, int " (type column: "void hud_num_right(unsigned v,int xr,int") */
+void hud_num_right(unsigned v, int xr, int y, int col);
 /* VGAME 0000:38ab  spec simflow.md "0000:38ab hud_number_draw(int slot, int value): s = ltoa(val" */
 void hud_number_draw(int slot, int v);
 /* VGAME 0000:7898  spec simflow.md "0000:c987 fx_dist(int a,int b) - cheap length |a|,|b|: max +" */
-void hud_overlay_frame(void); /* TODO signature: spec simflow.md "0000:c987 fx_dist(int a,int b) - cheap l" (type column: "void hud_overlay_frame(void)") */
+void hud_overlay_frame(void);
 /* VGAME 0000:b77a  spec simflow.md "0000:b77a hud_ping_label(s, colour, dy) (V)" */
 void hud_ping_label(char *s, int colour, int dy);
 /* VGAME 0000:8970  spec simflow.md "1 Part map" */
@@ -232,29 +233,27 @@ void hud_side_strips(int page);
 /* VGAME 0000:b3e6  spec simflow.md "0000:b3e6 hud_target_box(x, y, size, hex, colour) (V)" */
 void hud_target_box(int x, int y, int size, int hex, int colour);
 /* VGAME 0000:8aa2  spec simflow.md "0000:8aa2 hud_text(char *s, int x, int y, int col) (V) and 0" */
-void hud_text(void); /* TODO signature: spec simflow.md "0000:8aa2 hud_text(char *s, int x, int y" (type column: "void hud_text(char *s,int x,int y,int co") */
+void hud_text(char *s, int x, int y, int col);
 /* VGAME 0000:8ad3  spec simflow.md "0000:8aa2 hud_text(char *s, int x, int y, int col) (V) and 0" */
-void hud_text2(void); /* TODO signature: spec simflow.md "0000:8aa2 hud_text(char *s, int x, int y" (type column: "void hud_text2(char *s,int x,int y,int c") */
+void hud_text2(char *s, int x, int y, int col);
 /* VGAME 0000:8316  spec simflow.md "0000:4f2a hud_threat_update void(void) (V; owner detect for " */
 void hud_threat_bar(int val, int color, int y0, int y1);
 /* VGAME 0000:b3b3  spec simflow.md "0000:b3b3 hud_update_aspect_label() (V)" */
 void hud_update_aspect_label(void);
 /* VGAME 0000:cba0  spec simflow.md "0000:cb62 rand_n(int n) -> int = (rand() * n) >> 15 (32-bit " */
 void input_command_key(unsigned key);
-/* VGAME 0000:0010  spec simflow.md "0.1 main (0010) - start-up order (V)" */
-void main(void);
 /* VGAME 0000:8a4e  spec simflow.md "0000:8a4e mfd_clear(int which, int colour) -> 0000:8a5e mfd_" */
-void mfd_clear(void); /* TODO signature: spec simflow.md "0000:8a4e mfd_clear(int which, int colou" (type column: "void mfd_clear(int which,int colour)") */
+void mfd_clear(int which, int colour);
 /* VGAME 0000:8a5e  spec simflow.md "0000:8a4e mfd_clear(int which, int colour) -> 0000:8a5e mfd_" */
-void mfd_fill(void); /* TODO signature: spec simflow.md "0000:8a4e mfd_clear(int which, int colou" (type column: "void mfd_fill(int which,int colour)") */
+void mfd_fill(int which, int colour);
 /* VGAME 0000:950e  spec simflow.md "0000:950e mfd_fuel_bar(int v, int col) (V)" */
-void mfd_fuel_bar(void); /* TODO signature: spec simflow.md "0000:950e mfd_fuel_bar(int v, int col) (" (type column: "void mfd_fuel_bar(int v,int col)") */
+void mfd_fuel_bar(int v, int col);
 /* VGAME 0000:9154  spec simflow.md "0000:9154 mfd_icon(int cx, int cy, int x, int y) (V)" */
-void mfd_icon(void); /* TODO signature: spec simflow.md "0000:9154 mfd_icon(int cx, int cy, int x" (type column: "void mfd_icon(int cx,int cy,int x,int y)") */
+void mfd_icon(int cx, int cy, int x, int y);
 /* VGAME 0000:82e9  spec simflow.md "0000:82e9 mfd_init_geometry (V)" */
-void mfd_init_geometry(void); /* TODO signature: spec simflow.md "0000:82e9 mfd_init_geometry (V)" (type column: "void mfd_init_geometry(void)") */
+void mfd_init_geometry(void);
 /* VGAME 0000:80a0  spec simflow.md "0000:80a0 mfd_left_select(int mode) (V)" */
-void mfd_left_select(void); /* TODO signature: spec simflow.md "0000:80a0 mfd_left_select(int mode) (V)" (type column: "void mfd_left_select(int mode)") */
+void mfd_left_select(int mode);
 /* VGAME 0000:863c  spec simflow.md "0000:4f2a hud_threat_update void(void) (V; owner detect for " */
 void mfd_map_arc(int cx, int cy, int r, int color, int solid, int a0, int a1);
 /* VGAME 0000:86e5  spec simflow.md "0000:86E5 void mfd_map_line(int wx0, int wy0, int wx1, int w" */
@@ -262,7 +261,7 @@ void mfd_map_line(int wx0, int wy0, int wx1, int wy1);
 /* VGAME 0000:8548  spec simflow.md "0000:8548 int mfd_map_plot(int wx, int wy, int color, int bi" */
 int mfd_map_plot(int wx, int wy, int color, int big);
 /* VGAME 0000:8387  spec simflow.md "8 0000:8387 mfd_map_redraw(int cx, int cy) (owner simflow, 2" */
-void mfd_map_redraw(void); /* TODO signature: spec simflow.md "8 0000:8387 mfd_map_redraw(int cx, int c" (type column: "void mfd_map_redraw(int cellx,int celly)") */
+void mfd_map_redraw(int cellx, int celly);
 /* VGAME 0000:9770  spec simflow.md "0000:973C void mfd_map_save_bg(void) / 0000:9770 void mfd_ma" */
 void mfd_map_restore_bg(void);
 /* VGAME 0000:94a5  spec simflow.md "0000:94A5 void mfd_map_route(void) (V)" */
@@ -276,21 +275,21 @@ int mfd_map_sy(int wy);
 /* VGAME 0000:85ed  spec simflow.md "0000:85ED int mfd_map_to_screen(int wx, int wy, int *sx, int" */
 int mfd_map_to_screen(int wx, int wy, int *sx, int *sy);
 /* VGAME 0000:9208  spec simflow.md "0000:c987 fx_dist(int a,int b) - cheap length |a|,|b|: max +" */
-void mfd_nav_page(void); /* TODO signature: spec simflow.md "0000:c987 fx_dist(int a,int b) - cheap l" (type column: "void mfd_nav_page(void)") */
+void mfd_nav_page(void);
 /* VGAME 0000:97a4  spec simflow.md "0000:97a4 mfd_objectives_page() (V) -- right MFD page 0x18 (" */
-void mfd_objectives_page(void); /* TODO signature: spec simflow.md "0000:97a4 mfd_objectives_page() (V) -- r" (type column: "void mfd_objectives_page(void)") */
+void mfd_objectives_page(void);
 /* VGAME 0000:829d  spec simflow.md "0000:829d mfd_refresh(int page) (V)" */
-void mfd_refresh(void); /* TODO signature: spec simflow.md "0000:829d mfd_refresh(int page) (V)" (type column: "void mfd_refresh(int page)") */
+void mfd_refresh(int page);
 /* VGAME 0000:8113  spec simflow.md "0000:8113 mfd_right_select(int page) (V)" */
-void mfd_right_select(void); /* TODO signature: spec simflow.md "0000:8113 mfd_right_select(int page) (V)" (type column: "void mfd_right_select(int page)") */
+void mfd_right_select(int page);
 /* VGAME 0000:8c10  spec simflow.md "0000:8c10 mfd_scope_draw(int flip) (V) -- left MFD mode 1 (s" */
-void mfd_scope_draw(void); /* TODO signature: spec simflow.md "0000:8c10 mfd_scope_draw(int flip) (V) -" (type column: "void mfd_scope_draw(int flip)") */
+void mfd_scope_draw(int flip);
 /* VGAME 0000:903f  spec simflow.md "0000:903f mfd_target_box(int x, int y, int col) (V)" */
-void mfd_target_box(void); /* TODO signature: spec simflow.md "0000:903f mfd_target_box(int x, int y, i" (type column: "void mfd_target_box(int x,int y,int col)") */
+void mfd_target_box(int x, int y, int col);
 /* VGAME 0000:89fe  spec simflow.md "0000:89fe mfd_text(int mode, int col, int row, char *s, int " */
-void mfd_text(void); /* TODO signature: spec simflow.md "0000:89fe mfd_text(int mode, int col, in" (type column: "void mfd_text(int mode,int col,int row,c") */
+void mfd_text(int mode, int col, int row, char *s, int colour);
 /* VGAME 0000:81f6  spec simflow.md "0000:81f6 mfd_tv_label() (V) -- text under the TV page" */
-void mfd_tv_label(void); /* TODO signature: spec simflow.md "0000:81f6 mfd_tv_label() (V) -- text und" (type column: "void mfd_tv_label(void)") */
+void mfd_tv_label(void);
 /* VGAME 0000:c6de  spec simflow.md "0000:c6de void view_flir_tint(int x, int y) (V)" */
 void mfd_view_flir_tint(int x, int y);
 /* VGAME 0000:19ea  spec simflow.md "0000:19ea void view_ground_bands(int horizon, int mode) (V)" */
@@ -300,13 +299,13 @@ void mfd_view_render(unsigned obj, int x, int y, int z, int a0, int a1, int a2, 
 /* VGAME 0000:1961  spec simflow.md "0000:1961 void view_sky_bands(int horizon) (V)" */
 void mfd_view_sky_bands(int horizon);
 /* VGAME 0000:90b9  spec simflow.md "0000:90b9 mfd_w2s(int wx, int wy) (V) -- world to radar scop" */
-void mfd_w2s(void); /* TODO signature: spec simflow.md "0000:90b9 mfd_w2s(int wx, int wy) (V) --" (type column: "void mfd_w2s(int wx,int wy)") */
+void mfd_w2s(int wx, int wy);
 /* VGAME 0000:9678  spec simflow.md "0000:9678 mfd_weapons_page() (V) -- right MFD page 0x15 (F5)" */
-void mfd_weapons_page(void); /* TODO signature: spec simflow.md "0000:9678 mfd_weapons_page() (V) -- righ" (type column: "void mfd_weapons_page(void)") */
+void mfd_weapons_page(void);
 /* VGAME 0000:8498  spec simflow.md "0000:8498 mfd_zoom_in() / 0000:84d6 mfd_zoom_out() (V)" */
-void mfd_zoom_in(void); /* TODO signature: spec simflow.md "0000:8498 mfd_zoom_in() / 0000:84d6 mfd_" (type column: "void mfd_zoom_in(void)") */
+void mfd_zoom_in(void);
 /* VGAME 0000:84d6  spec simflow.md "0000:8498 mfd_zoom_in() / 0000:84d6 mfd_zoom_out() (V)" */
-void mfd_zoom_out(void); /* TODO signature: spec simflow.md "0000:8498 mfd_zoom_in() / 0000:84d6 mfd_" (type column: "void mfd_zoom_out(void)") */
+void mfd_zoom_out(void);
 /* VGAME 0000:48dd  spec simflow.md "0000:48dd mission_cheat_rearm void(void) (V)" */
 void mission_cheat_rearm(void);
 /* VGAME 0000:4926  spec simflow.md "2.2 Ending the mission - 4926(code) and who calls it" */
@@ -320,11 +319,11 @@ void mission_world_export(void);
 /* VGAME 0000:4ad0  spec simflow.md "0000:4AD0 mission_world_import(void) (V)" */
 void mission_world_import(void);
 /* VGAME 0000:8b93  spec simflow.md "0000:8b93 msg_post(char *text) (V)" */
-void msg_post(void); /* TODO signature: spec simflow.md "0000:8b93 msg_post(char *text) (V)" (type column: "void msg_post(char *text)") */
+void msg_post(char *text);
 /* VGAME 0000:49e7  spec simflow.md "0000:49e7 msg_site_label void msg_site_label(int i) (V)" */
 void msg_site_label(int site);
 /* VGAME 0000:d7d0  spec simflow.md "0000:d7d0 nav_copy_xy(int dst, int src): [2E6C + 4*dst] = wo" */
-void nav_copy_xy(void); /* TODO signature: spec simflow.md "0000:d7d0 nav_copy_xy(int dst, int src):" (type column: "void(dst,src)") */
+void nav_copy_xy(int dst, int src);
 /* VGAME 0000:a17e  spec simflow.md "0000:c987 fx_dist(int a,int b) - cheap length |a|,|b|: max +" */
 void obj_overlay_frame(void);
 /* VGAME 0000:02fe  spec simflow.md "0000:02FE ordnance_panel_build(void) (V)" */
@@ -336,7 +335,7 @@ void pal_mfd_ramp_green(void);
 /* VGAME 1088:00bd  spec simflow.md "1088:00A3 pal_mfd_ramp_green() / 00BD pal_mfd_ramp_rt()" */
 void pal_mfd_ramp_rt(void);
 /* VGAME 14a2:00c5  spec simflow.md "14A2:00C5 pal_read_dac(void far *dst) (V)" */
-void pal_read_dac(void); /* TODO signature: spec simflow.md "14A2:00C5 pal_read_dac(void far *dst) (V" (type column: "void(void far *dst)") */
+void pal_read_dac(void *dst);
 /* VGAME 1088:00ee  spec simflow.md "1088:00D7 pal_save(): pal_read_dac(DS:0D4A) (768 bytes). 108" */
 void pal_restore(void);
 /* VGAME 1088:00d7  spec simflow.md "1088:00D7 pal_save(): pal_read_dac(DS:0D4A) (768 bytes). 108" */
@@ -354,16 +353,18 @@ void sim_reset_clock_palette(void);
 /* VGAME 0000:0233  spec simflow.md "0.3 sim_run (0233) (V)" */
 void sim_run(void);
 /* VGAME 0000:4a73  spec simflow.md "0000:4a73 site_name(int site) (V)" */
-void site_name(void); /* TODO signature: spec simflow.md "0000:4a73 site_name(int site) (V)" (type column: "void site_name(int site)") */
+void site_name(int site);
 /* VGAME 0000:d6bf  spec simflow.md "0000:d6bf snd_cue(int cmd, int prio) (cdecl: cmd [bp+4], pri" */
-void snd_cue(void); /* TODO signature: spec simflow.md "0000:d6bf snd_cue(int cmd, int prio) (cd" (type column: "void(cmd,prio)") */
+void snd_cue(int cmd, int prio);
 /* VGAME 0000:d6e5  spec simflow.md "0000:d6e5 snd_engine_refresh(): snd_cmd( ([43C2]==0 && thr_c" */
 void snd_engine_refresh(void);
 /* VGAME 0000:1bfc  spec simflow.md "1. Timer / frame pacing (0000:1bfc .. 1e0b, ISR code in inde": same name as module_platform.h, declared there */
 /* VGAME 0000:8b04  spec simflow.md "0000:8b04 txt_draw(TextCtx *c, char *s, int x, int y, int co" */
-void txt_draw(void); /* TODO signature: spec simflow.md "0000:8b04 txt_draw(TextCtx *c, char *s, " (type column: "void txt_draw(TextCtx *c,char *s,int x,i") */
+void txt_draw(void *c, char *s, int x, int y, int col);
+/* VGAME 0000:0010  spec simflow.md "0.1 main (0010) - start-up order (V)" */
+void vgame_start(void);
 /* VGAME 0000:2f82  spec simflow.md "0000:c987 fx_dist(int a,int b) - cheap length |a|,|b|: max +" */
-void view_frame(void); /* TODO signature: spec simflow.md "0000:c987 fx_dist(int a,int b) - cheap l" (type column: "void view_frame(void)") */
+void view_frame(void);
 /* VGAME 0000:4cef  spec simflow.md "0000:4CEF wld_blob_copy(void *p, u16 n) (V)" */
 void wld_blob_copy(void *p, u16 n);
 /* VGAME 0000:4c41  spec simflow.md "0000:4C41 wld_blob_fields(void) (V) - the blob layout, in or" */

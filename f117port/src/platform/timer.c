@@ -12,8 +12,11 @@ static bool installed;
 
 /* The BIOS tick counter 0040:006C is 18.2065 Hz = 1193182 / 65536 per second: ticks = ms * 1193182 / 65 536 000.
  * (Also a midnight flag at 0040:0070 in the real BIOS; nothing reads it.) */
+bool timer_bios_frozen;                          /* test aid (ctest sim): 0040:006C stays as it is, so seeds taken from the BIOS clock are reproducible */
+
 void timer_poll_bios_clock(void)
 {
+    if (timer_bios_frozen) return;
     u64 ms = host_ns() / 1000000ull;
     wr32(0x40, 0x6C, (u32)(ms * 1193182ull / 65536000ull));
 }

@@ -124,7 +124,7 @@ def chain(exe, game):
     import shell_emu
     open(os.path.join(scratch, 'ROSTER.FIL'), 'wb').write(shell_emu.make_roster())
     script = os.path.join(HERE, 'shell_chain.txt')
-    env = dict(os.environ, F117_KEYS='1:31,2:03,11:39', F117_SHELL_SCRIPT=script)
+    env = dict(os.environ, F117_KEYS='1:31,2:03,11:39', F117_SHELL_SCRIPT=script, F117_VGAME_FRAMES='40')
     t = time.time()
     p = subprocess.run([exe, '--headless', '--trace', '--game-dir', scratch], env=env, capture_output=True, text=True, timeout=500)
     secs = time.time() - t

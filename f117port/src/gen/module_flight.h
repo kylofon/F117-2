@@ -24,9 +24,9 @@ int dmg_wobj_destroyable(int o);
 /* VGAME 0000:7470  spec flight.md "6.2 Damage to targets (owner damage) - simflow.md Part 6 sec" */
 int mission_target_done(int j);
 /* VGAME 0000:0d08  spec flight.md "6.3 0000:0d08 terr_find_scenery_at(long x, long y') -> hit* " */
-void terr_find_scenery_at(void); /* TODO signature: spec flight.md "6.3 0000:0d08 terr_find_scenery_at(long " (type column: "hit_t *terr_find_scenery_at(long x,long ") */
+unsigned terr_find_scenery_at(long x, long y_inv);
 /* VGAME 0000:0f31  spec flight.md "6.4 0000:0f31 terr_set_scenery_state(hit*, u8 newid) (owner " */
-void terr_set_scenery_state(void); /* TODO signature: spec flight.md "6.4 0000:0f31 terr_set_scenery_state(hit" (type column: "void terr_set_scenery_state(hit_t *h,byt") */
+void terr_set_scenery_state(unsigned h, unsigned newid);
 
 /* ---- owner detect */
 /* VGAME 0000:559a  spec flight.md "3.5 0000:5588 det_radar_warning, 0000:559a det_alert_network" */

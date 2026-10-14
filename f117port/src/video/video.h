@@ -40,6 +40,7 @@ typedef struct RectP { s16 x, y, w, h; } RectP;
 /* ---- The driver (mgraphic.c) --------------------------------------------------------------------------- */
 void video_init(void);                      /* once: driver state as MGRAPHIC.EXE is loaded; fonts from the game folder (silently none if absent) */
 bool video_fonts_loaded(void);
+void video_load_driver_state(u16 dseg, u16 cseg);   /* test aid: the driver's variables from a snapshot of the original overlay (sim tests) */
 u8  *seg_ptr(u16 seg);                      /* host pointer to a page / segment: A000..AFFF = the VGA model, else mem[] */
 u16  video_draw_seg(void);                  /* test access to the driver's variables */
 u16  video_draw_off(void);

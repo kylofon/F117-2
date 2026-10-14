@@ -225,9 +225,55 @@ shelltest.c  --shell-test and F117_SHELL_SCRIPT (below)
   and `shell_quit.txt` (roster read and saved again) and compares the screen + DAC CRC at every step, the comm block (the generated mission for the
   fixed seed) and ROSTER.FIL. The port reads the same scripts (`shelltest.c`; steps run at the 3rd `ui_poll_input` after the previous one).
   `shell_ref.py --dump f117 Game REFROOT` also writes the screens of both sides, `shell_ref.py --diff REFROOT ground STEP` shows the pixel difference.
-  `shell_chain` is the whole chain with `F117_KEYS` (SETUP, intro) and `F117_SHELL_SCRIPT` (START): new pilot, strike mission, launch, VGAME and END
-  placeholders, START again, quit. Dev aids: `F117_SHELL_DUMP=dir` saves the screen + DAC of every script step, `F117_SHELL_POLLS=1` prints the cursor at every poll,
+  `shell_chain` is the whole chain with `F117_KEYS` (SETUP, intro) and `F117_SHELL_SCRIPT` (START): new pilot, strike mission, launch, VGAME (real since S5.5, a few frames) and END
+  placeholder, START again, quit. Dev aids: `F117_SHELL_DUMP=dir` saves the screen + DAC of every script step, `F117_SHELL_POLLS=1` prints the cursor at every poll,
   `F117_TRACE=1` prints the steps. Both tests run on a scratch copy of the game folder (`work/s54/game`, marked SCRATCH.MARK): START writes ROSTER.FIL.
+
+## Sim flow (`src/sim`, S5.5)
+
+Spec `port/spec/simflow.md`; prototypes in `gen/module_simflow.h`, the DGROUP names in `gen/symbols_vgame.h`, the port's own additions in `sim/sim.h`
+(accessors, the test hooks, the sound call points), `sim/sim_priv.h` (what the files share) and `sim/sim_stubs.h`. VGAME is real now (frame loop, HUD,
+MFDs, keys); `--chain-test` still swaps it for `vgame_stub`. The 3D scene is a flat sky/ground backdrop until S5.6, the flight model and the weapons /
+AI / detection / damage functions are empty stubs until S5.7.
+
+```
+sim_main.c    VGAME start-up (vgame_start), sim_init (world from comm+7Ah, files, palettes), the frame loop (1BBC), shutdown and the export back to the comm
+              block (mission_world_export, mission_end, mission_log_event), the timer ISR body (vgame_tick: 70.09 Hz tick, sound poll skipped on every 7th),
+              the .3DG/.3DX/.3DT/.WLD loaders, pic_show, frame_delay
+sim_step.c    the per-frame step 39C4 (clock, fps estimator with its 60 ticks/s assumption, mission set-up, airfield objects, zones, estimator)
+sim_keys.c    cba0, the key interpreter (the full table, the debug and nav keys, the tail with the lamps, doors and gear)
+sim_input.c   the keypad-as-stick INT 9 hook, the Alt-Q / Alt-P / Alt-B screens, the key fetch of 1E9E (the rest of 1E9E is the flight model, S5.7)
+sim_view.c    2F82 view_frame (the 13 view modes, matrix B156 via E26B, picture reloads, the scene call, the pieces pasted over the window), 03CE r3d_scene_draw
+              (STUB: backdrop, frame-sync wait, frame delay, a17e)
+sim_overlay.c 7898 hud_overlay_frame: the text overlay of the frame (messages, tapes in the small styles, ILS, fps, ...)
+sim_hudasm.c  10A8 hud_draw_front (tapes, heading, frame, reticle, pitch ladder), hud_layout_init / hud_color_init from the original immediates
+sim_cockpit.c cockpit_keyblit, mfd_icon, panel refresh, 17A3 cockpit_draw_adi
+sim_mfd.c     the left MFD (map, zoom, route), the right MFD pages and their selection, fuel bar; sim_pages.c the nav / weapons / objectives pages and the ILS;
+              sim_scope.c the situation scope
+sim_mfdview.c bf71 mfd_view_render (the sensor window) with the sky / ground bands and the FLIR tint
+sim_objovl.c  a17e obj_overlay_frame (projectile markers, tracers and their hit tests, the explosion, the target symbology, the photo shutter, the bomb
+              cues, the radio beacon), the helpers b339..b7f8, and b85d r3d_project_point (render3d's, needed here)
+sim_hud.c     the HUD primitives (lines, boxes, text, digits, lamps); gfx2d.c the 1001 edge tables, the clipped line and the polygon / rectangle fills
+sim_pal.c     palettes (flight, day/night, fades, DAC read)    sim_lib.c the 109D fixed-point library, the C runtime pieces    sim_misc.c small per-frame pieces
+sim_stubs.c   the stubs (each marked `STUB ssss:oooo name`; the test harness makes the original return 0 at the same address)
+simtest.c     --sim-test: start-up dump, the ISR counters (ticks mode), the scenario runner
+```
+
+* DGROUP is VGAME's (`cur_dgroup`); the initial image comes from the real EXE, so strings and tables sit at their DS offsets. A near pointer in a table is a DS
+  offset; a pointer argument of a function is a host pointer (`DSP(off)`, `ds_str(off)`). `uN` / `sN` casts mark the 16-bit wrap of the original.
+* Timing: one host tick per retrace. `vgame_tick` clears the frame-sync flag [262A], counts [2646] / [264A] / [2648], skips the sound poll on every 7th tick
+  (6/7 of 70.09 Hz = 60.08 Hz), lets the poll result switch the divisor and calls `sim_snd_noise` class times; a closed window ends the mission (PORT).
+  `frame_delay` and the sync wait in `r3d_scene_draw` busy-wait on those counters; the test harness skips both.
+* The deviations from the original that tests accept: the garbage row table for y < 0 or y >= 200 in the HUD line draws (the port uses y * 320); the stale
+  `[bp-2Eh]` / `[bp-30h]` locals of a17e read by the bomb cue when the pipper block was skipped (the port starts them at 0); `sim_matrix_from_angles`
+  (E26B) and `r3d_project_point` (B85D) are render3d's functions, written here because the view and the overlay need them.
+* Tests (`ctest sim_vgame`, `port/notes/s55/sim_ref.py`, skip 77 without Game/; it needs the comm block of the `shell` test or `F117_COMM`): `startup` compares
+  the whole DGROUP, the three pages and the DAC at the entry of `sim_run` with the original VGAME under Unicorn (`vgame_emu.py`, segment-valued words masked);
+  `ticks` runs the ISR body 7000 times (counters, 6000 polls = 60.08 /s, the rate switch, snd_noise); `calls` runs 1262 scenarios (`sim_scn*.py`) of single
+  functions and of frame-loop bodies (view, HUD, ADI, MFDs, overlay, step, keys, export) on both sides from a snapshot of the machine and compares DGROUP, the
+  pages row by row, the DAC and the comm block (so the exported world and the event log byte for byte). The stubbed functions return 0 on both sides.
+  `--only calls:FAMILY`, `--bisect ID`, `--dump ID` (pixel crop of the first difference), `--trace ID`, `PROBEFN=name:nargs` (arguments of an original near function).
+  `shell_chain` runs the real VGAME for `F117_VGAME_FRAMES` frames (headless) between START and END.
 
 ## Symbol pipeline (`src/gen/`)
 

@@ -71,8 +71,8 @@ def make_roster():
 
 
 class ShellMachine(Machine):
-    def __init__(self, game, workdir, roster):
-        super().__init__('START', game=game, tail=b'')
+    def __init__(self, game, workdir, roster, prog='START', ds_off=0xA95):
+        super().__init__(prog, game=game, tail=b'')
         m = self
         uc = self.uc
         self.workdir = workdir
@@ -81,7 +81,7 @@ class ShellMachine(Machine):
         self.files['ROSTER.FIL'] = self.roster_path
         # environment block with a program name (the C start-up reads it)
         env = 0x0700
-        uc.mem_write(env * 16, b'\0\0\1\0C:\\START.EXE\0')
+        uc.mem_write(env * 16, b'\0\0\1\0C:\\' + prog.encode() + b'.EXE\0')
         uc.mem_write(dos_emu.PSP * 16 + 0x2C, struct.pack('<H', env))
         uc.mem_write(0x46C, struct.pack('<I', 0))
         # the iret that stands for the BIOS INT 8
@@ -108,7 +108,7 @@ class ShellMachine(Machine):
         self.snaps = []
         self.script = []
         self.since = 99
-        self.ds = self.load + 0xA95
+        self.ds = self.load + ds_off
 
     # ---------------------------------------------------------------------------------------------- interrupts
     def _intr(self, uc, n, _):

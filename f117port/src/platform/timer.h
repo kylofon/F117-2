@@ -18,6 +18,7 @@
  * routine k times from its body. */
 #include "types.h"
 
+extern bool timer_bios_frozen;                   /* test aid: do not refresh the BIOS clock word from the host clock */
 void timer_init(void);                           /* once: installs timer_isr as the host tick handler */
 extern volatile u32 timer_ticks;                 /* ticks since timer_init */
 

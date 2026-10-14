@@ -630,7 +630,7 @@
 #define VGAME_CSSEG_math_tab_asin                    0x14B2
 
 /* ---- Functions: index only (prototypes: gen/module_<spec>.h). Columns: address, C name, owner, spec file and section. */
-/* 0000:0010  main                           simflow    simflow.md "0.1 main (0010) - start-up order (V)" */
+/* 0000:0010  vgame_start                    simflow    simflow.md "0.1 main (0010) - start-up order (V)" */
 /* 0000:00f0  sim_init                       loader     simflow.md "0.2 sim_init (00f0) - load order (V)" */
 /* 0000:01b7  cockpit_palette_refresh        simflow    simflow.md "0000:01BF cockpit_daynight_recolor(void) and 0000:01B7 cockp" */
 /* 0000:01bf  cockpit_daynight_recolor       simflow    simflow.md "0000:01BF cockpit_daynight_recolor(void) and 0000:01B7 cockp" */
@@ -756,7 +756,7 @@
 /* 0000:88a8  hud_box                        simflow    simflow.md "0000:88a8 hud_box(int x0, int y0, int x1, int y1, int col) (" */
 /* 0000:88f6  hud_line_win                   simflow    simflow.md "0000:88f6 hud_line_win(x0,y0,x1,y1) (V)" */
 /* 0000:8929  gfx_set_fg                     simflow    simflow.md "0000:8929 gfx_set_fg(int c): ctx[3FE2].fg = ctx[3FFA].fg = c" */
-/* 0000:893f  gfx_fill_rect                  simflow    simflow.md "0000:8929 gfx_set_fg(int c): ctx[3FE2].fg = ctx[3FFA].fg = c" */
+/* 0000:893f  hud_fill_rect                  simflow    simflow.md "0000:8929 gfx_set_fg(int c): ctx[3FE2].fg = ctx[3FFA].fg = c" */
 /* 0000:8970  hud_pixel                      simflow    simflow.md "1 Part map" */
 /* 0000:898b  hud_lamp_update                simflow    simflow.md "0000:898b hud_lamp_update(int idx, int state) (no-op if [365" */
 /* 0000:89fe  mfd_text                       simflow    simflow.md "0000:89fe mfd_text(int mode, int col, int row, char *s, int " */

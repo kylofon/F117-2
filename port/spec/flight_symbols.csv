@@ -1,6 +1,6 @@
 exe,kind,address,name,type,owner,other_names,notes
-vgame,func,0000:0d08,terr_find_scenery_at,"hit_t *terr_find_scenery_at(long x,long y_inv)",damage,,"[flight.md 6.3] nearest destroyable scenery object around a world point: levels 1-2, 3x3 tiles, Manhattan, override table, hit record DS:BA14 (full pseudocode)"
-vgame,func,0000:0f31,terr_set_scenery_state,"void terr_set_scenery_state(hit_t *h,byte newid)",damage,,[flight.md 6.4] store a new id for the hit scenery object: override table DS:B772 (wreck ids) or tile record byte +6; sets bit 7
+vgame,func,0000:0d08,terr_find_scenery_at,"unsigned(long x,long y_inv)",damage,,"[flight.md 6.3] nearest destroyable scenery object around a world point: levels 1-2, 3x3 tiles, Manhattan, override table, hit record DS:BA14 (full pseudocode)"
+vgame,func,0000:0f31,terr_set_scenery_state,"void(unsigned h,unsigned newid)",damage,,[flight.md 6.4] store a new id for the hit scenery object: override table DS:B772 (wreck ids) or tile record byte +6; sets bit 7
 vgame,func,0000:1e9e,sim_input_flight,void(void),flight,,"[flight.md 2.1] per-frame: key read+dispatch, stick, player aircraft model (attitude/speed/alt/fuel/G/eject), history ring"
 vgame,func,0000:2c6e,fm_rotate_apply,"void(int*A,int*B)",flight,,[flight.md 2.2] fm_mat = A x B via 2DDC; every 8th sets dirty
 vgame,func,0000:2c9e,fm_mat_to_euler,void(void),flight,,[flight.md 2.2] matrix -> yaw/pitch/roll

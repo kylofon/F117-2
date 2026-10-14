@@ -113,6 +113,28 @@ int video_font_row(const FontInfo *f, int ch, int row)
     return ib((unsigned)(f->ptr + row * (f->last - f->first + 1) + (ch - f->first)));
 }
 
+/* Test aid (S5.5, ctest `sim`): the driver's variables as they are in a snapshot of the ORIGINAL MGRAPHIC overlay (data segment `dseg`, code segment `cseg`;
+ * offsets of the comments above), so that the port continues where the original stopped. */
+void video_load_driver_state(u16 dseg, u16 cseg)
+{
+    for (int i = 0; i < 5; i++) page_tab[i] = rd16(cseg, (u16)(0x787 + 2 * i));
+    draw_seg = rd16(cseg, 0x194);
+    draw_off = rd16(cseg, 0x196);
+    flip_last = rd8(cseg, 0x198);
+    flip_disable = rd16(cseg, 0x11DC);
+    shake = rd8(cseg, 0x1250);
+    colour = rd8(dseg, 0x1866);
+    last_x = rd16(dseg, 0x185A);
+    last_y = rd16(dseg, 0x185C);
+    rng = rd16(dseg, 0x1982);
+    data_cc = rd16(dseg, 0xCC);
+    data_ce = rd16(dseg, 0xCE);
+    pool_off = rd16(cseg, 0x82A); pool_seg = rd16(cseg, 0x82C); pool_base = rd16(cseg, 0x82E);
+    pool_end = rd16(cseg, 0x830); pool_limit = rd16(cseg, 0x832);
+    enc_lead = rd16(cseg, 0x834); enc_trail = rd16(cseg, 0x836); enc_len = rd16(cseg, 0x838);
+    enc_h = rd16(cseg, 0x83A); enc_w = rd16(cseg, 0x83C);
+}
+
 /* Called once, when the chain loads the drivers: the driver's variables as they are in the image. */
 void video_init(void)
 {
