@@ -19,7 +19,6 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 | U-render3d | DOSBox-X in flight (as U-vgame), look at the original and reply what you see: (1) radar dishes / rotating parts seen up close: any faces missing or flickering? (2) left map MFD while it scrolls: is the bottom pixel row of the map ever left unpainted? (3) TV camera (F6 options): is there a mode with a flat two-colour sky/ground? which option? (4) burning targets: do glow/flame sprites appear in the main view or only in the TV window? (5) any polygon that looks cut off part-way down (a hole that shows the frame before)? `port/spec/render3d.md` section 7. | S3.7 | 15 min |
 | U-flight | DOSBox-X in flight (as U-vgame), reply what you see: (1) take a few hits (SAM/fighter) and tell me the labels of the damage lamps that turn red (cockpit buttons; which label lights for which hit if you can tell); (2) left map MFD with an enemy missile in flight: is its blip a 2x2 dot or a single pixel? (3) keys `4` and `3`: which lamps light (ECM / IR jammer), and does the `3` lamp stay dim for a while after it switches itself off? `port/spec/flight.md` section 11. | S3.8 | 10 min |
 | U-debrief | DOSBox-X: finish any mission (land, or eject so that the rescue / captured screen runs) and tell me what you see in the original debrief: (1) on the map replay, are the route line segments visible (the code draws them with colour index 0)? (2) the 48x40 event picture that appears next to each stop: what do the pictures show (takeoff, landing, kill, missile hit, photo...)? (3) the TIME: clock at the bottom: does it start at 06:00:00 (18:00:00 on a night mission) plus an odd offset, and does the hour tens digit stay 0? `port/spec/debrief.md` 6.6-6.10. | S3.9 | 10 min |
-| U-skeleton | Only Alt+Enter is left: Play in `f117port/build/F-117A Nighthawk.exe`, wait for the last screen (4 white blocks), press Alt+Enter twice and resize the window: is the whole picture always shown, scaled, never cropped (fixed in `a8b7a63`)? Already confirmed 2026-10-14: colour grid and program blocks (user); 4:3 vs 1:1 window shapes, close button and Esc exit cleanly with code 0 (checked from the command line). | S4.1 | 1 min |
 
 ## Status
 
@@ -137,7 +136,7 @@ can port a function from its section alone.
 ### Phase 4 — `f117port/` skeleton
 | Id | Task | Model | Size |
 |---|---|---|---|
-| S4.1 | Copy `../AcesOfThePacific/aotpport` skeleton (CMake, SDL3 host, mem, VGA, OPL); drop EMS/VROOMM; chain loop = `F117.COM`; placeholder programs run the whole chain headless | S | M | done 2026-10-13 · U-skeleton pending |
+| S4.1 | Copy `../AcesOfThePacific/aotpport` skeleton (CMake, SDL3 host, mem, VGA, OPL); drop EMS/VROOMM; chain loop = `F117.COM`; placeholder programs run the whole chain headless | S | M | done 2026-10-13 · U-skeleton OK 2026-10-14 |
 | S4.2 | Generated `symbols_*.h`, module headers (`tools/gen_symbols.py`, `gen_module_headers.py`), `PORTING.md` | H | S | done 2026-10-13 |
 
 Notes:
