@@ -15,6 +15,8 @@
  *   --video-test  a composed screen (picture, fonts, sprites, lines, palette fade); F117_SNAPSHOT_DIR writes it as PNG
  *   --video-selftest  the driver primitives against vectors from the original MGRAPHIC under Unicorn (video/videotest.c)
  *   --decoder-test DIR  every PIC / PAN / PAL / font in --game-dir against the Phase 2 Python decoders' output in DIR (77 = no game files)
+
+ *   --shell-test DIR     START against the references of port/notes/s54/shell_ref.py (needs a scratch --game-dir with SCRATCH.MARK)
  *   --frontend-test DIR  the front end (SETUP, MPS_LOGO, PLAYER) against the references in DIR (port/notes/s53/frontend_ref.py writes them; 77 = no game files)
  *   --platform-test  headless checks of the platform layer (RTL, DOS files in --game-dir (a scratch folder!), keyboard,
  *                 joystick, timer); --exe-test loads the seven programs from --game-dir and checks their DGROUP (77 = no files)
@@ -29,6 +31,7 @@
 #include "platform/timer.h"
 #include "platform/vga.h"
 #include "frontend/fe.h"
+#include "shell/shell.h"
 #include "programs/placeholder.h"
 #include "prog.h"
 #include "video/video.h"
@@ -69,7 +72,7 @@ int main(int argc, char **argv)
 {
     HostConfig cfg = { "Game", 3, false, true, false };
     bool check = false, chain = false, tick = false, ptest = false, etest = false, vtest = false, vself = false;
-    const char *decref = NULL, *feref = NULL;
+    const char *decref = NULL, *feref = NULL, *shref = NULL;
     int tick_ms = 1000;
     for (int i = 1; i < argc; i++) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : NULL;
@@ -92,13 +95,14 @@ int main(int argc, char **argv)
         else if (!strcmp(a, "--video-selftest")) vself = true;
         else if (!strcmp(a, "--decoder-test") && v) { decref = v; i++; }
         else if (!strcmp(a, "--frontend-test") && v) { feref = v; i++; }
+        else if (!strcmp(a, "--shell-test") && v) { shref = v; i++; }
         else if (!strcmp(a, "--tick-test")) {
             tick = true;
             if (v && v[0] != '-') { tick_ms = atoi(v); i++; }
         }
         else return usage(argv[0]);
     }
-    if (check || tick || ptest || etest || vself || decref || feref) cfg.headless = true;
+    if (check || tick || ptest || etest || vself || decref || feref || shref) cfg.headless = true;
     if (host_trace()) prog_trace = true;
     if (chain) { prog_trace = true; prog_use_stubs = true; }
 
@@ -130,6 +134,12 @@ int main(int argc, char **argv)
 
     if (feref) {
         int rc = frontend_selftest(feref);
+        host_shutdown();
+        return rc;
+    }
+
+    if (shref) {
+        int rc = shell_selftest(shref);
         host_shutdown();
         return rc;
     }

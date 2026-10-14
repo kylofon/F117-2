@@ -1,0 +1,4 @@
+# Scripted START run that quits at once: Alt-Q at the first poll, y at the quit prompt. START reads ROSTER.FIL, normalises it and writes it back
+# (roster_startup_sync): a roster written by the original must come out byte for byte the same.
+seed 12345
+- - 1000 1579

@@ -1,0 +1,21 @@
+# Air combat mission over Libya (F-117A model 0), war level 3: orders, briefing with the hostile map, back to the ready room, the orders changed
+# (the "cancel your scheduled mission" dialog), a new briefing, arming, launch.
+seed 777
+285 170 1c0d
+30 80 1c0d
+167 65 1c0d
+280 149 1c0d
+210 170 1c0d
+215 194 1c0d
+270 50 1c0d
+270 77 1c0d
+270 53 1c0d
+- - 011b
+30 80 1c0d
+280 138 1c0d
+- - 1c0d
+215 194 1c0d
+270 50 1c0d
+270 135 1c0d
+270 148 1c0d
+- - 1c0d

@@ -25,8 +25,8 @@ host.h/.c         SDL3: window/present (4:3 or 1:1), 70.09 Hz tick, XT key bytes
 platform/vga.*    VGA model: 256 KB planar memory as linear pages, CRTC start/offset, pel panning,
                   DAC, 70.09 Hz retrace on port 3DAh                                              (coordinator)
 platform/timer.*  the tick source: timer_ticks and a hook for the ported ISR body                 (platform)
-programs/         PHASE 4 ONLY: placeholder.c has a stand-in for START, VGAME, END (S5.4 .. S5.8 replace them); the front-end
-                  stand-ins (*_stub) are used only by --chain-test, which needs no game files
+programs/         PHASE 4 ONLY: placeholder.c has a stand-in for VGAME and END (S5.5 .. S5.8 replace them); the stand-ins of the
+                  programs that read game files (*_stub, START too) are used only by --chain-test, which needs no game files
 launcher/         the wxWidgets launcher "F-117A Nighthawk" (-DF117_LAUNCHER=ON, launcher/README.md)
 ../third_party/nuked-opl3   the OPL2 emulator (LGPL-2.1), a separate static library
 ```
@@ -162,8 +162,8 @@ Rules for the modules that follow:
 ## Front end (`src/frontend`, S5.3)
 
 Spec `port/spec/frontend.md` (section 8 = the closing pass); prototypes in `gen/module_frontend.h`, the DGROUP offsets, the sound call points
-and the test hooks in `frontend/fe.h`. SETUP, MPS_LOGO, PLAYER and DSWAP are real now (`prog_table`); START, VGAME and END are still the
-placeholders; `--chain-test` swaps the four front-end programs for their `*_stub` stand-ins (`prog_use_stubs`) because it runs without game files.
+and the test hooks in `frontend/fe.h`. SETUP, MPS_LOGO, PLAYER and DSWAP are real now (`prog_table`); VGAME and END are still the
+placeholders (START is S5.4, below); `--chain-test` swaps the five programs that need game files for their `*_stub` stand-ins (`prog_use_stubs`) because it runs without game files.
 
 ```
 textmode.c   BIOS text mode 03h on B800:0000 (INT 10h 00/02/09/0E, INT 21h/09): cursor, teletype with wrap and scroll
@@ -192,6 +192,42 @@ platform/vgatext.c  the text screen on the window (640 x 400, 8 x 16 cells from 
   82 logo frames, must equal them; every cel of the 6 .PAN files through PLAYER's ring buffer (a 160 KB ring that wraps) equals the Phase 2
   decoder; the fade formula, the 60.08 Hz clock and the logo pacing are measured. `frontend_chain` is the scripted run
   (`F117_KEYS`), SETUP -> MPS_LOGO -> PLAYER -> DSWAP -> START placeholder -> ... -> quit. Both skip (77) without `Game/`.
+
+## Shell (`src/shell`, S5.4)
+
+Spec `port/spec/shell.md` (Part F = what the port found); prototypes in `gen/module_shell.h`, accessors and the test hooks in `shell/shell.h`. START is
+real now; `--chain-test` swaps it for `start_stub` (no game files). The ID quiz (057E, 0703, 0786) is dead code in this version (the call is three
+NOPs), so it is not ported and there is no `--skip-id`.
+
+```
+ui.c         the toolkit: text (ui_text, _wrap, _shadow, _centered), popups, frames, dialogs, the menu loop and ui_poll_input (cursor, arrow-key jumps,
+             joystick/mouse), the waits, the button-highlight animation, the palette queue and fades, ui_show_screen, the quit prompt (Alt-Q)
+screens.c    ready room, home card, hangar and launch, arming, the briefing map (route, rings, site icons, buttons), the map helpers (ring, route line,
+             labels) and the sine routines they use
+orders.c     the pilot-orders screen (ordrscrn) and the folder pages (brief_orders_screen, objective texts, the campaign date)
+roster.c     ROSTER.FIL load/save, the roster screen with hover info, name entry, the options panel, roster_startup_sync
+mission.c    mission_generate (4239, P0..P13 of the spec), the WLD reader/export, sites, units, grid references, clock strings, mission_site_setup (40F0)
+terrain.c    the .3DG / .3DT tile maps and object records, map_nearest_object and map_pick_object
+start.c      start-up (shell_init/comm/gfx/sprites), ui_main, shell_exit, START's ISR body (DS:ADFC++ for pal_apply_queue, then the sound poll)
+shelltest.c  --shell-test and F117_SHELL_SCRIPT (below)
+```
+
+* The loaded image keeps the strings, tables, dialog descriptors, button tables and colour triples at their DS offsets: the code reads them with
+  `DSB/DSW/DSP` and the generated `START_DS_*` names (a near pointer stored in a table is a DS offset). The callbacks stored in menu tables are code
+  offsets: `menu_cb()` in ui.c maps them to the port's functions. Struct arguments are host pointers into `mem[]`.
+* Every busy wait is `pal_apply_queue()` (it pumps the host and waits for the ISR flag) or a `kbd_empty_misc()` loop; the fades do one `pal_set` per
+  retrace (15 per speed unit) instead of calibrating on the BIOS clock.
+* Sound call points are `sh_snd(cmd)` (= `fe_snd_cmd`, `TODO(S5.9)`); the commands are those of the spec. The ISR body calls `fe_snd_poll()`.
+* The mission and the world go to VGAME in the comm block exactly as HANDOFFS C6 says (`wld_export_to_comm`: comm+7Ah, layout in the function);
+  the exit code is 0Ch, or 0Dh when the departure site has bit 200h of its flags (no hangar), 0 for a quit.
+* Tests: `ctest` `shell` runs the ORIGINAL START.EXE under Unicorn (`port/notes/s54/shell_emu.py`, drivers loaded as overlays, stub sound driver,
+  keyboard queue, timer interrupts injected) through `shell_ground.txt` (create pilot, options, orders, briefing modes, orders pages, arming, launch)
+  and `shell_quit.txt` (roster read and saved again) and compares the screen + DAC CRC at every step, the comm block (the generated mission for the
+  fixed seed) and ROSTER.FIL. The port reads the same scripts (`shelltest.c`; steps run at the 3rd `ui_poll_input` after the previous one).
+  `shell_ref.py --dump f117 Game REFROOT` also writes the screens of both sides, `shell_ref.py --diff REFROOT ground STEP` shows the pixel difference.
+  `shell_chain` is the whole chain with `F117_KEYS` (SETUP, intro) and `F117_SHELL_SCRIPT` (START): new pilot, strike mission, launch, VGAME and END
+  placeholders, START again, quit. Dev aids: `F117_SHELL_DUMP=dir` saves the screen + DAC of every script step, `F117_SHELL_POLLS=1` prints the cursor at every poll,
+  `F117_TRACE=1` prints the steps. Both tests run on a scratch copy of the game folder (`work/s54/game`, marked SCRATCH.MARK): START writes ROSTER.FIL.
 
 ## Symbol pipeline (`src/gen/`)
 

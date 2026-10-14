@@ -1,0 +1,13 @@
+# Air training over Libya (the scripted training mission, template 55); the hangar is tried first (the "need a briefing" dialog).
+seed 4242
+285 170 1c0d
+30 80 1c0d
+167 65 1c0d
+210 181 1c0d
+215 194 1c0d
+168 78 1c0d
+- - 1c0d
+270 50 1c0d
+270 135 1c0d
+270 148 1c0d
+- - 1c0d

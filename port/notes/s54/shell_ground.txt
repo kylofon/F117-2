@@ -1,0 +1,49 @@
+# Scripted START run, ground strike mission in the Persian Gulf. One line per step; a step runs at the 3rd poll of ui_poll_input after the
+# previous one (the screen is settled), and the screen + DAC CRC are recorded just before it.  Fields: x y keys...  ('-' = leave the cursor);
+# keys are BIOS key words scan<<8|ascii in hex, queued in order (the first is read by ui_poll_input, the rest by the screen's own key reads).
+# A step without keys only moves the cursor (the hover callbacks run). seed: set before the shell's first rand() (after srand(bios_timer())).
+seed 12345
+# roster (first run): Delete on the active row, type "kim", Enter
+- - 5300 256b 1769 326d 1c0d
+# hover another row, click the retired and the killed pilot (dialogs), then the new pilot's row -> options panel
+100 98
+160 127 1c0d
+- - 1c0d
+160 137 1c0d
+- - 1c0d
+160 77 1c0d
+# options: hover and click "Regular", then Done
+220 88
+220 88 1c0d
+250 180 1c0d
+# roster again: Done
+- - 1c0d
+# home: Alt-Q and 'n' (the quit prompt, answered no), then orders
+- - 1000 316e
+30 80 1c0d
+# orders: hover a theatre and click it (Persian Gulf), hover and click strike, war level 1, Fly
+212 70
+212 70 1c0d
+280 170 1c0d
+280 138 1c0d
+215 194 1c0d
+# home: briefing (the mission is generated); hover a site button, toggle a ring, the range modes
+270 50 1c0d
+190 98
+204 45 1c0d
+270 90 1c0d
+270 65 1c0d
+270 77 1c0d
+270 53 1c0d
+200 60 3920
+# the orders pages (two clicks on the folder), then arming
+270 120 1c0d 1c0d 1c0d
+270 135 1c0d
+# arming: hover a row, pick a weapon for bay 1, bay 2 and another weapon, OK
+50 40
+50 64 1c0d
+280 25 1c0d
+50 28 1c0d
+270 148 1c0d
+# hangar: Yes
+- - 1c0d

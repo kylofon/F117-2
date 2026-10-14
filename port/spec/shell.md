@@ -1434,3 +1434,32 @@ Method and the dead-code test: `frontend.md` section 8. Corrections to the S3.10
 | `9694` | `isprint` | live (RTL) | `int isprint(int c)`: `AL = 57h` (`_UPPER\|_LOWER\|_DIGIT\|_PUNCT\|_BLANK`), then the shared tail `96A1`. Caller: `roster_edit_name` (`6AB3`, which characters a typed pilot name accepts). Port: C `isprint` for ASCII (the table holds only ASCII classes; characters above 7Fh are 0) |
 | `96A1` | `ctype_test` | live (RTL) | shared tail of the MSC `isXXX` stubs at `9680..969E` (masks `80h` xdigit, `08h` space, `10h` punct, `07h` alnum, `57h` print, `17h` graph, `20h` cntrl; the other stubs are not indexed and unused by START): `return mask & _ctype[c + 1]` with the table at `DS:B050` (indexed by `c` at `B051`). The indexer decodes the bytes as `and al,[bx-4FAFh]`, which is the same instruction |
 | `A3CB` | `rtl_write_flush` | live (RTL) | the line-buffer flush of `rtl_write` (= VGAME `FD55`): writes `[DX, DI)` to the handle `[bp+4]` with `INT 21h/40h`, adds the count to `[bp-2]`; on a short or failed write unwinds the frame and returns the count or sets the DOS error (`ah = 9` / `1C00h` on a full disk unless the text-mode Ctrl-Z rule applies). The block also contains the unsplit `ltoa` core `A457..A4B6` (same routine as PLAYER `1F70`) |
+
+
+# Part F: S5.4 port findings (2026-10-14)
+
+The port (`f117port/src/shell`) was written from the disassembly (`work/s35/*.txt`, `tools/x86dis.py`) with this spec as the map, and checked against the
+ORIGINAL START.EXE run under Unicorn (`port/notes/s54/`): the screen + DAC CRC at 23 + 4 x 12 script steps, the comm block (the mission generated for a fixed
+seed, 5120 bytes), the exit code and ROSTER.FIL are identical. Where the text above disagrees with the code, the code won:
+
+* **ID quiz**: dead in this version (the call in `ui_main` is three NOPs): not ported; no `--skip-id` is needed.
+* `brief_screen_run`: button 8 ("different mission") calls `brief_new_mission` (1308), not `brief_setup`.
+* `arm_roll_unavailable` (0E23) tests `D878[table[j]]` but sets `D878[j]` (j = the random index), not `D878[table[j]]`.
+* Orders screen: the model-1 (Lockheed) test disables entries 13 and 15 (Air missions and Air training): the loop steps the table pointer by 16 bytes, not 8.
+  The clearance dialog is `ui_dialog_run(7338, x = 46h, y = 3Ch)`. When a war-level / mission-type click does not change the choice, the original erases a
+  marker whose index is stale stack data (the port erases and redraws the same marker).
+* `ui_fixmul_q14` (8C15) is `round(a * b / 32768)`: `imul; shl/rcl; shl/adc` (not `a*b*4 >> 16`).
+* `mission_clamp_hi(v, lo, hi)`: `v > hi` gives hi; `lo <= v <= hi` gives v; `-16384 < v < lo` gives lo; `v <= -16384` gives hi.
+* `mission_unit_init`: `+6` = 8Ch if the site's flag 200h is set, else 0Ch (the spec's "+80h if clear" had the sign wrong).
+* `mission_generate`: a second site at the SAME position as the first is rejected (P3 goes back to P2), a distance test `(dist & FFC0) > 6400h` rejects too;
+  the template scan (P5) is run twice per slot and draws `rand()` after each scan (the second draw is unused); P9's heading search ends at the FIRST candidate
+  whose deviation is below the running best (start 3000h); threshold for re-sited units grows by 10h on every retry.
+* `ui_wait_input(ticks)`: the keyboard is looked at before the tick count is tested, so `ticks == 0` returns after one look (it does not wait 65536 ticks).
+* `brief_orders_screen` (20D6): the landing base name index is `site[E074].name` when `site[E062].name != 0` but the byte at +0Eh of E074 otherwise
+  (the test is on the departure site); the second page starts with a copy of the strip `(0,26h,BAh) .. 104h x 0Eh` of the SCREEN into page 4; the last picture is
+  blitted from page 1.
+* `ui_hangar_anim`: the frame delay is `8 - DS:ADFC`, where ADFC is the timer ISR's tick counter (reset at the top of each frame).
+* START never installs the Ctrl-Break handler (DS:73F2 stays 0); `fcb_find` (804E) returns non-zero unless the floppy `F117A-SF` is in the drive: the port
+  always writes ROSTER.FIL. `shell_init` allocates the 24000-byte work buffer twice (the first block leaks), `roster_draw_row` draws its row twice: once is enough.
+* START's ISR body (8D0C): `DS:ADFC++` once per tick, then the sound poll (slot 103); `pal_apply_queue` clears ADFC and waits for it.
+* The mission is exported for VGAME by `wld_export_to_comm` at the end of `ui_main` (comm+7Ah, 4600 bytes) exactly in the order of the table in section 2 of Part C.

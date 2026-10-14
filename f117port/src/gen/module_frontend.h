@@ -254,7 +254,7 @@ unsigned ui_load_file_far(char *name, unsigned off, unsigned seg);
 /* DSWAP 0000:0374  spec frontend.md "8.4.3 C runtime (mapped to platform.md)" */
 unsigned ui_load_file_near(char *name, void *buf);
 /* SETUP 0000:0582  spec frontend.md "(no heading)" */
-void ui_text(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void(TextCtx *c, char *s, int x, int y)") */
+void ui_text(void *c, char *s, int x, int y);
 /* PLAYER 0000:0520  spec frontend.md "8.3.3 Input, video, break handler, timer (live)" */
 int video_get_mode(void);
 /* PLAYER 0000:0540  spec frontend.md "8.3.3 Input, video, break handler, timer (live)" */

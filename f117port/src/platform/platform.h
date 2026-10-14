@@ -81,6 +81,7 @@ void kbd_set_observer(Int9Hook h);
 bool kbd_key_waiting(void);                           /* INT 16h/01 (pumps the host once) */
 u16  kbd_key_get(void);                               /* INT 16h/00: waits (pumps) for a key; scan << 8 | ascii */
 void kbd_flush(void);
+void kbd_inject(u16 word);                            /* test aid: a key word into the type-ahead buffer */
 
 /* ---- Joystick / mouse (input.c) ------------------------------------------------------------------------- */
 void break_check_window(void);                        /* tick: a closed window is Ctrl-Break */

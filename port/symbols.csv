@@ -847,7 +847,7 @@ setup,func,0000:0503,break_check,void(void),frontend,,if Ctrl-Break flag [0AC8] 
 setup,func,0000:0512,text_gotoxy,"void(int row, int col)",frontend,,INT 10h AH=2 (via int86 0x1387),frontend
 setup,func,0000:053b,setup_exit,void(int code),frontend,,"break_hook_remove, release MISC overlay, timer_remove if installed, exit(code)",frontend
 setup,func,0000:0562,ui_text_far,"void(TextCtx *c, char far *s, int x, int y)",frontend,,"dead: c->x=x; c->y=y; ui_text_far_buf (library text routine, slots 5/47 unbound in SETUP)",frontend
-setup,func,0000:0582,ui_text,"void(TextCtx *c, char *s, int x, int y)",frontend,,"(= START 0000:3567, byte-shape copy; partner in shell_symbols.csv)",frontend
+setup,func,0000:0582,ui_text,"void(void *c, char *s, int x, int y)",frontend,,"(= START 0000:3567, byte-shape copy; partner in shell_symbols.csv)",frontend
 setup,func,0000:05a3,ui_text_far_buf,"void(TextCtx *c, char far *s)",frontend,,"dead: copies the far string to a 200-byte stack buffer, MGRAPHIC slot 5 text_noclip",frontend
 setup,func,0000:05ce,ui_text_wrap_far,"int(TextCtx *c, char far *s, int width, int x, int y, int line_h)",frontend,,"dead: older word-wrap variant of START ui_text_wrap, far string, no centre option",frontend
 setup,func,0000:070a,ui_text_wrap,"int(TextCtx *c, char *s, int width, int x, int y, int line_h)",frontend,,dead: near-string variant of 05CE,frontend
@@ -947,7 +947,7 @@ setup,func,0237:005c,joy_read_raw,void(void),platform,,,platform
 setup,func,0237:00a4,joy_scale,void(int axis /*SI*/),platform,,,platform
 setup,func,0237:0115,joy_calib_get,void(u16 *dst),frontend,,copies the 28h-byte calibration block (DS:0DF4) to comm+48h,frontend
 setup,func,0237:0127,joy_set_calib,void(const void *tbl),platform,,,platform
-start,func,0000:0010,ui_main,void ui_main(void),shell,,"shell main: init, (removed quiz call), pilot save, arming roll, ready room, save temp.wld, exit(0Ch/0Dh by site[E062].hi&2)",shell
+start,func,0000:0010,ui_main,void(void),shell,,"shell main: init, (removed quiz call), pilot save, arming roll, ready room, save temp.wld, exit(0Ch/0Dh by site[E062].hi&2)",shell
 start,func,0000:008d,roster_home_card_draw,void(void),shell,,"hook of homescrn: rank+surname, theatre, war, mission type, skill, crash, flight model, rating",shell
 start,func,0000:020f,ui_ready_room,void(void),shell,,"homescrn loop, 5 hotspots (tbl 6F42) -> orders 5BF0 / briefing 0FA3 / arming 0963 / roster 623E / hangar 038C",shell
 start,func,0000:02ba,roster_difficulty_rating,int(void),shell,,"(w60[theatre]+w54[type]+w58[skill]+w5C[crash])/3 - flight_model + 2, max 10",shell
@@ -979,47 +979,47 @@ start,func,0000:1b37,brief_hint_text,void(int h),shell,,help line under the map 
 start,func,0000:1c2f,brief_site_info,void(int n),shell,,airbase/radar data popup for site button n,shell
 start,func,0000:1f3f,brief_build_site_buttons,void(void),shell,,"build dynamic site buttons (DS:6D62), B286/B287 pairs, B2E6, 6D21",shell
 start,func,0000:20d6,brief_orders_screen,void(void),shell,,"mission orders pages (FOLDER1/FOLDER2), see shell.md part E",shell
-start,func,0000:24f7,brief_draw_target_summary,"void(TextCtx *c, int which)",shell,,which 0/1 = primary/secondary: heading + intro paragraph (1F24 table) + OBJECTIVE: + objective text; caller 20d6,shell
+start,func,0000:24f7,brief_draw_target_summary,"void(void *c, int which)",shell,,which 0/1 = primary/secondary: heading + intro paragraph (1F24 table) + OBJECTIVE: + objective text; caller 20d6,shell
 start,func,0000:25d9,brief_format_date,char *(char *buf),shell,,"sprintf(buf,""%s %d, %d"") of the campaign date from pilot record (theatre +38h, days +36h) and date tables 882/88C/896/8A8/8C2",shell
-start,func,0000:2651,brief_format_objective,"void(ObjRec *rec, char *out)",shell,,builds the one-line objective sentence for mission-objective record (E05E+12h*n); switch on type byte of 11DE table (8 kinds),shell
+start,func,0000:2651,brief_format_objective,"void(void *rec, char *out)",shell,,builds the one-line objective sentence for mission-objective record (E05E+12h*n); switch on type byte of 11DE table (8 kinds),shell
 start,func,0000:2864,ui_load_file_far,"unsigned(char *name, unsigned off, unsigned seg)",shell,,open + read up to FFFFh bytes to seg:off + close; returns bytes read,shell
 start,func,0000:289a,ui_load_file_near,"unsigned(char *name, void *buf)",shell,,open + read up to FFFFh bytes to near buf + close,shell
-start,func,0000:28ce,ui_anim_start,"int(int src_page, RectTbl *tbl, uint8_t *seq, int nsteps)",shell,,starts the button-highlight animation (returns 0 and ignores if one is running),shell
+start,func,0000:28ce,ui_anim_start,"void(int src_page, int tbl, int seq, int nsteps)",shell,,starts the button-highlight animation (returns 0 and ignores if one is running),shell
 start,func,0000:2901,ui_anim_step,int(void),shell,,per-tick step; acts every 8th call; returns remaining steps,shell
 start,func,0000:2a7e,ui_anim_active,int(void),shell,,returns [B2F4] remaining steps,shell
-start,func,0000:2a84,ui_text_centered,"void(TextCtx *c, char *s, int cx, int y)",shell,,draws s centred on cx (text_width/2) at y via slot 5,shell
-start,func,0000:2ab4,ui_popup_restore_box,"void(Box *b, int x, int y)",shell,,"copies saved background (page 2 at 0,h+4; size b->w,b->h at +6/+8) back to pages 1 and 0 at x,y",shell
+start,func,0000:2a84,ui_text_centered,"void(void *c, char *s, int cx, int y)",shell,,draws s centred on cx (text_width/2) at y via slot 5,shell
+start,func,0000:2ab4,ui_popup_restore_box,"void(void *b, int x, int y)",shell,,"copies saved background (page 2 at 0,h+4; size b->w,b->h at +6/+8) back to pages 1 and 0 at x,y",shell
 start,func,0000:2b06,ui_wait_ticks,void(int n),shell,,n x pal_apply_queue (each waits one timer tick),shell
 start,func,0000:2b1b,ui_popup_text,"void(char *s, int x, int y, int font, int centre, int wrap_w)",shell,,framed text popup on pages 1+0; saves background in page 2; geometry in B2F6/B2F8/B2FC/B302; undo with ui_popup_restore,shell
-start,func,0000:2cb4,ui_draw_frame,"void(TextCtx *c, int x, int y, int w, int h)",shell,,"bevelled panel: 4 corner tiles from page 2 (0..3,0..3), edges colours E0/E6/E1/E5, fill E2 (U)",shell
+start,func,0000:2cb4,ui_draw_frame,"void(void *c, int x, int y, int w, int h)",shell,,"bevelled panel: 4 corner tiles from page 2 (0..3,0..3), edges colours E0/E6/E1/E5, fill E2 (U)",shell
 start,func,0000:2df2,ui_draw_button,"int(char *s, int cx, int y, int colour)",shell,,"font 1 button: frame (w=textw+8,h=16) centred on cx + shadowed text; returns w",shell
 start,func,0000:2e50,map_draw_range_ring,"void(int wx, int wy, int radius, int colour, int solid)",shell,,circle of given world radius on the ONC map page 1 (dc18); dotted if solid==0,shell
 start,func,0000:2f4c,map_draw_route_line,"int(int x1, int y1, int x2, int y2, int skip)",shell,,animated 6-bit DDA line on page 1 (+ screen); polls ui_wait_skip(1) each step until Space; returns skip flag,shell
 start,func,0000:3070,pal_fade_in,void(int speed),shell,,"pal_fade(pal64e3, 0, 100h, speed)",shell
 start,func,0000:3088,pal_fade_out,void(int speed),shell,,"pal_fade(pal64e3, 100h, 0, speed)",shell
-start,func,0000:30a0,pal_fade,"void(uint8_t *pal, int from, int to, int speed)",shell,,quadratic brightness fade of 768-byte palette; stops timer ISR during the fade,shell
-start,func,0000:31ad,pal_fade_calibrate,void(uint8_t *buf),shell,,counts pal_set calls in 4 BIOS ticks into [B304],shell
-start,func,0000:31fa,map_place_label,"void(char *s, Pt *p1, Pt *p2, Pt *p3)",shell,,draws s near world point p1 choosing an offset away from the segments to p2/p3 (page 1 ctx dc18),shell
+start,func,0000:30a0,pal_fade,"void(void *pal, int from, int to, int speed)",shell,,quadratic brightness fade of 768-byte palette; stops timer ISR during the fade,shell
+start,func,0000:31ad,pal_fade_calibrate,void(void *buf),shell,,counts pal_set calls in 4 BIOS ticks into [B304],shell
+start,func,0000:31fa,map_place_label,"void(char *s, u16 p1, u16 p2, u16 p3)",shell,,draws s near world point p1 choosing an offset away from the segments to p2/p3 (page 1 ctx dc18),shell
 start,func,0000:3301,ui_sin_mul,"int(unsigned ang, int r)",shell,,"r*sin(ang)/16384 (ang 16-bit full circle) = fixmul_q14(sin16(ang), r)",shell
 start,func,0000:3318,ui_cos_mul,"int(unsigned ang, int r)",shell,,"ui_sin_mul(ang+4000h, r)",shell
-start,func,0000:332e,ui_dialog_draw,"void(Dialog *d, int x, int y)",shell,,"measures + draws message dialog with 1 or 2 buttons; fills d->w,h and the button hit rects (+0Eh..+1Ch)",shell
+start,func,0000:332e,ui_dialog_draw,"void(void *d, int x, int y)",shell,,"measures + draws message dialog with 1 or 2 buttons; fills d->w,h and the button hit rects (+0Eh..+1Ch)",shell
 start,func,0000:3517,pal_queue_push,"void(int first, void *rgb, int count)",shell,,"appends {first,rgb,count} to the DAC update queue 64A6 (count byte 64E2, max 10); applied by pal_apply_queue (8427)",shell
 start,func,0000:3548,pal_queue_push_click,"void(int first, void *rgb, int count)",shell,,pal_queue_push + snd_cmd(1Ah); no callers,shell
-start,func,0000:3567,ui_text,"void(TextCtx *c, char *s, int x, int y)",shell,,c->x=x; c->y=y; slot 5 text_noclip,shell
+start,func,0000:3567,ui_text,"void(void *c, char *s, int x, int y)",shell,,c->x=x; c->y=y; slot 5 text_noclip,shell
 start,func,0000:3588,ui_popup_restore,void(void),shell,,undo of ui_popup_text/ui_dialog_draw background: page 2 -> pages 1 and 0 using B2F6/B2F8/B2FC/B302,shell
 start,func,0000:35fc,ui_load_screen_pic,"void(int name_idx, int page_slot)",shell,,"loads ""<CBA[name_idx]>.pic"" into the file buffer, decodes into page seg CAB0[slot] with pic_to_seg_b (no palette)",shell
-start,func,0000:3641,ui_show_screen,"void(int name_idx, void (*overlay)(void))",shell,,"fade out, load pic into page 1, blit to screen, run overlay, fade in, screen_on",shell
-start,func,0000:3693,ui_sprite_draw,"void(SpriteCtx *c, int x, int y, unsigned seg)",shell,,"slot 22 sprite_scaled at natural size (dw,dh = words 0 and 2 of seg:0)",shell
-start,func,0000:36c4,ui_text_shadow,"void(TextCtx *c, char *s, int x, int y)",shell,,"if c->bg != -1 draws s three times in c->bg at (x+1,y),(x,y+1),(x+1,y+1) then normally at x,y",shell
-start,func,0000:373c,ui_text_width,"int(TextCtx *c, char *s)",shell,,sum of slot 47 font_char_width over s (font = c->font),shell
-start,func,0000:3776,ui_text_wrap,"int(TextCtx *c, char *s, int x, int y, int width, int line_h, int centre)",shell,,word wrap + draw (page -1 = measure only); returns widest line; c->y ends at the next line,shell
-start,func,0000:38ac,ui_menu_loop,int(MenuDesc *m),shell,,"modal input loop; returns button index 1..n, 63h cancel(ignored by dialog), 100h+hotkey",shell
-start,func,0000:393d,ui_hit_test,"int(Rect *rects, int n)",shell,,"1-based index of the 8-byte rect {x0,y0,x1,y1} containing the cursor (E08A,E08C), else 0",shell
+start,func,0000:3641,ui_show_screen,"void(int name_idx, void *overlay)",shell,,"fade out, load pic into page 1, blit to screen, run overlay, fade in, screen_on",shell
+start,func,0000:3693,ui_sprite_draw,"void(void *c, int x, int y, unsigned seg)",shell,,"slot 22 sprite_scaled at natural size (dw,dh = words 0 and 2 of seg:0)",shell
+start,func,0000:36c4,ui_text_shadow,"void(void *c, char *s, int x, int y)",shell,,"if c->bg != -1 draws s three times in c->bg at (x+1,y),(x,y+1),(x+1,y+1) then normally at x,y",shell
+start,func,0000:373c,ui_text_width,"int(void *c, char *s)",shell,,sum of slot 47 font_char_width over s (font = c->font),shell
+start,func,0000:3776,ui_text_wrap,"int(void *c, char *s, int x, int y, int width, int line_h, int centre)",shell,,word wrap + draw (page -1 = measure only); returns widest line; c->y ends at the next line,shell
+start,func,0000:38ac,ui_menu_loop,int(void *m),shell,,"modal input loop; returns button index 1..n, 63h cancel(ignored by dialog), 100h+hotkey",shell
+start,func,0000:393d,ui_hit_test,"int(void *rects, int n)",shell,,"1-based index of the 8-byte rect {x0,y0,x1,y1} containing the cursor (E08A,E08C), else 0",shell
 start,func,0000:3989,ui_cursor_erase,void(void),shell,,"blit_rect page1 -> page0 over the old cursor box (E08E,E090,E092 x E093)",shell
 start,func,0000:39b3,ui_order_desc,void(unsigned *p),shell,,"if p[2] > p[0] swap p[0],p[2] (unsigned)",shell
 start,func,0000:39d5,ui_order_asc,void(unsigned *p),shell,,"if p[2] < p[0] swap p[0],p[2] (unsigned)",shell
-start,func,0000:39f7,ui_poll_input,int(MenuDesc *m),shell,,"one poll of joystick/mouse/keyboard, moves + redraws the cursor; returns 0/1/2/62h/key",shell
-start,func,0000:3cea,ui_dialog_run,"int(Dialog *d, int x, int y)",shell,,"modal dialog: draw, place cursor on button 1, ui_menu_loop until not 63h, restore; returns 1/2/100h+key",shell
+start,func,0000:39f7,ui_poll_input,int(void *m),shell,,"one poll of joystick/mouse/keyboard, moves + redraws the cursor; returns 0/1/2/62h/key",shell
+start,func,0000:3cea,ui_dialog_run,"int(void *d, int x, int y)",shell,,"modal dialog: draw, place cursor on button 1, ui_menu_loop until not 63h, restore; returns 1/2/100h+key",shell
 start,func,0000:3da2,ui_dialog_hover,void(void),shell,,menu callback (cb field of every dialog descriptor): highlights the hovered button by swapping DAC E7/E8 colours,shell
 start,func,0000:3e20,ui_cursor_init,void(unsigned sprite_seg),shell,,"E088=seg, E092/E093 = byte0/byte2 of sprite, E094=E095=2, cursor pos and old pos = 0,0",shell
 start,func,0000:3e5e,ui_check_break,void(void),shell,,if [73F2] (break hook installed) call fatal_exit(0) (76D1),shell
@@ -1031,54 +1031,54 @@ start,func,0000:405f,ui_wait_skip,int(int ticks),shell,,ui_wait_input + click so
 start,func,0000:40a4,mem_alloc_chk,unsigned(unsigned bytes),platform,,,platform
 start,func,0000:40cf,mem_free_chk,void(unsigned seg),platform,,,platform
 start,func,0000:40f0,mission_site_setup,void(void),shell,,"after theatre/pilot choice: copies pilot theatre fields, calls theatre_load(5466) + 4239, option bytes CAD2..5, scans map flag 10h, randomly flags sites 40h/80h; caller 1308",shell
-start,func,0000:4239,mission_generate,void mission_generate(void),shell,,"mission generator: picks targets, templates, units, loadout, times",shell
-start,func,0000:512e,wld_site_at_pos,"int wld_site_at_pos(int x,int y,int slot)",shell,,"snap to terrain cell, find/create site",shell
-start,func,0000:51e8,wld_site_of_type,"int wld_site_of_type(int slot,int type)",shell,,"find terrain object of type, find/create site",shell
-start,func,0000:5282,arm_pick_weapon,int arm_pick_weapon(int target_class),shell,,"best weapon row in DS:1D86, random tie",shell
-start,func,0000:532a,wld_site_dist,"int wld_site_dist(int a,int b)",shell,,dist_approx_xy of two sites,shell
-start,func,0000:5356,mission_unit_init,"void mission_unit_init(int unit,int site)",shell,,init 36-byte unit record at site,shell
-start,func,0000:5413,dist_approx_xy,"int dist_approx_xy(int dx,int dy)",shell,,max+min/2 saturated 7FFF,shell
-start,func,0000:5466,wld_load_theatre,void wld_load_theatre(const char *prefix),shell,,"loads .wld, .3dG (7D71), .3dT (7E88)",shell
-start,func,0000:54bb,wld_read_file,void wld_read_file(const char *path),shell,,"fread .WLD into DGROUP tables, builds name pointer table",shell
-start,func,0000:5625,wld_export_to_comm,void wld_export_to_comm(void),shell,,pack world state into comm+7Ah,shell
-start,func,0000:5743,mission_bearing,"unsigned mission_bearing(int dx,int dy)",shell,,"16-bit bearing, 0=+dy 4000=+dx",shell
-start,func,0000:585c,wld_pack_get,"void wld_pack_get(void *dst,int size,int count)",shell,,copy from far cursor B392:B390 to DS,shell
-start,func,0000:588d,wld_pack_put,"void wld_pack_put(void *src,int size,int count)",shell,,copy DS to far cursor B392:B390,shell
-start,func,0000:58be,map_site_grid_ref,char *map_site_grid_ref(int site),shell,,"grid ref of site x,y for current theatre",shell
-start,func,0000:58df,map_grid_ref,"char *map_grid_ref(int x,int y,int theatre)",shell,,ONC-style chart ref in DS:B394,shell
-start,func,0000:59d8,mission_clamp_hi,"int mission_clamp_hi(int v,int lo,int hi)",shell,,v if lo<=v<=hi else hi,shell
-start,func,0000:59fe,brief_clock_string,"void brief_clock_string(char *buf,int ticks)",shell,,"HH:MM from ticks (30 per minute), night offset from comm+33",shell
-start,func,0000:5a8a,ui_orders_draw,void ui_orders_draw(void),shell,,"orders screen setup callback (hotspot enable, palette, markers)",shell
-start,func,0000:5bf0,ui_orders_screen,int ui_orders_screen(void),shell,,"orders screen menu loop (theatre, war level, mission type, Fly)",shell
-start,func,0000:5e6f,ui_orders_hover,void ui_orders_hover(void),shell,,menu idle callback: hover colours and tooltips,shell
-start,func,0000:5ffa,ui_tooltip_clear,void ui_tooltip_clear(void),shell,,restore tooltip panel,shell
-start,func,0000:6045,ui_tooltip_show,void ui_tooltip_show(const char *text),shell,,draw wrapped tooltip text,shell
-start,func,0000:60dc,ui_theatre_name_draw,void ui_theatre_name_draw(void),shell,,"draw current theatre name at (D4,7C)",shell
-start,func,0000:615c,roster_screen_draw,void roster_screen_draw(void),shell,,"roster screen callback: 10 lines, highlight, delete hint",shell
-start,func,0000:623e,roster_screen_run,int roster_screen_run(void),shell,,"Roster screen main loop: show rostscrn, pick pilot / Delete = rename / Done; saves roster on exit. Called from 029D.",shell
-start,func,0000:63fb,roster_hover_cb,void roster_hover_cb(void),shell,,menu hover callback of roster_menu (DS:704E): row colours + info panel,shell
-start,func,0000:64e5,roster_draw_info,void roster_draw_info(int slot),shell,,"bottom info panel: rank+surname, best/last mission, option strings, medals (CMH DFC AFC SS AM PH)",shell
-start,func,0000:6861,roster_draw_row,"void roster_draw_row(int slot,int y)",shell,,"draws one roster row into page 1: rank+name, score (x=224 right), missions (x=246 right), status centred; code is duplicated in the binary",shell
-start,func,0000:6a7c,ui_str_last_word,char *ui_str_last_word(char *s),shell,,pointer to the part after the last space (surname),shell
-start,func,0000:6ab3,roster_edit_name,int roster_edit_name(int slot),shell,,"Delete key on a row: type a new pilot name (prefix '2nd Lt ', max 29 chars, Esc cancels); resets the record and copies it to the active pilot",shell
-start,func,0000:6d07,roster_startup_sync,void roster_startup_sync(void),shell,,"called once after shell_init: load roster, fix +3C, roster<->active copy depending on first-run word, save silently",shell
-start,func,0000:6db8,roster_options_screen,void roster_options_screen(void),shell,,"pilot options panel: opponent level (+3E), landing (+40), aircraft (+42); Done / right click cancel",shell
-start,func,0000:71ad,roster_options_hover_cb,void roster_options_hover_cb(void),shell,,hover callback of opt_menu (DS:6FFA): DAC 0xF5-i red/normal,shell
-start,func,0000:7218,roster_load,void roster_load(void),shell,,"fopen Roster.Fil rb (unchecked), read word B39C + 10 x 0x50 into D892",shell
-start,func,0000:7272,roster_save,void roster_save(int show_err),shell,,write Roster.Fil unless fcb_find()==0 (original floppy volume label F117A-SF); error boxes 72EA/729D if show_err,shell
-start,func,0000:7312,shell_init,void shell_init(void),shell,,"program start: comm setup, bind MISC/MGRAPHIC/sound drivers, buffers, gfx init, sprites, timer, joystick/mouse, srand",shell
-start,func,0000:7387,shell_comm_setup,void shell_comm_setup(void),shell,,"sets DS:CBD8 (->0000:04F2), CAC0 (->04F4), E096/E098 comm far ptr, CACA/CACC active pilot = comm+1272h",shell
-start,func,0000:73ce,shell_gfx_init,void shell_gfx_init(void),shell,,"alloc 24000 B scratch (dup of 7312), mode13/screen_off first time, 5 pages + 5 TextCtx at DC02, load PALETTES.PAL (6912 B)",shell
-start,func,0000:74b1,shell_sprites_init,void shell_sprites_init(void),shell,,"load requestr.pic to page 2, sprite pool, 10 sprite_grab, cursor sprite D32E",shell
-start,func,0000:7611,ui_quit_prompt,void ui_quit_prompt(void),shell,,"Alt-Q: show adv.pic + adv.pal, Y exits, any other key restores the screen",shell
-start,func,0000:76c0,ui_rand_mod,unsigned ui_rand_mod(unsigned n),shell,,rand() % n,shell
-start,func,0000:76d1,shell_exit,void shell_exit(int code),shell,,"snd stop, free buffer, remove hooks, text mode if code<=1, 'Not enough memory!' if code==1, exit(code)",shell
-start,func,0000:7744,map_nearest_object,"struct ObjHit *map_nearest_object(long wx,long wy)",shell,,"nearest class!=0 terrain object around (wx=wld_x*32, wy=(0x8000-wld_y)*32), levels 1-2, 3x3 cells; result struct DS:CA8E",shell
-start,func,0000:7904,map_pick_object,struct ObjHit *map_pick_object(int obj_id),shell,,"random terrain record with obj==id (class 0x10: level-3 scan, else levels 1-2 scan); result struct DS:CA8E",shell
-start,func,0000:7c05,map_level_scale,"long map_level_scale(int level,long v)",shell,,"world units to level units: L0 <<1, L1 v, L2 >>2, L3 >>4, L4 >>6",shell
-start,func,0000:7c56,map_tile_type,"int map_tile_type(int level,int x,int y)",shell,,"tile type lookup in the 5-level .3DG tables, -1 out of range",shell
-start,func,0000:7d71,map_load_3dg,int map_load_3dg(char *name),shell,,load XX.3dG into BAA0/B9A0/B7A0/B5A0/B3A0 (zero/identity if missing),shell
-start,func,0000:7e88,map_load_3dt,int map_load_3dt(char *name),shell,,"load XX.3dT records into pool BAB0 (7-byte records), pointer table C85C, counts F00/F0A",shell
+start,func,0000:4239,mission_generate,void(void),shell,,"mission generator: picks targets, templates, units, loadout, times",shell
+start,func,0000:512e,wld_site_at_pos,"int(int x,int y,int slot)",shell,,"snap to terrain cell, find/create site",shell
+start,func,0000:51e8,wld_site_of_type,"int(int slot,int type)",shell,,"find terrain object of type, find/create site",shell
+start,func,0000:5282,arm_pick_weapon,int(int cls),shell,,"best weapon row in DS:1D86, random tie",shell
+start,func,0000:532a,wld_site_dist,"int(int a,int b)",shell,,dist_approx_xy of two sites,shell
+start,func,0000:5356,mission_unit_init,"void(int unit,int site)",shell,,init 36-byte unit record at site,shell
+start,func,0000:5413,dist_approx_xy,"int(int dx,int dy)",shell,,max+min/2 saturated 7FFF,shell
+start,func,0000:5466,wld_load_theatre,void(const char *prefix),shell,,"loads .wld, .3dG (7D71), .3dT (7E88)",shell
+start,func,0000:54bb,wld_read_file,void(const char *path),shell,,"fread .WLD into DGROUP tables, builds name pointer table",shell
+start,func,0000:5625,wld_export_to_comm,void(char *name),shell,,pack world state into comm+7Ah,shell
+start,func,0000:5743,mission_bearing,"unsigned(int dx,int dy)",shell,,"16-bit bearing, 0=+dy 4000=+dx",shell
+start,func,0000:585c,wld_pack_get,"void(void *dst,int size,int count)",shell,,copy from far cursor B392:B390 to DS,shell
+start,func,0000:588d,wld_pack_put,"void(void *src,int size,int count)",shell,,copy DS to far cursor B392:B390,shell
+start,func,0000:58be,map_site_grid_ref,char *(int site),shell,,"grid ref of site x,y for current theatre",shell
+start,func,0000:58df,map_grid_ref,"char *(int x,int y,int theatre)",shell,,ONC-style chart ref in DS:B394,shell
+start,func,0000:59d8,mission_clamp_hi,"int(int v,int lo,int hi)",shell,,v if lo<=v<=hi else hi,shell
+start,func,0000:59fe,brief_clock_string,"void(char *buf,int ticks)",shell,,"HH:MM from ticks (30 per minute), night offset from comm+33",shell
+start,func,0000:5a8a,ui_orders_draw,void(void),shell,,"orders screen setup callback (hotspot enable, palette, markers)",shell
+start,func,0000:5bf0,ui_orders_screen,int(void),shell,,"orders screen menu loop (theatre, war level, mission type, Fly)",shell
+start,func,0000:5e6f,ui_orders_hover,void(void),shell,,menu idle callback: hover colours and tooltips,shell
+start,func,0000:5ffa,ui_tooltip_clear,void(void),shell,,restore tooltip panel,shell
+start,func,0000:6045,ui_tooltip_show,void(const char *text),shell,,draw wrapped tooltip text,shell
+start,func,0000:60dc,ui_theatre_name_draw,void(void),shell,,"draw current theatre name at (D4,7C)",shell
+start,func,0000:615c,roster_screen_draw,void(void),shell,,"roster screen callback: 10 lines, highlight, delete hint",shell
+start,func,0000:623e,roster_screen_run,int(void),shell,,"Roster screen main loop: show rostscrn, pick pilot / Delete = rename / Done; saves roster on exit. Called from 029D.",shell
+start,func,0000:63fb,roster_hover_cb,void(void),shell,,menu hover callback of roster_menu (DS:704E): row colours + info panel,shell
+start,func,0000:64e5,roster_draw_info,void(int slot),shell,,"bottom info panel: rank+surname, best/last mission, option strings, medals (CMH DFC AFC SS AM PH)",shell
+start,func,0000:6861,roster_draw_row,"void(int slot,int y)",shell,,"draws one roster row into page 1: rank+name, score (x=224 right), missions (x=246 right), status centred; code is duplicated in the binary",shell
+start,func,0000:6a7c,ui_str_last_word,char *(char *s),shell,,pointer to the part after the last space (surname),shell
+start,func,0000:6ab3,roster_edit_name,int(int slot),shell,,"Delete key on a row: type a new pilot name (prefix '2nd Lt ', max 29 chars, Esc cancels); resets the record and copies it to the active pilot",shell
+start,func,0000:6d07,roster_startup_sync,void(void),shell,,"called once after shell_init: load roster, fix +3C, roster<->active copy depending on first-run word, save silently",shell
+start,func,0000:6db8,roster_options_screen,void(void),shell,,"pilot options panel: opponent level (+3E), landing (+40), aircraft (+42); Done / right click cancel",shell
+start,func,0000:71ad,roster_options_hover_cb,void(void),shell,,hover callback of opt_menu (DS:6FFA): DAC 0xF5-i red/normal,shell
+start,func,0000:7218,roster_load,void(void),shell,,"fopen Roster.Fil rb (unchecked), read word B39C + 10 x 0x50 into D892",shell
+start,func,0000:7272,roster_save,void(int show_err),shell,,write Roster.Fil unless fcb_find()==0 (original floppy volume label F117A-SF); error boxes 72EA/729D if show_err,shell
+start,func,0000:7312,shell_init,void(void),shell,,"program start: comm setup, bind MISC/MGRAPHIC/sound drivers, buffers, gfx init, sprites, timer, joystick/mouse, srand",shell
+start,func,0000:7387,shell_comm_setup,void(void),shell,,"sets DS:CBD8 (->0000:04F2), CAC0 (->04F4), E096/E098 comm far ptr, CACA/CACC active pilot = comm+1272h",shell
+start,func,0000:73ce,shell_gfx_init,void(void),shell,,"alloc 24000 B scratch (dup of 7312), mode13/screen_off first time, 5 pages + 5 TextCtx at DC02, load PALETTES.PAL (6912 B)",shell
+start,func,0000:74b1,shell_sprites_init,void(void),shell,,"load requestr.pic to page 2, sprite pool, 10 sprite_grab, cursor sprite D32E",shell
+start,func,0000:7611,ui_quit_prompt,void(void),shell,,"Alt-Q: show adv.pic + adv.pal, Y exits, any other key restores the screen",shell
+start,func,0000:76c0,ui_rand_mod,unsigned(unsigned n),shell,,rand() % n,shell
+start,func,0000:76d1,shell_exit,void(int code),shell,,"snd stop, free buffer, remove hooks, text mode if code<=1, 'Not enough memory!' if code==1, exit(code)",shell
+start,func,0000:7744,map_nearest_object,"u8 *(long wx,long wy)",shell,,"nearest class!=0 terrain object around (wx=wld_x*32, wy=(0x8000-wld_y)*32), levels 1-2, 3x3 cells; result struct DS:CA8E",shell
+start,func,0000:7904,map_pick_object,u8 *(int obj_id),shell,,"random terrain record with obj==id (class 0x10: level-3 scan, else levels 1-2 scan); result struct DS:CA8E",shell
+start,func,0000:7c05,map_level_scale,"long(int level,long v)",shell,,"world units to level units: L0 <<1, L1 v, L2 >>2, L3 >>4, L4 >>6",shell
+start,func,0000:7c56,map_tile_type,"int(int level,int x,int y)",shell,,"tile type lookup in the 5-level .3DG tables, -1 out of range",shell
+start,func,0000:7d71,map_load_3dg,int(char *name),shell,,load XX.3dG into BAA0/B9A0/B7A0/B5A0/B3A0 (zero/identity if missing),shell
+start,func,0000:7e88,map_load_3dt,int(char *name),shell,,"load XX.3dT records into pool BAB0 (7-byte records), pointer table C85C, counts F00/F0A",shell
 start,func,0000:800a,dos_allocmem,unsigned(unsigned bytes),platform,,,platform
 start,func,0000:8030,dos_freemem,int(unsigned seg),platform,dos_freemem_2,,platform
 start,func,0000:804e,fcb_find,int(void),platform,,,platform
@@ -1132,7 +1132,7 @@ start,func,0000:8bea,dist_approx,"int(int x1, int y1, int x2, int y2)",platform,
 start,func,0000:8c15,ui_fixmul_q14,"int(int a, int b)",shell,,library: (a*b*4)>>16 rounded (a is Q14),shell
 start,func,0000:8c6c,ui_cos16,int(unsigned ang),shell,,library: sin16(ang+4000h),shell
 start,func,0000:8c7c,ui_sin16,int(unsigned ang),shell,,"library: sin of 16-bit angle, Q14",shell
-start,func,0000:8c88,ui_sin_interp,int(BX ang),shell,,"library: sine from 256-entry table at DS:ABF8 with linear interpolation (BX=angle, returns BX Q14)",shell
+start,func,0000:8c88,ui_sin_interp,int(unsigned ang),shell,,"library: sine from 256-entry table at DS:ABF8 with linear interpolation (BX=angle, returns BX Q14)",shell
 start,func,0000:8ca8,timer_install,void(void),platform,,,platform
 start,func,0000:8ce6,timer_remove,void(void),platform,dos_setvect_4,,platform
 start,func,0000:8dd8,timer_calibrate,void(void),platform,,,platform
@@ -1162,7 +1162,7 @@ start,func,0000:959e,sprintf,"int(char *buf, char *fmt, ...)",platform,,,platfor
 start,func,0000:95f4,movedata,"void(unsigned sseg, unsigned soff, unsigned dseg, unsigned doff, unsigned n)",platform,,,platform
 start,func,0000:9612,memcpy,"void *(void *d, void *s, unsigned n)",platform,,,platform
 start,func,0000:963e,memset,"void *memset(void *d, int c, unsigned n)",shell,,"byte fill with rep stosw (odd start handled), returns d; caller 7D71",shell
-start,func,0000:9694,isprint,int isprint(int c),shell,,mask 57h (upper|lower|digit|punct|blank) through the shared ctype tail 96A1; caller roster_edit_name 6AB3,shell
+start,func,0000:9694,isprint,int(int c),shell,,mask 57h (upper|lower|digit|punct|blank) through the shared ctype tail 96A1; caller roster_edit_name 6AB3,shell
 start,func,0000:96a1,ctype_test,"int /* AL=mask, [bp+4]=c */",shell,,shared tail of the isXXX stubs 9680..969E: AL & _ctype[c+1] (table DS:B051),shell
 start,func,0000:96ae,abs,int(int),platform,,,platform
 start,func,0000:96bc,srand,void(unsigned seed),platform,,,platform

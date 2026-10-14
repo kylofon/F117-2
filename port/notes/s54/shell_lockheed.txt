@@ -1,0 +1,18 @@
+# The Lockheed model (aircraft 2: two bays, Air missions disabled): options panel, orders over the Persian Gulf (a strike training mission), briefing,
+# arming, launch. Orders are only clicked when they CHANGE the pilot's choice: an unchanged click erases a marker at a stack-garbage index in the original.
+seed 2024
+160 77 1c0d
+250 165 1c0d
+250 180 1c0d
+- - 1c0d
+30 80 1c0d
+210 170 1c0d
+212 70 1c0d
+280 181 1c0d
+280 149 1c0d
+215 194 1c0d
+270 50 1c0d
+270 135 1c0d
+50 64 1c0d
+270 148 1c0d
+- - 1c0d

@@ -124,9 +124,9 @@ int dswap_stub(const char *tail)
     return EXIT_DSWAP_OK;
 }
 
-/* ---- START: roster, briefing, arming; leaves the mission in the comm block ---------------------- */
+/* ---- START: stand-in of the --chain-test (the real START is src/shell, S5.4) ------------------------ */
 
-int start_main(const char *tail)
+int start_stub(const char *tail)
 {
     (void)tail;
     Comm *c = comm_get();
@@ -165,6 +165,7 @@ int vgame_main(const char *tail)
 {
     (void)tail;
     Comm *c = comm_get();
+    if (!prog_use_stubs) start_calls++;                  /* the real START (S5.4) does not count its passes: VGAME does */
     hold(5);
     c->damage_mask = start_calls == 1 ? 0x0000 : 0x0013;                    /* 34 */
     c->hits_taken = start_calls == 1 ? 0 : 3;                               /* 36 */
@@ -210,7 +211,7 @@ int end_main(const char *tail)
     return EXIT_END_RESTART;
 }
 
-/* The stand-in of a program (the chain test): the front-end stubs, and START / VGAME / END which are still only placeholders. */
+/* The stand-in of a program (the chain test): the stubs of the programs that need game files, and VGAME / END which are still only placeholders. */
 ProgMain placeholder_main(ProgId id)
 {
     switch (id) {
@@ -218,7 +219,7 @@ ProgMain placeholder_main(ProgId id)
     case PROG_MPS_LOGO: return mps_logo_stub;
     case PROG_PLAYER:   return player_stub;
     case PROG_DSWAP:    return dswap_stub;
-    case PROG_START:    return start_main;
+    case PROG_START:    return start_stub;
     case PROG_VGAME:    return vgame_main;
     case PROG_END:      return end_main;
     default:            return NULL;

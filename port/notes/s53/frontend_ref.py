@@ -81,21 +81,24 @@ def pan_ref(game, ref):
 
 def chain(exe, game):
     """The scripted run: F117_KEYS answers SETUP ('N' = no joystick at 1 s, '2' = AdLib at 2 s), the logo plays for its 7.7 s, a space at 11 s
-    ends the PLAYER intro, a space at 14 s ends PLAYER title-2; the placeholders of START / VGAME / END run to the quit. The trace has to
-    show the whole chain in order."""
+    ends the PLAYER intro; START (S5.4) is quit at once by its script (Alt-Q, y: port/notes/s54/shell_quit.txt) on a scratch game folder.
+    The trace has to show SETUP, MPS_LOGO, PLAYER, DSWAP and START in order."""
     import re, time
     if not os.path.isfile(os.path.join(game, 'SETUP.EXE')):
         print('no game files')
         return 77
-    env = dict(os.environ, F117_KEYS='1:31,2:03,11:39,14:39')
+    sys.path.insert(0, os.path.join(ROOT, 'port', 'notes', 's54'))
+    import shell_ref, shell_emu
+    scratch = shell_ref.scratch_game(game)
+    open(os.path.join(scratch, 'ROSTER.FIL'), 'wb').write(shell_emu.make_roster())
+    env = dict(os.environ, F117_KEYS='1:31,2:03,11:39', F117_SHELL_SCRIPT=os.path.join(ROOT, 'port', 'notes', 's54', 'shell_quit.txt'))
     t = time.time()
-    p = subprocess.run([exe, '--headless', '--trace', '--game-dir', game], env=env, capture_output=True, text=True, timeout=120)
+    p = subprocess.run([exe, '--headless', '--trace', '--game-dir', scratch], env=env, capture_output=True, text=True, timeout=120)
     secs = time.time() - t
     out = p.stdout
     want = [r'EXEC SETUP\.EXE', r'SETUP\.EXE exit code 24h', r'EXEC MPS_LOGO\.EXE\s+tail " A"', r'MPS_LOGO\.EXE exit code 00h',
             r'EXEC PLAYER\.EXE\s+tail " title-1 title-2 title-3a credit c-pit bunker"', r'PLAYER\.EXE exit code 20h', r'EXEC DSWAP\.EXE\s+tail " 0"',
-            r'EXEC START\.EXE', r'START\.EXE exit code 0Ch', r'EXEC PLAYER\.EXE\s+tail " title-2"', r'PLAYER\.EXE exit code 20h', r'EXEC VGAME\.EXE',
-            r'EXEC END\.EXE', r'END\.EXE exit code 23h', r'quit: START returned 0']
+            r'EXEC START\.EXE', r'START\.EXE exit code 00h', r'quit: START returned 0']
     pos = 0
     for w in want:
         m = re.compile(w).search(out, pos)
@@ -103,10 +106,10 @@ def chain(exe, game):
             print('frontend_chain FAILED: "%s" not found after offset %d\n%s' % (w, pos, out[-1500:]))
             return 1
         pos = m.end()
-    if p.returncode != 0 or secs < 12:
+    if p.returncode != 0 or secs < 9:
         print('frontend_chain FAILED: exit code %d after %.1f s' % (p.returncode, secs))
         return 1
-    print('frontend_chain OK: SETUP -> MPS_LOGO -> PLAYER -> DSWAP -> START (placeholder) ... quit, %.1f s' % secs)
+    print('frontend_chain OK: SETUP -> MPS_LOGO -> PLAYER -> DSWAP -> START (quit by its script), %.1f s' % secs)
     return 0
 
 

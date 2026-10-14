@@ -185,6 +185,9 @@ void kbd_init(void)
 
 void kbd_flush(void) { wr16(BDA, BUF_HEAD, rd16(BDA, BUF_TAIL)); }
 
+/* A test aid (S5.4 shell test): a key word (scan << 8 | ascii) into the BIOS type-ahead buffer as if it had been typed. */
+void kbd_inject(u16 word) { buf_put(word); }
+
 bool kbd_key_waiting(void)
 {
     host_pump();

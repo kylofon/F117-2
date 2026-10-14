@@ -10,5 +10,5 @@ extern bool placeholder_interactive;
 void placeholder_init(void);        /* installs the Esc handler on the host keyboard */
 
 #include "prog.h"
-/* The stand-in of program `id` (setup_stub, mps_logo_stub, player_stub, dswap_stub; START, VGAME and END are still the placeholders). */
+/* The stand-in of program `id` (setup_stub, mps_logo_stub, player_stub, dswap_stub, start_stub; VGAME and END are still the placeholders). */
 ProgMain placeholder_main(ProgId id);

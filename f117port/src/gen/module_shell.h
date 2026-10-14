@@ -14,7 +14,7 @@ void arm_draw_fuel(void);
 /* START 0000:0b01  spec shell.md "0000:0B01 arm_hover_hook void(void) (V)" */
 void arm_hover_hook(void);
 /* START 0000:5282  spec shell.md "0. Theatre numbering and what the pilot record fields mean (" */
-void arm_pick_weapon(void); /* TODO signature: spec shell.md "0. Theatre numbering and what the pilot " (type column: "int arm_pick_weapon(int target_class)") */
+int arm_pick_weapon(int cls);
 /* START 0000:0e23  spec shell.md "0000:0E23 arm_roll_unavailable void(void) (V)" */
 void arm_roll_unavailable(void);
 /* START 0000:07ee  spec shell.md "0000:07EE arm_screen_draw void(void) -- hook of ui_show_scre" */
@@ -26,7 +26,7 @@ int arm_show_weapon_info(int row);
 /* START 0000:1f3f  spec shell.md "S3.5 reader a: START.EXE 0000:0010 .. 0000:1F3F (lines 1-338" */
 void brief_build_site_buttons(void);
 /* START 0000:59fe  spec shell.md "3. Small helpers" */
-void brief_clock_string(void); /* TODO signature: spec shell.md "3. Small helpers" (type column: "void brief_clock_string(char *buf,int ti") */
+void brief_clock_string(char *buf, int ticks);
 /* START 0000:1ab6  spec shell.md "0000:1AB6 brief_draw_hostile void(void) (V, contains an orig" */
 void brief_draw_hostile(void);
 /* START 0000:183a  spec shell.md "0000:183A brief_draw_ranges void(void) (V) (modes 1 and 2)" */
@@ -36,11 +36,11 @@ char brief_draw_route(char done);
 /* START 0000:196a  spec shell.md "0000:196A brief_draw_site_icons int(char done) (V)" */
 int brief_draw_site_icons(char done);
 /* START 0000:24f7  spec shell.md "S3.5 reader b: START.EXE 0000:24F7 .. 4238 (first function a" */
-void brief_draw_target_summary(void); /* TODO signature: spec shell.md "S3.5 reader b: START.EXE 0000:24F7 .. 42" (type column: "void(TextCtx *c, int which)") */
+void brief_draw_target_summary(void *c, int which);
 /* START 0000:25d9  spec shell.md "1 Briefing text (24F7, 25D9, 2651)" */
 char *brief_format_date(char *buf);
 /* START 0000:2651  spec shell.md "1 Briefing text (24F7, 25D9, 2651)" */
-void brief_format_objective(void); /* TODO signature: spec shell.md "1 Briefing text (24F7, 25D9, 2651)" (type column: "void(ObjRec *rec, char *out)") */
+void brief_format_objective(void *rec, char *out);
 /* START 0000:1b37  spec shell.md "0000:1B37 brief_hint_text void(int h) (V)" */
 void brief_hint_text(int h);
 /* START 0000:11db  spec shell.md "0000:11DB brief_hover_hook void(void) (V)" */
@@ -60,7 +60,7 @@ void brief_site_info(int n);
 /* START 0000:96a1  spec shell.md "Part E: closing pass (S3.10b, 2026-10-13): the last 6 uncove" */
 int ctype_test(void);
 /* START 0000:5413  spec shell.md "2. WLD / site helpers (0000:512E..5466 and 54BB..5743)" */
-void dist_approx_xy(void); /* TODO signature: spec shell.md "2. WLD / site helpers (0000:512E..5466 a" (type column: "int dist_approx_xy(int dx,int dy)") */
+int dist_approx_xy(int dx, int dy);
 /* START 0000:8aa0  spec shell.md "(no heading)" */
 void edge_table_clear(void); /* TODO signature: spec shell.md "(no heading)" (type column: "void edge_table_clear(void)") */
 /* START 0000:8ad1  spec shell.md "(no heading)" */
@@ -70,47 +70,47 @@ void free_fn(void *p);
 /* START 0000:932e  spec shell.md "Part E: closing pass (S3.10b, 2026-10-13): the last 6 uncove" */
 void fwrite_fn(void); /* TODO signature: spec shell.md "Part E: closing pass (S3.10b, 2026-10-13" (type column: "unsigned fwrite(void *buf, unsigned size") */
 /* START 0000:9694  spec shell.md "1.5 6A7C ui_str_last_word and 6AB3 roster_edit_name" */
-void isprint_fn(void); /* TODO signature: spec shell.md "1.5 6A7C ui_str_last_word and 6AB3 roste" (type column: "int isprint(int c)") */
+int isprint_fn(int c);
 /* START 0000:9516  spec shell.md "Pilot record (0x50 bytes, comm+0x1272 and DS:D892+0x50*i, RO": same name as module_frontend.h, declared there */
 /* START 0000:2e50  spec shell.md "2E50 map_draw_range_ring(int wx, int wy, int radius, int col" */
 void map_draw_range_ring(int wx, int wy, int radius, int colour, int solid);
 /* START 0000:2f4c  spec shell.md "2F4C int map_draw_route_line(int x1, int y1, int x2, int y2," */
 int map_draw_route_line(int x1, int y1, int x2, int y2, int skip);
 /* START 0000:58df  spec shell.md "3. Small helpers" */
-void map_grid_ref(void); /* TODO signature: spec shell.md "3. Small helpers" (type column: "char *map_grid_ref(int x,int y,int theat") */
+char *map_grid_ref(int x, int y, int theatre);
 /* START 0000:7c05  spec shell.md "4.4 7C05 map_level_scale -> long map_level_scale(int level, " */
-void map_level_scale(void); /* TODO signature: spec shell.md "4.4 7C05 map_level_scale -> long map_lev" (type column: "long map_level_scale(int level,long v)") */
+long map_level_scale(int level, long v);
 /* START 0000:7d71  spec shell.md "4.1 7D71 map_load_3dg -> int map_load_3dg(char *name) (V)" */
-void map_load_3dg(void); /* TODO signature: spec shell.md "4.1 7D71 map_load_3dg -> int map_load_3d" (type column: "int map_load_3dg(char *name)") */
+int map_load_3dg(char *name);
 /* START 0000:7e88  spec shell.md "4.2 7E88 map_load_3dt -> int map_load_3dt(char *name) (V)" */
-void map_load_3dt(void); /* TODO signature: spec shell.md "4.2 7E88 map_load_3dt -> int map_load_3d" (type column: "int map_load_3dt(char *name)") */
+int map_load_3dt(char *name);
 /* START 0000:7744  spec shell.md "4.5 7744 map_nearest_object -> struct ObjHit *map_nearest_ob" */
-void map_nearest_object(void); /* TODO signature: spec shell.md "4.5 7744 map_nearest_object -> struct Ob" (type column: "struct ObjHit *map_nearest_object(long w") */
+u8 *map_nearest_object(long wx, long wy);
 /* START 0000:7904  spec shell.md "4.6 7904 map_pick_object -> struct ObjHit *map_pick_object(i" */
-void map_pick_object(void); /* TODO signature: spec shell.md "4.6 7904 map_pick_object -> struct ObjHi" (type column: "struct ObjHit *map_pick_object(int obj_i") */
+u8 *map_pick_object(int obj_id);
 /* START 0000:31fa  spec shell.md "31FA map_place_label(char *s, Pt *p1, Pt *p2, Pt *p3) (V)" */
-void map_place_label(void); /* TODO signature: spec shell.md "31FA map_place_label(char *s, Pt *p1, Pt" (type column: "void(char *s, Pt *p1, Pt *p2, Pt *p3)") */
+void map_place_label(char *s, u16 p1, u16 p2, u16 p3);
 /* START 0000:58be  spec shell.md "3. Small helpers" */
-void map_site_grid_ref(void); /* TODO signature: spec shell.md "3. Small helpers" (type column: "char *map_site_grid_ref(int site)") */
+char *map_site_grid_ref(int site);
 /* START 0000:7c56  spec shell.md "4.3 7C56 map_tile_type -> int map_tile_type(int level, int x" */
-void map_tile_type(void); /* TODO signature: spec shell.md "4.3 7C56 map_tile_type -> int map_tile_t" (type column: "int map_tile_type(int level,int x,int y)") */
+int map_tile_type(int level, int x, int y);
 /* START 0000:963e  spec shell.md "Part E: closing pass (S3.10b, 2026-10-13): the last 6 uncove" */
 void memset_fn(void); /* TODO signature: spec shell.md "Part E: closing pass (S3.10b, 2026-10-13" (type column: "void *memset(void *d, int c, unsigned n)") */
 /* START 0000:5743  spec shell.md "2. WLD / site helpers (0000:512E..5466 and 54BB..5743)" */
-void mission_bearing(void); /* TODO signature: spec shell.md "2. WLD / site helpers (0000:512E..5466 a" (type column: "unsigned mission_bearing(int dx,int dy)") */
+unsigned mission_bearing(int dx, int dy);
 /* START 0000:59d8  spec shell.md "3. Small helpers" */
-void mission_clamp_hi(void); /* TODO signature: spec shell.md "3. Small helpers" (type column: "int mission_clamp_hi(int v,int lo,int hi") */
+int mission_clamp_hi(int v, int lo, int hi);
 /* START 0000:4239  spec shell.md "S3.5 reader c: START 0000:4239 (mission generator) and 0000:" */
-void mission_generate(void); /* TODO signature: spec shell.md "S3.5 reader c: START 0000:4239 (mission " (type column: "void mission_generate(void)") */
+void mission_generate(void);
 /* START 0000:40f0  spec shell.md "6 Mission preparation (40F0) and memory wrappers" */
 void mission_site_setup(void);
 /* START 0000:5356  spec shell.md "2. WLD / site helpers (0000:512E..5466 and 54BB..5743)" */
-void mission_unit_init(void); /* TODO signature: spec shell.md "2. WLD / site helpers (0000:512E..5466 a" (type column: "void mission_unit_init(int unit,int site") */
+void mission_unit_init(int unit, int site);
 /* START 0000:a768  spec shell.md "Part E: closing pass (S3.10b, 2026-10-13): the last 6 uncove": same name as module_frontend.h, declared there */
 /* START 0000:30a0  spec shell.md "3070 / 3088 / 30A0 pal_fade_in(speed), pal_fade_out(speed), " */
-void pal_fade(void); /* TODO signature: spec shell.md "3070 / 3088 / 30A0 pal_fade_in(speed), p" (type column: "void(uint8_t *pal, int from, int to, int") */
+void pal_fade(void *pal, int from, int to, int speed);
 /* START 0000:31ad  spec shell.md "DGROUP globals seen" */
-void pal_fade_calibrate(void); /* TODO signature: spec shell.md "DGROUP globals seen" (type column: "void(uint8_t *buf)") */
+void pal_fade_calibrate(void *buf);
 /* START 0000:3070  spec shell.md "3070 / 3088 / 30A0 pal_fade_in(speed), pal_fade_out(speed), " */
 void pal_fade_in(int speed);
 /* START 0000:3088  spec shell.md "3070 / 3088 / 30A0 pal_fade_in(speed), pal_fade_out(speed), " */
@@ -127,46 +127,46 @@ void quiz_hover_hook(void);
 /* START 0000:02ba  spec shell.md "1 Entry (0010) and ready room (008D, 020F, 02BA)" */
 int roster_difficulty_rating(void);
 /* START 0000:64e5  spec shell.md "1.4 64E5 roster_draw_info -> void roster_draw_info(int slot)" */
-void roster_draw_info(void); /* TODO signature: spec shell.md "1.4 64E5 roster_draw_info -> void roster" (type column: "void roster_draw_info(int slot)") */
+void roster_draw_info(int slot);
 /* START 0000:6861  spec shell.md "1.6 6861 roster_draw_row -> void roster_draw_row(int slot, i" */
-void roster_draw_row(void); /* TODO signature: spec shell.md "1.6 6861 roster_draw_row -> void roster_" (type column: "void roster_draw_row(int slot,int y)") */
+void roster_draw_row(int slot, int y);
 /* START 0000:6ab3  spec shell.md "3989 ui_cursor_erase() (V): the erase blit of step 7 alone. " */
-void roster_edit_name(void); /* TODO signature: spec shell.md "3989 ui_cursor_erase() (V): the erase bl" (type column: "int roster_edit_name(int slot)") */
+int roster_edit_name(int slot);
 /* START 0000:008d  spec shell.md "1 Entry (0010) and ready room (008D, 020F, 02BA)" */
 void roster_home_card_draw(void);
 /* START 0000:63fb  spec shell.md "1.3 63FB roster_hover_cb -> void roster_hover_cb(void) (V)" */
-void roster_hover_cb(void); /* TODO signature: spec shell.md "1.3 63FB roster_hover_cb -> void roster_" (type column: "void roster_hover_cb(void)") */
+void roster_hover_cb(void);
 /* START 0000:7218  spec shell.md "1.8 7218 roster_load / 7272 roster_save (V)" */
-void roster_load(void); /* TODO signature: spec shell.md "1.8 7218 roster_load / 7272 roster_save " (type column: "void roster_load(void)") */
+void roster_load(void);
 /* START 0000:71ad  spec shell.md "2.2 71AD roster_options_hover_cb (V)" */
-void roster_options_hover_cb(void); /* TODO signature: spec shell.md "2.2 71AD roster_options_hover_cb (V)" (type column: "void roster_options_hover_cb(void)") */
+void roster_options_hover_cb(void);
 /* START 0000:6db8  spec shell.md "3989 ui_cursor_erase() (V): the erase blit of step 7 alone. " */
-void roster_options_screen(void); /* TODO signature: spec shell.md "3989 ui_cursor_erase() (V): the erase bl" (type column: "void roster_options_screen(void)") */
+void roster_options_screen(void);
 /* START 0000:7272  spec shell.md "1.8 7218 roster_load / 7272 roster_save (V)" */
-void roster_save(void); /* TODO signature: spec shell.md "1.8 7218 roster_load / 7272 roster_save " (type column: "void roster_save(int show_err)") */
+void roster_save(int show_err);
 /* START 0000:615c  spec shell.md "5. Roster screen callback: 0000:615C void ui_roster_draw(voi" */
-void roster_screen_draw(void); /* TODO signature: spec shell.md "5. Roster screen callback: 0000:615C voi" (type column: "void roster_screen_draw(void)") */
+void roster_screen_draw(void);
 /* START 0000:623e  spec shell.md "3989 ui_cursor_erase() (V): the erase blit of step 7 alone. " */
-void roster_screen_run(void); /* TODO signature: spec shell.md "3989 ui_cursor_erase() (V): the erase bl" (type column: "int roster_screen_run(void)") */
+int roster_screen_run(void);
 /* START 0000:6d07  spec shell.md "1.7 6D07 roster_startup_sync -> void roster_startup_sync(voi" */
-void roster_startup_sync(void); /* TODO signature: spec shell.md "1.7 6D07 roster_startup_sync -> void ros" (type column: "void roster_startup_sync(void)") */
+void roster_startup_sync(void);
 /* START 0000:98ca  spec shell.md "(no heading)": same name as module_frontend.h, declared there */
 /* START 0000:a3cb  spec shell.md "Part E: closing pass (S3.10b, 2026-10-13): the last 6 uncove" */
 void rtl_write_flush(void);
 /* START 0000:7387  spec shell.md "3.2 7387 shell_comm_setup (V)" */
-void shell_comm_setup(void); /* TODO signature: spec shell.md "3.2 7387 shell_comm_setup (V)" (type column: "void shell_comm_setup(void)") */
+void shell_comm_setup(void);
 /* START 0000:76d1  spec shell.md "3E5E ui_check_break() (V): if ([73F2]) fatal_exit(0) (76D1; " */
-void shell_exit(void); /* TODO signature: spec shell.md "3E5E ui_check_break() (V): if ([73F2]) f" (type column: "void shell_exit(int code)") */
+void shell_exit(int code);
 /* START 0000:73ce  spec shell.md "3.3 73CE shell_gfx_init (V)" */
-void shell_gfx_init(void); /* TODO signature: spec shell.md "3.3 73CE shell_gfx_init (V)" (type column: "void shell_gfx_init(void)") */
+void shell_gfx_init(void);
 /* START 0000:7312  spec shell.md "3.1 7312 shell_init -> void shell_init(void) (V) - first cal" */
-void shell_init(void); /* TODO signature: spec shell.md "3.1 7312 shell_init -> void shell_init(v" (type column: "void shell_init(void)") */
+void shell_init(void);
 /* START 0000:74b1  spec shell.md "3E20 ui_cursor_init(unsigned seg) (V): E088 = seg; E092 = by" */
-void shell_sprites_init(void); /* TODO signature: spec shell.md "3E20 ui_cursor_init(unsigned seg) (V): E" (type column: "void shell_sprites_init(void)") */
+void shell_sprites_init(void);
 /* START 0000:2a7e  spec shell.md "4 Button-highlight animation (28CE, 2901, 2A7E)" */
 int ui_anim_active(void);
 /* START 0000:28ce  spec shell.md "4 Button-highlight animation (28CE, 2901, 2A7E)" */
-void ui_anim_start(void); /* TODO signature: spec shell.md "4 Button-highlight animation (28CE, 2901" (type column: "int(int src_page, RectTbl *tbl, uint8_t ") */
+void ui_anim_start(int src_page, int tbl, int seq, int nsteps);
 /* START 0000:2901  spec shell.md "4 Button-highlight animation (28CE, 2901, 2A7E)" */
 int ui_anim_step(void);
 /* START 0000:3e5e  spec shell.md "3E5E ui_check_break() (V): if ([73F2]) fatal_exit(0) (76D1; " */
@@ -182,15 +182,15 @@ void ui_cursor_init(unsigned sprite_seg);
 /* START 0000:3e84  spec shell.md "3E84 ui_cursor_set_pos(x,y) (V): E08A=x; E08C=y; if (comm->f" */
 void ui_cursor_set_pos(int x, int y);
 /* START 0000:332e  spec shell.md "332E ui_dialog_draw(Dialog *d, int x, int y) (V)" */
-void ui_dialog_draw(void); /* TODO signature: spec shell.md "332E ui_dialog_draw(Dialog *d, int x, in" (type column: "void(Dialog *d, int x, int y)") */
+void ui_dialog_draw(void *d, int x, int y);
 /* START 0000:3da2  spec shell.md "3DA2 ui_dialog_hover() (V) -- the cb of every dialog" */
 void ui_dialog_hover(void);
 /* START 0000:3cea  spec shell.md "3CEA int ui_dialog_run(Dialog *d, int x, int y) (V)" */
-void ui_dialog_run(void); /* TODO signature: spec shell.md "3CEA int ui_dialog_run(Dialog *d, int x," (type column: "int(Dialog *d, int x, int y)") */
+int ui_dialog_run(void *d, int x, int y);
 /* START 0000:2df2  spec shell.md "2DF2 int ui_draw_button(char *s, int cx, int y, int colour) " */
 int ui_draw_button(char *s, int cx, int y, int colour);
 /* START 0000:2cb4  spec shell.md "2CB4 ui_draw_frame(TextCtx *c, int x, int y, int w, int h) (" */
-void ui_draw_frame(void); /* TODO signature: spec shell.md "2CB4 ui_draw_frame(TextCtx *c, int x, in" (type column: "void(TextCtx *c, int x, int y, int w, in") */
+void ui_draw_frame(void *c, int x, int y, int w, int h);
 /* START 0000:8c15  spec shell.md "2E50 map_draw_range_ring(int wx, int wy, int radius, int col" */
 int ui_fixmul_q14(int a, int b);
 /* START 0000:0448  spec shell.md "2 Hangar / launch (0311, 038C, 0448)" */
@@ -200,7 +200,7 @@ void ui_hangar_hook(void);
 /* START 0000:038c  spec shell.md "2 Hangar / launch (0311, 038C, 0448)" */
 int ui_hangar_launch(void);
 /* START 0000:393d  spec shell.md "393D int ui_hit_test(Rect *r, int n) (V)" */
-void ui_hit_test(void); /* TODO signature: spec shell.md "393D int ui_hit_test(Rect *r, int n) (V)" (type column: "int(Rect *rects, int n)") */
+int ui_hit_test(void *rects, int n);
 /* START 0000:3e6d  spec shell.md "3E6D ui_kbd_flush() (V): while (kbd_empty() == 0) kbd_get();" */
 void ui_kbd_flush(void);
 /* START 0000:2864  spec shell.md "2864 unsigned ui_load_file_far(char *name, unsigned off, uns": same name as module_frontend.h, declared there */
@@ -208,9 +208,9 @@ void ui_kbd_flush(void);
 /* START 0000:35fc  spec shell.md "35FC ui_load_screen_pic(int name_idx, int page_slot) (V)" */
 void ui_load_screen_pic(int name_idx, int page_slot);
 /* START 0000:0010  spec shell.md "S3.5 reader a: START.EXE 0000:0010 .. 0000:1F3F (lines 1-338" */
-void ui_main(void); /* TODO signature: spec shell.md "S3.5 reader a: START.EXE 0000:0010 .. 00" (type column: "void ui_main(void)") */
+void ui_main(void);
 /* START 0000:38ac  spec shell.md "38AC int ui_menu_loop(MenuDesc *m) (V)" */
-void ui_menu_loop(void); /* TODO signature: spec shell.md "38AC int ui_menu_loop(MenuDesc *m) (V)" (type column: "int(MenuDesc *m)") */
+int ui_menu_loop(void *m);
 /* START 0000:057b  spec shell.md "0000:057B, 057C ui_nop_a, ui_nop_b (V) ret stubs, called onl" */
 void ui_nop_a(void);
 /* START 0000:057c  spec shell.md "0000:057B, 057C ui_nop_a, ui_nop_b (V) ret stubs, called onl" */
@@ -220,52 +220,52 @@ void ui_order_asc(unsigned *p);
 /* START 0000:39b3  spec shell.md "39B3 / 39D5 (V): ui_order_desc(unsigned *p): if p[2] > p[0] " */
 void ui_order_desc(unsigned *p);
 /* START 0000:5a8a  spec shell.md "39B3 / 39D5 (V): ui_order_desc(unsigned *p): if p[2] > p[0] " */
-void ui_orders_draw(void); /* TODO signature: spec shell.md "39B3 / 39D5 (V): ui_order_desc(unsigned " (type column: "void ui_orders_draw(void)") */
+void ui_orders_draw(void);
 /* START 0000:5e6f  spec shell.md "4. Orders screen ("ordrscrn"): 0000:5A8A, 5BF0, 5E6F, 5FFA, " */
-void ui_orders_hover(void); /* TODO signature: spec shell.md "4. Orders screen ("ordrscrn"): 0000:5A8A" (type column: "void ui_orders_hover(void)") */
+void ui_orders_hover(void);
 /* START 0000:5bf0  spec shell.md "3989 ui_cursor_erase() (V): the erase blit of step 7 alone. " */
-void ui_orders_screen(void); /* TODO signature: spec shell.md "3989 ui_cursor_erase() (V): the erase bl" (type column: "int ui_orders_screen(void)") */
+int ui_orders_screen(void);
 /* START 0000:39f7  spec shell.md "39F7 int ui_poll_input(MenuDesc *m) (V) -- the input + curso" */
-void ui_poll_input(void); /* TODO signature: spec shell.md "39F7 int ui_poll_input(MenuDesc *m) (V) " (type column: "int(MenuDesc *m)") */
+int ui_poll_input(void *m);
 /* START 0000:3588  spec shell.md "0 Conventions and helpers used by this section (V unless mar" */
 void ui_popup_restore(void);
 /* START 0000:2ab4  spec shell.md "2B1B ui_popup_text(char *s, int x, int y, int font, int cent" */
-void ui_popup_restore_box(void); /* TODO signature: spec shell.md "2B1B ui_popup_text(char *s, int x, int y" (type column: "void(Box *b, int x, int y)") */
+void ui_popup_restore_box(void *b, int x, int y);
 /* START 0000:2b1b  spec shell.md "2B1B ui_popup_text(char *s, int x, int y, int font, int cent" */
 void ui_popup_text(char *s, int x, int y, int font, int centre, int wrap_w);
 /* START 0000:7611  spec shell.md "3.6 7611 ui_quit_prompt -> void ui_quit_prompt(void) (V) - A" */
-void ui_quit_prompt(void); /* TODO signature: spec shell.md "3.6 7611 ui_quit_prompt -> void ui_quit_" (type column: "void ui_quit_prompt(void)") */
+void ui_quit_prompt(void);
 /* START 0000:76c0  spec shell.md "3.7 76C0 ui_rand_mod -> unsigned ui_rand_mod(unsigned n) (V)" */
-void ui_rand_mod(void); /* TODO signature: spec shell.md "3.7 76C0 ui_rand_mod -> unsigned ui_rand" (type column: "unsigned ui_rand_mod(unsigned n)") */
+unsigned ui_rand_mod(unsigned n);
 /* START 0000:020f  spec shell.md "1 Entry (0010) and ready room (008D, 020F, 02BA)" */
 void ui_ready_room(void);
 /* START 0000:3641  spec shell.md "3641 void ui_show_screen(int name_idx, void (*overlay)(void)" */
-void ui_show_screen(void); /* TODO signature: spec shell.md "3641 void ui_show_screen(int name_idx, v" (type column: "void(int name_idx, void (*overlay)(void)") */
+void ui_show_screen(int name_idx, void *overlay);
 /* START 0000:8c7c  spec shell.md "2E50 map_draw_range_ring(int wx, int wy, int radius, int col" */
 int ui_sin16(unsigned ang);
 /* START 0000:8c88  spec shell.md "(no heading)" */
-void ui_sin_interp(void); /* TODO signature: spec shell.md "(no heading)" (type column: "int(BX ang)") */
+int ui_sin_interp(unsigned ang);
 /* START 0000:3301  spec shell.md "2E50 map_draw_range_ring(int wx, int wy, int radius, int col" */
 int ui_sin_mul(unsigned ang, int r);
 /* START 0000:3693  spec shell.md "3693 ui_sprite_draw(SpriteCtx *c, int x, int y, unsigned seg" */
-void ui_sprite_draw(void); /* TODO signature: spec shell.md "3693 ui_sprite_draw(SpriteCtx *c, int x," (type column: "void(SpriteCtx *c, int x, int y, unsigne") */
+void ui_sprite_draw(void *c, int x, int y, unsigned seg);
 /* START 0000:6a7c  spec shell.md "1.5 6A7C ui_str_last_word and 6AB3 roster_edit_name" */
-void ui_str_last_word(void); /* TODO signature: spec shell.md "1.5 6A7C ui_str_last_word and 6AB3 roste" (type column: "char *ui_str_last_word(char *s)") */
+char *ui_str_last_word(char *s);
 /* START 0000:3567  spec shell.md "3567 ui_text(TextCtx *c, char *s, int x, int y) (V)": same name as module_frontend.h, declared there */
 /* START 0000:2a84  spec shell.md "2A84 ui_text_centered(TextCtx *c, char *s, int cx, int y) (V" */
-void ui_text_centered(void); /* TODO signature: spec shell.md "2A84 ui_text_centered(TextCtx *c, char *" (type column: "void(TextCtx *c, char *s, int cx, int y)") */
+void ui_text_centered(void *c, char *s, int cx, int y);
 /* START 0000:36c4  spec shell.md "36C4 ui_text_shadow(TextCtx *c, char *s, int x, int y) (V)" */
-void ui_text_shadow(void); /* TODO signature: spec shell.md "36C4 ui_text_shadow(TextCtx *c, char *s," (type column: "void(TextCtx *c, char *s, int x, int y)") */
+void ui_text_shadow(void *c, char *s, int x, int y);
 /* START 0000:373c  spec shell.md "373C int ui_text_width(TextCtx *c, char *s) (V)" */
-void ui_text_width(void); /* TODO signature: spec shell.md "373C int ui_text_width(TextCtx *c, char " (type column: "int(TextCtx *c, char *s)") */
+int ui_text_width(void *c, char *s);
 /* START 0000:3776  spec shell.md "3776 int ui_text_wrap(TextCtx *c, char *s, int x, int y, int" */
-void ui_text_wrap(void); /* TODO signature: spec shell.md "3776 int ui_text_wrap(TextCtx *c, char *" (type column: "int(TextCtx *c, char *s, int x, int y, i") */
+int ui_text_wrap(void *c, char *s, int x, int y, int width, int line_h, int centre);
 /* START 0000:60dc  spec shell.md "4. Orders screen ("ordrscrn"): 0000:5A8A, 5BF0, 5E6F, 5FFA, " */
-void ui_theatre_name_draw(void); /* TODO signature: spec shell.md "4. Orders screen ("ordrscrn"): 0000:5A8A" (type column: "void ui_theatre_name_draw(void)") */
+void ui_theatre_name_draw(void);
 /* START 0000:5ffa  spec shell.md "4. Orders screen ("ordrscrn"): 0000:5A8A, 5BF0, 5E6F, 5FFA, " */
-void ui_tooltip_clear(void); /* TODO signature: spec shell.md "4. Orders screen ("ordrscrn"): 0000:5A8A" (type column: "void ui_tooltip_clear(void)") */
+void ui_tooltip_clear(void);
 /* START 0000:6045  spec shell.md "4. Orders screen ("ordrscrn"): 0000:5A8A, 5BF0, 5E6F, 5FFA, " */
-void ui_tooltip_show(void); /* TODO signature: spec shell.md "4. Orders screen ("ordrscrn"): 0000:5A8A" (type column: "void ui_tooltip_show(const char *text)") */
+void ui_tooltip_show(const char *text);
 /* START 0000:3ea5  spec shell.md "3EA5 int ui_wait_click(void) (V)" */
 int ui_wait_click(void);
 /* START 0000:3f33  spec shell.md "3F33 int ui_wait_input(int ticks) (V)" */
@@ -275,21 +275,21 @@ int ui_wait_skip(int ticks);
 /* START 0000:2b06  spec shell.md "2B06 ui_wait_ticks(int n) (V): while (n--) pal_apply_queue()" */
 void ui_wait_ticks(int n);
 /* START 0000:5625  spec shell.md "0 Conventions and helpers used by this section (V unless mar" */
-void wld_export_to_comm(void); /* TODO signature: spec shell.md "0 Conventions and helpers used by this s" (type column: "void wld_export_to_comm(void)") */
+void wld_export_to_comm(char *name);
 /* START 0000:5466  spec shell.md "2. WLD / site helpers (0000:512E..5466 and 54BB..5743)" */
-void wld_load_theatre(void); /* TODO signature: spec shell.md "2. WLD / site helpers (0000:512E..5466 a" (type column: "void wld_load_theatre(const char *prefix") */
+void wld_load_theatre(const char *prefix);
 /* START 0000:585c  spec shell.md "2. WLD / site helpers (0000:512E..5466 and 54BB..5743)" */
-void wld_pack_get(void); /* TODO signature: spec shell.md "2. WLD / site helpers (0000:512E..5466 a" (type column: "void wld_pack_get(void *dst,int size,int") */
+void wld_pack_get(void *dst, int size, int count);
 /* START 0000:588d  spec shell.md "0 Conventions and helpers used by this section (V unless mar" */
-void wld_pack_put(void); /* TODO signature: spec shell.md "0 Conventions and helpers used by this s" (type column: "void wld_pack_put(void *src,int size,int") */
+void wld_pack_put(void *src, int size, int count);
 /* START 0000:54bb  spec shell.md "2. WLD / site helpers (0000:512E..5466 and 54BB..5743)" */
-void wld_read_file(void); /* TODO signature: spec shell.md "2. WLD / site helpers (0000:512E..5466 a" (type column: "void wld_read_file(const char *path)") */
+void wld_read_file(const char *path);
 /* START 0000:512e  spec shell.md "S3.5 reader c: START 0000:4239 (mission generator) and 0000:" */
-void wld_site_at_pos(void); /* TODO signature: spec shell.md "S3.5 reader c: START 0000:4239 (mission " (type column: "int wld_site_at_pos(int x,int y,int slot") */
+int wld_site_at_pos(int x, int y, int slot);
 /* START 0000:532a  spec shell.md "2. WLD / site helpers (0000:512E..5466 and 54BB..5743)" */
-void wld_site_dist(void); /* TODO signature: spec shell.md "2. WLD / site helpers (0000:512E..5466 a" (type column: "int wld_site_dist(int a,int b)") */
+int wld_site_dist(int a, int b);
 /* START 0000:51e8  spec shell.md "2. WLD / site helpers (0000:512E..5466 and 54BB..5743)" */
-void wld_site_of_type(void); /* TODO signature: spec shell.md "2. WLD / site helpers (0000:512E..5466 a" (type column: "int wld_site_of_type(int slot,int type)") */
+int wld_site_of_type(int slot, int type);
 
 /* ---- dead: not ported (listed for the record) */
 /* DEAD START 0000:057e quiz_draw */

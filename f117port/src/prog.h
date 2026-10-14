@@ -33,8 +33,8 @@ typedef struct {
 
 extern const ProgDef prog_table[PROG_COUNT];
 
-/* The program entry points. SETUP, MPS_LOGO, PLAYER and DSWAP are the real ports (src/frontend, S5.3); START, VGAME and END are still
- * the placeholders of programs/placeholder.c (replaced by S5.4, S5.5 + S5.7, S5.8). */
+/* The program entry points. SETUP, MPS_LOGO, PLAYER and DSWAP are the real ports (src/frontend, S5.3), START is src/shell (S5.4); VGAME and END
+ * are still the placeholders of programs/placeholder.c (replaced by S5.5 + S5.7, S5.8). */
 int setup_main(const char *tail);
 int mps_logo_main(const char *tail);
 int player_main(const char *tail);
