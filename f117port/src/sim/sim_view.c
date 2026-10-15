@@ -32,21 +32,37 @@ void sim_matrix_from_angles(u16 m_off, int a, int b, int c)
     for (int i = 0; i < 9; i++) DSW((u16)(m_off + 2 * i)) = (u16)m[i];
 }
 
-/* 0000:03CE r3d_scene_draw: the 3D scene into the window (x0, y0, w, h) of the back page. STUB: the 3D renderer is S5.6's; this paints a flat sky/ground backdrop, waits for the
- * frame-sync flag like DAE8 does, then runs the frame delay and the object overlay (a17e) the way the original ends. In the differential tests (sim_test.active) it does nothing,
- * as the emulator hooks 03CE. */
+/* 0000:03CE r3d_scene_draw: the 3D scene into the window (x0, y0, w, h) of the back page. STUB for the scene proper (set-up, terrain, sorted queue, objects: S5.6b); done here as in
+ * the original DAE8: the viewport centre and clip maxima (DB71), the camera sine / cosine cache (DC64 -> E26B), the camera height (DCA9), the wait for the frame tick, and the sky /
+ * ground backdrop of render3d (1442, ported by S5.6a). A window that does not start at (0,0) (the driver's pixel offset of DB71 is not set up here) gets the flat backdrop of S5.5.
+ * Then the frame delay and the object overlay (a17e) the way the original ends. In the differential tests (sim_test.active) it does nothing, as the emulator hooks 03CE. */
 /* TESTSTUB 0000:03ce r3d_scene_draw */
 void r3d_scene_draw(int yaw, int pitch, int roll, s32 x, s32 y, s32 z, int x0, int y0, int w, int h)
 {
-    (void)yaw; (void)pitch; (void)roll; (void)x; (void)y; (void)z;
+    (void)x; (void)y;
     if (sim_test.active) return;                                          /* TESTSTUB 0000:03ce */
-    s16 vp[8] = { (s16)flip_flag(), 0, 0, 0, 0, 0, 0, 0 };
-    int horizon = y0 + (h * 3) / 5;                                       /* TODO(S5.6): from the camera pitch */
-    vp[2] = 0x88;                                                         /* the sky */
-    fill_rows_far(vp, x0, y0, x0 + w - 1, horizon > y0 + h - 1 ? y0 + h - 1 : horizon);
-    vp[2] = 0x70;                                                         /* the ground */
-    if (horizon + 1 <= y0 + h - 1) fill_rows_far(vp, x0, horizon + 1, x0 + w - 1, y0 + h - 1);
-    while (DSB(0x262A)) host_pump();                                      /* DAE8: wait for the tick that clears the sync flag */
+    s16 vp[8] = { (s16)flip_flag(), 0, 0x88, 0, 0, 0, 0, 0 };
+    if (x0 == 0 && y0 == 0) {
+        DSW(0x0D1E) = (u16)(((w + 1) >> 1) - 1);                          /* DB71 */
+        DSW(0x0D20) = (u16)(((h + 1) >> 1) - 1);
+        DSW(0x0D20) = DSW(0x365E) ? (DSB(0x294B) == 0 ? 0x34 : 0x3C) : 0x64;
+        DSW(0x2293) = (u16)(w - 1);
+        DSW(0x2295) = (u16)(h - 1);
+        sim_matrix_from_angles(0x498E, -(s16)yaw, -(s16)pitch, -(s16)roll);   /* DC64 */
+        DSW(0x497C) = 0; DSW(0x497E) = 0; DSW(0x4980) = (u16)z;           /* DCA9 */
+        while (DSB(0x262A)) host_pump();                                  /* DAE8: wait for the tick that clears the sync flag */
+        unsigned old = seg_get();
+        page_select_r(flip_flag());
+        r3d_draw_sky_ground(vp);
+        seg_set(old);
+    } else {
+        int horizon = y0 + (h * 3) / 5;                                   /* TODO(S5.6b): the other windows (TV camera) */
+        vp[2] = 0x88;                                                     /* the sky */
+        fill_rows_far(vp, x0, y0, x0 + w - 1, horizon > y0 + h - 1 ? y0 + h - 1 : horizon);
+        vp[2] = 0x70;                                                     /* the ground */
+        if (horizon + 1 <= y0 + h - 1) fill_rows_far(vp, x0, horizon + 1, x0 + w - 1, y0 + h - 1);
+        while (DSB(0x262A)) host_pump();
+    }
     frame_delay((s16)DSW(0x43B8));
     obj_overlay_frame();
 }

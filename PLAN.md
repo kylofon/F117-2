@@ -25,7 +25,7 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 ## Status
 
 - **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.3 (sound spec), S3.4 (front-end spec), S3.5 (shell spec), S3.6 (sim flow spec), S3.7 (render3d spec), S3.8 (flight/weapons/AI/detection/damage spec), S3.9 (debrief spec), S3.10 (hand-offs, coverage gate, symbols merge; closing pass: coverage 100 %, all conflicts settled), S4.1 (`f117port/` skeleton: CMake, SDL3 host, mem, VGA, OPL, chain loop with placeholder programs), S4.2 (generated symbol and module headers in `f117port/src/gen/`, symbol pipeline in `PORTING.md`), S5.1 (platform layer in `f117port/src/platform`: loader, RTL, DOS files, keyboard/joystick/mouse, timer hook), S5.2 (video: MGRAPHIC driver, program-side line/palette routines, PIC/PAN/PAL readers in `f117port/src/video`), S5.3 (front end in `f117port/src/frontend`: SETUP, MPS_LOGO with its .SS sprites, PLAYER with the PAN ring buffer and fade, DSWAP, the MISC slots, the text-mode screen; the first visible milestone), S5.4 (shell in `f117port/src/shell`: START with the roster, ready room, pilot orders, briefing map and folder, arming, hangar, the mission generator and the world hand-off to VGAME), S5.5 (sim flow in `f117port/src/sim`: VGAME start-up, frame loop, view modes, HUD, ADI, MFDs, key interpreter, step, overlay pass; a flat 3D backdrop).
-- **Next:** S5.6. Your tasks: **User to-do** above.
+- **Next:** S5.6b. Your tasks: **User to-do** above.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -174,7 +174,8 @@ S5.9 sound. Model: S for 5.1–5.5, 5.8, 5.9; O for 5.6, 5.7. Each ends with a U
 | S5.3 | Front end / title screens (SETUP, MPS_LOGO, PLAYER) - **U4 first visible milestone** | S | L | done 2026-10-14 · U-front pending |
 | S5.4 | Shell (START: menus, roster, mission planning; END moved to S5.8, DSWAP was done in S5.3) | S | L | done 2026-10-14 · U-shell pending |
 | S5.5 | Sim flow with a static 3D view (VGAME frame loop, HUD, MFDs) | S | L | done 2026-10-14 · U-sim pending |
-| S5.6 | Render3d (object renderer, polygon clipper, golden-frame tests below) | O | L |
+| S5.6a | Render3d leaf routines (clipper, raster, edge tables, sky, 1433 math) from the Python references | S | M | done 2026-10-15 |
+| S5.6b | Render3d top half (scene set-up, terrain, sorted queue, object renderer, world pass) + golden frames | O | L |
 | S5.7 | Flight, weapons, AI, detection, damage | O | L |
 | S5.8 | Debrief | S | M |
 | S5.9 | Sound (AdLib driver, sound poll in the tick) | S | M |
@@ -276,6 +277,10 @@ Notes:
   in `bf71` the magnified camera stores `[B80A] = 0` (no sign extension); mode 0x8A of `2F82` falls to the default (a stale camera). Port note: `poly_fill` takes the dirty rows as signed words (0FFFFh = empty). **Open:** U-sim (the cockpit by eye next to DOSBox-X); the y < 0 / y >= 200 HUD line draws read a garbage row table in the original (the port
   uses y * 320); a17e's bomb cue reads two stale stack locals when its pipper block is skipped (the port starts them at 0); `Game/ROSTER.FIL` has the modification time of the S5.4 incident
   (20:18, before the S5.4 commit); nothing in `Game/` was written by S5.5.
+- S5.6a status (2026-10-15): `f117port/src/render3d` has the leaf routines; `ctest` adds `render3d_leaf` (`port/notes/s56/r3d_leaf_ref.py` writes ~90000 random cases from the Python references of S3.7, `f117 --r3d-test` runs the C routines on them; 0 mismatches, mutation checks bite).
+  **Ported:** `r3d_clip.c` (12EF: outcode16/32, on_border, flags16/32, intercept, bisect_in/out with the half() quirk, clip_edge 16-bit and 32-bit paths, note_left/right/zclip, poly_add_edge, wall_left/right, line_emit, poly_finish), `r3d_raster.c` (1359 mode M: gfxlib_mode_init + rows_M, set_colour, edge_dda, wall_fill, line_M, fill_M with all fill types and the gap-row stop, the dispatch stubs), `edge2d.c` (segment 1001, moved from `sim/gfx2d.c`, plus `hz_draw` / `hz_fill_far`), `r3d_sky.c` (1442), `r3d_math.c` (1433: sin, cos, atan2, asin, hypot2, mat_vec16, mat_mul, mat_row_mul, mat_transpose, mat_copy, vec_mat32, mat_from_euler; its tables are read from segment 14B2 of the loaded image = DS - 1E23h + 14B2h). The 109D helpers and `r3d_project_point` / `sim_matrix_from_angles` stay in `src/sim` (S5.5). The DGROUP work buffers are one struct `R3dWork` (DS:8568..9145, offsets asserted) in `r3d.h`.
+  Not ported (dead or no callers): `clip_add_edge`, `draw_line`, `set_page`, the E/C/T modes, `mul_sin`, `mul_cos`, `hypot3`, `mat_to_euler`, `mulq`, `muldiv`, `div32sat`, `imul`, `mat_from_euler_b`. The INT 0 divide-overflow of the 16-bit intercept is impossible (spec) and maps to 0. The `r3d_trace` hook reports the MGRAPHIC calls of segment 1001 to the unit test instead of making them; `r3d_test_page` redirects the raster page. `r3d_scene_draw` (sim_view.c) now draws the real sky / ground backdrop (DB71 centre and clip maxima, E26B cache, DCA9 height, 1442) for windows at (0,0); other windows keep the flat S5.5 backdrop.
+  **For S5.6b:** the rest of render3d.md Parts 1-4 (scene set-up DAE8/DB71/DC64, terrain 04DA, placement/cull, sorted queue DDFE/DF08, object renderer 11EB, world pass 9ACA, billboards, map terrain 119C) and the golden-frame tests; the 12EF/1359 routines are called by 11EB (`r3d_clip_edge`, `r3d_poly_add_edge`, `r3d_poly_finish`, `r3d_line_emit`).
 - S5.6 render3d test plan (golden frames, 2026-10-13). The leaf routines are already bit-exact against the original
   (`port/notes/s37/R7*_emu.py`, 0 mismatches, re-run by the user); the six routines that call the object renderer
   (DF08, 04DA, DCC0, BD8F, 9ACA, 0CED) are only read. S5.6 closes that gap with whole-frame comparisons:

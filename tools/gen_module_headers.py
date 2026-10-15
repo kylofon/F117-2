@@ -32,7 +32,7 @@ from gen_symbols import (RESERVED, assign_names, cmt, emit, is_dead, load, parse
 
 MODULES = ['platform', 'video', 'sound', 'frontend', 'shell', 'simflow', 'render3d', 'flight', 'debrief']
 # Plain C types a prototype may use. Everything else (registers, near/far, pascal, varargs, struct names) is a TODO.
-CTYPE_WORDS = {'void', 'char', 'int', 'unsigned', 'long', 'short', 'signed', 'u8', 'u16', 'u32', 's8', 's16', 's32',
+CTYPE_WORDS = {'void', 'bool', 'char', 'int', 'unsigned', 'long', 'short', 'signed', 'u8', 'u16', 'u32', 's8', 's16', 's32',
                'u64', 's64', 'size_t', 'FILE', 'const'}
 
 

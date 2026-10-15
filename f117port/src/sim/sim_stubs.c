@@ -15,17 +15,6 @@ int sim_snd_poll(void) { sim_poll_calls++; return sim_poll_result; }            
 unsigned sim_noise_calls;                                                                           /* TEST */
 void sim_snd_noise(void) { sim_noise_calls++; }                                                                        /* TODO(S5.9): snd_noise() */
 
-/* 1359:0000 gfxlib_mode_init('M'): the renderer's row offset table DS:85EC (200 words, y * 320), the dispatch base [85C2] = 70h, the mode letter [85C4].
- * Only the MCGA case is used. Owner render3d (S5.6 takes it over). */
-void gfxlib_mode_init(int mode)
-{
-    int c = mode & 0xFF;
-    if (c >= 'a') c -= 0x20;
-    DSW(0x85C4) = (u16)c;
-    if (c != 'M') return;
-    for (int i = 0; i < 200; i++) DSW((u16)(0x85EC + 2 * i)) = (u16)(i * 320);
-    DSW(0x85C2) = 0x70;
-}
 
 /* ------------------------------------------------------------------------------------------------------------ stubs (see sim_stubs.h) */
 

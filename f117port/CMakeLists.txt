@@ -17,7 +17,7 @@ target_include_directories(nuked_opl3 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../thir
 
 # Coordinator files in src/, then one glob per module directory (PORTING.md "Source layout"): a module adds
 # <module>/<file>.c and it is built without touching this file. programs/ holds the phase 4 placeholders.
-set(F117_MODULES platform video frontend shell sim programs)
+set(F117_MODULES platform video frontend shell sim render3d programs)
 file(GLOB F117_SOURCES CONFIGURE_DEPENDS src/*.c)
 foreach(m ${F117_MODULES})
     file(GLOB m_sources CONFIGURE_DEPENDS src/${m}/*.c)
@@ -115,6 +115,15 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME sim_vgame COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s55/sim_ref.py
              $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game ${CMAKE_CURRENT_BINARY_DIR}/sim_ref)
     set_tests_properties(sim_vgame PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 1800 DEPENDS shell)
+endif()
+
+# The render3d leaf routines (src/render3d, S5.6a): the 12EF clipper, the 1359 raster back end, segment 1001's hz_draw, the 1442 sky/ground bands and the 1433 maths
+# against the Python references of port/notes/s37 (R7b_ref.py, R7c_ref.py; 0 mismatches against the original under Unicorn) on thousands of random cases per routine
+# (port/notes/s56/r3d_leaf_ref.py writes the vectors, `f117 --r3d-test` runs them). Needs work/unpacked/VGAME.EXE for the tables; skips (77) without it.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME render3d_leaf COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s56/r3d_leaf_ref.py
+             $<TARGET_FILE:f117> ${CMAKE_CURRENT_BINARY_DIR}/r3d_leaf)
+    set_tests_properties(render3d_leaf PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 900 PASS_REGULAR_EXPRESSION "r3d-test OK")
 endif()
 
 # The generated headers are current: the generators re-run in memory and fail on any difference (tools/gen_*.py).

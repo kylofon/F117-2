@@ -17,6 +17,7 @@
  *   --decoder-test DIR  every PIC / PAN / PAL / font in --game-dir against the Phase 2 Python decoders' output in DIR (77 = no game files)
 
  *   --sim-test DIR       VGAME (src/sim) against the references of port/notes/s55/sim_ref.py (77 = no game files)
+ *   --r3d-test FILE      the render3d leaf routines (src/render3d) against the vectors port/notes/s56/r3d_leaf_ref.py writes (77 = no game files)
  *   --shell-test DIR     START against the references of port/notes/s54/shell_ref.py (needs a scratch --game-dir with SCRATCH.MARK)
  *   --frontend-test DIR  the front end (SETUP, MPS_LOGO, PLAYER) against the references in DIR (port/notes/s53/frontend_ref.py writes them; 77 = no game files)
  *   --platform-test  headless checks of the platform layer (RTL, DOS files in --game-dir (a scratch folder!), keyboard,
@@ -34,6 +35,7 @@
 #include "frontend/fe.h"
 #include "shell/shell.h"
 #include "sim/simtest.h"
+int r3d_leaf_selftest(const char *file);                          /* render3d/r3dtest.c */
 #include "programs/placeholder.h"
 #include "prog.h"
 #include "video/video.h"
@@ -75,6 +77,7 @@ int main(int argc, char **argv)
     HostConfig cfg = { "Game", 3, false, true, false };
     bool check = false, chain = false, tick = false, ptest = false, etest = false, vtest = false, vself = false;
     const char *simref = NULL;
+    const char *r3dref = NULL;
     const char *decref = NULL, *feref = NULL, *shref = NULL;
     int tick_ms = 1000;
     for (int i = 1; i < argc; i++) {
@@ -100,13 +103,14 @@ int main(int argc, char **argv)
         else if (!strcmp(a, "--frontend-test") && v) { feref = v; i++; }
         else if (!strcmp(a, "--shell-test") && v) { shref = v; i++; }
         else if (!strcmp(a, "--sim-test") && v) { simref = v; i++; }
+        else if (!strcmp(a, "--r3d-test") && v) { r3dref = v; i++; }
         else if (!strcmp(a, "--tick-test")) {
             tick = true;
             if (v && v[0] != '-') { tick_ms = atoi(v); i++; }
         }
         else return usage(argv[0]);
     }
-    if (check || tick || ptest || etest || vself || decref || feref || shref || simref) cfg.headless = true;
+    if (check || tick || ptest || etest || vself || decref || feref || shref || simref || r3dref) cfg.headless = true;
     if (host_trace()) prog_trace = true;
     if (chain) { prog_trace = true; prog_use_stubs = true; }
 
@@ -144,6 +148,12 @@ int main(int argc, char **argv)
 
     if (shref) {
         int rc = shell_selftest(shref);
+        host_shutdown();
+        return rc;
+    }
+
+    if (r3dref) {
+        int rc = r3d_leaf_selftest(r3dref);
         host_shutdown();
         return rc;
     }

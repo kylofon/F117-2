@@ -1,12 +1,31 @@
-/* Segment 1001 of VGAME: the 2D clip and edge-table routines the HUD, the cockpit and the sky/ground bands draw through (spec render3d.md Part A; owner render3d,
- * ported here in S5.5 because the sim flow code calls them). TODO(S5.6): the rest of segment 1001 (hz_draw, ...) comes with render3d; keep this file's semantics.
+/* Segment 1001 of VGAME: the 2D clip and edge-table routines the HUD, the cockpit and the sky/ground bands draw through (spec render3d.md Part 6 section A; owner render3d,
+ * first ported in S5.5 as sim/gfx2d.c because the sim flow code calls them, moved here by S5.6a with hz_fill_far / hz_draw; the semantics are unchanged).
  *
  *   line_clip_draw  1001:0336  Cohen-Sutherland clip of DS:2299..229F to 0..[2293] x 0..[2295], then MGRAPHIC slot 31 `line`
  *   edge_to_tables  1001:06AC  the same clip core, then the segment into the left / right edge tables L = DS:22A1, R = DS:2459 (220 words each)
  *   fill_rows_far   1001:024C  a solid rectangle through slot 40;  poly_fill_far 1001:01EC  a convex polygon through slot 37
  * The INT 0 handlers of the original (divide overflow in the intercept computation) are the saturating rdiv(). */
+#include "render3d/r3d.h"
 #include "sim/sim.h"
-#include "sim/sim_priv.h"
+
+void (*r3d_trace)(int kind, const s16 *v, int n);
+
+/* the three MGRAPHIC calls of this segment; with r3d_trace set (unit test) they are reported instead of made */
+static void drv_color(int c)
+{
+    if (r3d_trace) { s16 v[1] = { (s16)c }; r3d_trace(32, v, 1); }
+    else color_set_r(c);
+}
+static void drv_line(s16 x1, s16 y1, s16 x2, s16 y2)
+{
+    if (r3d_trace) { s16 v[4] = { x1, y1, x2, y2 }; r3d_trace(31, v, 4); }
+    else line(x1, y1, x2, y2);
+}
+static void drv_poly_fill(s16 ymin, s16 ymax, int mode)
+{
+    if (r3d_trace) { s16 v[3] = { ymin, ymax, (s16)mode }; r3d_trace(37, v, 3); }
+    else poly_fill(ymin, DSP(0x22A1), ymax, mode);   /* L table */
+}
 
 #define XMAX ((s16)DSW(0x2293))
 #define YMAX ((s16)DSW(0x2295))
@@ -14,7 +33,7 @@
 #define RTAB 0x2459
 
 /* 1001:04C2 clip_outcode: 8 = x < 0, 1 = x > XMAX, 4 = y < 0, 2 = y > YMAX (signed compares) */
-static u8 outcode(s16 x, s16 y)
+u8 clip_outcode(s16 x, s16 y)
 {
     u8 al = 0x0F;
     if (x >= 0) al &= (u8)~8;
@@ -45,7 +64,6 @@ static s16 rdiv(s32 num, s16 D, s16 h)
 /* the clip core (spec A.8). `scratch` = 228A (0336) or 261A (06AC). Returns 0 = ACCEPT (DS:2299..229F hold the clipped segment), 1 = TRIVIAL_REJECT, 2 = LATE_REJECT;
  * for the edge variant `edge` is true: the parts beyond a side border call edge_column, and the reject cases report cx / bp / di / x through the out parameters. */
 typedef struct ClipOut { s16 cx, bp, di, x; u8 al, oc; } ClipOut;
-static void edge_column(u16 x, s16 ya, s16 yb);
 static void edge_column_x(s16 x, s16 ya, s16 yb);
 
 static int clip_core(u16 scratch, bool edge, ClipOut *o)
@@ -53,8 +71,8 @@ static int clip_core(u16 scratch, bool edge, ClipOut *o)
     u16 s_oc = scratch, s_dx = (u16)(scratch + 1), s_dy = (u16)(scratch + 3), s_hx = (u16)(scratch + 5), s_hy = (u16)(scratch + 7);
     s16 cx = (s16)DSW(0x2299), dx = (s16)DSW(0x229D), si = (s16)DSW(0x229B), di = (s16)DSW(0x229F);
     s16 bp, bx;
-    DSB(s_oc) = outcode(cx, dx);
-    u8 al = outcode(si, di);
+    DSB(s_oc) = clip_outcode(cx, dx);
+    u8 al = clip_outcode(si, di);
     if (al == 0) {
         if (DSB(s_oc) == 0) return 0;
         s16 t;
@@ -115,7 +133,7 @@ bool line_clip_draw(void)
 {
     ClipOut o;
     if (clip_core(0x228A, false, &o) != 0) return true;
-    line((s16)DSW(0x2299), (s16)DSW(0x229D), (s16)DSW(0x229B), (s16)DSW(0x229F));
+    drv_line((s16)DSW(0x2299), (s16)DSW(0x229D), (s16)DSW(0x229B), (s16)DSW(0x229F));
     return false;
 }
 
@@ -137,7 +155,7 @@ void tables_clear(void)
 }
 
 /* 1001:055B edge_column: x = 0 -> L, x = XMAX -> R (other x: nothing); rows between ya and yb are overwritten with x */
-static void edge_column(u16 x, s16 ya, s16 yb)
+void edge_column(u16 x, s16 ya, s16 yb)
 {
     u16 tbl;
     if (x == 0) tbl = LTAB;
@@ -253,6 +271,12 @@ void fill_rows_far(void *vp, int xl, int ymin, int xr, int ymax)
 void poly_fill_far(void *vp, int n, const s16 *pts, int colour)
 {
     (void)vp;
+    if (r3d_trace) {                                                        /* unit test: report the polygon only */
+        s16 v[9] = { (s16)(colour & 0xFF) };
+        for (int i = 0; i < 2 * n && i < 8; i++) v[1 + i] = pts[i];
+        r3d_trace(100, v, 1 + 2 * n);
+        return;
+    }
     color_set_r(colour & 0xFF);
     tables_clear();
     u16 cnt = (u16)(n - 1);
@@ -268,8 +292,75 @@ void poly_fill_far(void *vp, int n, const s16 *pts, int colour)
     DSW(0x229B) = (u16)pts[0];
     DSW(0x229F) = (u16)pts[1];
     edge_to_tables();
-    poly_fill((s16)DSW(0x2615), DSP(LTAB), (s16)DSW(0x2617), 0);
+    drv_poly_fill((s16)DSW(0x2615), (s16)DSW(0x2617), 0);
 }
 
 /* 1001:0504 poly_flush_far */
-void poly_flush_far(int mode) { poly_fill((s16)DSW(0x2615), DSP(LTAB), (s16)DSW(0x2617), mode); }
+void poly_flush_far(int mode) { drv_poly_fill((s16)DSW(0x2615), (s16)DSW(0x2617), mode); }
+
+/* 1001:0018 hz_draw: the two-colour sky/ground split of the low-detail view. The horizon is a line through (w2 + H sinC, h2 - 0.75 H cosC) with half-length vector
+ * (2 w2 cosC, -0.75 2 w2 sinC) (Q15 sin / cos, H = 256 tan(pitch) with the zoom and lens shifts), clipped to the window; pass 1 fills the side towards row 0 (row YMAX when
+ * cosC < 0) in the colour DS:0D46, pass 2 the other side in 78h. (spec A.2; reads sinB [4986] cosB [4988] sinC [498A] cosC [498C], zoom shift [433A], lens flag [294B],
+ * the screen centre [0D1E] / [0D20]) */
+static u16 hz_rnd(u32 v) { return (u16)((v >> 16) + ((v >> 15) & 1)); }          /* the high word rounded by bit 15 of the low word */
+
+void hz_draw(void)
+{
+    u16 nsC = (u16)-DSW(0x498A);
+    DSW(0x0D44) = nsC;
+    s16 sB = (s16)DSW(0x4986), cB = (s16)DSW(0x4988), cC = (s16)DSW(0x498C);
+    u16 H;
+    if (cB > 0x1F0B) H = (u16)(s16)(((s32)sB * 256) / cB);
+    else H = 0x3FF;
+    u8 z = DSB(0x433A);
+    if (z) H = (z & 0x1F) < 16 ? (u16)(H << (z & 0x1F)) : 0;
+    if (DSB(0x294B)) H = (u16)((s16)H >> 1);
+    u16 w2 = DSW(0x0D1E), h2 = DSW(0x0D20);
+    u32 P1 = (u32)((s32)(s16)H * (s16)nsC) << 1, P2 = (u32)((s32)(s16)(w2 << 1) * cC) << 1;
+    DSW(0x2299) = (u16)(hz_rnd(P2 - P1) + w2);
+    DSW(0x229B) = (u16)(w2 - hz_rnd(P1 + P2));
+    u32 Q1 = (u32)((s32)(s16)H * cC) << 1, Q2 = (u32)((s32)(s16)(w2 << 1) * (s16)nsC) << 1;
+    u16 r = hz_rnd(Q2 - Q1);
+    DSW(0x229F) = (u16)(r - (u16)((s16)r >> 2) + h2);
+    u16 s = hz_rnd(Q1 + Q2);
+    DSW(0x229D) = (u16)(h2 - (u16)(s - (u16)((s16)s >> 2)));
+    DSW(0x0D48) = 0;
+    drv_color(DSB(0x0D46));
+    tables_clear();
+    bool rejected = line_clip_draw();
+    u16 y1 = DSW(0x229D), y2 = DSW(0x229F);
+    if (rejected || (y1 == y2 && (y1 == 0 || y1 == DSW(0x2295)))) {        /* the line lies on the top / bottom border or off the window: the whole window */
+        if (!(DSW(0x4986) & 0x8000)) drv_color(0x78);
+        edge_column(0, 0, (s16)DSW(0x2295));
+        edge_column(DSW(0x2293), 0, (s16)DSW(0x2295));
+        drv_poly_fill((s16)DSW(0x2615), (s16)DSW(0x2617), 0);
+        return;
+    }
+    for (;;) {                                                              /* two passes over the clipped line */
+        u16 sv[4] = { DSW(0x2299), DSW(0x229D), DSW(0x229B), DSW(0x229F) };
+        edge_to_tables();
+        DSW(0x2299) = sv[0]; DSW(0x229D) = sv[1]; DSW(0x229B) = sv[2]; DSW(0x229F) = sv[3];
+        DSW(0x0D42) = ((DSW(0x0D48) ^ DSW(0x0D44)) & 0x8000) ? DSW(0x2293) : 0;     /* the corner column of this side */
+        u16 bx = 0, bp = DSW(0x2295);
+        if ((DSW(0x0D48) ^ DSW(0x498C)) & 0x8000) { u16 t = bx; bx = bp; bp = t; }
+        static const u16 pt[2][2] = { { 0x2299, 0x229D }, { 0x229B, 0x229F } };
+        for (int k = 0; k < 2; k++) {
+            u16 px = DSW(pt[k][0]), py = DSW(pt[k][1]);
+            if (py == bx) continue;
+            if (py == bp) px = DSW(0x0D42);
+            edge_column(px, (s16)py, (s16)bx);
+        }
+        drv_poly_fill((s16)DSW(0x2615), (s16)DSW(0x2617), 0);
+        DSW(0x0D48) ^= 0xFFFF;
+        if (DSW(0x0D48) == 0) return;
+        drv_color(0x78);
+        tables_clear();
+    }
+}
+
+/* 1001:0006 hz_fill_far(colour): DS:0D46 = the low byte, then hz_draw */
+void hz_fill_far(int colour)
+{
+    DSB(0x0D46) = (u8)colour;
+    hz_draw();
+}
