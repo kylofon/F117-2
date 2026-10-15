@@ -53,7 +53,7 @@ void sim_r3d_draw_queued(void) { r3d_draw_queued(); }
 void sim_fx_fire_puffs(int a0, int a1, int a2, int rx, int ry, int rz) { fx_fire_puffs((s16)a0, (s16)a1, (s16)a2, (s16)rx, (s16)ry, (s16)rz); }
 void sim_fx_smoke_draw(int camx, int camy, int camz) { fx_smoke_draw((s16)camx, (s16)camy, (s16)camz); }
 
-/* ---- damage, weapons, flight (TODO(S5.7)) and render3d (TODO(S5.6)) functions of the overlay pass */
+/* ---- damage, weapons, flight (TODO(S5.7)) and the render3d helpers (ported) of the overlay pass */
 /* STUB 0000:71b4 dmg_unit_kill */
 void sim_dmg_unit_kill(int u) { (void)u; }
 /* STUB 0000:74f6 dmg_player_blast */

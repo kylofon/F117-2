@@ -12,7 +12,7 @@ void sim_r3d_end_scene(void);                                                   
 void sim_r3d_draw_queued(void);                                                                              /* 0000:DF08 */
 void sim_fx_fire_puffs(int a0, int a1, int a2, int rx, int ry, int rz);                                      /* 0000:C73C */
 void sim_fx_smoke_draw(int camx, int camy, int camz);                                                        /* 0000:C834 */
-/* ---- weapons / damage / flight / render3d: what the overlay pass of the 3D scene calls (TODO(S5.6) / TODO(S5.7)) */
+/* ---- weapons / damage / flight / render3d: what the overlay pass of the 3D scene calls (TODO(S5.7)) */
 void sim_dmg_unit_kill(int u);                          /* 0000:71B4 */
 void sim_dmg_player_blast(void);                        /* 0000:74F6 */
 int  sim_dmg_wobj_destroyable(int o);                   /* 0000:780A */

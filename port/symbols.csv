@@ -1602,7 +1602,7 @@ vgame,func,0000:cba0,input_command_key,void(unsigned key),simflow,,"Per-frame ke
 vgame,func,0000:d6bf,snd_cue,"void(int cmd,int prio)",simflow,,snd_cmd gated by snd_level 43C2 and eject state,simflow
 vgame,func,0000:d6e5,snd_engine_refresh,void(void),simflow,,snd_cmd 24 or 25,simflow
 vgame,func,0000:d707,frame_params_update,void(void),simflow,,clamp rate 4-3D7A..15; 43B8 B16C B286 9F64,simflow
-vgame,func,0000:d76b,view_range_setup,void near(void),render3d,,"[Part 1] 48A6[k]=20h<<(k+detail) k<6, 48B2, 48B4 (no readers); [48B6]=(detail+1)*0D05h max depth",render3d
+vgame,func,0000:d76b,view_range_setup,void(void),render3d,,"[Part 1] 48A6[k]=20h<<(k+detail) k<6, 48B2, 48B4 (no readers); [48B6]=(detail+1)*0D05h max depth",render3d
 vgame,func,0000:d7bb,frame_rate_halve,void(void),simflow,,"3D7A 2->1, rate<<=1",simflow
 vgame,func,0000:d7d0,nav_copy_xy,"void(int dst,int src)",simflow,,copy site xy to 2E6C+4*dst,simflow
 vgame,func,0000:d7f4,pic_show,"void(char *name,int page)",loader,,open + 11B9:000E decode + close,simflow

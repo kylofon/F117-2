@@ -258,7 +258,7 @@ u32 terr_to_level(s16 level, u32 v);
 /* VGAME 1433:032e  spec render3d.md "C.11 1433:032E vec_mat32(const int16 v[3], const int16 M[9]," */
 void vec_mat32(u16 v, u16 m, u16 out);
 /* VGAME 0000:d76b  spec render3d.md "0000:D76B view_range_setup" */
-void view_range_setup(void); /* TODO signature: spec render3d.md "0000:D76B view_range_setup" (type column: "void near(void)") */
+void view_range_setup(void);
 
 /* ---- dead: not ported (listed for the record) */
 /* DEAD VGAME 1001:02ba fill_rows2_near */

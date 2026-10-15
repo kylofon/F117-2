@@ -33,7 +33,7 @@ vgame,func,0000:bee1,r3d_queue_object,"void(u16 id, s32 x, s32 y, s16 z, s16 a1,
 vgame,func,0000:c6b8,r3d_scenery_id,u16(u16 id),render3d,,[Part 1] if id bit 8: DS:0510[id&7F] | (id&8000) else id
 vgame,func,0000:c73c,fx_fire_puffs,"void(s16 hdg, s16 pitch, s16 roll, s16 X, s16 Y, s16 Z)",render3d,,"[Part 2] 6 puffs DS:3A5C -> E7AC 0x25+frame (0..3) / 0x24 with C040=frame (4,5); consumes game RNG cb62"
 vgame,func,0000:c834,fx_smoke_draw,"void(s16 cx, s16 cy, s16 cz)",render3d,fx_draw_effect_list,"[Part 2] 16 smoke puffs DS:39DA for TV camera: BA67 depth gate, 49C6=size<<8|class, BEE1(0x25)"
-vgame,func,0000:d76b,view_range_setup,void near(void),render3d,,"[Part 1] 48A6[k]=20h<<(k+detail) k<6, 48B2, 48B4 (no readers); [48B6]=(detail+1)*0D05h max depth"
+vgame,func,0000:d76b,view_range_setup,void(void),render3d,,"[Part 1] 48A6[k]=20h<<(k+detail) k<6, 48B2, 48B4 (no readers); [48B6]=(detail+1)*0D05h max depth"
 vgame,func,0000:dae8,r3d_begin_scene,"void(u16 vp, s16 a1, s16 a2, s16 a3, s16 ox, s16 oy, s16 oz, s16 backdrop, s16 focal)",render3d,,"[Part 1] DB71, DC64, DCA9; backdrop: C686=0, 8560=B760, 11EB:0F9B, wait byte[262A]==0, 1442; [49C4]=0"
 vgame,func,0000:db3e,r3d_end_scene,void(void),render3d,,"[Part 1] DF08, offset_clear, C04E+=1800h C04C+=1B00h ([4EA0]=6), memcpy(49B2,498E,18)"
 vgame,func,0000:db71,r3d_set_viewport,void(u16 vp),render3d,,"[Part 1] light 7D54=-36,36,36; centre 0D1E/0D20 (y0==0: 100 or 52/60), offset_set, 85CA..85D4, 2293/5, 85EA, E53E/E544 tables"
