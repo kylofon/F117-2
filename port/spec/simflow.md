@@ -1692,7 +1692,7 @@ a = clamp((fps*960) / ([2646]*[3D7A]), 1, 255);          /* 16-bit: imul ax,[366
 [2646] = 0; [3D78] = 0;
 if (abs(4*fps - a) > 3) { fps = (a+2) >> 2; d707(); }   /* d707 clamps fps to [4-[3D7A] , 15] and recomputes derived values */
 /* recount of active threats */
-[DED6] = #{ i=3..[98FC]-1 : T[i].alert > 0xC0 && !(T[i].flags & 0x80) } + #{ k=0..[DED0]-1 : O[k].+34 > 0xC0 && (O[k].flags & 2) };
+[DED6] = #{ i=3..[98FC]-1 : T[i].alert > 0xC0 && !(T[i].flags & 0x80) } + #{ k=0..[DED0]-1 : O[k].+34 > 0xC0 && (O[k].flags & 2) };   /* S5.7: each loop stops at its first hit, so DED6 = 0..2 (flight.md section 8) */
 ```
 Note: the loop starts at `bp-0xe = 3` and the first `jmp` re-enters through `439a`; the second loop is `k=0..ded0-1`. `a` is "4 x measured fps"
 if 60 ticks/s. `d707` (owner R2): `[43B8] = (fps>15) ? clamp((-120/fps + 9)>>1, 1, 4) : 0`; `fps = clamp(fps, 4-[3D7A], 15)`;

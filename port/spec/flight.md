@@ -615,6 +615,8 @@ of a round spawned in step n are tested in the scene pass of frame n+1 after the
 | Part 9 4.3 (line "Player launch") | "first free of 8..11" | last free slot |
 | render3d.md 9ACA open item 2 | `[DFDC]` 0x13/0x19 "laser-guided bomb ids" | right-MFD page: 0x13 = TV sensor page; 0x19 is never selected |
 | render3d.md section 6 `DS:04F4 = 0 0x1000 0x2000` | | `DS:04F2..04F6 = -0x1000, 0, 0x1000`, indexed by the cell offset -1..1 (section 6.3) |
+| simflow.md Part 4 section 1.2 (`[DED6]` recount, S5.7) | the number of sites plus the number of units above 0xC0 | each loop stops at its first hit (the code falls through into the next loop): `[DED6]` = (any site) + (any unit), 0..2 |
+| simflow.md Part 2 section 1 `cb62` (S5.7) | `rand_n` = the RTL helper | VGAME's `cb62` multiplies with `imul` (signed n); the other programs' `rand_n` zero-extends n |
 
 ## 9 Tests
 
