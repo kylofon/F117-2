@@ -1762,32 +1762,32 @@ vgame,func,11ce:000a,pic_row,void(void),loader,,"one 320-pixel row into DS:9516 
 vgame,func,11ce:0034,pic_begin,void(void),loader,,read header word: bit7 -> 8-bit pixels else 4-bit; max code bits; init LZW table C688 (2048*3 B),simflow
 vgame,func,11ce:00b2,pic_rle90_fill,void(void),loader,,expand [965A] pixels with RLE escape 90h; 4-bit mode emits 2 px per byte,simflow
 vgame,func,11ce:012b,pic_lzw_next,void(void),loader,,variable-width LZW decoder step using a private stack and the 512 B file buffer 43C8,simflow
-vgame,func,11eb:000c,r3d_set_camera,"void far(const int16*mat9,int16 zoom)",render3d,,"[Part 4] camera matrix -> 7AF8 scaled: col0 m>>1, col1 -(3/8)m, col2 floor(-far*m/2^15); far 7D2E=7FFF00h/max(abs16(2zoom),100h); 7B0A transpose dead",render3d
-vgame,func,11eb:00d3,r3d_draw_object,"void far(uint16 obj,int16 x,int16 y,int16 z,int16*mat9,int16*vars)",render3d,,"[Part 4] draws one 3DX object: LOD by |z_hi|, radius, 02B6 cull, parts, planes, INT0 hook, vertices, edges, faces; C686|=inside",render3d
-vgame,func,11eb:01b8,r3d_probe_object,"void far(uint16 obj,int16 x,int16 y,int16 z,int16*mat9)",render3d,,[Part 4] 00D3 without drawing (point-inside-model test for 0FFB); always runs 02B6; 7D1E stale,render3d
-vgame,func,11eb:0281,r3d_hook_div0,void near(),render3d,,[Part 4] saves IVT[0] to DS:5EB6/8 and installs 11EB:0975,render3d
-vgame,func,11eb:02a2,r3d_unhook_div0,void near(),render3d,,[Part 4] restores IVT[0] from DS:5EB6/8,render3d
-vgame,func,11eb:02b6,r3d_frustum_test,near(AX=radius)->AX=0/ZF=1 visible,render3d,,[Part 4] (abs16(zh)+1)*2 < far (u16 wrap); t=s16(2zh+r)>=0; hi16(abs32(x)) and hi16(abs32(y)) <= t unsigned. Diff-tested,render3d
-vgame,func,11eb:031b,r3d_setup_parts,"void near(CX=nparts,ES:SI)",render3d,,"[Part 4] M_k=PartRot*M_0 at 7B1C+24h*k, eyes 7C3C, lights 7C6C, origins 7CAE; max safe nparts 7 (data max 2)",render3d
-vgame,func,11eb:0440,r3d_part_pivot,"void near(BX=eye slot,DI=slot+12h,ES:SI=pivot)",render3d,,[Part 4] origin_k = origin + pivot*M_0 - pivot*M_k (32-bit add/adc),render3d
-vgame,func,11eb:04cd,r3d_light_root,void near(DI=mat),render3d,,[Part 4] 7C6C = 7D54 light * ObjMat^T; 7D4C=7C72,render3d
-vgame,func,11eb:04f9,r3d_light_part,void near(DI=mat),render3d,,[Part 4] [7D4C] = root light 7C6C * PartRot^T; 7D4C+=6,render3d
-vgame,func,11eb:0565,r3d_planes,void near(ES:SI=nplanes),render3d,,[Part 4] s=n.eye+d (imul sums mod 2^32) >=0 -> FF&7D38 into 76D2; map mode FF; marks 79D2; BSP 0E5F. Diff-tested,render3d
-vgame,func,11eb:0658,r3d_clear_vertex_flags,void near(),render3d,,[Part 4] zero (abs16(nverts)+2)>>1 words at DS:79D2,render3d
-vgame,func,11eb:0678,r3d_plane_shade,"void near(SI after d,DI=plane)",render3d,,[Part 4] 77D2[di] = bits 14..21 of n.L; dead (7D5A never read). Diff-tested,render3d
-vgame,func,11eb:06b9,r3d_xform_vertices,void near(ES:SI=vertices),render3d,,"[Part 4] needed vertices -> 0819 (C688 s32, D688 proj); part words 8000-800F not counted; nverts<0 shared path (dead)",render3d
+vgame,func,11eb:000c,r3d_set_camera,"void(u16 mat9, s16 zoom)",render3d,,"[Part 4] camera matrix -> 7AF8 scaled: col0 m>>1, col1 -(3/8)m, col2 floor(-far*m/2^15); far 7D2E=7FFF00h/max(abs16(2zoom),100h); 7B0A transpose dead",render3d
+vgame,func,11eb:00d3,r3d_draw_object,"void(u16 obj, s16 x, s16 y, s16 z, u16 mat9, u16 vars)",render3d,,"[Part 4] draws one 3DX object: LOD by |z_hi|, radius, 02B6 cull, parts, planes, INT0 hook, vertices, edges, faces; C686|=inside",render3d
+vgame,func,11eb:01b8,r3d_probe_object,"void(u16 obj, s16 x, s16 y, s16 z, u16 mat9)",render3d,,[Part 4] 00D3 without drawing (point-inside-model test for 0FFB); always runs 02B6; 7D1E stale,render3d
+vgame,func,11eb:0281,r3d_hook_div0,void(void),render3d,,[Part 4] saves IVT[0] to DS:5EB6/8 and installs 11EB:0975,render3d
+vgame,func,11eb:02a2,r3d_unhook_div0,void(void),render3d,,[Part 4] restores IVT[0] from DS:5EB6/8,render3d
+vgame,func,11eb:02b6,r3d_frustum_test,int(s16 radius),render3d,,[Part 4] (abs16(zh)+1)*2 < far (u16 wrap); t=s16(2zh+r)>=0; hi16(abs32(x)) and hi16(abs32(y)) <= t unsigned. Diff-tested,render3d
+vgame,func,11eb:031b,r3d_setup_parts,"u16(u16 si, s16 nparts)",render3d,,"[Part 4] M_k=PartRot*M_0 at 7B1C+24h*k, eyes 7C3C, lights 7C6C, origins 7CAE; max safe nparts 7 (data max 2)",render3d
+vgame,func,11eb:0440,r3d_part_pivot,"void(u16 eye, u16 di, u16 si)",render3d,,[Part 4] origin_k = origin + pivot*M_0 - pivot*M_k (32-bit add/adc),render3d
+vgame,func,11eb:04cd,r3d_light_root,void(u16 mat),render3d,,[Part 4] 7C6C = 7D54 light * ObjMat^T; 7D4C=7C72,render3d
+vgame,func,11eb:04f9,r3d_light_part,void(u16 mat),render3d,,[Part 4] [7D4C] = root light 7C6C * PartRot^T; 7D4C+=6,render3d
+vgame,func,11eb:0565,r3d_planes,u16(u16 si),render3d,,[Part 4] s=n.eye+d (imul sums mod 2^32) >=0 -> FF&7D38 into 76D2; map mode FF; marks 79D2; BSP 0E5F. Diff-tested,render3d
+vgame,func,11eb:0658,r3d_clear_vertex_flags,void(void),render3d,,[Part 4] zero (abs16(nverts)+2)>>1 words at DS:79D2,render3d
+vgame,func,11eb:0678,r3d_plane_shade,"void(u16 nrm, u16 plane)",render3d,,[Part 4] 77D2[di] = bits 14..21 of n.L; dead (7D5A never read). Diff-tested,render3d
+vgame,func,11eb:06b9,r3d_xform_vertices,u16(u16 si),render3d,,"[Part 4] needed vertices -> 0819 (C688 s32, D688 proj); part words 8000-800F not counted; nverts<0 shared path (dead)",render3d
 vgame,func,11eb:0819,r3d_xform_one,"void near(ES:SI,BX=mat,DI=out3d,BP=out2d)",render3d,,"[Part 4] out3d=v*M+origin (s32, no shift), 0906; si+=6 di+=16 bp+=8. Diff-tested",render3d
-vgame,func,11eb:0906,r3d_project,"void near(DI=v3d,BX=out2d)",render3d,,"[Part 4] zh>=100h: (x>>8)/zh; 1<=zh<100h: (x>>1)/(z>>9), #DE -> 0975; zh<1: x_hi=8000h. Diff-tested",render3d
+vgame,func,11eb:0906,r3d_project,"void(u16 di, u16 bx)",render3d,,"[Part 4] zh>=100h: (x>>8)/zh; 1<=zh<100h: (x>>1)/(z>>9), #DE -> 0975; zh<1: x_hi=8000h. Diff-tested",render3d
 vgame,func,11eb:0975,r3d_div0_handler,INT 0 handler (iret),render3d,,"[Part 4] IP+=3 (skips idiv+cwd), q=idiv(dividend>>8,cx), DX:AX=(int32)q<<8. Diff-tested",render3d
-vgame,func,11eb:0990,r3d_near_bisect,"void far(int32 p0[3] front,int32 p1[3] behind)",render3d,,[Part 4] mid=(p0+p1+1)>>1 (wrap) until mid z_hi<=1 unsigned; x->7D42 y->7D46. Diff-tested,render3d
-vgame,func,11eb:0a37,r3d_build_edges,void near(ES:SI=nedges),render3d,,"[Part 4] edge (v0,v1): if nplanes==0 or 79D2[v0]&79D2[v1] -> 0B3F; record 5EBA+18h*i",render3d
-vgame,func,11eb:0b3f,r3d_make_edge,"void near(BP=rec,DI=8*v0,BX=8*v1)",render3d,,"[Part 4] edge record: proj + zero-extended centre (s32), near-plane cases, 12EF:0333 clip",render3d
-vgame,func,11eb:0c7a,r3d_draw_faces,void near(ES:SI),render3d,,"[Part 4] nplanes>0 file order, <0 BSP list 78D2, ==0 one list",render3d
-vgame,func,11eb:0cac,r3d_draw_face_plane,void near(BX=plane),render3d,,"[Part 4] if 76D2[bx]>7Fh: 7D5A=77D2[bx] (dead), 0CED(es:[si+2bx])",render3d
-vgame,func,11eb:0ced,r3d_face_list,void near(ES:SI=list),render3d,,"[Part 4] face list: 00-1F polygon (12EF:003E/010A), 40-5F lines (1359:0040/0049, 7D4E), 20h points (no draw), 80h cond, FF end",render3d
-vgame,func,11eb:0e5f,r3d_bsp_order,"void near(ES:SI=root,DI=out,BX=vis)",render3d,,"[Part 4] vis!=0: b1 subtree, node, b0; vis==0: b0, b1 (node not emitted); b0 80h-FEh emitted verbatim; FF end. Diff-tested",render3d
+vgame,func,11eb:0990,r3d_near_bisect,"void(u16 p0, u16 p1)",render3d,,[Part 4] mid=(p0+p1+1)>>1 (wrap) until mid z_hi<=1 unsigned; x->7D42 y->7D46. Diff-tested,render3d
+vgame,func,11eb:0a37,r3d_build_edges,u16(u16 si),render3d,,"[Part 4] edge (v0,v1): if nplanes==0 or 79D2[v0]&79D2[v1] -> 0B3F; record 5EBA+18h*i",render3d
+vgame,func,11eb:0b3f,r3d_make_edge,"void(u16 rec, u16 v0x8, u16 v1x8)",render3d,,"[Part 4] edge record: proj + zero-extended centre (s32), near-plane cases, 12EF:0333 clip",render3d
+vgame,func,11eb:0c7a,r3d_draw_faces,void(u16 si),render3d,,"[Part 4] nplanes>0 file order, <0 BSP list 78D2, ==0 one list",render3d
+vgame,func,11eb:0cac,r3d_draw_face_plane,"void(u16 plane, u16 si)",render3d,,"[Part 4] if 76D2[bx]>7Fh: 7D5A=77D2[bx] (dead), 0CED(es:[si+2bx])",render3d
+vgame,func,11eb:0ced,r3d_face_list,void(u16 si),render3d,,"[Part 4] face list: 00-1F polygon (12EF:003E/010A), 40-5F lines (1359:0040/0049, 7D4E), 20h points (no draw), 80h cond, FF end",render3d
+vgame,func,11eb:0e5f,r3d_bsp_order,"void(u16 si, u16 out, u16 vis)",render3d,,"[Part 4] vis!=0: b1 subtree, node, b0; vis==0: b0, b1 (node not emitted); b0 80h-FEh emitted verbatim; FF end. Diff-tested",render3d
 vgame,func,11eb:0ef2,r3d_object_extent,"void far(uint16 obj,int16 out[3])",render3d,,"[Part 4] unsigned max abs16 x,y,z of LOD0 vertices; no callers",render3d
-vgame,func,11eb:0f9b,r3d_shared_verts,void far(),render3d,,[Part 4] 4EB6[k] = v*CamMat for the count at offs[n]; count 0 in all banks; retf at 12EF:0000,render3d
+vgame,func,11eb:0f9b,r3d_shared_verts,void(void),render3d,,[Part 4] 4EB6[k] = v*CamMat for the count at offs[n]; count 0 in all banks; retf at 12EF:0000,render3d
 vgame,func,12ef:0002,r3d_clip_add_edge,"void far(int16 x0,y0,x1,y1)",render3d,,"[Part 5] sext to record DS:5EBA, 0333 clip, 003E add; no callers",render3d
 vgame,func,12ef:003e,r3d_poly_add_edge,void(u16 rec),render3d,,"[Part 5] 85B2|=flags; 40h->00E0; rejected: wall range of end0 side from +6/+0E; else 85BC|=4, 1359:0719 DDA, wall ranges per end",render3d
 vgame,func,12ef:00aa,r3d_note_left,"void(s16 a,s16 b)",render3d,,"[Part 5] left wall range: 85B6=max(.,hi) if hi>=, 85B4=min(.,lo)",render3d
