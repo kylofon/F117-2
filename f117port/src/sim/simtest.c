@@ -290,6 +290,36 @@ WV(r3d_draw_world_objects, r3d_draw_world_objects())
 WV(map_render_terrain, map_render_terrain(DSP((u16)A(0)), (s16)A(1), (s16)A(2), (s16)A(3)))
 WV(terr_probe_cell, terr_probe_cell((s16)A(0), (s16)A(1), (s16)A(2)))
 
+/* ---- flight, weapons, AI, detection, damage (S5.7) */
+WV(wpn_release, wpn_release())
+WV(wpn_release_countermeasure, wpn_release_countermeasure((int)A(0)))
+WV(wpn_cm_tick, wpn_cm_tick())
+WV(wpn_gun_update, wpn_gun_update())
+WV(wpn_proj_update_all, wpn_proj_update_all())
+WR(wpn_seeker_check, wpn_seeker_check((int)A(0), (int)A(1), (int)A(2), (int)A(3), (s16)A(4)))
+WR(wpn_suit, wpn_suit((int)A(0), (int)A(1)))
+WR(obj_find_at, obj_find_at((s16)A(0), (s16)A(1)))
+WR(obj_cls_ship, obj_cls_ship((int)A(0)))
+WR(wpn_site_dist, wpn_site_dist((int)A(0)))
+WR(wpn_unit_dist, wpn_unit_dist((int)A(0)))
+WR(fm_bomb_dive_angle, fm_bomb_dive_angle())
+WV(ai_update_units, ai_update_units())
+WV(ai_unit_radar, ai_unit_radar((int)A(0)))
+WV(ai_unit_takeoff, ai_unit_takeoff((int)A(0), (int)A(1)))
+WV(hud_threat_update, hud_threat_update())
+WV(det_site_radar_update, det_site_radar_update((int)A(0)))
+WV(det_alert_network, det_alert_network())
+WV(det_radar_warning, det_radar_warning())
+WV(dmg_player_blast, dmg_player_blast())
+WV(dmg_unit_kill, dmg_unit_kill((int)A(0)))
+WV(dmg_object_destroy, dmg_object_destroy((int)A(0)))
+WR(dmg_wobj_destroyable, dmg_wobj_destroyable((int)A(0)))
+WR(mission_target_done, mission_target_done((int)A(0)))
+WR(terr_find_scenery_at, terr_find_scenery_at(L32(0), L32(2)))
+WV(terr_set_scenery_state, terr_set_scenery_state((u16)A(0), (u16)A(1)))
+WV(fm_mat_to_euler, fm_mat_to_euler())
+WV(fm_mat_from_euler, fm_mat_from_euler())
+
 #define E(n) { #n, w_##n, false }          /* a function without a result worth comparing */
 #define ER(n) { #n, w_##n, true }          /* the result goes into the hash */
 static const CallDef calls[] = {
@@ -304,6 +334,10 @@ static const CallDef calls[] = {
     E(sim_frame_step), E(sim_input_flight), E(sim_key_and_signature), E(input_command_key), E(snd_cue), E(snd_engine_refresh), E(frame_params_update), E(frame_rate_halve), E(view_range_setup), E(hud_glideslope_update), E(fx_smoke_update), E(fx_fall_update), E(mission_cheat_rearm), E(cockpit_widgets_reset), E(mission_name_targets), E(sim_reset_clock_palette), E(pal_time_of_day_step), E(mission_end), E(mission_log_event), E(mission_world_export), E(cockpit_daynight_recolor), ER(input_button),
     E(hud_overlay_frame), E(mfd_scope_draw), E(mfd_w2s), E(mfd_target_box), E(hud_draw_front), E(cockpit_draw_adi), E(view_frame), E(r3d_project_point), E(hud_target_box), E(hud_draw_diamond), E(hud_update_aspect_label), E(hud_seeker_cross), E(hud_lock_bracket), E(hud_lock_indicator), E(hud_ping_label), E(hud_format_range), E(obj_overlay_frame), E(mfd_view_sky_bands), E(mfd_view_ground_bands), E(mfd_view_flir_tint), E(mfd_view_render),
     E(r3d_scene_draw), E(r3d_draw_world_objects), E(map_render_terrain), E(terr_probe_cell),
+    E(wpn_release), E(wpn_release_countermeasure), E(wpn_cm_tick), E(wpn_gun_update), E(wpn_proj_update_all), ER(wpn_seeker_check), ER(wpn_suit), ER(obj_find_at),
+    ER(obj_cls_ship), ER(wpn_site_dist), ER(wpn_unit_dist), ER(fm_bomb_dive_angle), E(ai_update_units), E(ai_unit_radar), E(ai_unit_takeoff), E(hud_threat_update),
+    E(det_site_radar_update), E(det_alert_network), E(det_radar_warning), E(dmg_player_blast), E(dmg_unit_kill), E(dmg_object_destroy), ER(dmg_wobj_destroyable),
+    ER(mission_target_done), ER(terr_find_scenery_at), E(terr_set_scenery_state), E(fm_mat_to_euler), E(fm_mat_from_euler),
     E(hud_side_strips), E(pal_flight_load), E(pal_save), E(pal_restore), E(hud_color_init), E(hud_layout_init),
 };
 

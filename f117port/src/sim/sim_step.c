@@ -1,5 +1,5 @@
 /* The per-frame simulation step 39C4 (spec simflow.md Part 4): player cell and world clamp, the first-call mission initialisation, the moving-map markers, the
- * updaters of the other modules (stubs until S5.7), countdown timers, the nearest-airfield logic, the airfield zone, take-off line, cargo, landing and the failure
+ * updaters of the other modules (flight/, S5.7), countdown timers, the nearest-airfield logic, the airfield zone, take-off line, cargo, landing and the failure
  * checks, the beacon phase, the mission clock, the frame-rate estimator, and finally the key commands. The order of the calls is the original's. */
 #include <string.h>
 
@@ -307,11 +307,11 @@ void sim_frame_step(void)
         DSW(0xDED6) = 0;
         for (int i = 3; (s16)DSW(0x98FC) > i; i++) {
             u16 s = SITE(i);
-            if ((s16)DSW(s + 10) > 0xC0 && !(DSB(s + 8) & 0x80)) DSW(0xDED6)++;
+            if ((s16)DSW(s + 10) > 0xC0 && !(DSB(s + 8) & 0x80)) { DSW(0xDED6)++; break; }   /* the original leaves each loop at the first hit (no jump back) */
         }
         for (int k = 0; (s16)DSW(0xDED0) > k; k++) {
             u16 o = UNIT(k);
-            if ((s16)DSW(o + 0x22) > 0xC0 && (DSB(o + 0x18) & 2)) DSW(0xDED6)++;
+            if ((s16)DSW(o + 0x22) > 0xC0 && (DSB(o + 0x18) & 2)) { DSW(0xDED6)++; break; }
         }
     }
     sim_key_and_signature();

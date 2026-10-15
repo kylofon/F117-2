@@ -19,7 +19,7 @@ vgame,func,0000:62d0,ai_unit_radar,void(int u),ai,,"[flight.md 4.4] Aircraft rad
 vgame,func,0000:65d4,ai_unit_takeoff,"void(int u,int site)",ai,,"[flight.md 4.5] Place unit on airbase (carrier z=0x8C), flags|=0x403, endurance, msg ""<site> - <type> taking off"""
 vgame,func,0000:671a,wpn_proj_update_all,void(void),weapons,,"[flight.md 5.3] per-step update of the 12 projectile slots (0-7 enemy, 8-11 player): seeker/decoys, steering, move, impact, proximity burst, messages"
 vgame,func,0000:711f,wpn_seeker_check,"int(int slot,int tx,int ty,int tz,int cls)",weapons,,[flight.md 5.4] 22.5 deg cone / rear-aspect test of projectile vs point; sets [94F4] dist [94F6] bearing; tz unused
-vgame,func,0000:71b4,dmg_unit_kill,void(int u),damage,,"[flight.md 6.2] marks unit u dead (flags 0x20), logs event 3/0x83, name to 9876, sound 5, mission_target_done(0) for primary air target"
+vgame,func,0000:71b4,dmg_unit_kill,void(int u),damage,,"[flight.md 6.2] marks unit u shot down (flags 0x20), logs event 3/0x83, name to 9876, sound 5, mission_target_done(0) for primary air target"
 vgame,func,0000:72a4,dmg_object_destroy,void(int o),damage,,"[flight.md 6.2] destroys ground object o: flag 0x80, wreck shape, mission target k (kind 2) done, event log 1/0xC/2, sound 5"
 vgame,func,0000:7470,mission_target_done,int(int j),damage,,[flight.md 6.2] primary/secondary target achieved: sets 9B05 0x40/0x20 and 2E7C 1/2/3; 9876 = Primary target or Second. target; logs 0x8B/0x4B for kinds 3/4
 vgame,func,0000:74f6,dmg_player_blast,void(void),damage,,[flight.md 6.1] skill+1 random bits into [3632] damage mask and [C5C8]++; lamps 10..16 refresh; [98EE]=1; sound 4; no-op in training

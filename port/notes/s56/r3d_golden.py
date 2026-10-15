@@ -140,7 +140,7 @@ def main():
             for op in ops:
                 f.write(' '.join(op) + '\n')
             f.write('end\n')
-    key = stamp(comm) + ('' if not only else only)
+    key = stamp(comm) + ' stubs %d' % len(sim_ref.stub_list()) + ('' if not only else only)   # the references depend on what is stubbed (S5.7 removed the flight stubs)
     ref_file, stamp_file = os.path.join(work, 'refs.bin'), os.path.join(work, 'stamp.txt')
     if not fresh and os.path.exists(stamp_file) and open(stamp_file).read().strip() == key and os.path.exists(ref_file):
         raw = open(ref_file, 'rb').read()

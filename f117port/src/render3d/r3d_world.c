@@ -1,6 +1,6 @@
 /* The world-object pass of render3d (spec port/spec/render3d.md Part 2): 9ACA (own aircraft, the two designator blocks of the weapons logic, smoke billboards,
  * units with their shadows, projectiles, the falling wreck), the depth helper BA67 and the TV-camera effects C73C / C834. B85D / BA13 (the point projection) are
- * in sim/sim_objovl.c (written by S5.5 for the overlay). The range / bearing helpers bbb4 / bb86 / bb9e (owner weapons, flight.md 5.4) are here until S5.7. */
+ * in sim/sim_objovl.c (written by S5.5 for the overlay). The range / bearing helpers bbb4 / bb86 / bb9e are the weapons module's (flight/fl_weapons.c). */
 #include "render3d/r3d.h"
 #include "sim/sim.h"
 #include "sim/sim_priv.h"
@@ -10,18 +10,6 @@
 static inline s16 abs16(s16 v) { return (s16)(v < 0 ? (u16)-(u16)v : (u16)v); }
 static inline s16 mq(s16 a, s16 b) { return (s16)fx_mul15(a, b); }
 
-/* 0000:BBB4 obj_dist_bearing (owner weapons, simflow.md Part 8 Part 2): [9502] = bearing player -> object (only with want_bearing), [94FE] = distance */
-int obj_dist_bearing(int x_u, int y_u, int want_bearing)
-{
-    s16 dx = (s16)(DSW(0xC0A4) - (u16)x_u), dy = (s16)(DSW(0xC0B2) - (u16)y_u);
-    if (want_bearing) DSW(0x9502) = fx_heading((s16)-dx, dy);
-    DSW(0x94FE) = (u16)fx_dist(dx, dy);
-    return (s16)DSW(0x94FE);
-}
-
-/* 0000:BB86 wpn_site_dist / 0000:BB9E wpn_unit_dist (owner weapons) */
-int wpn_site_dist(int site) { u16 s = (u16)(0xB2A4 + 16 * site); return obj_dist_bearing((s16)DSW(s), (s16)DSW((u16)(s + 2)), 1); }
-int wpn_unit_dist(int unit) { u16 u = (u16)(0xC140 + 36 * unit); return obj_dist_bearing((s16)DSW(u), (s16)DSW((u16)(u + 2)), 0); }
 
 /* 0000:BA67 r3d_view_depth: [DE92] = the depth of the point against the third row of the cull matrix (the z-term sign quirk is kept) */
 void r3d_view_depth(s16 px, s16 py, s16 pz, s16 cx, s16 cy, s16 cz)

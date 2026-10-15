@@ -218,7 +218,9 @@ FAMILIES = [('math', fam_math), ('lamps', fam_lamps), ('digits', fam_digits), ('
 
 # functions whose result is part of the comparison (simtest.c marks the same ones with ER())
 RET_FUNCS = {'input_button', 'mfd_map_sx', 'mfd_map_sy', 'mfd_map_plot', 'mfd_map_to_screen', 'mfd_map_sx', 'mfd_map_sy', 'mfd_map_plot', 'mfd_map_to_screen', 'fx_mul15', 'fx_sin16', 'fx_cos16', 'fx_clamp', 'fx_clamp_wrap', 'fx_dist', 'fx_heading', 'fx_sin_mul', 'fx_cos_mul', 'fx_sext8', 'fx_isqrt',
-             'fx_asin', 'fx_acos', 'fx_ratio_q15', 'lib_scale_eighths', 'lib_sign', 'pal_fade_step'}
+             'fx_asin', 'fx_acos', 'fx_ratio_q15', 'lib_scale_eighths', 'lib_sign', 'pal_fade_step',
+             'wpn_seeker_check', 'wpn_suit', 'obj_find_at', 'obj_cls_ship', 'wpn_site_dist', 'wpn_unit_dist', 'fm_bomb_dive_angle', 'dmg_wobj_destroyable', 'mission_target_done',
+             'terr_find_scenery_at'}
 
 
 import sim_scn_mfd
@@ -241,3 +243,7 @@ FAMILIES.append(('polysingle', sim_scn_hud.fam_polysingle))
 
 import sim_scn_flight
 FAMILIES.append(('flight', sim_scn_flight.fam_flight))
+
+import sim_scn_combat
+FAMILIES.append(("combat", sim_scn_combat.fam_combat))
+FAMILIES.append(("engage", sim_scn_combat.fam_engage))

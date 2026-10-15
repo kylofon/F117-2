@@ -725,7 +725,7 @@
 /* 0000:65d4  ai_unit_takeoff                ai         flight.md "4.5 0000:65d4 ai_unit_takeoff(u, site) (owner ai) (T)" */
 /* 0000:671a  wpn_proj_update_all            weapons    flight.md "5.3 0000:671a wpn_proj_update_all(void) (owner weapons) (T) " */
 /* 0000:711f  wpn_seeker_check               weapons    flight.md "5.4 0000:711f wpn_seeker_check, 0000:8bab wpn_suit, 0000:bad" */
-/* 0000:71b4  dmg_unit_kill                  damage     flight.md "6.2 Damage to targets (owner damage) - simflow.md Part 6 sec"  DEAD */
+/* 0000:71b4  dmg_unit_kill                  damage     flight.md "6.2 Damage to targets (owner damage) - simflow.md Part 6 sec" */
 /* 0000:72a4  dmg_object_destroy             damage     flight.md "6.2 Damage to targets (owner damage) - simflow.md Part 6 sec" */
 /* 0000:7470  mission_target_done            damage     flight.md "6.2 Damage to targets (owner damage) - simflow.md Part 6 sec" */
 /* 0000:74f6  dmg_player_blast               damage     flight.md "0 Map" */

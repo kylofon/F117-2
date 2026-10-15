@@ -1,6 +1,6 @@
 /* The 3D scene's overlay pass (spec simflow.md Part 9 "a17e" and its helpers, section 2): the projectile markers, the cannon tracers with their hit tests, the explosion
  * sprite, the target symbology of the HUD (boxes, the lock lamp, the name pings, the photo shutter, the bomb cues, the radio beacon). Everything is drawn through the
- * HUD primitives; the hit consequences (units killed, objects destroyed, the player hit) are the damage module's (stubs, TODO(S5.7)). */
+ * HUD primitives; the hit consequences (units killed, objects destroyed, the player hit) are the damage module's (flight/fl_damage.c). */
 #include <stdio.h>
 #include <string.h>
 

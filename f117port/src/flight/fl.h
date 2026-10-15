@@ -4,6 +4,7 @@
  * Python references of S3.6 / S3.8 (port/notes/s36/r2_fm.py, port/notes/s38/s38_ref.py) do; the record bases are theirs. */
 #include "sim/sim.h"
 #include "sim/sim_priv.h"
+#include "gen/module_render3d.h"
 
 #define UNIT_BASE   0xC13E          /* unit (aircraft) records, 0x24 bytes, count [DED0] */
 #define SITE_BASE   0xB2A2          /* site / ground object records, 16 bytes, count [E540] (all) / [C0B4] (objects) */

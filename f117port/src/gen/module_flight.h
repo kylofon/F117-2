@@ -19,6 +19,8 @@ void ai_update_units(void);
 void dmg_object_destroy(int o);
 /* VGAME 0000:74f6  spec flight.md "0 Map" */
 void dmg_player_blast(void);
+/* VGAME 0000:71b4  spec flight.md "6.2 Damage to targets (owner damage) - simflow.md Part 6 sec" */
+void dmg_unit_kill(int u);
 /* VGAME 0000:780a  spec flight.md "6.2 Damage to targets (owner damage) - simflow.md Part 6 sec" */
 int dmg_wobj_destroyable(int o);
 /* VGAME 0000:7470  spec flight.md "6.2 Damage to targets (owner damage) - simflow.md Part 6 sec" */
@@ -95,6 +97,3 @@ int wpn_site_dist(int site);
 int wpn_suit(int wpn, int site);
 /* VGAME 0000:bb9e  spec flight.md "5.4 0000:711f wpn_seeker_check, 0000:8bab wpn_suit, 0000:bad" */
 int wpn_unit_dist(int unit);
-
-/* ---- dead: not ported (listed for the record) */
-/* DEAD VGAME 0000:71b4 dmg_unit_kill */

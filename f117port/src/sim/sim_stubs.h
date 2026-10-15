@@ -1,7 +1,6 @@
 #pragma once
-/* The functions of the modules that are not ported yet and that the sim flow code calls (sim_stubs.c). Each is an empty function marked
- * `STUB ssss:oooo name` there; the test harness makes the original at that address return 0 at once, so both sides stay comparable.
- * Signatures are what the callers pass (cdecl, words), not final: render3d (S5.6) and flight, weapons, AI, detection, damage (S5.7) replace them. */
+/* The names under which the sim flow code calls other modules (sim_stubs.c): thin wrappers of render3d (S5.6) and of the flight module (S5.7). A function
+ * that is still a stub is marked `STUB ssss:oooo name` there; the test harness then makes the original at that address return 0 at once. */
 #include "types.h"
 
 /* ---- render3d (ported, S5.6b): the names the sim code calls */
@@ -12,7 +11,7 @@ void sim_r3d_end_scene(void);                                                   
 void sim_r3d_draw_queued(void);                                                                              /* 0000:DF08 */
 void sim_fx_fire_puffs(int a0, int a1, int a2, int rx, int ry, int rz);                                      /* 0000:C73C */
 void sim_fx_smoke_draw(int camx, int camy, int camz);                                                        /* 0000:C834 */
-/* ---- weapons / damage / flight / render3d: what the overlay pass of the 3D scene calls (TODO(S5.7)) */
+/* ---- weapons / damage / flight / render3d: what the overlay pass of the 3D scene calls (wrappers of the flight module, S5.7) */
 void sim_dmg_unit_kill(int u);                          /* 0000:71B4 */
 void sim_dmg_player_blast(void);                        /* 0000:74F6 */
 int  sim_dmg_wobj_destroyable(int o);                   /* 0000:780A */
