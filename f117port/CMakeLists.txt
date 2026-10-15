@@ -126,6 +126,16 @@ if(Python3_Interpreter_FOUND)
     set_tests_properties(render3d_leaf PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 900 PASS_REGULAR_EXPRESSION "r3d-test OK")
 endif()
 
+# The whole 3D renderer (src/render3d, S5.6b): golden frames. The ORIGINAL VGAME.EXE under Unicorn (port/notes/s56/r3d_golden.py on top of the S5.5 harness) and
+# `f117 --render-test` run the same scenes from a running mission (r3d_scene_draw on the runway, low, high, at targets, inside models, external views, whole
+# view_frame calls after sim steps, the map MFD terrain at every zoom, the TV camera, the collision probe) and compare DGROUP, the pages, the DAC and the comm
+# block byte for byte. References cached in the build tree (stamp of the scripts, VGAME.EXE, the comm block). Needs the `shell` comm block; skips (77) without ../Game.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME render3d_golden COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s56/r3d_golden.py
+             $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game ${CMAKE_CURRENT_BINARY_DIR}/r3d_golden)
+    set_tests_properties(render3d_golden PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 900 DEPENDS shell)
+endif()
+
 # The generated headers are current: the generators re-run in memory and fail on any difference (tools/gen_*.py).
 find_package(Python3 COMPONENTS Interpreter)
 if(Python3_Interpreter_FOUND)

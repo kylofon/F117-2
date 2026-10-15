@@ -78,7 +78,8 @@ _Static_assert(offsetof(R3dWork, fill_dither) == 0x9140 - R3D_W_OFS, "fill_dithe
 
 /* the page the raster writes to: ES = DS:85EA, a VGA page segment. The unit test redirects it to a plain buffer. */
 extern u8 *r3d_test_page;
-static inline u8 *r3d_page(void) { return r3d_test_page ? r3d_test_page : vga_page(DSW(0x85EA)); }
+u8 *seg_ptr(u16 seg);                   /* video/mgraphic.c: A000..AFFF = the VGA model, else mem[] (page 2 lives in conventional memory) */
+static inline u8 *r3d_page(void) { return r3d_test_page ? r3d_test_page : seg_ptr(DSW(0x85EA)); }
 
 /* driver call trace: the unit test sets this to see the calls the 1001 code makes to MGRAPHIC (colour, line, polygon fill) instead of making them. kinds: 32 colour (v[0]),
  * 31 line (v[0..3] = x1 y1 x2 y2 as stored), 37 poly_fill (v[0] ymin, v[1] ymax, v[2] mode), 100 poly_fill_far (v[0] colour, n points in v[1..]). */

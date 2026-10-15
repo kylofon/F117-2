@@ -233,7 +233,7 @@ shelltest.c  --shell-test and F117_SHELL_SCRIPT (below)
 
 Spec `port/spec/simflow.md`; prototypes in `gen/module_simflow.h`, the DGROUP names in `gen/symbols_vgame.h`, the port's own additions in `sim/sim.h`
 (accessors, the test hooks, the sound call points), `sim/sim_priv.h` (what the files share) and `sim/sim_stubs.h`. VGAME is real now (frame loop, HUD,
-MFDs, keys); `--chain-test` still swaps it for `vgame_stub`. The 3D scene is a flat sky/ground backdrop until S5.6, the flight model and the weapons /
+MFDs, keys); `--chain-test` still swaps it for `vgame_stub`. The 3D scene is render3d's (S5.6, below), the flight model and the weapons /
 AI / detection / damage functions are empty stubs until S5.7.
 
 ```
@@ -244,7 +244,7 @@ sim_step.c    the per-frame step 39C4 (clock, fps estimator with its 60 ticks/s 
 sim_keys.c    cba0, the key interpreter (the full table, the debug and nav keys, the tail with the lamps, doors and gear)
 sim_input.c   the keypad-as-stick INT 9 hook, the Alt-Q / Alt-P / Alt-B screens, the key fetch of 1E9E (the rest of 1E9E is the flight model, S5.7)
 sim_view.c    2F82 view_frame (the 13 view modes, matrix B156 via E26B, picture reloads, the scene call, the pieces pasted over the window), 03CE r3d_scene_draw
-              (STUB: backdrop, frame-sync wait, frame delay, a17e)
+              (now in render3d/r3d_scene.c; the TESTSTUB marker stays here for the sim tests)
 sim_overlay.c 7898 hud_overlay_frame: the text overlay of the frame (messages, tapes in the small styles, ILS, fps, ...)
 sim_hudasm.c  10A8 hud_draw_front (tapes, heading, frame, reticle, pitch ladder), hud_layout_init / hud_color_init from the original immediates
 sim_cockpit.c cockpit_keyblit, mfd_icon, panel refresh, 17A3 cockpit_draw_adi
@@ -274,6 +274,31 @@ simtest.c     --sim-test: start-up dump, the ISR counters (ticks mode), the scen
   pages row by row, the DAC and the comm block (so the exported world and the event log byte for byte). The stubbed functions return 0 on both sides.
   `--only calls:FAMILY`, `--bisect ID`, `--dump ID` (pixel crop of the first difference), `--trace ID`, `PROBEFN=name:nargs` (arguments of an original near function).
   `shell_chain` runs the real VGAME for `F117_VGAME_FRAMES` frames (headless) between START and END.
+
+## Render3d (`src/render3d`, S5.6)
+
+Spec `port/spec/render3d.md`; prototypes in `gen/module_render3d.h` (typed from the `type` column of `render3d_symbols.csv`), the work buffers and the
+register-interface routines in `render3d/r3d.h`. Every routine works on VGAME's DGROUP at the original offsets; pointer arguments are DS offsets (ES offsets
+in the 3DX bank for 11EB), so the buffers keep their adjacency (part slots 7B1C.. vs the eyes 7C3C, edge records 5EBA.., the 12EF / 1359 row tables).
+
+```
+r3d_scene.c    03CE r3d_scene_draw, DAE8 / DB71 / DC64 / DCA9 / DB3E set-up and end, E3E2 / E54B, E7AC placement, E8A2 / E8B5 cull, 1088:0120 depth shade,
+               C6B8, BD8F / BEE1 / DCC0 submitters, DDFE / DF08 sorted queue, 1AD6 / 1B1B / 1A85 sprites
+r3d_terrain.c  0804 / 0865 / 0FB1, 04DA terrain walk (path A quirk), 119C / 11F2 / 1353 / 13AC / 13E3 map MFD, 0FFB / 77D9 collision probe, BC12 / BC77 / BCD7
+r3d_world.c    9ACA world pass (designators of the weapons logic kept inside), BA67, C73C, C834; bbb4 / bb86 / bb9e (owner weapons, here until S5.7)
+r3d_object.c   segment 11EB: 000C camera, 00D3 / 01B8 objects, 02B6, parts 031B / 0440 / 04CD / 04F9, planes 0565 / 0658 / 0678, BSP 0E5F, vertices 06B9 / 0819,
+               projection 0906 (+0975 as a checked division), 0990, edges 0A37 / 0B3F, faces 0C7A / 0CAC / 0CED, 0F9B
+r3d_clip.c, r3d_raster.c, edge2d.c, r3d_sky.c, r3d_math.c   the leaf routines of S5.6a (12EF, 1359, 1001, 1442, 1433)
+r3dtest.c      --r3d-test: the leaf routines against the Python references (ctest render3d_leaf)
+```
+
+* B85D / BA13 (point projection) and E26B (`sim_matrix_from_angles`) stay in `src/sim` (S5.5). The sim code calls the scene functions through the
+  `sim_*` wrappers of `sim_stubs.c` (host-pointer viewports become DS offsets there).
+* PORT: 11EB:0281 only saves IVT[0] into DS:5EB6 (the port divides with a check, 0906); the raster writes to `seg_ptr(DS:85EA)` (page 2 is in mem[]).
+* Tests: `render3d_leaf` (S5.6a) and `render3d_golden` (`port/notes/s56/r3d_golden.py`): the ORIGINAL 03CE / 2F82 / bf71 / 119C / 77D9 under Unicorn and
+  `f117 --render-test` (the sim scenario runner with r3d_scene_draw enabled) from the same running-mission snapshot; DGROUP, pages, DAC and comm block byte for byte.
+  `--only ID` runs one scene, `--fresh` rebuilds the cached references. The sim tests (`sim_vgame`) keep 03CE hooked (TESTSTUB) but now run the real
+  bf71 / 119C / BC12 / BCD7 / 1A85 on both sides.
 
 ## Symbol pipeline (`src/gen/`)
 

@@ -375,10 +375,10 @@ static int run_scenarios(const char *dir)
     u32 magic = 0x314E4353;
     static u8 rec[BSS_END];
     for (char *line = strtok(txt, "\r\n"); line; line = strtok(NULL, "\r\n")) {
-        char *tok[16];
+        char *tok[24];
         int nt = 0;
         char *save = NULL;
-        for (char *t = strtok_r(line, " \t", &save); t && nt < 16; t = strtok_r(NULL, " \t", &save)) tok[nt++] = t;
+        for (char *t = strtok_r(line, " \t", &save); t && nt < 24; t = strtok_r(NULL, " \t", &save)) tok[nt++] = t;
         if (nt == 0 || tok[0][0] == '#') continue;
         if (!strcmp(tok[0], "scn") && nt >= 3) {
             Snap *s = get_snap(dir, tok[2]);
@@ -401,8 +401,8 @@ static int run_scenarios(const char *dir)
         } else if (!strcmp(tok[0], "call") && nt >= 2) {
             const CallDef *c = find_call(tok[1]);
             if (!c) { printf("sim-test: no wrapper for %s\n", tok[1]); bad++; continue; }
-            long a[12] = { 0 };
-            for (int i = 2; i < nt && i < 14; i++) a[i - 2] = parse_num(tok[i]);
+            long a[20] = { 0 };
+            for (int i = 2; i < nt && i < 22; i++) a[i - 2] = parse_num(tok[i]);
             long r = c->fn(a);
             if (getenv("F117_SIM_TRACE") && !strcmp(getenv("F117_SIM_TRACE"), cur_id)) printf("T %u %u %s %ld %ld %ld %ld\n", ncalls, (u32)r & 0xFFFF, c->name, a[0], a[1], a[2], a[3]);
             if (c->ret) hash = (hash * 31 + ((u32)r & 0xFFFF)) & 0xFFFF;

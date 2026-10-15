@@ -280,8 +280,8 @@ void r3d_queue_insert(void)
 /* 0000:1AD6 r3d_sprite_main / 0000:1B1B r3d_sprite_tv / 0000:1A85 fx_explosion_sprite: a scaled 2D sprite centred on (x, y) */
 static void sprite(u16 ctx, u16 tab, s16 x, s16 y, s16 size, s16 cls)
 {
-    s16 half = (s16)(size / 2);
-    sprite_scaled(DSP(ctx), x - half, y - half, size, size - (size >> 2), DSW((u16)(tab + 4 * cls)), DSW((u16)(tab + 4 * cls + 2)));
+    s16 dh = (s16)(size - (size >> 2));                                 /* the y offset is half of dh, not of size (cwd on the dh still in AX) */
+    sprite_scaled(DSP(ctx), x - size / 2, y - dh / 2, size, dh, DSW((u16)(tab + 4 * cls)), DSW((u16)(tab + 4 * cls + 2)));
 }
 void r3d_sprite_main(s16 x, s16 y, s16 size, s16 cls) { sprite(DSW(0x0344), 0x91D8, x, y, size, cls); }
 void r3d_sprite_tv(s16 x, s16 y, s16 size, s16 cls) { sprite(DSW(0x4042), 0x91D8, x, y, size, cls); }

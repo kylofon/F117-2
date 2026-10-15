@@ -170,7 +170,7 @@ BC12, BCD7), `R7f_ref.py` (B85D, BA13, BA67). Harnesses `*_emu.py` run the real 
 unicorn`, read `work/unpacked/VGAME.EXE` at run time; no game data is stored in the repo).
 Not emulated (they call the object renderer): DF08, 04DA, DCC0, BD8F, 9ACA, 0CED: line-by-line pseudocode, (V).
 Whole-frame test for those (golden frames from DOSBox-X dumps around `03CE`, Unicorn replay, then the port's `--render-test`):
-PLAN.md Phase 5 Notes, S5.6 render3d test plan.
+PLAN.md Phase 5 Notes, S5.6 render3d test plan. **S5.6b:** done as Unicorn golden frames instead of DOSBox-X dumps (`port/notes/s56/r3d_golden.py`, ctest `render3d_golden`): the real 03CE / 2F82 / bf71 / 119C / 77D9 from a running mission, 107 scenes, the port byte for byte equal (DGROUP, pages, DAC); so DF08, 04DA, DCC0, BD8F, 9ACA and 0CED are now (T) through the whole frame. No pseudocode of Parts 1-4 needed a correction.
 
 ## 9 Suggested port layout (Phase 5)
 
@@ -705,11 +705,11 @@ Callers DB3E, bf71. Callees 1AD6, 1B1B, E3E2, E54B, 109D:0006, 1433:03A9, 11EB:0
 ### 0000:1AD6 r3d_sprite_main / 0000:1B1B r3d_sprite_tv / 0000:1A85 fx_explosion_sprite  (V)
 `void near f(int16 x, int16 y, int16 size, int16 cls)`; all three:
 ```
-half = size / 2;                                    // truncating (cwd; sub ax,dx; sar 1)
-slot22_sprite_scaled(ctx, x - half, y - half, size, size - (size sar 2), tab[cls].off, tab[cls].seg);
+dh = size - (size sar 2);
+slot22_sprite_scaled(ctx, x - size / 2, y - dh / 2, size, dh, tab[cls].off, tab[cls].seg);   // truncating (cwd; sub ax,dx; sar 1)
 ```
 1AD6: ctx = `[0344]`, tab = DS:91D8; 1B1B: ctx = `[4042]`, tab = DS:91D8; 1A85: ctx = `[0348] ? [4042] : [0344]`, tab = **DS:9188**.
-Tables: 8 far pointers (off, seg); image initial 91D8 = offsets 0,1B6h,361h,4F2h,6A7h,848h,9EFh,B82h in seg 1D50h, 9188 =
+**[corr] S5.6b:** the y offset is `dh / 2`, not `size / 2` (the `cwd` works on dh, still in AX; found by the golden frames). Tables: 8 far pointers (off, seg); image initial 91D8 = offsets 0,1B6h,361h,4F2h,6A7h,848h,9EFh,B82h in seg 1D50h, 9188 =
 0,0D5h,229h,54Bh,810h,9F9h,0CDAh,10F4h in seg 1853h (fixed up by the loader, U). Callers: 1AD6, 1B1B DF08; 1A85 A17E.
 
 ---------------------------------------------------------------------------------------------------------------------------

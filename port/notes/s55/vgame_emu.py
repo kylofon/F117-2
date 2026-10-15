@@ -53,10 +53,18 @@ class VG(ShellMachine):
         for off, dvo in ((0x043C, 0x228B), (0x0474, 0x228D), (0x0796, 0x261B), (0x07CE, 0x261D)):
             a = self.lin(0x1001, off)
             self.uc.hook_add(UC_HOOK_CODE, self._mk_div(dvo), None, a, a)
+        # the same for the four `idiv cx` of 11EB:0906 (render3d projection; 11EB:0281 points IVT[0] at 11EB:0975), as port/notes/s37/R7a_emu.py does (S5.6b)
+        for off in (0x091E, 0x0930, 0x094F, 0x0963):
+            a = self.lin(0x11EB, off)
+            self.uc.hook_add(UC_HOOK_CODE, self._mk_div(None), None, a, a)
 
     def _mk_div(self, dvo):
         def hk(uc, addr, size, _):
-            d = struct.unpack('<h', self.dg(dvo, 2))[0]
+            if dvo is None:                                                         # divisor in CX
+                d = uc.reg_read(UC_X86_REG_CX)
+                d = d - 0x10000 if d & 0x8000 else d
+            else:
+                d = struct.unpack('<h', self.dg(dvo, 2))[0]
             n = (uc.reg_read(UC_X86_REG_DX) << 16) | uc.reg_read(UC_X86_REG_AX)
             if n & 0x80000000:
                 n -= 1 << 32
