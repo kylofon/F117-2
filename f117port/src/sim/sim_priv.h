@@ -22,7 +22,9 @@ void r3d_project_point(int x_u, int y_u, int z);                  /* 0000:B85D, 
 void r3d_scene_draw(int yaw, int pitch, int roll, s32 x, s32 y, s32 z, int x0, int y0, int w, int h); /* 0000:03CE (render3d/r3d_scene.c) */
 void sim_matrix_from_angles(u16 m_off, int a, int b, int c);   /* 0000:E26B, render3d's (S5.6) */
 void r3d_draw_sky_ground(void *ctx);                              /* 0000:1442 (render3d/r3d_sky.c) */
-void sim_input_flight(void);                         /* 0000:1E9E: TODO(S5.7) the player flight model; here only its key fetch and first-call set-up */
+void sim_quit_requester(void);                       /* the Alt-Q requester of 1E9E (sim_input.c) */
+void sim_boss_screen(void);                          /* the Alt-B screen of 1E9E (sim_input.c) */
+void sim_pause_wait(void);                           /* 0000:3939 */
 void timer_install_sim(void);
 void timer_remove_sim(void);
 void vgame_start(void);                              /* 0000:0010 */

@@ -50,7 +50,7 @@ void fm_mat_from_euler(void);
 /* VGAME 0000:2c9e  spec flight.md "0 Map" */
 void fm_mat_to_euler(void);
 /* VGAME 0000:2c6e  spec flight.md "0 Map" */
-void fm_rotate_apply(int *A, int *B);
+void fm_rotate_apply(u16 a, u16 b);
 /* VGAME 0000:cb72  spec flight.md "0 Map" */
 int input_button(int n);
 /* VGAME 10a8:0ca8  spec flight.md "2.1 0000:1e9e sim_input_flight (owner flight) - specified in": same name as module_platform.h, declared there */
@@ -60,11 +60,11 @@ void joy_recenter(void);
 /* VGAME 1181:0008  spec flight.md "0 Map" */
 void keypad_stick_install(void);
 /* VGAME 1181:0072  spec flight.md "2.4 Controls" */
-void keypad_stick_isr(void); /* TODO signature: spec flight.md "2.4 Controls" (type column: "void interrupt(void)") */
+void keypad_stick_isr(u8 scan);
 /* VGAME 1181:0058  spec flight.md "12 Function index (generated from flight_symbols.csv)" */
 void keypad_stick_remove(void);
 /* VGAME 0000:e578  spec flight.md "0 Map" */
-void mat_mul_0000_E578(void); /* TODO signature: spec flight.md "0 Map" (type column: "void(A,B,C)") */
+void mat_mul_0000_E578(u16 a, u16 b, u16 c);
 /* VGAME 0000:1e9e  spec flight.md "2.1 0000:1e9e sim_input_flight (owner flight) - specified in" */
 void sim_input_flight(void);
 
@@ -92,7 +92,7 @@ int wpn_seeker_check(int slot, int tx, int ty, int tz, int cls);
 /* VGAME 0000:bb86  spec flight.md "5.4 0000:711f wpn_seeker_check, 0000:8bab wpn_suit, 0000:bad" */
 int wpn_site_dist(int site);
 /* VGAME 0000:8bab  spec flight.md "5.4 0000:711f wpn_seeker_check, 0000:8bab wpn_suit, 0000:bad" */
-void wpn_suit(void); /* TODO signature: spec flight.md "5.4 0000:711f wpn_seeker_check, 0000:8ba" (type column: "int wpn_suit(int wpn,int site)") */
+int wpn_suit(int wpn, int site);
 /* VGAME 0000:bb9e  spec flight.md "5.4 0000:711f wpn_seeker_check, 0000:8bab wpn_suit, 0000:bad" */
 int wpn_unit_dist(int unit);
 

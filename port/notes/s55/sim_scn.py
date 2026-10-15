@@ -238,3 +238,6 @@ FAMILIES.append(('objovl', sim_scn_hud.fam_objovl))
 FAMILIES.append(('objovp', sim_scn_hud.fam_objovp))
 FAMILIES.append(('mfdview', sim_scn_hud.fam_mfdview))
 FAMILIES.append(('polysingle', sim_scn_hud.fam_polysingle))
+
+import sim_scn_flight
+FAMILIES.append(('flight', sim_scn_flight.fam_flight))

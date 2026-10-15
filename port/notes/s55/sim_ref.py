@@ -14,6 +14,7 @@ import csv, os, re, struct, subprocess, sys, shutil, zlib
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import vgame_emu as V
+from unicorn.x86_const import UC_X86_REG_SI
 
 ROOT = V.ROOT
 BSS_END = 0xE55E
@@ -277,9 +278,14 @@ def run_emu_scenarios(m, snaps, scns, syms):
     recs = []
     for sid, snap, ops in scns:
         m.restore(snaps[snap])
+        m.keys = []
         h, nc = 0, 0
         for op in ops:
-            if op[0] == 'poke':
+            if op[0] == 'key':                           # a key word for the BIOS buffer (1E9E's key fetch)
+                m.keys.append(int(op[1], 0) & 0xFFFF)
+            elif op[0] == 'pokec':                       # a word of the comm block (pilot record = comm+1272h)
+                m.wb(V.COMM_SEG, int(op[1], 0), (int(op[2], 0) & 0xFFFF).to_bytes(2, 'little'))
+            elif op[0] == 'poke':
                 off, v = int(op[2], 0), int(op[3], 0)
                 n = {'b': 1, 'w': 2, 'l': 4}[op[1]]
                 m.wb(m.ds, off, (v & ((1 << (8 * n)) - 1)).to_bytes(n, 'little'))
@@ -291,6 +297,7 @@ def run_emu_scenarios(m, snaps, scns, syms):
                     args = [int(x, 0) & 0xFFFF for x in op[2:]]
                     if op[1] in sim_scn.ARG_FIXUP:
                         args = sim_scn.ARG_FIXUP[op[1]](args, m.ds)
+                    m.uc.reg_write(UC_X86_REG_SI, 1)         # 671a passes its caller's SI as the 4th argument of 8548 (the blip size); in the game it is not 0
                     r = m.call(seg, off, args, far=far)
                 except Exception as e:
                     raise RuntimeError('scenario %s: %s: %s' % (sid, ' '.join(op), e))

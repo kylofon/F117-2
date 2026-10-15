@@ -1,7 +1,6 @@
 /* Keyboard side of the sim flow: the keypad-as-stick INT 9 hook (1181:0008 / 0058 / 0072, spec simflow.md Part 1 section 7 and flight.md 2.4: owner flight, ported here
- * because S5.1 left the hook for this module), and the stand-in of 1E9E (owner flight, S5.7): its first-call set-up, the key fetch into [DE90] and the
- * Alt-Q / Alt-P / Alt-B screens, which are drawn with simflow's palettes and pictures. TODO(S5.7): the player flight model of 1E9E (stick, autopilot, engine,
- * attitude, position); until then the aircraft does not move. */
+ * because S5.1 left the hook for this module), and the Alt-Q / Alt-P / Alt-B screens of 1E9E, which are drawn with simflow's palettes and pictures (the flight
+ * model 1E9E itself is in flight/fl_flight.c). */
 #include <string.h>
 
 #include "sim/sim.h"
@@ -9,7 +8,7 @@
 
 /* ------------------------------------------------------------------------------------------------------ keypad as stick */
 
-/* 1181:0072 keypad_stick_isr as keypad_stick_hook (INT 9, the byte on port 60h = `raw`): the numeric keypad and the grey cursor keys move the virtual stick bytes DS:2CD6 (x) and
+/* 1181:0072 keypad_stick_isr (INT 9, the byte on port 60h = `raw`): the numeric keypad and the grey cursor keys move the virtual stick bytes DS:2CD6 (x) and
  * 2CD7 (y); 80h is centre, a first press gives 5Ah, a second press of the same key within 4 BIOS ticks 7Fh. Runs before the BIOS handler: first the type-ahead
  * buffer loses the repeats of identical keys. */
 static void dedupe_buffer(void)
@@ -26,7 +25,7 @@ static void dedupe_buffer(void)
     }
 }
 
-static void keypad_stick_hook(u8 al)
+void keypad_stick_isr(u8 al)
 {
     if (DSB(0x2CDD)) { DSB(0x2CDD)--; dedupe_buffer(); return; }
     u8 prev = DSB(0x2CDB);
@@ -72,7 +71,7 @@ void keypad_stick_install(void)
     DSB(0x2CD9) = 0;
     DSB(0x2CDB) = DSB(0x2CDC) = DSB(0x2CDD) = 0;
     DSB(0x2CD6) = DSB(0x2CD7) = 0x80;
-    kbd_set_int9_hook(keypad_stick_hook);
+    kbd_set_int9_hook(keypad_stick_isr);
 }
 
 /* 1181:0058 keypad_stick_remove */
@@ -95,7 +94,7 @@ void sim_pause_wait(void)
 }
 
 /* the quit requester of 1E9E (205F): ADV.PIC with the question; Y ends the mission with the abort code and the program with exit code 0 */
-static void quit_requester(void)
+void sim_quit_requester(void)
 {
     u16 save = DSW(0x2646);
     screen_off();
@@ -120,39 +119,12 @@ static void quit_requester(void)
     DSW(0x2646) = save;
 }
 
-/* STUB 0000:1e9e sim_input_flight */
-/* 0000:1E9E sim_input_flight (stand-in): the first call sets the control state up; every call fetches at most one key into [DE90] and handles the screens of
- * the key switch (Alt-Q requester, Alt-P pause, Alt-B boss screen, c = HUD style). The other keys of 1E9E (throttle, brakes, re-centre) are the flight model's. */
-void sim_input_flight(void)
+/* the Alt-B boss screen of 1E9E (2110): the lower panel saved to the clean page 2, both display pages black, pause, the panel back; the caller redraws the throttle digits */
+void sim_boss_screen(void)
 {
-    if (DSW(0xC0AE) == 0) {
-        DSW(0xB052) = DSW(0x2DF6) = DSW(0x2DF4) = DSW(0xB170) = DSW(0x2DFE) = DSW(0x2DF2) = DSW(0x2DF0) = 0;
-        u16 th = *(u16 *)(far_mp(ds_far(0x98F4)) + 0x38);
-        DSW(0x2DEE) = (s16)DSW((u16)(0x3D7C + 2 * th)) > 0 ? 0 : 0x8000;
-        if (DSB((u16)(0xB2A9 + 16 * DSW(0xE2DC))) & 2) DSB(0x2DEF) = (u8)(DSB(0x2DEF) + 4);
-        /* TODO(S5.7): fm_mat_from_euler (2E43) */
-        hud_draw_throttle();
-        DSW(0xC0AE) = 1;
-    }
-    DSW(0xDE90) = 0;
-    if (dos_kbhit()) {
-        DSW(0xDE90) = (u16)bios_keyboard(0);
-        while (dos_kbhit()) bios_keyboard(0);
-    }
-    switch (DSW(0xDE90)) {
-    case 0x1000: quit_requester(); break;                 /* Alt-Q */
-    case 0x1900: sim_pause_wait(); break;                 /* Alt-P */
-    case 0x2E63:                                           /* c: HUD style */
-        DSB(0x294B) = DSB(0x294B) == 0;
-        hud_layout_init_far();
-        break;
-    case 0x3000:                                           /* Alt-B: boss screen */
-        if (DSW(0x365E)) blit_rect(0, 0, 91, 2, 0, 91, 320, 109);
-        gfx_set_fg(0);
-        hud_fill_rect(0, 0, 319, 199);
-        sim_pause_wait();
-        if (DSW(0x365E)) gfx_restore_rect(0, 91, 320, 109);
-        hud_draw_throttle();
-        break;
-    }
+    if (DSW(0x365E)) blit_rect(0, 0, 91, 2, 0, 91, 320, 109);
+    gfx_set_fg(0);
+    hud_fill_rect(0, 0, 319, 199);
+    sim_pause_wait();
+    if (DSW(0x365E)) gfx_restore_rect(0, 91, 320, 109);
 }

@@ -2,7 +2,7 @@ exe,kind,address,name,type,owner,other_names,notes
 vgame,func,0000:0d08,terr_find_scenery_at,"unsigned(long x,long y_inv)",damage,,"[flight.md 6.3] nearest destroyable scenery object around a world point: levels 1-2, 3x3 tiles, Manhattan, override table, hit record DS:BA14 (full pseudocode)"
 vgame,func,0000:0f31,terr_set_scenery_state,"void(unsigned h,unsigned newid)",damage,,[flight.md 6.4] store a new id for the hit scenery object: override table DS:B772 (wreck ids) or tile record byte +6; sets bit 7
 vgame,func,0000:1e9e,sim_input_flight,void(void),flight,,"[flight.md 2.1] per-frame: key read+dispatch, stick, player aircraft model (attitude/speed/alt/fuel/G/eject), history ring"
-vgame,func,0000:2c6e,fm_rotate_apply,"void(int*A,int*B)",flight,,[flight.md 2.2] fm_mat = A x B via 2DDC; every 8th sets dirty
+vgame,func,0000:2c6e,fm_rotate_apply,"void(u16 a,u16 b)",flight,,[flight.md 2.2] fm_mat = A x B via 2DDC; every 8th sets dirty
 vgame,func,0000:2c9e,fm_mat_to_euler,void(void),flight,,[flight.md 2.2] matrix -> yaw/pitch/roll
 vgame,func,0000:2e43,fm_mat_from_euler,void(void),flight,,"[flight.md 2.2] e26b(2D94,yaw,pitch,roll); clear dirty"
 vgame,func,0000:43ee,sim_key_and_signature,void(void),detect,,"[flight.md 3.1] cba0(key) then the radar signature [3D5C]: speed, bank, bay +24, ECM +16, MicroProse altitude term / Lockheed +20 when [9B04]==0"
@@ -25,7 +25,7 @@ vgame,func,0000:7470,mission_target_done,int(int j),damage,,[flight.md 6.2] prim
 vgame,func,0000:74f6,dmg_player_blast,void(void),damage,,[flight.md 6.1] skill+1 random bits into [3632] damage mask and [C5C8]++; lamps 10..16 refresh; [98EE]=1; sound 4; no-op in training
 vgame,func,0000:753f,wpn_release,void(void),weapons,,"[flight.md 5.2] fire key: checks roll/bay/altitude, takes a store from the selected bay, fills a free projectile slot 8-11 or transfers fuel; messages Bay closed etc."
 vgame,func,0000:780a,dmg_wobj_destroyable,int(int o),damage,,[flight.md 6.2] 1 if the world object found in [9F10] is not yet the wreck shape (C0AC or DEA4 by class)
-vgame,func,0000:8bab,wpn_suit,"int wpn_suit(int wpn,int site)",weapons,,[flight.md 5.4] weapon suitability DS:386A[wpn*16 + class[site type]]
+vgame,func,0000:8bab,wpn_suit,"int(int wpn,int site)",weapons,,[flight.md 5.4] weapon suitability DS:386A[wpn*16 + class[site type]]
 vgame,func,0000:bad1,obj_find_at,"int(int x,int y)",weapons,wobj_register,[flight.md 5.4] terrain object at world point -> site index (>=1) / 0 = scratch site 0 filled / -1 none (R6 name obj_find_at)
 vgame,func,0000:bb86,wpn_site_dist,int(int site),weapons,,"[flight.md 5.4] bbb4 with site record DS:B2A4+16*site (x,y), bearing wanted"
 vgame,func,0000:bb9e,wpn_unit_dist,int(int unit),weapons,,"[flight.md 5.4] bbb4 with unit record DS:C140+36*unit (x,y), no bearing"
@@ -34,13 +34,13 @@ vgame,func,0000:bbed,fm_bomb_dive_angle,int(void),flight,,[flight.md 2.3] (((0x4
 vgame,func,0000:bc77,obj_cls_soft,int(int o),weapons,,"[flight.md 5.4] C604[type]&15 in {9,11,12,13}"
 vgame,func,0000:bcac,obj_cls_ship,int(int o),weapons,,"[flight.md 5.4] C604[type]&15 in {12,13}"
 vgame,func,0000:cb72,input_button,int(int n),flight,,[flight.md 2.4] key pulse 43BE+2n plus joy_button(n)
-vgame,func,0000:e578,mat_mul,"void(A,B,C)",flight,,[flight.md 2.2] 3x3 Q15 C=AxB; bit-exact spec: render3d.md Part 1 (E578)
+vgame,func,0000:e578,mat_mul,"void(u16 a,u16 b,u16 c)",flight,,[flight.md 2.2] 3x3 Q15 C=AxB; bit-exact spec: render3d.md Part 1 (E578)
 vgame,func,10a8:0c87,joy_recenter,void(void),flight,,"[flight.md 2.4] raw read, min=max=centre=raw"
 vgame,func,10a8:0c95,joy_set_centre_axis,SI axis,flight,,[flight.md 2.4] centre/min/max[si]=raw[si]
 vgame,func,10a8:0ca8,joy_poll,void(void),flight,,"[flight.md 2.4] raw read + joy_scale X,Y -> 2CD2/2CD3"
 vgame,func,1181:0008,keypad_stick_install,void(void),flight,,"[flight.md 2.4] NumLock off, clear state, 2CD6/2CD7=80h, save INT 9, install keypad_stick_isr"
 vgame,func,1181:0058,keypad_stick_remove,void(void),flight,,[flight.md 2.4] restore INT 9 from cs:0187
-vgame,func,1181:0072,keypad_stick_isr,void interrupt(void),flight,,"[flight.md 2.4] INT 9: keypad/arrow keys -> virtual stick bytes 2CD6/2CD7 (80h centre; 5Ah tap, 7Fh double tap), drops repeated identical keys in the BIOS buffer, chains to BIOS"
+vgame,func,1181:0072,keypad_stick_isr,void(u8 scan),flight,,"[flight.md 2.4] INT 9: keypad/arrow keys -> virtual stick bytes 2CD6/2CD7 (80h centre; 5Ah tap, 7Fh double tap), drops repeated identical keys in the BIOS buffer, chains to BIOS"
 vgame,label,0000:23a8,fm_eject_sequence,label,flight,,crash/eject block (C06E != 0)
 vgame,label,0000:2b6f,fm_history_store,label,flight,,16-entry ring + sway
 vgame,data,DS:2d14,gload_tab,u8[128],flight,,16/cos(bank) table

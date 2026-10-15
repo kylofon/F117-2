@@ -17,7 +17,7 @@ target_include_directories(nuked_opl3 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../thir
 
 # Coordinator files in src/, then one glob per module directory (PORTING.md "Source layout"): a module adds
 # <module>/<file>.c and it is built without touching this file. programs/ holds the phase 4 placeholders.
-set(F117_MODULES platform video frontend shell sim render3d programs)
+set(F117_MODULES platform video frontend shell sim render3d flight programs)
 file(GLOB F117_SOURCES CONFIGURE_DEPENDS src/*.c)
 foreach(m ${F117_MODULES})
     file(GLOB m_sources CONFIGURE_DEPENDS src/${m}/*.c)

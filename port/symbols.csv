@@ -1447,7 +1447,7 @@ vgame,func,0000:1d76,timer_calibrate,void(void),platform,,"measures PIT counts p
 vgame,func,0000:1e0b,pit_read_retrace,u16(void),lib,,wait retrace start on 3DAh (3BAh mono) then latch and read PIT ch0; 0 on timeout,simflow
 vgame,func,0000:1e60,bios_timer,unsigned(void),platform,,"INT 1A/00, returns the low word of the BIOS tick count",platform
 vgame,func,0000:1e9e,sim_input_flight,void(void),flight,,"[flight.md 2.1] per-frame: key read+dispatch, stick, player aircraft model (attitude/speed/alt/fuel/G/eject), history ring",flight
-vgame,func,0000:2c6e,fm_rotate_apply,"void(int*A,int*B)",flight,,[flight.md 2.2] fm_mat = A x B via 2DDC; every 8th sets dirty,flight
+vgame,func,0000:2c6e,fm_rotate_apply,"void(u16 a,u16 b)",flight,,[flight.md 2.2] fm_mat = A x B via 2DDC; every 8th sets dirty,flight
 vgame,func,0000:2c9e,fm_mat_to_euler,void(void),flight,,[flight.md 2.2] matrix -> yaw/pitch/roll,flight
 vgame,func,0000:2e43,fm_mat_from_euler,void(void),flight,,"[flight.md 2.2] e26b(2D94,yaw,pitch,roll); clear dirty",flight
 vgame,func,0000:2e64,fx_ratio_q15,"int(int x,int y)",lib,,x/y in Q15 with signs,simflow
@@ -1538,7 +1538,7 @@ vgame,func,0000:8b04,txt_draw,"void(void *c,char *s,int x,int y,int col)",simflo
 vgame,func,0000:8b3b,hud_num_left,"void(int v,int x,int y,int col)",simflow,,itoa to DS:C5D8 and draw left aligned,simflow
 vgame,func,0000:8b5c,hud_num_right,"void(unsigned v,int xr,int y,int col)",simflow,,"ltoa unsigned, right aligned x = xr - 4*len",simflow
 vgame,func,0000:8b93,msg_post,void(char *text),simflow,,"strcpy(DS:C578,text); DS:409E = 3*DS:3660 frames",simflow
-vgame,func,0000:8bab,wpn_suit,"int wpn_suit(int wpn,int site)",weapons,,[flight.md 5.4] weapon suitability DS:386A[wpn*16 + class[site type]],flight
+vgame,func,0000:8bab,wpn_suit,"int(int wpn,int site)",weapons,,[flight.md 5.4] weapon suitability DS:386A[wpn*16 + class[site type]],flight
 vgame,func,0000:8bd3,gfx_restore_rect,"void(int x,int y,int w,int h)",simflow,,page2 -> page0 and page1,simflow
 vgame,func,0000:8c10,mfd_scope_draw,void(int flip),simflow,,"left MFD mode 1 scope: grid, air units, missile tracks, sites, ownship, countermeasure marks",simflow
 vgame,func,0000:903f,mfd_target_box,"void(int x,int y,int col)",simflow,,9x7 selection frame around a scope icon,simflow
@@ -1622,7 +1622,7 @@ vgame,func,0000:df08,r3d_draw_queued,void(void),render3d,,[Part 1] replays queue
 vgame,func,0000:e26b,r3d_matrix_from_angles,"void near(int16*m,int16 A,int16 B,int16 C)",render3d,,"[Part 1] Q15 rotation, sin/cos to 4982..498C, products mq rounded. Diff-tested",render3d
 vgame,func,0000:e3e2,r3d_matrix_obj_side,void(void),render3d,,[Part 1] Q15 matrix 49A0 from [496A..496E] (other composition); DF08 id 18h side tests. Diff-tested,render3d
 vgame,func,0000:e54b,r3d_transpose49A0,void(void),render3d,,[Part 1] swap 49A2/49A6 49A4/49AC 49AA/49AE,render3d
-vgame,func,0000:e578,mat_mul,"void(A,B,C)",flight,,[flight.md 2.2] 3x3 Q15 C=AxB; bit-exact spec: render3d.md Part 1 (E578),flight
+vgame,func,0000:e578,mat_mul,"void(u16 a,u16 b,u16 c)",flight,,[flight.md 2.2] 3x3 Q15 C=AxB; bit-exact spec: render3d.md Part 1 (E578),flight
 vgame,func,0000:e7ac,r3d_place_object,"void(u16 type, s16 a1, s16 a2, s16 a3, s16 X, s16 Y, s16 Z)",render3d,,"[Part 1] flags DS:0A60[bank][idx]: class->497A, bit7 -> DDFE; else shade, 1433:03A9, transpose, 11EB:00D3(idx,x,z,-y)",render3d
 vgame,func,0000:e8a2,r3d_cull_point,"int(s16 x, s16 y, s16 z)",render3d,,"[Part 1] BP=x BX=y CX=z -> E8B5; AX 0 visible, ZF",render3d
 vgame,func,0000:e8b5,r3d_cull_core,"int(s16 x, s16 y, s16 z)",render3d,,"[Part 1] A,B,C=2*(M*v) s32 wrap; depth 48B6/48C6; wide 4936/4946 or E53E/E544 >>cl; [4978] dist (wide quirk). Diff-tested",render3d
@@ -1745,7 +1745,7 @@ vgame,func,10a8:0d70,joy_get_calib,void(void *dst),lib,,copy 20 words DS:2CA2 ->
 vgame,func,10a8:0d82,joy_set_calib,void(void far *src),lib,,copy 20 words far src (comm+48h) -> DS:2CA2,simflow
 vgame,func,1181:0008,keypad_stick_install,void(void),flight,,"[flight.md 2.4] NumLock off, clear state, 2CD6/2CD7=80h, save INT 9, install keypad_stick_isr",flight
 vgame,func,1181:0058,keypad_stick_remove,void(void),flight,,[flight.md 2.4] restore INT 9 from cs:0187,flight
-vgame,func,1181:0072,keypad_stick_isr,void interrupt(void),flight,,"[flight.md 2.4] INT 9: keypad/arrow keys -> virtual stick bytes 2CD6/2CD7 (80h centre; 5Ah tap, 7Fh double tap), drops repeated identical keys in the BIOS buffer, chains to BIOS",flight
+vgame,func,1181:0072,keypad_stick_isr,void(u8 scan),flight,,"[flight.md 2.4] INT 9: keypad/arrow keys -> virtual stick bytes 2CD6/2CD7 (80h centre; 5Ah tap, 7Fh double tap), drops repeated identical keys in the BIOS buffer, chains to BIOS",flight
 vgame,func,1199:000c,dos_open,"int(char *name, int mode)",platform,,INT 21/3D; on error prints message and exits (fatal tail 41CA); resets disk-buffer pos [1EDF]=200h,platform
 vgame,func,1199:006a,dos_creat,"int(char *name, int attr)",platform,,INT 21/3C; same fatal tail as dos_open,platform
 vgame,func,1199:00c8,dos_close,void(int h),lib,,"INT 21/3E, fatal on error",simflow

@@ -238,6 +238,7 @@ WV(hud_ils, hud_ils())
 
 /* ---- the step, keys and small pieces */
 WV(sim_frame_step, sim_frame_step())
+WV(sim_input_flight, sim_input_flight())
 WV(sim_key_and_signature, sim_key_and_signature())
 WV(input_command_key, input_command_key((unsigned)A(0)))
 WV(snd_cue, snd_cue((int)A(0), (int)A(1)))
@@ -300,7 +301,7 @@ static const CallDef calls[] = {
     E(hud_line_view), E(hud_line_win), E(hud_box), E(hud_pixel), E(txt_draw), E(hud_text), E(hud_num_left), E(hud_num_right), E(msg_post), E(mfd_text),
     E(cockpit_keyblit), E(mfd_icon), E(cockpit_refresh_panels), E(mfd_map_line), E(mfd_map_arc), E(mfd_map_route), E(mfd_map_save_bg), E(mfd_map_restore_bg), E(mfd_map_redraw), E(mfd_zoom_in), E(mfd_zoom_out), E(mfd_init_geometry), E(hud_threat_bar), E(mfd_left_select), E(mfd_right_select), E(mfd_tv_label), E(mfd_refresh), E(mfd_fuel_bar), E(fmt_2digit), E(fmt_clock_hhmm), E(fmt_clock_hhmmss), E(site_name), E(msg_site_label), E(nav_copy_xy), E(mfd_nav_page), E(mfd_weapons_page), E(mfd_objectives_page), E(hud_ils),
     ER(mfd_map_sx), ER(mfd_map_sy), ER(mfd_map_plot), ER(mfd_map_to_screen),
-    E(sim_frame_step), E(sim_key_and_signature), E(input_command_key), E(snd_cue), E(snd_engine_refresh), E(frame_params_update), E(frame_rate_halve), E(view_range_setup), E(hud_glideslope_update), E(fx_smoke_update), E(fx_fall_update), E(mission_cheat_rearm), E(cockpit_widgets_reset), E(mission_name_targets), E(sim_reset_clock_palette), E(pal_time_of_day_step), E(mission_end), E(mission_log_event), E(mission_world_export), E(cockpit_daynight_recolor), ER(input_button),
+    E(sim_frame_step), E(sim_input_flight), E(sim_key_and_signature), E(input_command_key), E(snd_cue), E(snd_engine_refresh), E(frame_params_update), E(frame_rate_halve), E(view_range_setup), E(hud_glideslope_update), E(fx_smoke_update), E(fx_fall_update), E(mission_cheat_rearm), E(cockpit_widgets_reset), E(mission_name_targets), E(sim_reset_clock_palette), E(pal_time_of_day_step), E(mission_end), E(mission_log_event), E(mission_world_export), E(cockpit_daynight_recolor), ER(input_button),
     E(hud_overlay_frame), E(mfd_scope_draw), E(mfd_w2s), E(mfd_target_box), E(hud_draw_front), E(cockpit_draw_adi), E(view_frame), E(r3d_project_point), E(hud_target_box), E(hud_draw_diamond), E(hud_update_aspect_label), E(hud_seeker_cross), E(hud_lock_bracket), E(hud_lock_indicator), E(hud_ping_label), E(hud_format_range), E(obj_overlay_frame), E(mfd_view_sky_bands), E(mfd_view_ground_bands), E(mfd_view_flir_tint), E(mfd_view_render),
     E(r3d_scene_draw), E(r3d_draw_world_objects), E(map_render_terrain), E(terr_probe_cell),
     E(hud_side_strips), E(pal_flight_load), E(pal_save), E(pal_restore), E(hud_color_init), E(hud_layout_init),
@@ -384,9 +385,16 @@ static int run_scenarios(const char *dir)
             Snap *s = get_snap(dir, tok[2]);
             if (!s) { printf("sim-test: snapshot %s missing\n", tok[2]); bad++; continue; }
             restore_snap(s);
+            kbd_flush();
             hash = 0;
             ncalls = 0;
             snprintf(cur_id, sizeof cur_id, "%s", tok[1]);
+        } else if (!strcmp(tok[0], "key") && nt >= 2) {           /* a key word into the BIOS buffer (1E9E's key fetch) */
+            kbd_inject((u16)parse_num(tok[1]));
+        } else if (!strcmp(tok[0], "pokec") && nt >= 3) {         /* a word of the comm block */
+            u8 *c = (u8 *)comm_get() + parse_num(tok[1]);
+            long v = parse_num(tok[2]);
+            c[0] = (u8)v; c[1] = (u8)(v >> 8);
         } else if (!strcmp(tok[0], "poke") && nt >= 4) {
             long off = parse_num(tok[2]), v = parse_num(tok[3]);
             if (tok[1][0] == 'b') DSB(off) = (u8)v;
