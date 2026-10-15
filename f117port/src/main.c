@@ -17,6 +17,7 @@
  *   --decoder-test DIR  every PIC / PAN / PAL / font in --game-dir against the Phase 2 Python decoders' output in DIR (77 = no game files)
 
  *   --sim-test DIR       VGAME (src/sim) against the references of port/notes/s55/sim_ref.py (77 = no game files)
+ *   --render-test DIR    the whole 3D scene (render3d) against the original: golden frames of port/notes/s56/r3d_golden.py (77 = no game files)
  *   --r3d-test FILE      the render3d leaf routines (src/render3d) against the vectors port/notes/s56/r3d_leaf_ref.py writes (77 = no game files)
  *   --shell-test DIR     START against the references of port/notes/s54/shell_ref.py (needs a scratch --game-dir with SCRATCH.MARK)
  *   --frontend-test DIR  the front end (SETUP, MPS_LOGO, PLAYER) against the references in DIR (port/notes/s53/frontend_ref.py writes them; 77 = no game files)
@@ -103,6 +104,7 @@ int main(int argc, char **argv)
         else if (!strcmp(a, "--frontend-test") && v) { feref = v; i++; }
         else if (!strcmp(a, "--shell-test") && v) { shref = v; i++; }
         else if (!strcmp(a, "--sim-test") && v) { simref = v; i++; }
+        else if (!strcmp(a, "--render-test") && v) { simref = v; sim_test_render_mode(); i++; }
         else if (!strcmp(a, "--r3d-test") && v) { r3dref = v; i++; }
         else if (!strcmp(a, "--tick-test")) {
             tick = true;

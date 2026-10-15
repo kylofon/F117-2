@@ -332,7 +332,7 @@
 #define VGAME_DS_r3d_old_int0                        0x5EB6  /* uint16[2]; owner render3d; spec render3d */
 #define VGAME_DS_r3d_edges                           0x5EBA  /* uint8[354][24]; owner render3d; spec render3d */
 #define VGAME_DS_r3d_plane_vis                       0x76D2  /* uint8[256]; owner render3d; spec render3d */
-#define VGAME_DS_r3d_plane_shade_77D2                0x77D2  /* DEAD; uint8[256]; owner render3d; spec render3d */
+#define VGAME_DS_r3d_plane_shade_tab                 0x77D2  /* DEAD; uint8[256]; owner render3d; spec render3d */
 #define VGAME_DS_r3d_bsp_list                        0x78D2  /* uint8[256]; owner render3d; spec render3d */
 #define VGAME_DS_r3d_vtx_needed                      0x79D2  /* uint8[256]; owner render3d; spec render3d */
 #define VGAME_DS_r3d_cammat                          0x7AF8  /* int16[9]; owner render3d; spec render3d */
@@ -992,7 +992,7 @@
 /* 11ce:0034  pic_begin                      loader     simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9" */
 /* 11ce:00b2  pic_rle90_fill                 loader     simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9" */
 /* 11ce:012b  pic_lzw_next                   loader     simflow.md "11B9 / 11CE picture decoder (V; format in video.md section 9" */
-/* 11eb:000c  r3d_set_camera                 render3d   render3d.md "11EB:000C r3d_set_camera"  DEAD */
+/* 11eb:000c  r3d_set_camera                 render3d   render3d.md "11EB:000C r3d_set_camera" */
 /* 11eb:00d3  r3d_draw_object                render3d   render3d.md "11EB:00D3 r3d_draw_object" */
 /* 11eb:01b8  r3d_probe_object               render3d   render3d.md "11EB:01B8 r3d_probe_object" */
 /* 11eb:0281  r3d_hook_div0                  render3d   render3d.md "11EB:0281 r3d_hook_div0 / 11EB:02A2 r3d_unhook_div0" */
@@ -1004,8 +1004,8 @@
 /* 11eb:04f9  r3d_light_part                 render3d   render3d.md "11EB:04CD r3d_light_root / 11EB:04F9 r3d_light_part" */
 /* 11eb:0565  r3d_planes                     render3d   render3d.md "11EB:0565 r3d_planes" */
 /* 11eb:0658  r3d_clear_vertex_flags         render3d   render3d.md "11EB:0658 r3d_clear_vertex_flags" */
-/* 11eb:0678  r3d_plane_shade_11EB_0678      render3d   render3d.md "11EB:0678 r3d_plane_shade"  DEAD */
-/* 11eb:06b9  r3d_xform_vertices             render3d   render3d.md "11EB:06B9 r3d_xform_vertices"  DEAD */
+/* 11eb:0678  r3d_plane_shade                render3d   render3d.md "11EB:0678 r3d_plane_shade" */
+/* 11eb:06b9  r3d_xform_vertices             render3d   render3d.md "11EB:06B9 r3d_xform_vertices" */
 /* 11eb:0819  r3d_xform_one                  render3d   render3d.md "11EB:0819 r3d_xform_one" */
 /* 11eb:0906  r3d_project                    render3d   render3d.md "11EB:0906 r3d_project" */
 /* 11eb:0975  r3d_div0_handler               render3d   render3d.md "11EB:0975 r3d_div0_handler (INT 0)" */
@@ -1013,7 +1013,7 @@
 /* 11eb:0a37  r3d_build_edges                render3d   render3d.md "11EB:0A37 r3d_build_edges" */
 /* 11eb:0b3f  r3d_make_edge                  render3d   render3d.md "11EB:0B3F r3d_make_edge" */
 /* 11eb:0c7a  r3d_draw_faces                 render3d   render3d.md "11EB:0C7A r3d_draw_faces" */
-/* 11eb:0cac  r3d_draw_face_plane            render3d   render3d.md "11EB:0CAC r3d_draw_face_plane"  DEAD */
+/* 11eb:0cac  r3d_draw_face_plane            render3d   render3d.md "11EB:0CAC r3d_draw_face_plane" */
 /* 11eb:0ced  r3d_face_list                  render3d   render3d.md "11EB:0CED r3d_face_list" */
 /* 11eb:0e5f  r3d_bsp_order                  render3d   render3d.md "11EB:0E5F r3d_bsp_order" */
 /* 11eb:0ef2  r3d_object_extent              render3d   render3d.md "11EB:0EF2 r3d_object_extent" */

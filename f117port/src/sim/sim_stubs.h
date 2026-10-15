@@ -4,8 +4,7 @@
  * Signatures are what the callers pass (cdecl, words), not final: render3d (S5.6) and flight, weapons, AI, detection, damage (S5.7) replace them. */
 #include "types.h"
 
-/* ---- render3d (TODO(S5.6)) */
-void map_render_terrain(void *ctx, int px, int py, int shift);          /* 0000:119C the cockpit map's terrain */
+/* ---- render3d (ported, S5.6b): the names the sim code calls */
 void sim_r3d_begin_scene(void *vp, int yaw, int pitch, int roll, int a, int b, int z, int flag, int fov);   /* 0000:DAE8 */
 void sim_r3d_draw_terrain(int yaw, int pitch, s32 x, s32 y, s32 z);                                          /* 0000:04DA */
 void sim_r3d_place_object(unsigned type, int a1, int a2, int a3, int x, int y, int z);                       /* 0000:E7AC */

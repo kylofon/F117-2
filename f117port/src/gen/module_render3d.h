@@ -18,11 +18,11 @@ void edge_to_tables_far(void); /* TODO signature: spec render3d.md "A.14 1001:06
 /* VGAME 1001:024c  spec render3d.md "A.4 1001:024C fill_rows_far - void far fill_rows_far(Viewpor" */
 void fill_rows_far(void *vp, int xl, int ymin, int xr, int ymax);
 /* VGAME 0000:1a85  spec render3d.md "0000:1AD6 r3d_sprite_main / 0000:1B1B r3d_sprite_tv / 0000:1" */
-void fx_explosion_sprite(void); /* TODO signature: spec render3d.md "0000:1AD6 r3d_sprite_main / 0000:1B1B r3" (type column: "void near(int16 x,int16 y,int16 size,int") */
+void fx_explosion_sprite(s16 x, s16 y, s16 size, s16 cls);
 /* VGAME 0000:c73c  spec render3d.md "0000:C73C fx_fire_puffs (V)" */
-void fx_fire_puffs(void); /* TODO signature: spec render3d.md "0000:C73C fx_fire_puffs (V)" (type column: "void near(int16 hdg,int16 pitch,int16 ro") */
+void fx_fire_puffs(s16 hdg, s16 pitch, s16 roll, s16 X, s16 Y, s16 Z);
 /* VGAME 0000:c834  spec render3d.md "0000:C834 fx_smoke_draw (V)" */
-void fx_smoke_draw(void); /* TODO signature: spec render3d.md "0000:C834 fx_smoke_draw (V)" (type column: "void near(int16 cx,int16 cy,int16 cz)") */
+void fx_smoke_draw(s16 cx, s16 cy, s16 cz);
 /* VGAME 1359:0094  spec render3d.md "Index-level entries (dead in this game: modes E/C/T, or no c" */
 void gfxlib_alloc_dead(void); /* TODO signature: spec render3d.md "Index-level entries (dead in this game: " (type column: "uint16 far(uint16 paras)") */
 /* VGAME 1359:0040  spec render3d.md "0. Overview of the range" */
@@ -50,15 +50,15 @@ void line_clip_far(void);
 /* VGAME 1001:0326  spec render3d.md "A.6 1001:0326 / 1001:032A far wrappers of 0336 (V)" */
 void line_clip_far_stub(void); /* TODO signature: spec render3d.md "A.6 1001:0326 / 1001:032A far wrappers o" (type column: "void far line_clip_far_stub(void)") */
 /* VGAME 0000:13e3  spec render3d.md "0000:13E3 map_draw_object (V,T)" */
-void map_draw_object(void); /* TODO signature: spec render3d.md "0000:13E3 map_draw_object (V,T)" (type column: "void near(uint16 obj,int16 x,int16 y)") */
+void map_draw_object(u16 obj, s16 x, s16 y);
 /* VGAME 0000:11f2  spec render3d.md "0000:11F2 map_draw_tiles (V,T)" */
-void map_draw_tiles(void); /* TODO signature: spec render3d.md "0000:11F2 map_draw_tiles (V,T)" (type column: "void near(int16 px,int16 py,int16 shift)") */
+void map_draw_tiles(s16 px, s16 py, s16 shift);
 /* VGAME 0000:13ac  spec render3d.md "0000:13AC map_pixel_to_tile (V,T)" */
-void map_pixel_to_tile(void); /* TODO signature: spec render3d.md "0000:13AC map_pixel_to_tile (V,T)" (type column: "void near(int16 px,int16 py,int16*tx,int") */
+void map_pixel_to_tile(s16 px, s16 py, s16 *tx, s16 *ty);
 /* VGAME 0000:119c  spec render3d.md "0000:119C map_render_terrain" */
-void map_render_terrain(void); /* TODO signature: spec render3d.md "0000:119C map_render_terrain" (type column: "void near(Viewport*ctx,int16 px,int16 py") */
+void map_render_terrain(void *ctx, int px, int py, int shift);
 /* VGAME 0000:1353  spec render3d.md "0000:1353 map_tile_bounds (V,T)" */
-void map_tile_bounds(void); /* TODO signature: spec render3d.md "0000:1353 map_tile_bounds (V,T)" (type column: "void near(int16*x0,int16*x1,int16*y0,int") */
+void map_tile_bounds(s16 *x0, s16 *x1, s16 *y0, s16 *y1);
 /* VGAME 1433:0314  spec render3d.md "C.10 1433:0314 mat_copy(const int16 src[9], int16 dst[9]) (V" */
 void mat_copy(u16 src, u16 dst);
 /* VGAME 1433:03a9  spec render3d.md "C.12 1433:03A9 mat_from_euler(uint16 a, uint16 b, uint16 c, " */
@@ -82,13 +82,13 @@ u16 math_hypot2(s16 a, s16 b);
 /* VGAME 1433:0004  spec render3d.md "C.1 1433:0004 math_sin(uint16 a) / 1433:0031 math_cos(uint16" */
 s16 math_sin(u16 a);
 /* VGAME 0000:bc12  spec render3d.md "0000:BC12 obj_wreck_shape (V,T)" */
-void obj_wreck_shape(void); /* TODO signature: spec render3d.md "0000:BC12 obj_wreck_shape (V,T)" (type column: "uint16 near(int16 site)") */
+u16 obj_wreck_shape(s16 o);
 /* VGAME 1001:01ec  spec render3d.md "A.3 1001:01EC poly_fill_far - void far poly_fill_far(Viewpor" */
 void poly_fill_far(void *vp, int n, const s16 *pts, int colour);
 /* VGAME 1001:0504  spec render3d.md "A.10 1001:0504 poly_flush_far(int mode) (V)" */
 void poly_flush_far(int mode);
 /* VGAME 0000:dae8  spec render3d.md "0000:DAE8 r3d_begin_scene" */
-void r3d_begin_scene(void); /* TODO signature: spec render3d.md "0000:DAE8 r3d_begin_scene" (type column: "void near(Viewport*vp,int16 a1,int16 a2,") */
+void r3d_begin_scene(u16 vp, s16 a1, s16 a2, s16 a3, s16 ox, s16 oy, s16 oz, s16 backdrop, s16 focal);
 /* VGAME 12ef:04ef  spec render3d.md "12EF:04EF bisect_in(SI = P0, DI = P1) -> CF, DX:AX, CX:BX (V" */
 int r3d_bisect_in(u16 si, u16 di, s32 *mx, s32 *my);
 /* VGAME 12ef:056b  spec render3d.md "12EF:056B bisect_out(SI = inside point, DI = outside point) " */
@@ -110,33 +110,35 @@ u8 r3d_clip_flags32(u16 rec, u8 c0, u8 c1);
 /* VGAME 12ef:0265  spec render3d.md "12EF:0265 intercept(AL = outcode, BX = x, CX = y) -> BP = x'" */
 int r3d_clip_intercept(u8 code, s16 x, s16 y, s16 *ox, s16 *oy, u8 *fail);
 /* VGAME 0000:e8b5  spec render3d.md "0000:E8B5 r3d_cull_core (T)" */
-void r3d_cull_core(void); /* TODO signature: spec render3d.md "0000:E8B5 r3d_cull_core (T)" (type column: "near(BP=x,BX=y,CX=z,[497A]) -> AX,ZF") */
+int r3d_cull_core(s16 x, s16 y, s16 z);
 /* VGAME 0000:e8a2  spec render3d.md "0000:E8A2 r3d_cull_point (T)" */
-void r3d_cull_point(void); /* TODO signature: spec render3d.md "0000:E8A2 r3d_cull_point (T)" (type column: "int16 near(int16 x,int16 y,int16 z)") */
+int r3d_cull_point(s16 x, s16 y, s16 z);
 /* VGAME 1088:0120  spec render3d.md "Part 1: scene set-up, terrain, placement, culling, sorted qu" */
-void r3d_depth_shade(void); /* TODO signature: spec render3d.md "Part 1: scene set-up, terrain, placement" (type column: "uint16 far(void)") */
+u16 r3d_depth_shade(void);
 /* VGAME 11eb:0975  spec render3d.md "11EB:0975 r3d_div0_handler (INT 0)" */
 void r3d_div0_handler(void); /* TODO signature: spec render3d.md "11EB:0975 r3d_div0_handler (INT 0)" (type column: "INT 0 handler (iret)") */
+/* VGAME 11eb:0cac  spec render3d.md "11EB:0CAC r3d_draw_face_plane" */
+void r3d_draw_face_plane(u16 plane, u16 si);
 /* VGAME 11eb:0c7a  spec render3d.md "11EB:0C7A r3d_draw_faces" */
 void r3d_draw_faces(u16 si);
 /* VGAME 12ef:01b1  spec render3d.md "12EF:01B1 void far draw_line(int16 x0, y0, x1, y1, colour) (" */
 void r3d_draw_line(void); /* TODO signature: spec render3d.md "12EF:01B1 void far draw_line(int16 x0, y" (type column: "void far(int16 x0,y0,x1,y1,colour)") */
 /* VGAME 0000:bd8f  spec render3d.md "0000:BD8F r3d_draw_model (V)" */
-void r3d_draw_model(void); /* TODO signature: spec render3d.md "0000:BD8F r3d_draw_model (V)" (type column: "void near(uint16 model,int32 x,int32 y,i") */
+void r3d_draw_model(u16 model, s32 x, s32 y, s16 alt, s16 ang1, s16 ang2, s16 ang3, s16 lod);
 /* VGAME 11eb:00d3  spec render3d.md "11EB:00D3 r3d_draw_object" */
 void r3d_draw_object(u16 obj, s16 x, s16 y, s16 z, u16 mat9, u16 vars);
 /* VGAME 0000:df08  spec render3d.md "0000:DF08 r3d_draw_queued (V)" */
-void r3d_draw_queued(void); /* TODO signature: spec render3d.md "0000:DF08 r3d_draw_queued (V)" (type column: "void near(void)") */
+void r3d_draw_queued(void);
 /* VGAME 0000:1442  spec render3d.md "Part 6: sky/ground backdrop (1442), 2D edge tables (1001), Q" */
 void r3d_draw_sky_ground(void *ctx);
 /* VGAME 0000:04da  spec render3d.md "0000:04DA r3d_draw_terrain (V)" */
-void r3d_draw_terrain(void); /* TODO signature: spec render3d.md "0000:04DA r3d_draw_terrain (V)" (type column: "void near(int16 a1,int16 pitch,int32 x,i") */
+void r3d_draw_terrain(s16 a1, s16 pitch, s32 x, s32 y, s32 z);
 /* VGAME 0000:9aca  spec render3d.md "Part 2: world-object pass 9ACA, projection B85D, TV-camera e" */
-void r3d_draw_world_objects(void); /* TODO signature: spec render3d.md "Part 2: world-object pass 9ACA, projecti" (type column: "void near(void)") */
+void r3d_draw_world_objects(void);
 /* VGAME 1359:0719  spec render3d.md "1359:0719 void far edge_dda(SI = rec) (V,T)" */
 void r3d_edge_dda(u16 rec);
 /* VGAME 0000:db3e  spec render3d.md "0000:DB3E r3d_end_scene" */
-void r3d_end_scene(void); /* TODO signature: spec render3d.md "0000:DB3E r3d_end_scene" (type column: "void near(void)") */
+void r3d_end_scene(void);
 /* VGAME 11eb:0ced  spec render3d.md "11EB:0CED r3d_face_list" */
 void r3d_face_list(u16 si);
 /* VGAME 11eb:02b6  spec render3d.md "11EB:02B6 r3d_frustum_test" */
@@ -154,7 +156,7 @@ void r3d_make_edge(u16 rec, u16 v0x8, u16 v1x8);
 /* VGAME 0000:e26b  spec render3d.md "0000:E26B r3d_matrix_from_angles (T)" */
 void r3d_matrix_from_angles(void); /* TODO signature: spec render3d.md "0000:E26B r3d_matrix_from_angles (T)" (type column: "void near(int16*m,int16 A,int16 B,int16 ") */
 /* VGAME 0000:e3e2  spec render3d.md "0000:E3E2 r3d_matrix_obj_side (T)" */
-void r3d_matrix_obj_side(void); /* TODO signature: spec render3d.md "0000:E3E2 r3d_matrix_obj_side (T)" (type column: "void near(void)") */
+void r3d_matrix_obj_side(void);
 /* VGAME 0000:ba13  spec render3d.md "0000:BA13 r3d_matrix_row_dot (T)" */
 void r3d_matrix_row_dot(void); /* TODO signature: spec render3d.md "0000:BA13 r3d_matrix_row_dot (T)" (type column: "int32 near(int16 row,int16 dx,int16 dy,i") */
 /* VGAME 11eb:0990  spec render3d.md "11EB:0990 r3d_near_bisect" */
@@ -178,7 +180,9 @@ void r3d_part_pivot(u16 eye, u16 di, u16 si);
 /* VGAME 1359:027b  spec render3d.md "Part 7: function index (generated from render3d_symbols.csv)" */
 void r3d_pixel_M(void); /* TODO signature: spec render3d.md "Part 7: function index (generated from r" (type column: "void far(x,y,c)") */
 /* VGAME 0000:e7ac  spec render3d.md "0000:E7AC r3d_place_object (V)" */
-void r3d_place_object(void); /* TODO signature: spec render3d.md "0000:E7AC r3d_place_object (V)" (type column: "void near(uint16 type,int16 a1,int16 a2,") */
+void r3d_place_object(u16 type, s16 a1, s16 a2, s16 a3, s16 X, s16 Y, s16 Z);
+/* VGAME 11eb:0678  spec render3d.md "11EB:0678 r3d_plane_shade" */
+void r3d_plane_shade(u16 nrm, u16 plane);
 /* VGAME 11eb:0565  spec render3d.md "11EB:0565 r3d_planes" */
 u16 r3d_planes(u16 si);
 /* VGAME 12ef:003e  spec render3d.md "12EF:003E void far poly_add_edge(SI = rec) (V,T)" */
@@ -190,41 +194,43 @@ void r3d_probe_object(u16 obj, s16 x, s16 y, s16 z, u16 mat9);
 /* VGAME 11eb:0906  spec render3d.md "11EB:0906 r3d_project" */
 void r3d_project(u16 di, u16 bx);
 /* VGAME 0000:b85d  spec render3d.md "Part 2: world-object pass 9ACA, projection B85D, TV-camera e" */
-void r3d_project_point(void); /* TODO signature: spec render3d.md "Part 2: world-object pass 9ACA, projecti" (type column: "void near(int16 x_u,int16 y_u,int16 z)") */
+void r3d_project_point(int x_u, int y_u, int z);
 /* VGAME 0000:dcc0  spec render3d.md "0000:DCC0 r3d_queue_billboard (V)" */
-void r3d_queue_billboard(void); /* TODO signature: spec render3d.md "0000:DCC0 r3d_queue_billboard (V)" (type column: "void near(uint16 id,int32 x,int32 y,int1") */
+void r3d_queue_billboard(u16 id, s32 x, s32 y, s16 z, s16 sx, s16 sy, s16 size);
 /* VGAME 0000:ddfe  spec render3d.md "0000:DDFE r3d_queue_insert (T)" */
-void r3d_queue_insert(void); /* TODO signature: spec render3d.md "0000:DDFE r3d_queue_insert (T)" (type column: "void near(void)") */
+void r3d_queue_insert(void);
 /* VGAME 0000:bee1  spec render3d.md "0000:BEE1 r3d_queue_object (V)" */
-void r3d_queue_object(void); /* TODO signature: spec render3d.md "0000:BEE1 r3d_queue_object (V)" (type column: "void near(uint16 id,int32 x,int32 y,int1") */
+void r3d_queue_object(u16 id, s32 x, s32 y, s16 z, s16 a1, s16 a2, s16 a3);
 /* VGAME 0000:03ce  spec render3d.md "0000:03CE r3d_scene_draw" */
-void r3d_scene_draw(void); /* TODO signature: spec render3d.md "0000:03CE r3d_scene_draw" (type column: "void near(int16 a1,int16 a2,int16 a3,int") */
+void r3d_scene_draw(int yaw, int pitch, int roll, s32 x, s32 y, s32 z, int x0, int y0, int w, int h);
 /* VGAME 0000:c6b8  spec render3d.md "0000:C6B8 r3d_scenery_id (V)" */
-void r3d_scenery_id(void); /* TODO signature: spec render3d.md "0000:C6B8 r3d_scenery_id (V)" (type column: "uint16 near(uint16 id)") */
+u16 r3d_scenery_id(u16 id);
+/* VGAME 11eb:000c  spec render3d.md "11EB:000C r3d_set_camera" */
+void r3d_set_camera(u16 mat9, s16 zoom);
 /* VGAME 0000:dc64  spec render3d.md "0000:DC64 r3d_set_camera_matrix" */
-void r3d_set_camera_matrix(void); /* TODO signature: spec render3d.md "0000:DC64 r3d_set_camera_matrix" (type column: "void near(int16 a1,int16 a2,int16 a3,int") */
+void r3d_set_camera_matrix(s16 a1, s16 a2, s16 a3, s16 focal);
 /* VGAME 0000:dca9  spec render3d.md "0000:DCA9 r3d_set_origin" */
-void r3d_set_origin(void); /* TODO signature: spec render3d.md "0000:DCA9 r3d_set_origin" (type column: "void near(int16 x,int16 y,int16 z)") */
+void r3d_set_origin(s16 x, s16 y, s16 z);
 /* VGAME 1359:019b  spec render3d.md "4 Decisions (scope and ownership)" */
 void r3d_set_page(void); /* TODO signature: spec render3d.md "4 Decisions (scope and ownership)" (type column: "void far(int16 page)") */
 /* VGAME 0000:db71  spec render3d.md "0000:DB71 r3d_set_viewport" */
-void r3d_set_viewport(void); /* TODO signature: spec render3d.md "0000:DB71 r3d_set_viewport" (type column: "void near(Viewport*vp)") */
+void r3d_set_viewport(u16 vp);
 /* VGAME 11eb:031b  spec render3d.md "11EB:031B r3d_setup_parts" */
 u16 r3d_setup_parts(u16 si, s16 nparts);
 /* VGAME 11eb:0f9b  spec render3d.md "11EB:0F9B r3d_shared_verts" */
 void r3d_shared_verts(void);
 /* VGAME 0000:1ad6  spec render3d.md "0000:1AD6 r3d_sprite_main / 0000:1B1B r3d_sprite_tv / 0000:1" */
-void r3d_sprite_main(void); /* TODO signature: spec render3d.md "0000:1AD6 r3d_sprite_main / 0000:1B1B r3" (type column: "void near(int16 x,int16 y,int16 size,int") */
+void r3d_sprite_main(s16 x, s16 y, s16 size, s16 cls);
 /* VGAME 0000:1b1b  spec render3d.md "0000:1AD6 r3d_sprite_main / 0000:1B1B r3d_sprite_tv / 0000:1" */
-void r3d_sprite_tv(void); /* TODO signature: spec render3d.md "0000:1AD6 r3d_sprite_main / 0000:1B1B r3" (type column: "void near(int16 x,int16 y,int16 size,int") */
+void r3d_sprite_tv(s16 x, s16 y, s16 size, s16 cls);
 /* VGAME 0000:e54b  spec render3d.md "0000:E54B r3d_transpose49A0 (V)" */
-void r3d_transpose49A0(void); /* TODO signature: spec render3d.md "0000:E54B r3d_transpose49A0 (V)" (type column: "void near(void)") */
+void r3d_transpose49A0(void);
 /* VGAME 11eb:02a2  spec render3d.md "11EB:0281 r3d_hook_div0 / 11EB:02A2 r3d_unhook_div0" */
 void r3d_unhook_div0(void);
 /* VGAME 0000:bcd7  spec render3d.md "0000:BCD7 r3d_unit_terrain_class (V,T)" */
-void r3d_unit_terrain_class(void); /* TODO signature: spec render3d.md "0000:BCD7 r3d_unit_terrain_class (V,T)" (type column: "void near(int16 unit)") */
+void r3d_unit_terrain_class(u16 u);
 /* VGAME 0000:ba67  spec render3d.md "0000:BA67 r3d_view_depth (T)" */
-void r3d_view_depth(void); /* TODO signature: spec render3d.md "0000:BA67 r3d_view_depth (T)" (type column: "void near(int16 px,int16 py,int16 pz,int") */
+void r3d_view_depth(s16 px, s16 py, s16 pz, s16 cx, s16 cy, s16 cz);
 /* VGAME 1359:07d6  spec render3d.md "1359:07D6 void far wall_fill(int16 a, int16 b, int16 x) (V,T" */
 void r3d_wall_fill(s16 a, s16 b, s16 x);
 /* VGAME 12ef:019b  spec render3d.md "12EF:0185 wall_right / 12EF:019B wall_left (V)" */
@@ -233,20 +239,22 @@ void r3d_wall_left(void);
 void r3d_wall_right(void);
 /* VGAME 11eb:0819  spec render3d.md "11EB:0819 r3d_xform_one" */
 void r3d_xform_one(void); /* TODO signature: spec render3d.md "11EB:0819 r3d_xform_one" (type column: "void near(ES:SI,BX=mat,DI=out3d,BP=out2d") */
+/* VGAME 11eb:06b9  spec render3d.md "11EB:06B9 r3d_xform_vertices" */
+u16 r3d_xform_vertices(u16 si);
 /* VGAME 1001:0525  spec render3d.md "A.11 1001:051F tables_clear_far / 1001:0525 tables_clear (V," */
 void tables_clear(void);
 /* VGAME 1001:051f  spec render3d.md "A.11 1001:051F tables_clear_far / 1001:0525 tables_clear (V," */
 void tables_clear_far(void); /* TODO signature: spec render3d.md "A.11 1001:051F tables_clear_far / 1001:0" (type column: "void far tables_clear_far(void)") */
 /* VGAME 0000:77d9  spec render3d.md "0000:77D9 terr_probe_cell (V,T)" */
-void terr_probe_cell(void); /* TODO signature: spec render3d.md "0000:77D9 terr_probe_cell (V,T)" (type column: "void near(int16 cellx,int16 celly,int16 ") */
+void terr_probe_cell(s16 cellx, s16 celly, s16 alt);
 /* VGAME 0000:0ffb  spec render3d.md "0000:0FFB terr_probe_point (V,T)" */
-void terr_probe_point(void); /* TODO signature: spec render3d.md "0000:0FFB terr_probe_point (V,T)" (type column: "void near(uint32 x,uint32 y,uint32 z)") */
+void terr_probe_point(u32 x, u32 y, u32 z);
 /* VGAME 0000:0fb1  spec render3d.md "0000:0FB1 terr_scenery_override (V)" */
-void terr_scenery_override(void); /* TODO signature: spec render3d.md "0000:0FB1 terr_scenery_override (V)" (type column: "uint16 near(int16 level,int16 idx,int16 ") */
+u16 terr_scenery_override(s16 level, s16 idx, s16 cx, s16 cy);
 /* VGAME 0000:0865  spec render3d.md "0000:0865 terr_tile_type (T)" */
-void terr_tile_type(void); /* TODO signature: spec render3d.md "0000:0865 terr_tile_type (T)" (type column: "uint16 near(int16 level,int16 x,int16 y)") */
+u16 terr_tile_type(s16 level, s16 x, s16 y);
 /* VGAME 0000:0804  spec render3d.md "0000:0804 terr_to_level (T)" */
-void terr_to_level(void); /* TODO signature: spec render3d.md "0000:0804 terr_to_level (T)" (type column: "int32 near(int16 level,uint32 v)") */
+u32 terr_to_level(s16 level, u32 v);
 /* VGAME 1433:032e  spec render3d.md "C.11 1433:032E vec_mat32(const int16 v[3], const int16 M[9]," */
 void vec_mat32(u16 v, u16 m, u16 out);
 /* VGAME 0000:d76b  spec render3d.md "0000:D76B view_range_setup" */
@@ -254,10 +262,6 @@ void view_range_setup(void); /* TODO signature: spec render3d.md "0000:D76B view
 
 /* ---- dead: not ported (listed for the record) */
 /* DEAD VGAME 1001:02ba fill_rows2_near */
-/* DEAD VGAME 11eb:000c r3d_set_camera */
-/* DEAD VGAME 11eb:0678 r3d_plane_shade_11EB_0678 */
-/* DEAD VGAME 11eb:06b9 r3d_xform_vertices */
-/* DEAD VGAME 11eb:0cac r3d_draw_face_plane */
 /* DEAD VGAME 1359:00e7 gfxlib_rows_ega */
 /* DEAD VGAME 1359:0126 gfxlib_rows_cga */
 /* DEAD VGAME 1359:0149 gfxlib_rows_tandy */

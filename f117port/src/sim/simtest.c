@@ -17,6 +17,7 @@
 #include <string.h>
 
 #include "prog.h"
+#include "gen/module_render3d.h"
 #include "sim/sim.h"
 #include "sim/sim_priv.h"
 #include "sim/simtest.h"
@@ -281,6 +282,13 @@ WV(mfd_view_ground_bands, mfd_view_ground_bands((int)A(0), (int)A(1)))
 WV(mfd_view_flir_tint, mfd_view_flir_tint((int)A(0), (int)A(1)))
 WV(mfd_view_render, mfd_view_render((unsigned)A(0), (int)A(1), (int)A(2), (int)A(3), (int)A(4), (int)A(5), (int)A(6), (int)A(7), (int)A(8)))
 
+/* ---- render3d (S5.6b, --render-test): 32-bit arguments come as two words, lo first */
+#define L32(i) ((s32)(((u32)(u16)A(i + 1) << 16) | (u16)A(i)))
+WV(r3d_scene_draw, r3d_scene_draw((s16)A(0), (s16)A(1), (s16)A(2), L32(3), L32(5), L32(7), (s16)A(9), (s16)A(10), (s16)A(11), (s16)A(12)))
+WV(r3d_draw_world_objects, r3d_draw_world_objects())
+WV(map_render_terrain, map_render_terrain(DSP((u16)A(0)), (s16)A(1), (s16)A(2), (s16)A(3)))
+WV(terr_probe_cell, terr_probe_cell((s16)A(0), (s16)A(1), (s16)A(2)))
+
 #define E(n) { #n, w_##n, false }          /* a function without a result worth comparing */
 #define ER(n) { #n, w_##n, true }          /* the result goes into the hash */
 static const CallDef calls[] = {
@@ -294,6 +302,7 @@ static const CallDef calls[] = {
     ER(mfd_map_sx), ER(mfd_map_sy), ER(mfd_map_plot), ER(mfd_map_to_screen),
     E(sim_frame_step), E(sim_key_and_signature), E(input_command_key), E(snd_cue), E(snd_engine_refresh), E(frame_params_update), E(frame_rate_halve), E(view_range_setup), E(hud_glideslope_update), E(fx_smoke_update), E(fx_fall_update), E(mission_cheat_rearm), E(cockpit_widgets_reset), E(mission_name_targets), E(sim_reset_clock_palette), E(pal_time_of_day_step), E(mission_end), E(mission_log_event), E(mission_world_export), E(cockpit_daynight_recolor), ER(input_button),
     E(hud_overlay_frame), E(mfd_scope_draw), E(mfd_w2s), E(mfd_target_box), E(hud_draw_front), E(cockpit_draw_adi), E(view_frame), E(r3d_project_point), E(hud_target_box), E(hud_draw_diamond), E(hud_update_aspect_label), E(hud_seeker_cross), E(hud_lock_bracket), E(hud_lock_indicator), E(hud_ping_label), E(hud_format_range), E(obj_overlay_frame), E(mfd_view_sky_bands), E(mfd_view_ground_bands), E(mfd_view_flir_tint), E(mfd_view_render),
+    E(r3d_scene_draw), E(r3d_draw_world_objects), E(map_render_terrain), E(terr_probe_cell),
     E(hud_side_strips), E(pal_flight_load), E(pal_save), E(pal_restore), E(hud_color_init), E(hud_layout_init),
 };
 
@@ -341,7 +350,9 @@ static void restore_snap(const Snap *s)
     plat_prog = PROG_VGAME;
     video_load_driver_state(s->mgdata, s->mgcode);
     timer_bios_frozen = true;
+    bool render = sim_test.render;
     memset(&sim_test, 0, sizeof sim_test);
+    sim_test.render = render;
     sim_test.active = true;
     sim_test.frames_left = -1;
 }
@@ -426,6 +437,8 @@ static int run_scenarios(const char *dir)
     printf("sim-test: %d scenarios run%s\n", count, bad ? " (with errors)" : "");
     return bad ? 1 : 0;
 }
+
+void sim_test_render_mode(void) { sim_test.render = true; }
 
 int sim_selftest(const char *dir)
 {

@@ -6,6 +6,7 @@
 #include "sim/sim.h"
 #include "sim/sim_priv.h"
 #include "sim/sim_stubs.h"
+#include "gen/module_render3d.h"
 
 /* ---- the sound driver, slots 101 / 103 / 104 of ASOUND.117 (sound.md "2. Driver interface") ---- */
 int sim_snd_cmd(int cmd, int a, int b, int c) { (void)cmd; (void)a; (void)b; (void)c; return 0; }   /* TODO(S5.9): snd_cmd(cmd, ...) */
@@ -17,9 +18,6 @@ void sim_snd_noise(void) { sim_noise_calls++; }                                 
 
 
 /* ------------------------------------------------------------------------------------------------------------ stubs (see sim_stubs.h) */
-
-/* STUB 0000:119c map_render_terrain */
-void map_render_terrain(void *ctx, int px, int py, int shift) { (void)ctx; (void)px; (void)py; (void)shift; }   /* TODO(S5.6) */
 
 /* STUB 0000:0d08 terr_find_scenery_at */
 unsigned terr_find_scenery_at(long x, long y_inv) { (void)x; (void)y_inv; return 0; }              /* TODO(S5.7): flight.md 6.3 */
@@ -45,21 +43,15 @@ void wpn_release(void) { }   /* TODO(S5.7) */
 /* STUB 0000:4512 wpn_release_countermeasure */
 void wpn_release_countermeasure(int type) { (void)type; }   /* TODO(S5.7) */
 
-/* ---- render3d (TODO(S5.6)): the scene functions that the view code calls */
-/* STUB 0000:dae8 r3d_begin_scene */
-void sim_r3d_begin_scene(void *vp, int yaw, int pitch, int roll, int a, int b, int z, int flag, int fov) { (void)vp; (void)yaw; (void)pitch; (void)roll; (void)a; (void)b; (void)z; (void)flag; (void)fov; }
-/* STUB 0000:04da r3d_draw_terrain */
-void sim_r3d_draw_terrain(int yaw, int pitch, s32 x, s32 y, s32 z) { (void)yaw; (void)pitch; (void)x; (void)y; (void)z; }
-/* STUB 0000:e7ac r3d_place_object */
-void sim_r3d_place_object(unsigned type, int a1, int a2, int a3, int x, int y, int z) { (void)type; (void)a1; (void)a2; (void)a3; (void)x; (void)y; (void)z; }
-/* STUB 0000:db3e r3d_end_scene */
-void sim_r3d_end_scene(void) { }
-/* STUB 0000:df08 r3d_draw_queued */
-void sim_r3d_draw_queued(void) { }
-/* STUB 0000:c73c fx_fire_puffs */
-void sim_fx_fire_puffs(int a0, int a1, int a2, int rx, int ry, int rz) { (void)a0; (void)a1; (void)a2; (void)rx; (void)ry; (void)rz; }
-/* STUB 0000:c834 fx_smoke_draw */
-void sim_fx_smoke_draw(int camx, int camy, int camz) { (void)camx; (void)camy; (void)camz; }
+/* ---- render3d (ported by S5.6b): the scene functions that the view code calls, under the names the sim code uses */
+static u16 vp_off(void *vp) { return (u16)((u8 *)vp - DSP(0)); }
+void sim_r3d_begin_scene(void *vp, int yaw, int pitch, int roll, int a, int b, int z, int flag, int fov) { r3d_begin_scene(vp_off(vp), (s16)yaw, (s16)pitch, (s16)roll, (s16)a, (s16)b, (s16)z, (s16)flag, (s16)fov); }
+void sim_r3d_draw_terrain(int yaw, int pitch, s32 x, s32 y, s32 z) { r3d_draw_terrain((s16)yaw, (s16)pitch, x, y, z); }
+void sim_r3d_place_object(unsigned type, int a1, int a2, int a3, int x, int y, int z) { r3d_place_object((u16)type, (s16)a1, (s16)a2, (s16)a3, (s16)x, (s16)y, (s16)z); }
+void sim_r3d_end_scene(void) { r3d_end_scene(); }
+void sim_r3d_draw_queued(void) { r3d_draw_queued(); }
+void sim_fx_fire_puffs(int a0, int a1, int a2, int rx, int ry, int rz) { fx_fire_puffs((s16)a0, (s16)a1, (s16)a2, (s16)rx, (s16)ry, (s16)rz); }
+void sim_fx_smoke_draw(int camx, int camy, int camz) { fx_smoke_draw((s16)camx, (s16)camy, (s16)camz); }
 
 /* ---- damage, weapons, flight (TODO(S5.7)) and render3d (TODO(S5.6)) functions of the overlay pass */
 /* STUB 0000:71b4 dmg_unit_kill */
@@ -76,13 +68,9 @@ int sim_obj_find_at(int x, int y) { (void)x; (void)y; return 0; }
 int sim_wpn_suit(int wpn, int site) { (void)wpn; (void)site; return 0; }
 /* STUB 0000:bcac obj_cls_ship */
 int sim_obj_cls_ship(int o) { (void)o; return 0; }
-/* STUB 0000:bb86 wpn_site_dist */
-int sim_wpn_site_dist(int site) { (void)site; return 0; }
-/* STUB 0000:bc12 obj_wreck_shape */
-unsigned sim_obj_wreck_shape(int o) { (void)o; return 0; }
-/* STUB 0000:bcd7 r3d_unit_terrain_class */
-void sim_r3d_unit_terrain_class(int u) { (void)u; }
+int sim_wpn_site_dist(int site) { return wpn_site_dist(site); }                                  /* 0000:BB86 (render3d/r3d_world.c until S5.7) */
+unsigned sim_obj_wreck_shape(int o) { return obj_wreck_shape((s16)o); }                           /* 0000:BC12 (render3d) */
+void sim_r3d_unit_terrain_class(int u) { r3d_unit_terrain_class((u16)u); }                       /* 0000:BCD7 (render3d) */
 /* STUB 0000:bbed fm_bomb_dive_angle */
 int sim_fm_bomb_dive_angle(void) { return 0; }
-/* STUB 0000:1a85 fx_explosion_sprite */
-void sim_fx_explosion_sprite(int x, int y, int size, int frame) { (void)x; (void)y; (void)size; (void)frame; }
+void sim_fx_explosion_sprite(int x, int y, int size, int frame) { fx_explosion_sprite((s16)x, (s16)y, (s16)size, (s16)frame); }   /* 0000:1A85 (render3d) */

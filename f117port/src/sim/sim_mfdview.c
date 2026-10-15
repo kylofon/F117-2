@@ -1,5 +1,5 @@
 /* The sensor picture window of the right MFD (spec simflow.md Part 9 "bf71"): x 169..245, y 110..169 of the screen. The sky / ground backdrop bands, the FLIR tint and
- * the render function itself; the 3D scene calls inside are render3d's stubs (TODO(S5.6)). */
+ * the render function itself; the 3D scene calls inside go to render3d (sim_stubs.c wrappers). */
 #include <stdio.h>
 #include <string.h>
 

@@ -51,6 +51,7 @@ void sim_snd_noise(void);                                /* TODO(S5.9) */
 /* ---- test hooks (simtest.c); all idle in a normal run ---- */
 typedef struct SimTest {
     bool active;
+    bool render;                    /* --render-test: r3d_scene_draw runs in full under sim_test.active (kept over restore_snap) */
     const char *dump_dir;           /* tests: where simtest.c writes */
     bool stop_at_run;               /* tests: leave the program at the entry of sim_run after dumping the state */
     bool ticks;                     /* tests: ticks mode, the ISR body is run at the entry of sim_run instead */

@@ -1,8 +1,9 @@
 /* The multi-function displays (spec simflow.md Part 7 sections 2 and 3, Part 3 section 8, Part 5 section 4): the left MFD (moving map / scope) and the right MFD
- * pages (TV, navigation, weapons, objectives) with their selection, zoom and map primitives. The cockpit map's terrain drawing (119C) is render3d's (TODO(S5.6)). */
+ * pages (TV, navigation, weapons, objectives) with their selection, zoom and map primitives. The cockpit map's terrain drawing (119C) is render3d's (render3d/r3d_terrain.c). */
 #include <stdio.h>
 #include <string.h>
 
+#include "gen/module_render3d.h"
 #include "sim/sim.h"
 #include "sim/sim_priv.h"
 #include "sim/sim_stubs.h"
