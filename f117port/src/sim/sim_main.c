@@ -414,7 +414,7 @@ void frame_loop_body(void)
         DSB(0x262A) = 1;
         sim_input_flight();
         sim_frame_step();
-        if (sim_test.frames_left >= 0 && sim_test.frames_left-- == 0) mission_end(7);
+        if (sim_test.frames_left >= 0 && sim_test.frames_left-- == 0) mission_end(getenv("F117_VGAME_END") ? atoi(getenv("F117_VGAME_END")) : 7);   /* PORT: F117_VGAME_END=0 lands (the chain test hands END a finished mission) */
     } while (DSB(0xE552) == 0);
 }
 

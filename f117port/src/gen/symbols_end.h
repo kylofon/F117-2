@@ -121,7 +121,7 @@
 #define END_DS_display_name                          0x7228  /* char[]; owner debrief; spec debrief */
 
 /* ---- Functions: index only (prototypes: gen/module_<spec>.h). Columns: address, C name, owner, spec file and section. */
-/* 0000:0010  end_main                       debrief    debrief.md "0000:0010 end_main void end_main(void) (V)" */
+/* 0000:0010  debrief_main                   debrief    debrief.md "0000:0010 end_main void end_main(void) (V)" */
 /* 0000:00a1  landing_class                  debrief    debrief.md "0000:00A1 landing_class int landing_class(void) (V)" */
 /* 0000:00c7  end_nop_a                      debrief    debrief.md "0000:00C7, 00C8 end_nop_a, end_nop_b (V)" */
 /* 0000:00c8  end_nop_b                      debrief    debrief.md "0000:00C7, 00C8 end_nop_a, end_nop_b (V)" */
@@ -142,37 +142,37 @@
 /* 0000:0ecd  map_x                          debrief    debrief.md "6.6 0000:0714 replay_step(idx) (V, differential-tested) -> n" */
 /* 0000:0ee0  map_y                          debrief    debrief.md "6.6 0000:0714 replay_step(idx) (V, differential-tested) -> n" */
 /* 0000:0ef3  fmt_time                       debrief    debrief.md "6.10 0000:0EF3 fmt_time(unsigned ticks, char *buf) (V, diffe" */
-/* 0000:0fa4  load_file_far                  debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
-/* 0000:0fda  load_file_near                 debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
+/* 0000:0fa4  ui_load_file_far               debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
+/* 0000:0fda  ui_load_file_near              debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 /* 0000:100d  load_pic                       debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 /* 0000:1039  load_pic_seg_a                 debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md "  DEAD */
 /* 0000:1061  load_pic_seg_c                 debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md "  DEAD */
 /* 0000:1089  load_pic_seg_c_at              debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md "  DEAD */
 /* 0000:10c1  save_file_far                  debrief    debrief.md "9 What END hands back"  DEAD */
-/* 0000:10fa  text_centered                  debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
+/* 0000:10fa  ui_text_centered               debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 /* 0000:112a  text_shadow_centered           debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
-/* 0000:11a2  wait_ticks                     debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
+/* 0000:11a2  ui_wait_ticks                  debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 /* 0000:11b7  popup_text                     debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md "  DEAD */
 /* 0000:1332  draw_frame                     debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md "  DEAD */
 /* 0000:1470  draw_button                    debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md "  DEAD */
 /* 0000:14ce  map_route_line                 debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md "  DEAD */
 /* 0000:15d7  fade_in                        debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 /* 0000:15ef  fade_out                       debrief    debrief.md "6.1 Screen build: 0000:02A4 map_screen_init (V for the call " */
-/* 0000:1607  pal_fade                       debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
-/* 0000:1708  pal_fade_calibrate             debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
+/* 0000:1607  end_pal_fade                   debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
+/* 0000:1708  end_pal_fade_calibrate         debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 /* 0000:1755  map_place_label                debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md "  DEAD */
-/* 0000:185c  pal_queue_push                 debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
+/* 0000:185c  end_pal_queue_push             debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 /* 0000:188d  ui_text                        debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 /* 0000:1901  show_screen_pic                debrief    debrief.md "0000:1901 show_screen_pic(const char *name, void (*cb)(void)" */
-/* 0000:1992  sprite_draw                    debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
-/* 0000:19c3  text_shadow                    debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
-/* 0000:1a3b  text_width                     debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
-/* 0000:1a75  text_wrap                      debrief    debrief.md "Debrief: END.EXE (S3.9)" */
+/* 0000:1992  ui_sprite_draw                 debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
+/* 0000:19c3  ui_text_shadow                 debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
+/* 0000:1a3b  ui_text_width                  debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
+/* 0000:1a75  ui_text_wrap                   debrief    debrief.md "Debrief: END.EXE (S3.9)" */
 /* 0000:1baa  menu_loop                      debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 /* 0000:1c3b  hit_test                       debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 /* 0000:1cb1  rect_order_desc                debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md "  DEAD */
 /* 0000:1cd3  rect_order_asc                 debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md "  DEAD */
-/* 0000:1cf5  poll_input                     debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
+/* 0000:1cf5  end_poll_input                 debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md " */
 /* 0000:1fe5  cursor_init                    debrief    debrief.md "0000:3D4F init_sprites void(void) (V)" */
 /* 0000:2023  check_break                    debrief    debrief.md "Exit: 0000:3F44 end_exit void end_exit(int code) (V)" */
 /* 0000:2032  kbd_flush                      debrief    debrief.md "10 UI toolkit and RTL-level helpers (map to START, shell.md "  DEAD */

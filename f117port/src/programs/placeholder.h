@@ -10,7 +10,7 @@ extern bool placeholder_interactive;
 void placeholder_init(void);        /* installs the Esc handler on the host keyboard */
 
 #include "prog.h"
-/* The stand-in of program `id` (setup_stub, mps_logo_stub, player_stub, dswap_stub, start_stub; VGAME and END are still the placeholders). */
+/* The stand-in of program `id` (setup_stub, mps_logo_stub, player_stub, dswap_stub, start_stub; the real VGAME and END have their own modules). */
 ProgMain placeholder_main(ProgId id);
 int vgame_stub(const char *tail);        /* the --chain-test stand-in of VGAME (the real one is src/sim) */
 void placeholder_note_vgame_pass(void);  /* the real VGAME calls it: the stand-in END counts the passes */

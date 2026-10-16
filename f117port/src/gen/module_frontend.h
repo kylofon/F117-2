@@ -101,8 +101,7 @@ int kbd_empty_misc(void);
 int kbd_get_misc(void);
 /* MISC 0007:0018  spec frontend.md "5 MISC.EXE (6 entries, slot base 90, code segment image 0070" */
 void kbd_locks_clear(void);
-/* DSWAP 0000:03a7  spec frontend.md "(no heading)" */
-void load_pic(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void load_pic(char *name, int page)") */
+/* DSWAP 0000:03a7  spec frontend.md "(no heading)": same name as module_debrief.h, declared there */
 /* DSWAP 0000:03d3  spec frontend.md "(no heading)" */
 void load_pic_seg_a(void); /* TODO signature: spec frontend.md "(no heading)" (type column: "void load_pic_seg_a(char *name, unsigned") */
 /* DSWAP 0000:03fb  spec frontend.md "(no heading)" */

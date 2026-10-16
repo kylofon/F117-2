@@ -115,8 +115,8 @@ def one(exe, game, name):
 
 def chain(exe, game):
     """The scripted run: F117_KEYS answers SETUP ('N' at 1 s, '2' at 2 s), the logo plays, a space at 11 s ends the PLAYER intro; then START runs the
-    script of shell_chain.txt (F117_SHELL_SCRIPT): create a pilot, orders, briefing, arming, launch -> PLAYER title-2 ends at once, VGAME and END
-    are the placeholders, START again and Alt-Q at the quit prompt."""
+    script of shell_chain.txt (F117_SHELL_SCRIPT): create a pilot, orders, briefing, arming, launch -> PLAYER title-2 ends at once, VGAME
+    runs 40 frames and lands, the real END debriefs (end_chain.txt), START again and Alt-Q at the quit prompt."""
     if not have_game(game):
         print('no game files')
         return 77
@@ -124,7 +124,8 @@ def chain(exe, game):
     import shell_emu
     open(os.path.join(scratch, 'ROSTER.FIL'), 'wb').write(shell_emu.make_roster())
     script = os.path.join(HERE, 'shell_chain.txt')
-    env = dict(os.environ, F117_KEYS='1:31,2:03,11:39', F117_SHELL_SCRIPT=script, F117_VGAME_FRAMES='40')
+    env = dict(os.environ, F117_KEYS='1:31,2:03,11:39', F117_SHELL_SCRIPT=script, F117_VGAME_FRAMES='40', F117_VGAME_END='0',
+               F117_END_SCRIPT=os.path.join(HERE, '..', 's58', 'end_chain.txt'))     # the real END (S5.8) needs its keys; the flight ends with a landing
     t = time.time()
     p = subprocess.run([exe, '--headless', '--trace', '--game-dir', scratch], env=env, capture_output=True, text=True, timeout=500)
     secs = time.time() - t

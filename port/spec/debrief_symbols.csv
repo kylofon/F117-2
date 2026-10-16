@@ -1,100 +1,100 @@
 exe,kind,address,name,type,owner,other_names,notes
-end,func,0000:0010,end_main,void end_main(void),debrief,,"END main: init, missions++, outcome scene by comm+26h, summary, map replay, awards, quips, retire/KIA flags, exit(23h) [debrief.md 0/2]"
-end,func,0000:00a1,landing_class,int landing_class(void),debrief,,grid class (0..3) of the final position comm+74h/76h >> 11 into DS:6440; 0 = hostile = captured [2]
-end,func,0000:00c7,end_nop_a,void end_nop_a(void),debrief,,ret stub (C start-up table)
-end,func,0000:00c8,end_nop_b,void end_nop_b(void),debrief,,ret stub (C start-up table)
-end,func,0000:00c9,name_table_build,void name_table_build(void),debrief,,blob_import then DS:6DFA name pointer table from the NUL separated pool DS:6EFA (same as VGAME 4AD0) [1.3]
-end,func,0000:0113,blob_import,void blob_import(void),debrief,,unpack the mission blob comm+7Ah into DGROUP (16 fields + 0x600 byte event log) [1.3]
-end,func,0000:0242,blob_get,"void blob_get(void *dst, int size, int count)",debrief,,"movedata from the blob cursor DS:543C/543E, cursor += size*count"
-end,func,0000:0273,blob_put,"void blob_put(void *src, int size, int count)",debrief,,reverse of blob_get; dead
-end,func,0000:02a4,map_screen_init,void map_screen_init(void),debrief,,"builds the debrief map screen: pages 2/3/4 (breficon, brefscrn, theatre), palette, icons, panel sprite, cursor [6.1]"
-end,func,0000:03d9,map_screen,void map_screen(void),debrief,,menu loop around replay_step; then score(0x100) into pilot+30/2E/32 [6.5]
-end,func,0000:046e,map_hover,void map_hover(void),debrief,,"menu hook: highlights button under the cursor via pal_queue_push(0x100-n, DS:131E/1324) [6.4]"
-end,func,0000:04d2,site_marks_draw,void site_marks_draw(char pick),debrief,,draws the site icons one by one (wait_input(8) + snd 1C until a key skips) [6.3]
-end,func,0000:05ca,place_icons,void place_icons(void),debrief,,"builds the icon list [54B8] n, [5440] site/partner bytes, [54BA] x, [5532] y from the site table (pairs by name) [6.2]"
-end,func,0000:0714,replay_step,int replay_step(int idx),debrief,,"route replay step: draws segments until a stopping event, then icon + text; returns next index, 0 = finished [6.6]"
-end,func,0000:0880,event_icon_draw,"void event_icon_draw(Rec *r, int idx)",debrief,,"picks the 48x40 picture (breficon.pic page 2) and its position, saves background, draws [6.7]"
-end,func,0000:0a98,event_text_draw,"void event_text_draw(Rec *r, int idx)",debrief,,"builds the text of one timeline event and shows it in the box (140,180) [6.8]"
-end,func,0000:0da3,status_draw,void status_draw(int idx),debrief,,"TIME / SCORE / In Flight strip at (75,180) [6.9]"
-end,func,0000:0e82,icon_erase,void icon_erase(void),debrief,,"restores the background under the event picture from page 2 (0,160) to pages 1 and 0 [6.6]"
-end,func,0000:0ecd,map_x,unsigned map_x(unsigned v),debrief,,((v << 7) & FFFF) / 146
-end,func,0000:0ee0,map_y,unsigned map_y(unsigned v),debrief,,((v << 7) & FFFF) / 195
-end,func,0000:0ef3,fmt_time,"char *fmt_time(unsigned ticks, char *buf)",debrief,,"hh:mm:ss clock, base 06:00 (18:00 night) + template offset, 1800 ticks per hour [6.10]"
-end,func,0000:0fa4,load_file_far,"unsigned load_file_far(char *name, unsigned off, unsigned seg)",debrief,,"open, read up to FFFFh bytes to seg:off, close (= START 2864) [10]"
-end,func,0000:0fda,load_file_near,"unsigned load_file_near(char *name, void *buf)",debrief,,(= START 289A)
-end,func,0000:100d,load_pic,"void load_pic(char *name, int page)",debrief,,"open + pic_to_page(fh, page) + close [10]"
-end,func,0000:1039,load_pic_seg_a,"void load_pic_seg_a(char *name, unsigned seg)",debrief,,dead
-end,func,0000:1061,load_pic_seg_c,"void load_pic_seg_c(char *name, unsigned seg)",debrief,,dead
-end,func,0000:1089,load_pic_seg_c_at,"void load_pic_seg_c_at(char *name, unsigned seg, long pos)",debrief,,dead (lseek then pic_to_seg_c)
-end,func,0000:10c1,save_file_far,"unsigned save_file_far(char *name, ...)",debrief,,dead (dos_creat + dos_write_far)
-end,func,0000:10fa,text_centered,"void text_centered(TextCtx *c, char *s, int cx, int y)",debrief,,(= START 2A84)
-end,func,0000:112a,text_shadow_centered,"void text_shadow_centered(TextCtx *c, char *s, int cx, int y)",debrief,,"shadow in c->bg at (+1,0),(0,+1),(+1,+1) then normal; skipped when bg == -1 (like START 36C4 but centred)"
-end,func,0000:11a2,wait_ticks,void wait_ticks(int n),debrief,,n x pal_apply_queue (= START 2B06)
-end,func,0000:11b7,popup_text,void popup_text(...),debrief,,dead (= START 2B1B)
-end,func,0000:1332,draw_frame,"void draw_frame(TextCtx *c, int x, int y, int w, int h)",debrief,,dead (= START 2CB4)
-end,func,0000:1470,draw_button,"int draw_button(char *s, int cx, int y, int colour)",debrief,,dead (= START 2DF2)
-end,func,0000:14ce,map_route_line,"void map_route_line(int x1, int y1, int x2, int y2, int skip)",debrief,,dead (= START 2F4C without the skip poll)
-end,func,0000:15d7,fade_in,void fade_in(int speed),debrief,,"pal_fade(DS:1F25, 0, 100h, speed) [10]"
-end,func,0000:15ef,fade_out,void fade_out(int speed),debrief,,"pal_fade(DS:1F25, 100h, 0, speed)"
-end,func,0000:1607,pal_fade,"void pal_fade(uint8_t *pal, int from, int to, int speed)",debrief,,quadratic brightness fade of a 768 byte palette (= START 30A0 without the queue drain)
-end,func,0000:1708,pal_fade_calibrate,void pal_fade_calibrate(uint8_t *buf),debrief,,(= START 31AD) counts pal_set calls in 4 BIOS ticks into [55BA]
-end,func,0000:1755,map_place_label,void map_place_label(...),debrief,,dead (= START 31FA)
-end,func,0000:185c,pal_queue_push,"void pal_queue_push(int first, void *rgb, int count)",debrief,,(= START 3517)
-end,func,0000:188d,ui_text,"void ui_text(TextCtx *c, char *s, int x, int y)",debrief,,(= START 3567)
-end,func,0000:1901,show_screen_pic,"void show_screen_pic(char *name, void (*cb)(void))",debrief,,"fade out, name.pic into page 1, name.pal into DS:1F25, blit to screen, cb, fade in, screen_on [10]"
-end,func,0000:1992,sprite_draw,"void sprite_draw(TextCtx *c, int x, int y, unsigned seg)",debrief,,(= START 3693) slot 22 at natural size
-end,func,0000:19c3,text_shadow,"void text_shadow(TextCtx *c, char *s, int x, int y)",debrief,,(= START 36C4)
-end,func,0000:1a3b,text_width,"int text_width(TextCtx *c, char *s)",debrief,,(= START 373C)
-end,func,0000:1a75,text_wrap,"int text_wrap(TextCtx *c, char *s, int x, int y, int width, int line_h, int centre)",debrief,,(= START 3776) page -1 = measure only; returns widest line
-end,func,0000:1baa,menu_loop,int menu_loop(MenuDesc *m),debrief,,(= START 38AC)
-end,func,0000:1c3b,hit_test,"int hit_test(Rect *r, int n)",debrief,,(= START 393D)
-end,func,0000:1cb1,rect_order_desc,void rect_order_desc(unsigned *p),debrief,,dead (= START 39B3)
-end,func,0000:1cd3,rect_order_asc,void rect_order_asc(unsigned *p),debrief,,dead (= START 39D5)
-end,func,0000:1cf5,poll_input,int poll_input(MenuDesc *m),debrief,,(= START 39F7); Alt-Q calls quit_prompt(0)
-end,func,0000:1fe5,cursor_init,void cursor_init(unsigned seg),debrief,,(= START 3E20) cursor variables DS:7212..721F
-end,func,0000:2023,check_break,void check_break(void),debrief,,(= START 3E5E) if ([2608]) end_exit(0)
-end,func,0000:2032,kbd_flush,void kbd_flush(void),debrief,,dead (= START 3E6D)
-end,func,0000:2049,cursor_set_pos,"void cursor_set_pos(int x, int y)",debrief,,(= START 3E84)
-end,func,0000:206a,prompt_continue,"int prompt_continue(int cx, int y)",debrief,,"font 3 shadowed ""Press Selector to continue"" centred at (cx,y), then wait_input(FFFF) [10]"
-end,func,0000:2092,wait_input,int wait_input(unsigned ticks),debrief,,joystick / mouse / keyboard wait with click sounds; FFFF = forever; 0 = one keyboard poll; Alt-Q = quit_prompt(1) [10]
-end,func,0000:2265,awards_screen,int awards_screen(void),debrief,,"awards.pic screen: promotion_check, award_check, promo_text, medal_text; returns 0 when skipped [7.1]"
-end,func,0000:22eb,ribbons_draw,void ribbons_draw(void),debrief,,"collects up to 12 ribbon ids from the pilot record (+22..2C counts, +44..4C flags, 3 filler) and draws them [7.4]"
-end,func,0000:23d6,ribbon_draw,"void ribbon_draw(int id, int j, int n)",debrief,,"blit(3,260,2*id,1,dx,dy,11,2) in rows of 3 [7.4]"
-end,func,0000:2476,award_check,void award_check(void),debrief,,"ribbons by missions flown, Purple Heart, one score medal (CMH/AFC/SS/DFC/AM) [7.3]"
-end,func,0000:26a9,show_award_text,void show_award_text(char *s),debrief,,"restores the text area, text_wrap at (152,19) width 158, prompt at (231,63) [7.5]"
-end,func,0000:2703,medal_text,void medal_text(void),debrief,,"medal picture + citation, Combat Readiness Ribbon, ribbon and ghost-medal lines [7.5]"
-end,func,0000:28ed,rank_picture,void rank_picture(void),debrief,,rank insignia pair on the right panel of the awards screen [7.5]
-end,func,0000:2a01,promo_text,void promo_text(void),debrief,,"promotion / withheld / ""remained at his present rank"" line, retirement line, PH suppression [7.5]"
-end,func,0000:2afa,promotion_check,void promotion_check(void),debrief,,"rank promotion by career score / missions / average (tables DS:05B0, 05BC, 05C8) [7.2]"
-end,func,0000:2bec,summary_screen,void summary_screen(void),debrief,,"flag.pic summary paragraph: outcome, rating, kills, rules of engagement, friendly fire [5]"
-end,func,0000:3021,score,int score(unsigned limit),debrief,,replays the event log up to record `limit` with all scoring rules and multipliers; recomputes the counters [4]
-end,func,0000:3682,crash_cb,void crash_cb(void),debrief,,callback of the cemetary screen: crash text by comm+28h [8]
-end,func,0000:370a,cemetery_screen,void cemetery_screen(void),debrief,,crash scene [8]
-end,func,0000:372f,landed_cb,void landed_cb(void),debrief,,"callback of landed1: loads landed2..4, rebuilds the sky ramp DS:2165 [8]"
-end,func,0000:3887,landed_screen,void landed_screen(void),debrief,,landing scene with 3 sequential pictures and a 4 frame light animation [8]
-end,func,0000:39d0,ending_scene,void ending_scene(void),debrief,,desk / endhangr / flight screen with a random quip (only comm+28h == 0 && comm+30h == 0) [8]
-end,func,0000:3b41,rescue_cb,void rescue_cb(void),debrief,,callback of the rescue screen: bail-out text [8]
-end,func,0000:3b9a,rescue_screen,void rescue_screen(void),debrief,,rescue scene [8]
-end,func,0000:3bbf,captured_screen,void captured_screen(void),debrief,,tass scene; sets DS:6982 = 1 [8]
-end,func,0000:3bf4,end_init,void end_init(void),debrief,,"pointers, ovl_bind x3, buffer, srand, joystick/mouse, break hook, blob, display name, pages, sprites, timer_install [3]"
-end,func,0000:3ca1,init_pointers,void init_pointers(void),debrief,,"comm = 0:04F0 segment, pilot = comm+1272h [3]"
-end,func,0000:3cd0,init_pages,void init_pages(void),debrief,,"file buffer, 5 pages (slot 0/75) and 5 TextCtx at DS:6D8C [3]"
-end,func,0000:3d4f,init_sprites,void init_sprites(void),debrief,,"requestr.pic page 2, sprite_grab of 7 sprites, cursor init [3]"
-end,func,0000:3e61,quit_prompt,void quit_prompt(int save_screen),debrief,,"Alt-Q: adv.pic, Y quits (exit 0), else restore (= START 7611) [2]"
-end,func,0000:3f44,end_exit,void end_exit(int code),debrief,,"stop sound, free buffer, remove hooks, text mode if code == 0, misc94, exit(code) [2]"
-end,func,0000:4648,pic_to_page,"void pic_to_page(int fh, int page)",debrief,,= START 86A8 (video.md 9)
-end,func,0000:46ba,pic_to_seg_a,"void pic_to_seg_a(int fh, unsigned seg)",debrief,,= START 871A; dead
-end,func,0000:4722,pic_to_seg_b,"void pic_to_seg_b(unsigned buf_seg, unsigned dst_seg)",debrief,,= START 8782: decode a PIC held in memory (200 rows of 320) into a segment
-end,func,0000:4796,pic_to_seg_c,"void pic_to_seg_c(int fh, unsigned seg)",debrief,,= START 87F6; dead
-end,func,0000:47fe,pic_nop,void pic_nop(void),debrief,,ret (clear_es placeholder)
-end,func,0000:47ff,pic_row,void pic_row(int row),debrief,,= START 885F
-end,func,0000:4829,pic_begin,void pic_begin(void),debrief,,= START 8889
-end,func,0000:4874,lzw_reset,void lzw_reset(void),debrief,,= START 88D4
-end,func,0000:48aa,rle90_fill,void rle90_fill(unsigned n),debrief,,= START 890A
-end,func,0000:4923,lzw_next,int lzw_next(void),debrief,,= START 8983
-end,func,0000:49d2,gfx_fill_rect,"void gfx_fill_rect(Win *w, int x0, int y0, int x1, int y1)",debrief,,= START 8A32: fills with w->fg (+4)
-end,func,0000:4a40,edge_table_clear,void edge_table_clear(void),debrief,,= START 8AA0: resets the left/right edge tables DS:419C / 4354
-end,func,0000:4a71,gfx_fill_rect_bg,"void gfx_fill_rect_bg(Win *w, int x0, int y0, int x1, int y1)",debrief,,= START 8AD1: fills with w->bg (+6); dead
+end,func,0000:0010,debrief_main,void(void),debrief,end_main,"END main: init, missions++, outcome scene by comm+26h, summary, map replay, awards, quips, retire/KIA flags, exit(23h) [debrief.md 0/2]"
+end,func,0000:00a1,landing_class,int(void),debrief,,grid class (0..3) of the final position comm+74h/76h >> 11 into DS:6440; 0 = hostile = captured [2]
+end,func,0000:00c7,end_nop_a,void(void),debrief,,ret stub (C start-up table)
+end,func,0000:00c8,end_nop_b,void(void),debrief,,ret stub (C start-up table)
+end,func,0000:00c9,name_table_build,void(void),debrief,,blob_import then DS:6DFA name pointer table from the NUL separated pool DS:6EFA (same as VGAME 4AD0) [1.3]
+end,func,0000:0113,blob_import,void(void),debrief,,unpack the mission blob comm+7Ah into DGROUP (16 fields + 0x600 byte event log) [1.3]
+end,func,0000:0242,blob_get,"void(void *dst, int size, int count)",debrief,,"movedata from the blob cursor DS:543C/543E, cursor += size*count"
+end,func,0000:0273,blob_put,"void(void *src, int size, int count)",debrief,,reverse of blob_get; dead
+end,func,0000:02a4,map_screen_init,void(void),debrief,,"builds the debrief map screen: pages 2/3/4 (breficon, brefscrn, theatre), palette, icons, panel sprite, cursor [6.1]"
+end,func,0000:03d9,map_screen,void(void),debrief,,menu loop around replay_step; then score(0x100) into pilot+30/2E/32 [6.5]
+end,func,0000:046e,map_hover,void(void),debrief,,"menu hook: highlights button under the cursor via pal_queue_push(0x100-n, DS:131E/1324) [6.4]"
+end,func,0000:04d2,site_marks_draw,void(char pick),debrief,,draws the site icons one by one (wait_input(8) + snd 1C until a key skips) [6.3]
+end,func,0000:05ca,place_icons,void(void),debrief,,"builds the icon list [54B8] n, [5440] site/partner bytes, [54BA] x, [5532] y from the site table (pairs by name) [6.2]"
+end,func,0000:0714,replay_step,int(int idx),debrief,,"route replay step: draws segments until a stopping event, then icon + text; returns next index, 0 = finished [6.6]"
+end,func,0000:0880,event_icon_draw,"void(void *r, int idx)",debrief,,"picks the 48x40 picture (breficon.pic page 2) and its position, saves background, draws [6.7]"
+end,func,0000:0a98,event_text_draw,"void(void *r, int idx)",debrief,,"builds the text of one timeline event and shows it in the box (140,180) [6.8]"
+end,func,0000:0da3,status_draw,void(int idx),debrief,,"TIME / SCORE / In Flight strip at (75,180) [6.9]"
+end,func,0000:0e82,icon_erase,void(void),debrief,,"restores the background under the event picture from page 2 (0,160) to pages 1 and 0 [6.6]"
+end,func,0000:0ecd,map_x,unsigned(unsigned v),debrief,,((v << 7) & FFFF) / 146
+end,func,0000:0ee0,map_y,unsigned(unsigned v),debrief,,((v << 7) & FFFF) / 195
+end,func,0000:0ef3,fmt_time,"char *(unsigned ticks, char *buf)",debrief,,"hh:mm:ss clock, base 06:00 (18:00 night) + template offset, 1800 ticks per hour [6.10]"
+end,func,0000:0fa4,ui_load_file_far,"unsigned(char *name, unsigned off, unsigned seg)",debrief,load_file_far,"open, read up to FFFFh bytes to seg:off, close (= START 2864) [10]"
+end,func,0000:0fda,ui_load_file_near,"unsigned(char *name, void *buf)",debrief,load_file_near,(= START 289A)
+end,func,0000:100d,load_pic,"void(char *name, int page)",debrief,,"open + pic_to_page(fh, page) + close [10]"
+end,func,0000:1039,load_pic_seg_a,"void(char *name, unsigned seg)",debrief,,dead
+end,func,0000:1061,load_pic_seg_c,"void(char *name, unsigned seg)",debrief,,dead
+end,func,0000:1089,load_pic_seg_c_at,"void(char *name, unsigned seg, long pos)",debrief,,dead (lseek then pic_to_seg_c)
+end,func,0000:10c1,save_file_far,"unsigned(char *name, ...)",debrief,,dead (dos_creat + dos_write_far)
+end,func,0000:10fa,ui_text_centered,"void(void *c, char *s, int cx, int y)",debrief,text_centered,(= START 2A84)
+end,func,0000:112a,text_shadow_centered,"void(void *c, char *s, int cx, int y)",debrief,,"shadow in c->bg at (+1,0),(0,+1),(+1,+1) then normal; skipped when bg == -1 (like START 36C4 but centred)"
+end,func,0000:11a2,ui_wait_ticks,void(int n),debrief,wait_ticks,n x pal_apply_queue (= START 2B06)
+end,func,0000:11b7,popup_text,void(void),debrief,,dead (= START 2B1B)
+end,func,0000:1332,draw_frame,"void(void *c, int x, int y, int w, int h)",debrief,,dead (= START 2CB4)
+end,func,0000:1470,draw_button,"int(char *s, int cx, int y, int colour)",debrief,,dead (= START 2DF2)
+end,func,0000:14ce,map_route_line,"void(int x1, int y1, int x2, int y2, int skip)",debrief,,dead (= START 2F4C without the skip poll)
+end,func,0000:15d7,fade_in,void(int speed),debrief,,"pal_fade(DS:1F25, 0, 100h, speed) [10]"
+end,func,0000:15ef,fade_out,void(int speed),debrief,,"pal_fade(DS:1F25, 100h, 0, speed)"
+end,func,0000:1607,end_pal_fade,"void(u8 *pal, int from, int to, int speed)",debrief,pal_fade,quadratic brightness fade of a 768 byte palette (= START 30A0 without the queue drain)
+end,func,0000:1708,end_pal_fade_calibrate,void(u8 *buf),debrief,pal_fade_calibrate,(= START 31AD) counts pal_set calls in 4 BIOS ticks into [55BA]
+end,func,0000:1755,map_place_label,void(void),debrief,,dead (= START 31FA)
+end,func,0000:185c,end_pal_queue_push,"void(int first, void *rgb, int count)",debrief,pal_queue_push,(= START 3517)
+end,func,0000:188d,ui_text,"void(void *c, char *s, int x, int y)",debrief,,(= START 3567)
+end,func,0000:1901,show_screen_pic,"void(char *name, void *cb)",debrief,,"fade out, name.pic into page 1, name.pal into DS:1F25, blit to screen, cb, fade in, screen_on [10]"
+end,func,0000:1992,ui_sprite_draw,"void(void *c, int x, int y, unsigned seg)",debrief,sprite_draw,(= START 3693) slot 22 at natural size
+end,func,0000:19c3,ui_text_shadow,"void(void *c, char *s, int x, int y)",debrief,text_shadow,(= START 36C4)
+end,func,0000:1a3b,ui_text_width,"int(void *c, char *s)",debrief,text_width,(= START 373C)
+end,func,0000:1a75,ui_text_wrap,"int(void *c, char *s, int x, int y, int width, int line_h, int centre)",debrief,text_wrap,(= START 3776) page -1 = measure only; returns widest line
+end,func,0000:1baa,menu_loop,int(void *m),debrief,,(= START 38AC)
+end,func,0000:1c3b,hit_test,"int(void *r, int n)",debrief,,(= START 393D)
+end,func,0000:1cb1,rect_order_desc,void(unsigned *p),debrief,,dead (= START 39B3)
+end,func,0000:1cd3,rect_order_asc,void(unsigned *p),debrief,,dead (= START 39D5)
+end,func,0000:1cf5,end_poll_input,int(void *m),debrief,poll_input,(= START 39F7); Alt-Q calls quit_prompt(0)
+end,func,0000:1fe5,cursor_init,void(unsigned seg),debrief,,(= START 3E20) cursor variables DS:7212..721F
+end,func,0000:2023,check_break,void(void),debrief,,(= START 3E5E) if ([2608]) end_exit(0)
+end,func,0000:2032,kbd_flush,void(void),debrief,,dead (= START 3E6D)
+end,func,0000:2049,cursor_set_pos,"void(int x, int y)",debrief,,(= START 3E84)
+end,func,0000:206a,prompt_continue,"int(int cx, int y)",debrief,,"font 3 shadowed ""Press Selector to continue"" centred at (cx,y), then wait_input(FFFF) [10]"
+end,func,0000:2092,wait_input,int(unsigned ticks),debrief,,joystick / mouse / keyboard wait with click sounds; FFFF = forever; 0 = one keyboard poll; Alt-Q = quit_prompt(1) [10]
+end,func,0000:2265,awards_screen,int(void),debrief,,"awards.pic screen: promotion_check, award_check, promo_text, medal_text; returns 0 when skipped [7.1]"
+end,func,0000:22eb,ribbons_draw,void(void),debrief,,"collects up to 12 ribbon ids from the pilot record (+22..2C counts, +44..4C flags, 3 filler) and draws them [7.4]"
+end,func,0000:23d6,ribbon_draw,"void(int id, int j, int n)",debrief,,"blit(3,260,2*id,1,dx,dy,11,2) in rows of 3 [7.4]"
+end,func,0000:2476,award_check,void(void),debrief,,"ribbons by missions flown, Purple Heart, one score medal (CMH/AFC/SS/DFC/AM) [7.3]"
+end,func,0000:26a9,show_award_text,void(char *s),debrief,,"restores the text area, text_wrap at (152,19) width 158, prompt at (231,63) [7.5]"
+end,func,0000:2703,medal_text,void(void),debrief,,"medal picture + citation, Combat Readiness Ribbon, ribbon and ghost-medal lines [7.5]"
+end,func,0000:28ed,rank_picture,void(void),debrief,,rank insignia pair on the right panel of the awards screen [7.5]
+end,func,0000:2a01,promo_text,void(void),debrief,,"promotion / withheld / ""remained at his present rank"" line, retirement line, PH suppression [7.5]"
+end,func,0000:2afa,promotion_check,void(void),debrief,,"rank promotion by career score / missions / average (tables DS:05B0, 05BC, 05C8) [7.2]"
+end,func,0000:2bec,summary_screen,void(void),debrief,,"flag.pic summary paragraph: outcome, rating, kills, rules of engagement, friendly fire [5]"
+end,func,0000:3021,score,int(unsigned limit),debrief,,replays the event log up to record `limit` with all scoring rules and multipliers; recomputes the counters [4]
+end,func,0000:3682,crash_cb,void(void),debrief,,callback of the cemetary screen: crash text by comm+28h [8]
+end,func,0000:370a,cemetery_screen,void(void),debrief,,crash scene [8]
+end,func,0000:372f,landed_cb,void(void),debrief,,"callback of landed1: loads landed2..4, rebuilds the sky ramp DS:2165 [8]"
+end,func,0000:3887,landed_screen,void(void),debrief,,landing scene with 3 sequential pictures and a 4 frame light animation [8]
+end,func,0000:39d0,ending_scene,void(void),debrief,,desk / endhangr / flight screen with a random quip (only comm+28h == 0 && comm+30h == 0) [8]
+end,func,0000:3b41,rescue_cb,void(void),debrief,,callback of the rescue screen: bail-out text [8]
+end,func,0000:3b9a,rescue_screen,void(void),debrief,,rescue scene [8]
+end,func,0000:3bbf,captured_screen,void(void),debrief,,tass scene; sets DS:6982 = 1 [8]
+end,func,0000:3bf4,end_init,void(void),debrief,,"pointers, ovl_bind x3, buffer, srand, joystick/mouse, break hook, blob, display name, pages, sprites, timer_install [3]"
+end,func,0000:3ca1,init_pointers,void(void),debrief,,"comm = 0:04F0 segment, pilot = comm+1272h [3]"
+end,func,0000:3cd0,init_pages,void(void),debrief,,"file buffer, 5 pages (slot 0/75) and 5 TextCtx at DS:6D8C [3]"
+end,func,0000:3d4f,init_sprites,void(void),debrief,,"requestr.pic page 2, sprite_grab of 7 sprites, cursor init [3]"
+end,func,0000:3e61,quit_prompt,void(int save_screen),debrief,,"Alt-Q: adv.pic, Y quits (exit 0), else restore (= START 7611) [2]"
+end,func,0000:3f44,end_exit,void(int code),debrief,,"stop sound, free buffer, remove hooks, text mode if code == 0, misc94, exit(code) [2]"
+end,func,0000:4648,pic_to_page,"void(int fh, int page)",debrief,,= START 86A8 (video.md 9)
+end,func,0000:46ba,pic_to_seg_a,"void(int fh, unsigned seg)",debrief,,= START 871A; dead
+end,func,0000:4722,pic_to_seg_b,"void(unsigned buf_seg, unsigned dst_seg)",debrief,,= START 8782: decode a PIC held in memory (200 rows of 320) into a segment
+end,func,0000:4796,pic_to_seg_c,"void(int fh, unsigned seg)",debrief,,= START 87F6; dead
+end,func,0000:47fe,pic_nop,void(void),debrief,,ret (clear_es placeholder)
+end,func,0000:47ff,pic_row,void(int row),debrief,,= START 885F
+end,func,0000:4829,pic_begin,void(void),debrief,,= START 8889
+end,func,0000:4874,lzw_reset,void(void),debrief,,= START 88D4
+end,func,0000:48aa,rle90_fill,void(unsigned n),debrief,,= START 890A
+end,func,0000:4923,lzw_next,int(void),debrief,,= START 8983
+end,func,0000:49d2,gfx_fill_rect,"void(void *w, int x0, int y0, int x1, int y1)",debrief,,= START 8A32: fills with w->fg (+4)
+end,func,0000:4a40,edge_table_clear,void(void),debrief,,= START 8AA0: resets the left/right edge tables DS:419C / 4354
+end,func,0000:4a71,gfx_fill_rect_bg,"void(void *w, int x0, int y0, int x1, int y1)",debrief,,= START 8AD1: fills with w->bg (+6); dead
 end,data,DS:00ce,tbl_theatre_pic,char*[9],debrief,,theatre picture names (libya.pic ... korea.pic) index pilot+38h
 end,data,DS:00e0,str_primary,char[],debrief,,"""PRIMARY OBJECTIVE"" (00F2 ""SECONDARY OBJECTIVE"")"
 end,data,DS:0647,str_crr_ribbon,char[],debrief,,Combat Readiness Ribbon line

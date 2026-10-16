@@ -1,0 +1,6 @@
+# The scripted END of the chain test (F117_END_SCRIPT): every wait for a key is answered with Enter; at the map menu 'next' through the replay, then Esc.
+- - 1c0d
+- - 1c0d
+- - 1c0d
+- - 1c0d
+- - 011b

@@ -194,7 +194,7 @@ static const char *end_screen(u16 state, u16 code)
     return "(garbage)";
 }
 
-int end_main(const char *tail)
+int end_stub(const char *tail)
 {
     (void)tail;
     Comm *c = comm_get();
@@ -223,7 +223,7 @@ ProgMain placeholder_main(ProgId id)
     case PROG_DSWAP:    return dswap_stub;
     case PROG_START:    return start_stub;
     case PROG_VGAME:    return vgame_stub;
-    case PROG_END:      return end_main;
+    case PROG_END:      return end_stub;
     default:            return NULL;
     }
 }

@@ -61,8 +61,7 @@ void brief_site_info(int n);
 int ctype_test(void);
 /* START 0000:5413  spec shell.md "2. WLD / site helpers (0000:512E..5466 and 54BB..5743)" */
 int dist_approx_xy(int dx, int dy);
-/* START 0000:8aa0  spec shell.md "(no heading)" */
-void edge_table_clear(void); /* TODO signature: spec shell.md "(no heading)" (type column: "void edge_table_clear(void)") */
+/* START 0000:8aa0  spec shell.md "(no heading)": same name as module_debrief.h, declared there */
 /* START 0000:8ad1  spec shell.md "(no heading)" */
 void fill_rows2_near(void); /* TODO signature: spec shell.md "(no heading)" (type column: "void fill_rows2_near(...)") */
 /* START 0000:a76c  spec shell.md "4 Arming screen (weapon bays)" */

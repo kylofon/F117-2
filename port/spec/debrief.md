@@ -350,7 +350,7 @@ Append entry `k = icon_count++`: `[54BA+2k] = x - 1`, `[5532+2k] = y - 2`, `byte
 (146 x 195 world units per map pixel; the same scale as START's briefing map.)
 
 ### 6.3 `0000:04D2 site_marks_draw(char pick)` (V, differential-tested)
-For `k = 0 .. icon_count-1`: if `pick == 0` { `pick = wait_input(8)` (low byte); `snd(0x1C)` } (so the icons appear one every 8 ticks until a key or click skips the animation; the tick sound plays
+For `k = 0 .. icon_count-1`: if `pick == 0` { `pick = wait_input(8)` (low byte); `snd(0x1C)` } (so the icons appear one every 8 ticks until **Space** skips the animation (S5.8 correction: `wait_input` returns 1 only for Space; Enter, Esc and button clicks play their click sound and return 0, so they do not skip); the tick sound plays
 for every icon drawn while `pick` was still 0). `q = site byte[5440+2k]`, `(x, y) = ([54BA+2k], [5532+2k])`. If `byte[5441+2k] == 0`: one sprite `seg =
 q.+6 != 0 ? (q.flags & 8 ? [7226] : [720C]) : [5DA0]` at (x, y) on ctx1 then ctx0 (`sprite_draw`, slot 22 at natural size). Else a pair: `[720C]` at (x-1, y) and `[5DA0]` at (x+2, y), ctx1 then ctx0 for each.
 
@@ -647,6 +647,13 @@ switch (r) { 0: return 0; 1: snd(1A); return 0; 2: snd(23); return 0; 3: snd(1A)
 * Port layout: `debrief.c` with `debrief_main()`; `score.c` (section 4 verbatim, tables as `static const int16_t`); text assembly may use `snprintf` but keep the buffers' content byte-exact (the tests compare strings);
   `end_ui` = the shared START toolkit of the port (S5.x). Event log and pilot record are the shared structures of the comm block (HANDOFFS.md, S3.10).
 * The port reads the pictures `*.PIC/.PAL` and `MEDALS.PIC` from the game directory like the original; no new files are written.
+
+### Port notes (S5.8, `f117port/src/debrief`)
+
+* Layout: `score.c` (3021, 2AFA, 2476, 05CA, 0EF3, 00A1, 0ECD/0EE0), `end_ui.c` (the toolkit copies with END's DGROUP offsets: cursor 7212..721F, poll_input, menu_loop, wait_input, prompt_continue, the palette queue 1EE8/1F24, `pal_fade` with the calibration byte 55BA, `show_screen_pic`, `quit_prompt`, `end_exit`), `end_map.c` (section 6), `end_awards.c` (7), `end_screens.c` (5, 8), `end_main.c` (start-up, blob, main), `endtest.c`.
+* Reused from `src/shell` (state-free): `ui_text`, `ui_text_width`, `ui_text_wrap`, `ui_text_shadow`, `ui_text_centered`, `ui_sprite_draw`, `ui_wait_ticks`, `ui_load_file_far/near` (the debrief_symbols.csv rows carry the shell names). The other toolkit twins keep END's offsets, so they are END's own C (`end_pal_fade`, `end_pal_queue_push`, `end_poll_input`, `menu_loop`, `hit_test`, ...): the START versions read START's DGROUP.
+* PORT deviations: the first 35000-byte allocation of `end_init` is not made (it leaked); the fades do not stop and restart the timer ISR; calibration is a constant 15 `pal_set` per speed unit (as START); `crash_cb` draws nothing for the codes 0 and > 6 and the summary builds no paragraph for `26h = 1, 28h = 0` (the original prints uninitialised stack text there).
+* Test (`ctest debrief`, `port/notes/s58/`): the original END under Unicorn on eight comm blocks (the `shell` test's mission with VGAME's result fields, an event log and a pilot record): landed (night, war 1, kills, both objectives, the short tour ribbon), ejected and rescued, ejected and captured (war 2, ghost medal), crashed (KIA), promoted with a Purple Heart that is not shown, training with the Combat Readiness Ribbon, the 99th mission lost (KIA) and won (Brigadier General, retirement, the career-score carry). Screen and DAC CRC at every `wait_input` and every 3rd menu poll (about 50 per scenario), the pilot record in the comm block byte for byte, exit 23h: 0 differences.
 
 ### Open items
 1. (U) Visual check in DOSBox-X (PLAN.md `U-debrief`): colour index 0 route line, the 16 event pictures of `breficon.pic`, clock start, awards strip.

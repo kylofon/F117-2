@@ -17,7 +17,7 @@ target_include_directories(nuked_opl3 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../thir
 
 # Coordinator files in src/, then one glob per module directory (PORTING.md "Source layout"): a module adds
 # <module>/<file>.c and it is built without touching this file. programs/ holds the phase 4 placeholders.
-set(F117_MODULES platform video frontend shell sim render3d flight programs)
+set(F117_MODULES platform video frontend shell sim render3d flight debrief programs)
 file(GLOB F117_SOURCES CONFIGURE_DEPENDS src/*.c)
 foreach(m ${F117_MODULES})
     file(GLOB m_sources CONFIGURE_DEPENDS src/${m}/*.c)
@@ -134,6 +134,19 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME render3d_golden COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s56/r3d_golden.py
              $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game ${CMAKE_CURRENT_BINARY_DIR}/r3d_golden)
     set_tests_properties(render3d_golden PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 900 DEPENDS shell)
+endif()
+
+# The debrief (src/debrief, S5.8): the ORIGINAL END.EXE under Unicorn (port/notes/s58/end_emu.py) replays eight mission outcomes (landed with kills and objectives, ejected and
+# rescued, ejected and captured, crashed, promoted with medals, a training flight, the 99th mission lost and won) from comm blocks built on the `shell` test's mission; the port
+# runs the same scripts and must give the same screen + DAC CRC at every step, the same pilot record (the comm block, byte for byte) and the exit code 23h. `debrief_chain` is the
+# scripted run of the whole chain with the real END: a landing ends VGAME, END debriefs, START saves a roster that holds END's record. References cached in the build tree.
+# Both skip (77) without ../Game or the `shell` comm block.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME debrief COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s58/end_ref.py
+             $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game ${CMAKE_CURRENT_BINARY_DIR}/debrief_ref)
+    add_test(NAME debrief_chain COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s58/end_ref.py --chain
+             $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game)
+    set_tests_properties(debrief debrief_chain PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 900 DEPENDS shell)
 endif()
 
 # The generated headers are current: the generators re-run in memory and fail on any difference (tools/gen_*.py).
