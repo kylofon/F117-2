@@ -135,6 +135,7 @@ int main(int argc, char **argv)
     if (chain) { prog_trace = true; prog_use_stubs = true; }
 
     if (!host_init(&cfg)) return 1;
+    host_install_crash_log(prog_current_name);                 /* PORT: f117.log beside the program */
 
     if (check) {
         const char *missing = game_files_missing();
@@ -216,15 +217,9 @@ int main(int argc, char **argv)
                                 missing, host_game_dir());
     }
 
-    placeholder_init();
-    placeholder_interactive = !chain && !cfg.headless;
+    if (chain) placeholder_init();   /* the stub chain only: the real programs read their own keys, the chain quits on their exit codes */
     int runs = chain_run("");
-    int rc = 0;
-    if (chain) rc = chain_test(runs);
-    else if (placeholder_interactive && !prog_abort && !host_quit_requested()) {
-        printf("f117: placeholder chain finished (%d programs); Esc or close the window to exit\n", runs);
-        while (!prog_abort && !host_quit_requested()) host_pump();
-    }
+    int rc = chain ? chain_test(runs) : 0;
     host_shutdown();
     return rc;
 }

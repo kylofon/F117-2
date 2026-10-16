@@ -6,11 +6,12 @@
 #include <string.h>
 
 #include "prog.h"
+#include "platform/platform.h"
 #include "sim/sim.h"
 #include "sim/sim_priv.h"
 #include "sim/simtest.h"
 
-SimTest sim_test = { .frames_left = -1 };
+SimTest sim_test = { .frames_left = -1, .dive_at = -1 };
 
 static inline u8 *pilot_rec(void) { return far_mp(ds_far(0x98F4)); }
 #define PILOT(o) (*(u16 *)(pilot_rec() + (o)))
@@ -399,6 +400,26 @@ void sim_init(void)
     cockpit_daynight_recolor();
 }
 
+/* PORT, test aid of the scripted chain run (F117_VGAME_DIVE=N, ctest debrief_chain_sea): after N frames the aircraft is put in a
+ * 45-degree dive at 450 kt, 600 ft over the sea north of Tripoli (Libya; any point at sea level outside an airfield zone is the same),
+ * gear up, and Esc is pressed on the host keyboard as a player would after the impact. The flight model and the sim step then crash it
+ * for real: AGL 0 with crashes on = mission_end(1), END (killed in action), START. Before the fix of 2026-10-16 that Esc made the
+ * chain quit to the desktop when VGAME ended. */
+static void chain_dive(void)
+{
+    DSL(0xBA10) = 4288u * 32;                            /* x, y in world units (level units x 32, y runs north here) */
+    DSL(0xC02A) = (0x8000u - 13700u) * 32;
+    DSW(0x2DF6) = 600;
+    DSW(0xB052) = 450 * 27;
+    DSW(0x2DFE) = DSW(0xB170) = 100;
+    DSW(0x9B04) |= 1;                                    /* gear up */
+    DSW(0x2DF0) = 0xE000;                                /* pitch: nose 45 degrees down */
+    DSW(0x2DF2) = 0;
+    DSB(0x2DFB) = 1;                                     /* the flight model rebuilds its matrix from the angles */
+    kbd_host_byte(0x01);
+    kbd_host_byte(0x81);
+}
+
 /* 0000:1BB0 frame_loop / 1BBC frame_loop_body: THE frame loop (spec simflow.md 0.4), until [E552] != 0 */
 void frame_loop_body(void)
 {
@@ -414,6 +435,7 @@ void frame_loop_body(void)
         DSB(0x262A) = 1;
         sim_input_flight();
         sim_frame_step();
+        if (sim_test.dive_at >= 0 && sim_test.dive_at-- == 0) chain_dive();   /* PORT: test aid (F117_VGAME_DIVE) */
         if (sim_test.frames_left >= 0 && sim_test.frames_left-- == 0) mission_end(getenv("F117_VGAME_END") ? atoi(getenv("F117_VGAME_END")) : 7);   /* PORT: F117_VGAME_END=0 lands (the chain test hands END a finished mission) */
     } while (DSB(0xE552) == 0);
 }
@@ -487,6 +509,7 @@ int vgame_main(const char *tail)
     (void)tail;
     placeholder_note_vgame_pass();
     if (!sim_test.active && getenv("F117_VGAME_FRAMES")) sim_test.frames_left = atoi(getenv("F117_VGAME_FRAMES"));   /* PORT: the scripted chain run ends the flight after N frames */
+    if (!sim_test.active && getenv("F117_VGAME_DIVE")) sim_test.dive_at = atoi(getenv("F117_VGAME_DIVE"));            /* PORT: ... or dives into the sea after N frames */
     vgame_start();
     return 0;
 }

@@ -7,7 +7,7 @@
  * (mode 13h, DAC ramp; the number of white blocks on top = the program's number in the chain) for about
  * half a second of 70.09 Hz ticks; Esc or closing the window aborts the chain. */
 extern bool placeholder_interactive;
-void placeholder_init(void);        /* installs the Esc handler on the host keyboard */
+void placeholder_init(void);        /* the stub chain only: installs the Esc handler on the host keyboard */
 
 #include "prog.h"
 /* The stand-in of program `id` (setup_stub, mps_logo_stub, player_stub, dswap_stub, start_stub; the real VGAME and END have their own modules). */

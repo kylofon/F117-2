@@ -30,9 +30,11 @@ static void key_isr(u8 xt)
     if (xt == 0x01) prog_abort = true;                  /* Esc make code */
 }
 
+/* Only the stub chain (--chain-test) may install it: with the real programs an Esc anywhere (a cancelled dialog, a crash in flight)
+ * set prog_abort, and the chain quit to the desktop when that program ended (bug found 2026-10-16). */
 void placeholder_init(void)
 {
-    kbd_set_observer(key_isr);
+    if (prog_use_stubs) kbd_set_observer(key_isr);
 }
 
 static void screen(int number)

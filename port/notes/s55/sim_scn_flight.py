@@ -1,6 +1,8 @@
 """S5.7: scenario families of the flight module (flight model 1E9E, weapons, AI, detection, damage; see sim_scn.py).
 Multi-frame flights from snapshot s1 (a running mission): every frame is 1E9E (`sim_input_flight`, with scripted BIOS keys and stick bytes) and the sim
 step 39C4, which runs the radars, the fighters, the projectiles, the countermeasures, the gun and cba0 (fire, release, countermeasures, eject)."""
+import random
+
 from sim_scn_step import state_pokes, KEYS
 
 PILOT = 0x1272                       # pilot record in the comm block (DS:98F4 -> comm+1272h)
@@ -76,3 +78,17 @@ def fam_flight(T, rng):
             ops += FRAME
         ops += ['call mission_world_export']
         T.add('fm_eject%d' % n, 's1', ops)
+    # into the sea (2026-10-16, the user's crash off Tripoli): a dive outside any airfield zone down to sea level (AGL 0), crash mode Easy /
+    # Realistic, the stick held forward: 39C4 ends the mission with code 1 (stranded at AGL 0 with crashes on), comm+28h = 1; Esc in the BIOS keys is
+    # harmless in flight
+    rng = random.Random(20261016)                                       # its own generator: the families after this one keep their scenarios
+    for n in range(6):
+        ops = state_pokes(rng) + air(rng, rng.randint(150, 900)) + ['pokec %d %d' % (PILOT + 0x40, 1 + n % 2), 'poke w 0x3D74 0', 'poke w 0x9B04 1',
+                                                                   'poke w 0x2DF0 %d' % rng.randint(-0x3000, -0x1800), 'poke w 0xB052 %d' % rng.randint(9000, 16000),
+                                                                   'poke w 0xC06E 0', 'poke w 0x3634 5000']
+        for f in range(60):
+            if f in (3, 12):
+                ops += ['key 0x011B']
+            ops += ['poke b 0x2CD6 0x80', 'poke b 0x2CD7 0x26'] + FRAME           # the stick held forward
+        ops += ['call mission_world_export']
+        T.add('fm_sea%d' % n, 's1', ops)

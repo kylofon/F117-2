@@ -8,6 +8,7 @@
 
 usage: python end_ref.py <f117 executable> <game dir> [refroot]          (the test)
        python end_ref.py --chain <f117 executable> <game dir>            (the scripted run of the whole chain: a mission ends in VGAME, END runs, START saves the roster)
+       python end_ref.py --chain-sea <f117 executable> <game dir>        (the same with a real crash into the sea off Tripoli and an Esc in flight)
        python end_ref.py --one <f117 executable> <game dir> <scenario>   (debugging: one scenario on both sides with the screens dumped)
 exit 77 (ctest SKIP) when the game folder, work/unpacked/END.EXE or the `shell` comm block is missing.
 """
@@ -395,9 +396,62 @@ def chain(exe, game):
     return 0
 
 
+def chain_sea(exe, game):
+    """The chain run of the user's crash (2026-10-16): START (a new pilot with Realistic crashes, a strike over Libya) -> VGAME, where after 40
+    frames F117_VGAME_DIVE puts the aircraft in a dive into the sea north of Tripoli and presses Esc on the host keyboard -> the real crash
+    (AGL 0 outside an airfield zone with crashes on: mission_end(1)) -> END (killed in action) -> START saves the roster -> quit at the prompt.
+    Before the fix the Esc made the chain quit to the desktop as soon as VGAME ended ("quit: aborted")."""
+    if not os.path.isfile(os.path.join(game, 'END.EXE')) or not os.path.isfile(os.path.join(ROOT, 'work', 'unpacked', 'START.EXE')):
+        print('no game files')
+        return 77
+    import shell_ref, shell_emu
+    scratch = shell_ref.scratch_game(game)
+    open(os.path.join(scratch, 'ROSTER.FIL'), 'wb').write(shell_emu.make_roster())
+    env = dict(os.environ, F117_KEYS='1:31,2:03,11:39', F117_SHELL_SCRIPT=os.path.join(HERE, '..', 's54', 'shell_chain_libya.txt'), F117_VGAME_DIVE='40',
+               F117_VGAME_FRAMES='400', F117_END_SCRIPT=os.path.join(HERE, 'end_chain.txt'))
+    t = time.time()
+    p = subprocess.run([exe, '--headless', '--trace', '--game-dir', scratch], env=env, capture_output=True, text=True, timeout=900)
+    secs = time.time() - t
+    out = p.stdout
+    want = [r'EXEC START\.EXE', r'START\.EXE exit code 0[CD]h', r'EXEC VGAME\.EXE', r'VGAME\.EXE exit code 81h', r'EXEC DSWAP\.EXE\s+tail " 2"', r'EXEC END\.EXE',
+            r'\[END\] pilot record: [^\n]*', r'END\.EXE exit code 23h', r'EXEC DSWAP\.EXE\s+tail " 0"', r'EXEC START\.EXE', r'START\.EXE exit code 00h', r'quit: START returned 0']
+    pos = 0
+    rec = None
+    for w in want:
+        m = re.compile(w).search(out, pos)
+        if not m:
+            print('debrief_chain_sea FAILED: "%s" not found after offset %d\n%s' % (w, pos, out[-2500:]))
+            print(p.stderr[-1000:])
+            return 1
+        if w.startswith(r'\[END'):
+            rec = m.group(0)
+        pos = m.end()
+    mm = re.search(r'missions=(\d+) last=(\d+) best=(\d+) career=(\d+) status=(\d+) rank=(\d+)', rec)
+    end_rec = tuple(int(x) for x in mm.groups())
+    r = open(os.path.join(scratch, 'ROSTER.FIL'), 'rb').read()
+    i = r.find(b'kim', 2)
+    if i < 0:
+        print('debrief_chain_sea FAILED: the new pilot is not in ROSTER.FIL')
+        return 1
+    o = i - 2
+    status, = struct.unpack_from('<H', r, o + 0x4E)
+    missions, = struct.unpack_from('<H', r, o + 0x36)
+    theatre, = struct.unpack_from('<H', r, o + 0x38)
+    if end_rec[0] != 1 or end_rec[4] != 2 or (missions, status, theatre) != (1, 2, 0):
+        print('debrief_chain_sea FAILED: END wrote %r (want 1 mission, status 2 = killed); ROSTER.FIL has missions %d status %d theatre %d' % (end_rec, missions, status, theatre))
+        return 1
+    if 'aborted' in out or p.stderr.strip():
+        print('debrief_chain_sea FAILED: unexpected quit or error\n%s' % p.stderr[-1000:])
+        return 1
+    print('debrief_chain_sea OK: START (Libya) -> VGAME (Esc, dive into the sea, crash) -> END (killed in action) -> START saved the roster, %.0f s' % secs)
+    return 0
+
+
 if __name__ == '__main__':
     if len(sys.argv) > 3 and sys.argv[1] == '--chain':
         sys.exit(chain(os.path.abspath(sys.argv[2]), os.path.abspath(sys.argv[3])))
+    if len(sys.argv) > 3 and sys.argv[1] == '--chain-sea':
+        sys.exit(chain_sea(os.path.abspath(sys.argv[2]), os.path.abspath(sys.argv[3])))
     if len(sys.argv) > 4 and sys.argv[1] == '--one':
         sys.exit(one(os.path.abspath(sys.argv[2]), os.path.abspath(sys.argv[3]), sys.argv[4]))
     sys.exit(test(os.path.abspath(sys.argv[1]), os.path.abspath(sys.argv[2]), os.path.abspath(sys.argv[3]) if len(sys.argv) > 3 else None))

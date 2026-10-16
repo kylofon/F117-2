@@ -390,6 +390,7 @@ static void restore_snap(const Snap *s)
     sim_test.render = render;
     sim_test.active = true;
     sim_test.frames_left = -1;
+    sim_test.dive_at = -1;
 }
 
 static long parse_num(const char *t) { return strtol(t, NULL, 0); }

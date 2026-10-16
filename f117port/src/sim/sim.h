@@ -56,6 +56,7 @@ typedef struct SimTest {
     bool stop_at_run;               /* tests: leave the program at the entry of sim_run after dumping the state */
     bool ticks;                     /* tests: ticks mode, the ISR body is run at the entry of sim_run instead */
     int  frames_left;               /* >= 0: end the mission with the abort code after this many frame-loop iterations */
+    int  dive_at;                   /* >= 0: the chain run's dive into the sea after this many frame-loop iterations (F117_VGAME_DIVE) */
     u16  keys[64];                  /* scripted key words for 1E9E's key fetch (one per frame), 0 = none */
     int  nkeys, next_key;
 } SimTest;

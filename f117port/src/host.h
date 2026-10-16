@@ -84,6 +84,11 @@ void  host_free(void *p);
 
 /* ---- Errors: prints (and shows unless headless) a message, shuts down and exits with code 3. */
 _Noreturn void host_fatal(const char *fmt, ...);
+/* PORT: an error worth reporting: printed to stderr and appended, with the date, to f117.log beside the program (the launcher
+ * hides stderr). host_fatal and the crash handler log through it. */
+void host_log_error(const char *fmt, ...);
+/* PORT: a crash (access violation, division by zero, ...) is logged as "crash: ... in <where()>" before the program dies. */
+void host_install_crash_log(const char *(*where)(void));
 
 /* ---- Developer aids (environment variables; work headless with SDL_VIDEO_DRIVER=dummy and
  *      SDL_AUDIO_DRIVER=dummy; "sound off" in the launcher is SDL_AUDIO_DRIVER=dummy):

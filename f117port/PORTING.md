@@ -89,6 +89,11 @@ ctest runs the chain with the placeholders (`chain`), counts ticks over a second
 report (`check_missing_files`). Developer aids (environment, `host.h`): `F117_SNAPSHOT_DIR` (+ `F117_SNAPSHOT_MS`) saves
 presented frames as PNG, `F117_KEYS` scripts XT key presses, `F117_TRACE=1` logs program switches. Throwaway
 verification programs go in your scratch area; do not create HTML pages.
+Errors the player cannot see (the launcher hides stderr) go to stderr and `f117.log` beside the program (`host_log_error`): every
+`host_fatal`, a crash (`host_install_crash_log`: the exception code and the program that ran) and a quit of the chain that the player did
+not ask for (`prog.c f117_quit`: a DSWAP or END code the original never gives, an abort without a closed window). The chain quits only on
+the programs' exit codes or a closed window; the Esc handler of the placeholders is installed for `--chain-test` only (before 2026-10-16
+an Esc anywhere, e.g. after a crash in flight, ended the game when that program finished).
 
 ## Key bindings (`src/keymap.c`, launcher `keys.cpp`)
 
@@ -286,7 +291,9 @@ simtest.c     --sim-test: start-up dump, the ISR counters (ticks mode), the scen
   functions and of frame-loop bodies (view, HUD, ADI, MFDs, overlay, step, keys, export) on both sides from a snapshot of the machine and compares DGROUP, the
   pages row by row, the DAC and the comm block (so the exported world and the event log byte for byte). The stubbed functions return 0 on both sides.
   `--only calls:FAMILY`, `--bisect ID`, `--dump ID` (pixel crop of the first difference), `--trace ID`, `PROBEFN=name:nargs` (arguments of an original near function).
-  `shell_chain` runs the real VGAME for `F117_VGAME_FRAMES` frames (headless) between START and END.
+  `shell_chain` runs the real VGAME for `F117_VGAME_FRAMES` frames (headless) between START and END. `debrief_chain_sea` (end_ref.py --chain-sea)
+  flies a Libya strike into the sea: `F117_VGAME_DIVE=N` puts the aircraft in a dive off Tripoli after N frames and presses Esc; the crash
+  (mission_end(1)), END (killed in action) and START follow. The `fm_sea*` scenarios are the same dive against the original 39C4 byte for byte.
 
 ## Render3d (`src/render3d`, S5.6)
 

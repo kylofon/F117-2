@@ -142,13 +142,16 @@ endif()
 # rescued, ejected and captured, crashed, promoted with medals, a training flight, the 99th mission lost and won) from comm blocks built on the `shell` test's mission; the port
 # runs the same scripts and must give the same screen + DAC CRC at every step, the same pilot record (the comm block, byte for byte) and the exit code 23h. `debrief_chain` is the
 # scripted run of the whole chain with the real END: a landing ends VGAME, END debriefs, START saves a roster that holds END's record. References cached in the build tree.
+# `debrief_chain_sea` is the user's crash of 2026-10-16: an Esc in flight, a dive into the sea off Tripoli, END (killed in action), START (no quit to the desktop).
 # Both skip (77) without ../Game or the `shell` comm block.
 if(Python3_Interpreter_FOUND)
     add_test(NAME debrief COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s58/end_ref.py
              $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game ${CMAKE_CURRENT_BINARY_DIR}/debrief_ref)
     add_test(NAME debrief_chain COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s58/end_ref.py --chain
              $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game)
-    set_tests_properties(debrief debrief_chain PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 900 DEPENDS shell)
+    add_test(NAME debrief_chain_sea COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s58/end_ref.py --chain-sea
+             $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game)
+    set_tests_properties(debrief debrief_chain debrief_chain_sea PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 900 DEPENDS shell)
 endif()
 
 # The sound module (src/sound, S5.9): ASOUND.117 and ASOUND.LOG ported from sound.md. `sound` replays scripts of driver calls (every single command, the PLAYER intro

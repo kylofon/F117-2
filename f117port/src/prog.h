@@ -54,6 +54,7 @@ extern int prog_run_count[PROG_COUNT];
 
 /* The ProgId of the program running now, -1 outside prog_run. */
 int prog_current_id(void);
+const char *prog_current_name(void);   /* PORT: the running program's EXE name (or F117.COM), for the crash log */
 
 /* Runs one program (a logged EXEC) and returns its exit code. */
 int prog_run(ProgId id, const char *tail);

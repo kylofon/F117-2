@@ -84,10 +84,15 @@ const char *game_files_missing(void)
     return NULL;
 }
 
-static void f117_quit(const char *why)
+/* PORT: the player chose to quit (Alt-Q, Esc in SETUP, a closed window) -> only the trace; anything else is an error the
+ * player never sees (the launcher hides stderr), so it also goes to stderr and f117.log. */
+static void f117_quit(const char *why, bool expected)
 {
     prog_log("[chain] quit: %s", why);
+    if (!expected && !host_quit_requested()) host_log_error("the game ended unexpectedly: %s", why);
 }
+
+const char *prog_current_name(void) { return current_prog < 0 ? "F117.COM" : prog_table[current_prog].exe; }
 
 void prog_comm_init(void)
 {
@@ -109,14 +114,15 @@ static int chain_body(const char *f117_tail)
 
     prog_comm_init();
 
-    if (RUN(PROG_SETUP, f117_tail) != EXIT_SETUP_OK) { f117_quit("SETUP did not return 24h"); return runs; }
-    if (prog_abort) { f117_quit("aborted"); return runs; }
+    int setup = RUN(PROG_SETUP, f117_tail);
+    if (setup != EXIT_SETUP_OK) { f117_quit(setup ? "SETUP did not return 24h" : "SETUP returned 0 (Esc)", setup == 0); return runs; }
+    if (prog_abort) { f117_quit("aborted", false); return runs; }
 
     char tail[96];
     snprintf(tail, sizeof tail, " %c", comm_get()->snd_driver[0] & 0x5F);
     int logo = RUN(PROG_MPS_LOGO, tail);
-    if (logo == EXIT_LOGO_ALT_Q) { f117_quit("MPS_LOGO returned 2 (Alt-Q)"); return runs; }
-    if (prog_abort) { f117_quit("aborted"); return runs; }
+    if (logo == EXIT_LOGO_ALT_Q) { f117_quit("MPS_LOGO returned 2 (Alt-Q)", true); return runs; }
+    if (prog_abort) { f117_quit("aborted", false); return runs; }
 
     /* The drivers: MGRAPHIC, the sound driver and MISC are bound (platform.md §6: static C function tables in the
      * port, so nothing is loaded), and comm+20h = the off-screen page, the result of graphics entry 0 (2):
@@ -131,23 +137,28 @@ static int chain_body(const char *f117_tail)
 
     if (logo == EXIT_LOGO_NOKEY) {
         RUN(PROG_PLAYER, " title-1 title-2 title-3a credit c-pit bunker");   /* exit code ignored */
-        if (prog_abort) { f117_quit("aborted"); return runs; }
+        if (prog_abort) { f117_quit("aborted", false); return runs; }
     }
 
     for (;;) {                                                      /* L */
-        if (RUN(PROG_DSWAP, " 0") == 0) { f117_quit("DSWAP 0 returned 0"); break; }
+        if (RUN(PROG_DSWAP, " 0") == 0) { f117_quit("DSWAP 0 returned 0", false); break; }
         int start = RUN(PROG_START, "");
-        if (start == 0) { f117_quit("START returned 0"); break; }
-        if (prog_abort) { f117_quit("aborted"); break; }
-        if (RUN(PROG_DSWAP, " 1") == 0) { f117_quit("DSWAP 1 returned 0"); break; }
+        if (start == 0) { f117_quit("START returned 0", true); break; }
+        if (prog_abort) { f117_quit("aborted", false); break; }
+        if (RUN(PROG_DSWAP, " 1") == 0) { f117_quit("DSWAP 1 returned 0", false); break; }
         if (start == EXIT_START_FLY) RUN(PROG_PLAYER, " title-2");
-        if (prog_abort) { f117_quit("aborted"); break; }
-        if (RUN(PROG_VGAME, "") == 0) { f117_quit("VGAME returned 0"); break; }
-        if (prog_abort) { f117_quit("aborted"); break; }
-        if (RUN(PROG_DSWAP, " 2") == 0) { f117_quit("DSWAP 2 returned 0"); break; }
+        if (prog_abort) { f117_quit("aborted", false); break; }
+        if (RUN(PROG_VGAME, "") == 0) { f117_quit("VGAME returned 0", true); break; }
+        if (prog_abort) { f117_quit("aborted", false); break; }
+        if (RUN(PROG_DSWAP, " 2") == 0) { f117_quit("DSWAP 2 returned 0", false); break; }
         int end = RUN(PROG_END, "");
-        if (end != EXIT_END_RESTART) { f117_quit("END did not return 23h"); break; }
-        if (prog_abort) { f117_quit("aborted"); break; }
+        if (end != EXIT_END_RESTART) {
+            char why[48];
+            snprintf(why, sizeof why, "END returned %02Xh, not 23h", end & 0xFF);
+            f117_quit(why, end == 0);                               /* 0 = Alt-Q, Y */
+            break;
+        }
+        if (prog_abort) { f117_quit("aborted", false); break; }
     }
 #undef RUN
     return runs;

@@ -6,6 +6,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#else
+#include <signal.h>
+#endif
 
 #include "opl3.h"
 
@@ -586,6 +593,66 @@ const char *host_game_dir(void) { return game_dir; }
 
 void host_free(void *p) { SDL_free(p); }
 
+/* ---------------------------------------------------------------- the error log (f117.log beside the program) */
+
+static void log_line(const char *msg)
+{
+    fprintf(stderr, "f117: %s\n", msg);
+    fflush(stderr);
+    const char *base = SDL_GetBasePath();
+    char path[1024];
+    snprintf(path, sizeof path, "%sf117.log", base ? base : "");
+    FILE *f = fopen(path, "a");
+    if (!f) return;
+    time_t now = time(NULL);
+    char stamp[32] = "";
+    struct tm *tm = localtime(&now);
+    if (tm) strftime(stamp, sizeof stamp, "%Y-%m-%d %H:%M:%S", tm);
+    fprintf(f, "%s %s\n", stamp, msg);
+    fclose(f);
+}
+
+void host_log_error(const char *fmt, ...)
+{
+    char msg[512];
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(msg, sizeof msg, fmt, ap);
+    va_end(ap);
+    log_line(msg);
+}
+
+static const char *(*crash_where)(void);
+
+#ifdef _WIN32
+static LONG WINAPI crash_filter(EXCEPTION_POINTERS *e)
+{
+    host_log_error("crash: exception %08lX at %p in %s", (unsigned long)e->ExceptionRecord->ExceptionCode,
+                   e->ExceptionRecord->ExceptionAddress, crash_where ? crash_where() : "?");
+    return EXCEPTION_CONTINUE_SEARCH;
+}
+#else
+static void crash_signal(int sig)
+{
+    host_log_error("crash: signal %d in %s", sig, crash_where ? crash_where() : "?");
+    signal(sig, SIG_DFL);
+    raise(sig);
+}
+#endif
+
+void host_install_crash_log(const char *(*where)(void))
+{
+    crash_where = where;
+#ifdef _WIN32
+    SetUnhandledExceptionFilter(crash_filter);
+#else
+    signal(SIGSEGV, crash_signal);
+    signal(SIGFPE, crash_signal);
+    signal(SIGILL, crash_signal);
+    signal(SIGBUS, crash_signal);
+#endif
+}
+
 _Noreturn void host_fatal(const char *fmt, ...)
 {
     char msg[512];
@@ -593,7 +660,7 @@ _Noreturn void host_fatal(const char *fmt, ...)
     va_start(ap, fmt);
     vsnprintf(msg, sizeof msg, fmt, ap);
     va_end(ap);
-    fprintf(stderr, "fatal: %s\n", msg);
+    host_log_error("fatal: %s", msg);
     if (window && !headless) SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "F-117A Nighthawk", msg, window);
     host_shutdown();
     exit(3);
