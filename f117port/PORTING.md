@@ -84,11 +84,24 @@ Needs SDL3 (`mingw-w64-x86_64-sdl3`); the launcher also wxWidgets 3.2 (`mingw-w6
 it); keep them together in a release.
 
 Options: `--game-dir DIR`, `--scale N`, `--aspect 4:3|1:1`, `--fullscreen` (what the launcher passes), `--headless` (no window or
-audio), `--trace`, `--check` (are the files of the chain in the game folder?), `--chain-test`, `--tick-test [MS]`, `--frontend-test DIR`.
+audio), `--trace`, `--check` (are the files of the chain in the game folder?), `--chain-test`, `--tick-test [MS]`, `--frontend-test DIR`, `--keys NAME=CODE,...` and `--keymap-test` (see "Key bindings").
 ctest runs the chain with the placeholders (`chain`), counts ticks over a second (`tick_rate`) and the missing-file
 report (`check_missing_files`). Developer aids (environment, `host.h`): `F117_SNAPSHOT_DIR` (+ `F117_SNAPSHOT_MS`) saves
 presented frames as PNG, `F117_KEYS` scripts XT key presses, `F117_TRACE=1` logs program switches. Throwaway
 verification programs go in your scratch area; do not create HTML pages.
+
+## Key bindings (`src/keymap.c`, launcher `keys.cpp`)
+
+`--keys "name=code,..."` (what the launcher passes for the actions not on their default keys) remaps host keys before the
+game's keyboard layer sees them (PORT: marked, the game code stays faithful). `host.c key_event` asks `keymap_map()` for
+each XT byte; with no `--keys` it returns -1 at once, so the byte stream is untouched. A code is the XT set-1 make code
+with `0x100` = E0 prefix (arrows, Insert...) and `0x1000` Shift, `0x2000` Ctrl, `0x4000` Alt held with it; `0` = no key.
+Only while VGAME runs (`prog_current_id()`): a key bound to an action is sent as the action's own key (the keys the
+original reads: `simflow.md` Part 2 section 2.1 for 1E9E, Part 10 for CBA0, the arrows of the keypad-as-stick hook), the
+modifiers it needs pressed around it; the default key of an action bound elsewhere is dropped; every other key passes.
+The 56 actions (flying, weapons and countermeasures, views, displays and game) are listed identically in `keymap.c` and
+`launcher/keys.cpp`. Fixed: the keypad stick, Esc, Alt+Q / Alt+B / Alt+S, Alt+Enter. `f117 --keymap-test` (ctest `keymap`)
+checks the parser and the key streams. The launcher keeps the keys in `settings.ini` `[Keys]`.
 
 ## Platform layer (`src/platform`, S5.1)
 

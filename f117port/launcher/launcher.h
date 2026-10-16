@@ -3,6 +3,8 @@
 
 #include <wx/dialog.h>
 
+#include "keys.h"
+
 class wxButton;
 class wxCheckBox;
 class wxChoice;
@@ -25,6 +27,7 @@ private:
     void BrowseProgram();
     void Play();
     void About();
+    void EditKeys();
     void Save();
 
     wxTextCtrl* folder_ = nullptr;
@@ -36,5 +39,6 @@ private:
     wxCheckBox* fullscreen_ = nullptr;
     wxCheckBox* sound_ = nullptr;
     wxButton* play_ = nullptr;
+    keys::Bindings bindings_;  // the game's keys (Key Bindings...), saved with the other options
     bool loading_ = true;  // no edits are recorded while the window is built
 };

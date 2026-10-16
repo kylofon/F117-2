@@ -1,4 +1,5 @@
 #include "host.h"
+#include "keymap.h"   /* PORT: key bindings */
 
 #include <SDL3/SDL.h>
 #include <stdarg.h>
@@ -411,6 +412,18 @@ static void key_event(SDL_Scancode sc, bool down)
     }
     u16 x = xt_scan(sc);
     if (!x) return;
+    u16 mapped[16];
+    int m = keymap_map(x, down, mapped);           /* PORT: key bindings (-1: the key as it is) */
+    if (m >= 0) {
+        for (int i = 0; i < m; i++) {
+            u8 seq[2];
+            int n = 0;
+            if (mapped[i] & GREY) seq[n++] = 0xE0;
+            seq[n++] = (u8)(mapped[i] & 0xFF);
+            feed(seq, n);
+        }
+        return;
+    }
     u8 seq[2];
     int n = 0;
     if (x & GREY) seq[n++] = 0xE0;

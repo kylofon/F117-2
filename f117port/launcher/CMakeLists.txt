@@ -26,6 +26,8 @@ add_executable(f117launcher WIN32
     app.cpp
     game.cpp
     icon.cpp
+    keys.cpp
+    keysdialog.cpp
     launcher.cpp
     settings.cpp
 )

@@ -24,6 +24,8 @@
 
 #include "game.h"
 #include "icon.h"
+#include "keys.h"
+#include "keysdialog.h"
 #include "settings.h"
 #include "version.h"
 
@@ -133,24 +135,52 @@ LauncherDialog::LauncherDialog()
     optionsBox->Add(sound_, 0, wxALL, gap);
     aspect_->Bind(wxEVT_CHOICE, [this](wxCommandEvent&) { FillScales(); });
 
+    // Keys
+    auto* keysBox = new wxStaticBoxSizer(wxVERTICAL, this, "Keys in the game");
+    wxWindow* kb = keysBox->GetStaticBox();
+    auto* keyGrid = new wxFlexGridSizer(2, small, FromDIP(16));
+    const char* const KEYS[][2] = {
+        {"Arrows / keypad", "fly the stick (tap twice for full deflection)"},
+        {"- =   Shift+-  Shift+=", "throttle down / up, idle, full"},
+        {"6  8  7  0", "landing gear, weapon bay, altitude hold, wheel brakes"},
+        {"Space  Backspace  Enter", "select weapon, gun, release the weapon"},
+        {"1  2  5  (3  4)", "flare, chaff, decoy (flare and chaff modes)"},
+        {"F1  Shift+F1 - F6", "cockpit view, outside views"},
+        {"F2 - F8  F10", "master mode and the display pages"},
+        {"M , . /", "sensor looks left, right, rear, ahead"},
+        {"Shift+F10", "eject"},
+        {"Alt+P  Alt+Q  Alt+Enter", "pause, quit, full screen"},
+    };
+    for (const auto& k : KEYS) {
+        keyGrid->Add(new wxStaticText(kb, wxID_ANY, k[0]));
+        keyGrid->Add(GreyText(kb, k[1]));
+    }
+    keysBox->Add(keyGrid, 0, wxLEFT | wxRIGHT | wxTOP, gap);
+    keysBox->Add(GreyText(kb, "These are the original keys; Key Bindings... changes most of them."), 0, wxALL, gap);
+
     // Buttons
     auto* buttons = new wxBoxSizer(wxHORIZONTAL);
     auto* about = new wxButton(this, wxID_ABOUT, "&About");
+    auto* keyBindings = new wxButton(this, wxID_ANY, "&Key Bindings...");
+    keyBindings->SetToolTip("Choose the keys for flying, weapons, views and the displays.");
     play_ = new wxButton(this, wxID_ANY, "&Play");
     auto* close = new wxButton(this, wxID_CLOSE, "Close");
-    buttons->Add(about);
+    buttons->Add(about, 0, wxRIGHT, gap);
+    buttons->Add(keyBindings);
     buttons->AddStretchSpacer();
     buttons->Add(play_, 0, wxRIGHT, gap);
     buttons->Add(close);
     play_->SetDefault();
     SetEscapeId(wxID_CLOSE);
     about->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { About(); });
+    keyBindings->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { EditKeys(); });
     play_->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { Play(); });
     close->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { Close(); });
 
     auto* all = new wxBoxSizer(wxVERTICAL);
     all->Add(filesBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, margin);
-    all->Add(optionsBox, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, margin);
+    all->Add(optionsBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, margin);
+    all->Add(keysBox, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, margin);
     all->Add(buttons, 0, wxEXPAND | wxALL, margin);
     SetSizer(all);
 
@@ -165,6 +195,7 @@ LauncherDialog::LauncherDialog()
         wxMax(MIN_SCALE, wxMin(MAX_SCALE, settings::GetInt(SECTION, "Scale", DEFAULT_SCALE))) - MIN_SCALE);
     fullscreen_->SetValue(settings::GetInt(SECTION, "Fullscreen", 0) != 0);
     sound_->SetValue(settings::GetInt(SECTION, "Sound", 1) != 0);
+    bindings_ = keys::Load();
     loading_ = false;
     UpdateState();
 
@@ -239,6 +270,7 @@ void LauncherDialog::Play() {
     options.scale = scale_->GetSelection() + MIN_SCALE;
     options.fullscreen = fullscreen_->GetValue();
     options.sound = sound_->GetValue();
+    options.keys = keys::Argument(bindings_);
     wxString error;
     if (!LaunchGame(options, error)) wxMessageBox(error, APP_TITLE, wxOK | wxICON_ERROR, this);
 }
@@ -255,6 +287,10 @@ void LauncherDialog::Save() {
     settings::SetInt(SECTION, "Fullscreen", fullscreen_->GetValue() ? 1 : 0);
     settings::SetInt(SECTION, "Sound", sound_->GetValue() ? 1 : 0);
     settings::SaveWindowPosition(SECTION, this);
+}
+
+void LauncherDialog::EditKeys() {
+    if (EditKeyBindings(this, bindings_)) keys::Save(bindings_);
 }
 
 void LauncherDialog::About() {

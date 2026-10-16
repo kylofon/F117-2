@@ -11,6 +11,9 @@
  *   --check       verify that the game folder holds the files the chain needs, print a summary and exit
  *   --chain-test  run the whole chain with the placeholder programs without waiting, print the trace and
  *                 check it; exits 0 when the sequence was right (needs no game files)
+ *   --keys        PORT: key bindings, "name=code,..." for the actions not on their default keys (the launcher's
+ *                 Key Bindings dialog; keymap.c, PORTING.md). Without it every key goes to the game as it is
+ *   --keymap-test the key map (keymap_parse and the remapping) against its expected key streams; no game files
  *   --tick-test   count the timer ticks over MS milliseconds (default 1000), print them and exit
  *   --video-test  a composed screen (picture, fonts, sprites, lines, palette fade); F117_SNAPSHOT_DIR writes it as PNG
  *   --video-selftest  the driver primitives against vectors from the original MGRAPHIC under Unicorn (video/videotest.c)
@@ -31,6 +34,7 @@
 #include <string.h>
 
 #include "host.h"
+#include "keymap.h"
 #include "mem.h"
 #include "platform/platform.h"
 #include "platform/timer.h"
@@ -49,7 +53,8 @@ static int usage(const char *prog)
 {
     fprintf(stderr,
             "usage: %s [--game-dir DIR] [--scale N] [--aspect 4:3|1:1] [--fullscreen] [--headless]\n"
-            "          [--trace] [--check] [--chain-test] [--tick-test [MS]]\n", prog);
+            "          [--trace] [--check] [--chain-test] [--tick-test [MS]]\n"
+            "          [--keys NAME=CODE,...] [--keymap-test]\n", prog);
     return 2;
 }
 
@@ -81,6 +86,7 @@ int main(int argc, char **argv)
 {
     HostConfig cfg = { "Game", 3, false, true, false };
     bool check = false, chain = false, tick = false, ptest = false, etest = false, vtest = false, vself = false;
+    bool ktest = false;
     const char *simref = NULL;
     const char *r3dref = NULL;
     const char *decref = NULL, *feref = NULL, *shref = NULL, *dbref = NULL, *sndref = NULL;
@@ -99,6 +105,11 @@ int main(int argc, char **argv)
         }
         else if (!strcmp(a, "--trace")) prog_trace = true;
         else if (!strcmp(a, "--check")) check = true;
+        else if (!strcmp(a, "--keys") && v) {                                             /* PORT */
+            if (!keymap_parse(v)) { fprintf(stderr, "bad --keys list: %s\n", v); return usage(argv[0]); }
+            i++;
+        }
+        else if (!strcmp(a, "--keymap-test")) ktest = true;
         else if (!strcmp(a, "--chain-test")) chain = true;
         else if (!strcmp(a, "--platform-test")) ptest = true;
         else if (!strcmp(a, "--exe-test")) etest = true;
@@ -118,6 +129,7 @@ int main(int argc, char **argv)
         }
         else return usage(argv[0]);
     }
+    if (ktest) return keymap_selftest();                       /* needs neither window nor game files */
     if (check || tick || ptest || etest || vself || decref || feref || shref || dbref || sndref || simref || r3dref) cfg.headless = true;
     if (host_trace()) prog_trace = true;
     if (chain) { prog_trace = true; prog_use_stubs = true; }

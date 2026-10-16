@@ -56,11 +56,17 @@ void prog_log(const char *fmt, ...)
     fflush(stdout);
 }
 
+static int current_prog = -1;
+int prog_current_id(void) { return current_prog; }   /* PORT: the key bindings (keymap.c) act only in VGAME */
+
 int prog_run(ProgId id, const char *tail)
 {
+    int outer = current_prog;
+    current_prog = (int)id;
     prog_log("[chain] EXEC %-12s tail \"%s\"", prog_table[id].exe, tail);
     prog_run_count[id]++;
     int code = platform_exec(id, prog_use_stubs ? placeholder_main(id) : prog_table[id].main, tail);
+    current_prog = outer;
     prog_log("[chain]   %s exit code %02Xh", prog_table[id].exe, code);
     return code;
 }

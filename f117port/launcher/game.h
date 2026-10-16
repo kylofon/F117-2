@@ -27,6 +27,7 @@ struct GameOptions {
     bool aspect43 = true;     // --aspect 4:3 | 1:1
     bool fullscreen = false;  // --fullscreen
     bool sound = true;        // false: SDL_AUDIO_DRIVER=dummy
+    wxString keys;            // --keys: the actions not on their default keys (keys::Argument), empty if none
 };
 
 // Starts the game. On failure returns false and says why in `error`.

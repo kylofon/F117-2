@@ -51,6 +51,8 @@ endif()
 enable_testing()
 add_test(NAME chain COMMAND f117 --headless --chain-test)
 set_tests_properties(chain PROPERTIES PASS_REGULAR_EXPRESSION "chain-test OK")
+add_test(NAME keymap COMMAND f117 --keymap-test)
+set_tests_properties(keymap PROPERTIES PASS_REGULAR_EXPRESSION "keymap-test OK")
 add_test(NAME tick_rate COMMAND f117 --headless --tick-test 1000)
 # 70.09 Hz: 70 or 71 ticks in a second; a loaded machine may see a few fewer, never more than 72.
 set_tests_properties(tick_rate PROPERTIES PASS_REGULAR_EXPRESSION "ticks in 1000 ms: (6[4-9]|7[0-2]) ")

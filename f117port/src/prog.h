@@ -52,6 +52,9 @@ void prog_comm_init(void);
 /* How often each program ran (the chain test checks the sequence). */
 extern int prog_run_count[PROG_COUNT];
 
+/* The ProgId of the program running now, -1 outside prog_run. */
+int prog_current_id(void);
+
 /* Runs one program (a logged EXEC) and returns its exit code. */
 int prog_run(ProgId id, const char *tail);
 

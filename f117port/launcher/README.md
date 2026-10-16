@@ -18,12 +18,18 @@ controls, like the Test Drive III launcher (`TestDrive3/td3port/launcher`) it is
   * **Aspect** (`--aspect`): 4:3 as on a VGA monitor, or 1:1 square pixels.
   * **Window size** (`--scale`) and **Start in full screen** (`--fullscreen`; Alt+Enter switches).
   * **Sound**: off starts the game with `SDL_AUDIO_DRIVER=dummy`.
+* **Keys in the game**: a reminder of the main keys of the original (as in the Test Drive III launcher).
+* **Key Bindings...** opens a dialog with a button per action showing its key, on four tabs (Flying, Weapons and
+  countermeasures, Views, Displays and game): click it, then press the new key (Shift, Ctrl or Alt can be held with it;
+  a key already used asks before it is taken over; **No key** frees the action). **Reset to defaults**, **OK**,
+  **Cancel**. Changed keys are shown in bold. The keys that keep their job (keypad stick, Esc, Alt+Q, Alt+B, Alt+S,
+  Alt+Enter) are listed under the tabs. Play passes only the changed keys, as `--keys name=code,...`
+  (`f117port/PORTING.md` "Key bindings").
 * **Play** starts the game; the launcher stays open. **About**: version, author and links.
 
 Everything is remembered in `%APPDATA%\F-117A Nighthawk\settings.ini` (`~/.config/f117a-nighthawk` on Linux). A
 folder or program left at its default is stored empty, so it follows the launcher if the whole folder moves.
-Delete the file to go back to the defaults. A "Keys in the game" box like Test Drive III's comes once the port's
-keys are settled (S5).
+The key bindings are in the `[Keys]` section, one line per action. Delete the file to go back to the defaults.
 
 ## Building
 
@@ -46,6 +52,8 @@ itself is linked in.
 
 * `app.cpp`: the wxWidgets application.
 * `launcher.h`, `launcher.cpp`: the window and the About box.
+* `keys.h`, `keys.cpp`: the rebindable actions (the same names and defaults as `src/keymap.c`), key names, load and save, the
+  `--keys` argument and the "Press new key" prompt. `keysdialog.h`, `keysdialog.cpp`: the Key Bindings dialog.
 * `game.h`, `game.cpp`: the file checks and starting the game.
 * `settings.h`, `settings.cpp`: `settings.ini`.
 * `icon.h`, `icon.cpp`: the app icon, the F-117A over a night sky drawn in code. `make_icon.py` (Pillow) writes

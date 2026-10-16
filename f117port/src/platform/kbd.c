@@ -9,6 +9,7 @@
 
 #include "gen/module_platform.h"
 #include "host.h"
+#include "keymap.h"   /* PORT: key bindings */
 #include "platform/platform.h"
 
 #define BDA 0x40
@@ -161,6 +162,7 @@ void kbd_host_byte(u8 raw)
 /* Keys released outside the window never send their break code: release every key that is down. */
 static void focus_lost(void)
 {
+    keymap_focus_lost();                                  /* PORT: key bindings */
     for (int i = 0; i < 256; i++) {
         if (!down[i]) continue;
         if (i & 0x80) kbd_host_byte(0xE0);
