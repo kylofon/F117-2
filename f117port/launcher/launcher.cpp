@@ -11,6 +11,7 @@
 #include <wx/hyperlink.h>
 #include <wx/msgdlg.h>
 #include <wx/settings.h>
+#include <wx/spinctrl.h>
 #include <wx/sizer.h>
 #include <wx/statbmp.h>
 #include <wx/statbox.h>
@@ -38,6 +39,8 @@ const char* const SUPPORT = "https://buymeacoffee.com/krzysztofkania";
 const char* const SECTION = "Game";
 
 const int MIN_SCALE = 1, MAX_SCALE = 6, DEFAULT_SCALE = 3;
+// The game's speed: retrace ticks (70.09 a second) a frame at least in flight (f117 --frame-ticks; 0 = the original pacing only).
+const int MIN_TICKS = 0, MAX_TICKS = 20, DEFAULT_TICKS = 7;
 
 #ifdef __WXMSW__
 HRESULT CALLBACK AboutCallback(HWND hwnd, UINT msg, WPARAM, LPARAM lp, LONG_PTR) {
@@ -126,6 +129,17 @@ LauncherDialog::LauncherDialog()
     scale_ = new wxChoice(ob, wxID_ANY);
     scale_->SetToolTip("The window's size when the game starts. Alt+Enter switches to full screen.");
     grid->Add(scale_, 0, wxALIGN_CENTER_VERTICAL);
+    grid->Add(new wxStaticText(ob, wxID_ANY, "Game &speed:"), 0, wxALIGN_CENTER_VERTICAL);
+    auto* speedRow = new wxBoxSizer(wxHORIZONTAL);
+    speed_ = new wxSpinCtrl(ob, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(FromDIP(64), -1),
+                            wxSP_ARROW_KEYS, MIN_TICKS, MAX_TICKS, DEFAULT_TICKS);
+    speed_->SetToolTip("Retrace ticks (70 a second) each frame takes at least in flight. The game times its flight "
+                       "model by the frame rate it measures, so this changes how smooth it looks (and how fast "
+                       "radar dishes spin), not how fast the aircraft flies. 0 = no limit: the original's own "
+                       "pacing, about 17 frames a second on any modern PC.");
+    speedRow->Add(speed_, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
+    speedRow->Add(GreyText(ob, "ticks a frame: 7 recommended (10 fps), 0 original (too fast)"), 0, wxALIGN_CENTER_VERTICAL);
+    grid->Add(speedRow, 0, wxALIGN_CENTER_VERTICAL);
     optionsBox->Add(grid, 0, wxLEFT | wxRIGHT | wxTOP, gap);
     fullscreen_ = new wxCheckBox(ob, wxID_ANY, "Start in f&ull screen (Alt+Enter switches)");
     optionsBox->Add(fullscreen_, 0, wxLEFT | wxRIGHT | wxTOP, gap);
@@ -195,6 +209,7 @@ LauncherDialog::LauncherDialog()
         wxMax(MIN_SCALE, wxMin(MAX_SCALE, settings::GetInt(SECTION, "Scale", DEFAULT_SCALE))) - MIN_SCALE);
     fullscreen_->SetValue(settings::GetInt(SECTION, "Fullscreen", 0) != 0);
     sound_->SetValue(settings::GetInt(SECTION, "Sound", 1) != 0);
+    speed_->SetValue(wxMax(MIN_TICKS, wxMin(MAX_TICKS, settings::GetInt(SECTION, "FrameTicks", DEFAULT_TICKS))));
     bindings_ = keys::Load();
     loading_ = false;
     UpdateState();
@@ -270,6 +285,7 @@ void LauncherDialog::Play() {
     options.scale = scale_->GetSelection() + MIN_SCALE;
     options.fullscreen = fullscreen_->GetValue();
     options.sound = sound_->GetValue();
+    options.frameTicks = speed_->GetValue();
     options.keys = keys::Argument(bindings_);
     wxString error;
     if (!LaunchGame(options, error)) wxMessageBox(error, APP_TITLE, wxOK | wxICON_ERROR, this);
@@ -286,6 +302,7 @@ void LauncherDialog::Save() {
     settings::SetInt(SECTION, "Scale", scale_->GetSelection() + MIN_SCALE);
     settings::SetInt(SECTION, "Fullscreen", fullscreen_->GetValue() ? 1 : 0);
     settings::SetInt(SECTION, "Sound", sound_->GetValue() ? 1 : 0);
+    settings::SetInt(SECTION, "FrameTicks", speed_->GetValue());
     settings::SaveWindowPosition(SECTION, this);
 }
 

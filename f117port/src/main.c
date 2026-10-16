@@ -13,6 +13,8 @@
  *                 check it; exits 0 when the sequence was right (needs no game files)
  *   --keys        PORT: key bindings, "name=code,..." for the actions not on their default keys (the launcher's
  *                 Key Bindings dialog; keymap.c, PORTING.md). Without it every key goes to the game as it is
+ *   --frame-ticks PORT: the game speed, at least N retrace ticks (70.09 a second) a frame in flight on top of the original's pacing
+ *                 (default HOST_DEFAULT_FRAME_TICKS = 7, 10 frames a second; 0 = the original pacing only, about 17 frames a second)
  *   --keymap-test the key map (keymap_parse and the remapping) against its expected key streams; no game files
  *   --tick-test   count the timer ticks over MS milliseconds (default 1000), print them and exit
  *   --video-test  a composed screen (picture, fonts, sprites, lines, palette fade); F117_SNAPSHOT_DIR writes it as PNG
@@ -54,7 +56,7 @@ static int usage(const char *prog)
     fprintf(stderr,
             "usage: %s [--game-dir DIR] [--scale N] [--aspect 4:3|1:1] [--fullscreen] [--headless]\n"
             "          [--trace] [--check] [--chain-test] [--tick-test [MS]]\n"
-            "          [--keys NAME=CODE,...] [--keymap-test]\n", prog);
+            "          [--keys NAME=CODE,...] [--keymap-test] [--frame-ticks N]\n", prog);
     return 2;
 }
 
@@ -110,6 +112,7 @@ int main(int argc, char **argv)
             i++;
         }
         else if (!strcmp(a, "--keymap-test")) ktest = true;
+        else if (!strcmp(a, "--frame-ticks") && v) { host_set_frame_ticks(atoi(v)); i++; }    /* PORT: the game speed */
         else if (!strcmp(a, "--chain-test")) chain = true;
         else if (!strcmp(a, "--platform-test")) ptest = true;
         else if (!strcmp(a, "--exe-test")) etest = true;

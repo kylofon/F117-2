@@ -18,6 +18,11 @@ controls, like the Test Drive III launcher (`TestDrive3/td3port/launcher`) it is
   * **Aspect** (`--aspect`): 4:3 as on a VGA monitor, or 1:1 square pixels.
   * **Window size** (`--scale`) and **Start in full screen** (`--fullscreen`; Alt+Enter switches).
   * **Sound**: off starts the game with `SDL_AUDIO_DRIVER=dummy`.
+  * **Game speed** (`--frame-ticks`, default 7): the retrace ticks (70.09 a second) each frame takes at least in
+    flight. The original paces itself to about 17 frames a second on any fast PC (its frame-rate estimator stops at
+    15), far above the 4 to 15 it was built for, so radar dishes spin wildly. 7 gives 10 frames a second, the middle of
+    that range; the flight model scales with the measured rate, so the aircraft still flies at the same speed.
+    0 = the original pacing only.
 * **Keys in the game**: a reminder of the main keys of the original (as in the Test Drive III launcher).
 * **Key Bindings...** opens a dialog with a button per action showing its key, on four tabs (Flying, Weapons and
   countermeasures, Views, Displays and game): click it, then press the new key (Shift, Ctrl or Alt can be held with it;

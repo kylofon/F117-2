@@ -85,6 +85,8 @@ it); keep them together in a release.
 
 Options: `--game-dir DIR`, `--scale N`, `--aspect 4:3|1:1`, `--fullscreen` (what the launcher passes), `--headless` (no window or
 audio), `--trace`, `--check` (are the files of the chain in the game folder?), `--chain-test`, `--tick-test [MS]`, `--frontend-test DIR`, `--keys NAME=CODE,...` and `--keymap-test` (see "Key bindings").
+`--frame-ticks N` (PORT, the launcher's Game speed, default 7): VGAME's frame loop takes at least N retrace ticks a frame on top of the
+original's pacing (`sim_main.c frame_floor`, before the flip; skipped by the tests); 0 = the original pacing only (PLAN.md Decisions 2026-10-16).
 ctest runs the chain with the placeholders (`chain`), counts ticks over a second (`tick_rate`) and the missing-file
 report (`check_missing_files`). Developer aids (environment, `host.h`): `F117_SNAPSHOT_DIR` (+ `F117_SNAPSHOT_MS`) saves
 presented frames as PNG, `F117_KEYS` scripts XT key presses, `F117_TRACE=1` logs program switches. Throwaway

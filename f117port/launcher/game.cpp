@@ -79,7 +79,8 @@ bool LaunchGame(const GameOptions& o, wxString& error) {
     std::vector<wxString> args{o.program,
                                "--game-dir", o.gameDir,
                                "--scale", wxString::Format("%d", o.scale),
-                               "--aspect", o.aspect43 ? "4:3" : "1:1"};
+                               "--aspect", o.aspect43 ? "4:3" : "1:1",
+                               "--frame-ticks", wxString::Format("%d", o.frameTicks)};
     if (o.fullscreen) args.push_back("--fullscreen");
     if (!o.keys.empty()) {
         args.push_back("--keys");

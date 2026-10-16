@@ -8,6 +8,7 @@
 class wxButton;
 class wxCheckBox;
 class wxChoice;
+class wxSpinCtrl;
 class wxStaticBitmap;
 class wxStaticText;
 class wxTextCtrl;
@@ -38,6 +39,7 @@ private:
     wxChoice* scale_ = nullptr;
     wxCheckBox* fullscreen_ = nullptr;
     wxCheckBox* sound_ = nullptr;
+    wxSpinCtrl* speed_ = nullptr;
     wxButton* play_ = nullptr;
     keys::Bindings bindings_;  // the game's keys (Key Bindings...), saved with the other options
     bool loading_ = true;  // no edits are recorded while the window is built

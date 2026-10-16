@@ -137,6 +137,10 @@ void host_shutdown(void)
 
 void host_set_tick_handler(void (*handler)(void)) { tick_handler = handler; }
 u64  host_ticks(void) { return ticks_run; }
+
+static int frame_ticks = HOST_DEFAULT_FRAME_TICKS;
+void host_set_frame_ticks(int ticks) { frame_ticks = ticks < 0 ? 0 : ticks > 70 ? 70 : ticks; }
+int  host_frame_ticks(void) { return frame_ticks; }
 bool host_quit_requested(void) { return quit_requested; }
 void host_set_kbd_handler(void (*handler)(u8)) { kbd_handler = handler; }
 void host_set_focus_lost_handler(void (*handler)(void)) { focus_lost_handler = handler; }

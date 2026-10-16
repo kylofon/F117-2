@@ -400,6 +400,20 @@ void sim_init(void)
     cockpit_daynight_recolor();
 }
 
+/* PORT: the game speed (--frame-ticks N, PLAN.md Decisions 2026-10-16). The original paces a frame only by the frame_delay([43B8]) of
+ * r3d_scene_draw and the tick wait of the scene set-up, so a fast PC runs at the cap of its estimator: about 4 ticks a frame (17.5 frames a
+ * second) with sim_rate 15, where the flight model is still right but everything drawn per frame (the radar dishes' 33.75 degrees per scene,
+ * render3d.md DB3E) runs at about twice the speed of a 1991 PC. The floor makes each frame last at least N ticks; the estimator [3660] then
+ * measures the slower rate and the flight model keeps its speed. N = 0 (and the tests) leave the original's pacing alone. */
+static void frame_floor(void)
+{
+    static u64 last;
+    int n = host_frame_ticks();
+    if (n <= 0 || sim_test.active) return;
+    while (host_ticks() - last < (u64)n && !host_quit_requested()) host_pump();
+    last = host_ticks();
+}
+
 /* PORT, test aid of the scripted chain run (F117_VGAME_DIVE=N, ctest debrief_chain_sea): after N frames the aircraft is put in a
  * 45-degree dive at 450 kt, 600 ft over the sea north of Tripoli (Libya; any point at sea level outside an airfield zone is the same),
  * gear up, and Esc is pressed on the host keyboard as a player would after the impact. The flight model and the sim step then crash it
@@ -431,6 +445,7 @@ void frame_loop_body(void)
             hud_side_strips(DSB(0x4088));
             cockpit_draw_adi();
         }
+        frame_floor();                                   /* PORT: the game speed */
         flip(DSW(0x2E34) * 160);
         DSB(0x262A) = 1;
         sim_input_flight();

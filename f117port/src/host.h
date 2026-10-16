@@ -29,6 +29,12 @@ void host_shutdown(void);
  * estimator, sound poll) is built on that (S5.1, S5.9). */
 void host_set_tick_handler(void (*handler)(void));
 u64  host_ticks(void);                       /* ticks delivered since host_init */
+/* PORT: the game speed (--frame-ticks N, the launcher's "Game speed"; PLAN.md Decisions 2026-10-16): VGAME's frame loop takes at least N
+ * ticks (70.09 a second) a frame, on top of the original's own pacing. The original's estimator caps itself at about 17 frames a second on
+ * any fast PC; the default 7 gives 10 (a 1991 PC's rate, the middle of the 4..15 the estimator was built for). 0 = the original pacing only. */
+#define HOST_DEFAULT_FRAME_TICKS 7
+void host_set_frame_ticks(int ticks);
+int  host_frame_ticks(void);
 
 /* Source of the displayed image: fills a w x h XRGB8888 frame and returns true if it changed since the
  * last call. Installed by the VGA model (platform/vga.c). Shown with 4:3 aspect unless --aspect 1:1. */
