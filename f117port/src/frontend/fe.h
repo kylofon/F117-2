@@ -21,6 +21,7 @@ u8  *tm_buffer(void);                         /* B800:0000 as 80 x 25 (char, att
 int  fe_snd_init(unsigned speech_seg);        /* ASOUND.117 slot 100 snd_init (sound.md "6") */
 int  fe_snd_cmd(int cmd, int arg);            /* slot 101 snd_cmd: PLAYER cue 3 = intro soundtrack, 0 = stop, 2 = "voices active?" (returns 0 when silent) */
 void fe_snd_shutdown(void);                   /* slot 102 */
+void fe_snd_poll_skipped(void);                   /* a skipped tick: only snd_noise in the fast state */
 int  fe_snd_poll(void);                       /* slot 103 snd_poll: called by the timer ISR body; 0 = nothing, <0 / >0 = change the tick divisor (S5.9) */
 
 /* ---- Developer / test hooks (fetest.c sets them; all NULL / 0 in a normal run) ------------------------------------------- */

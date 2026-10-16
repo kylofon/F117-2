@@ -5,16 +5,18 @@
 #include "sim/sim.h"
 #include "sim/sim_priv.h"
 #include "sim/sim_stubs.h"
+#include "sound/snd.h"
 #include "gen/module_flight.h"
 #include "gen/module_render3d.h"
 
-/* ---- the sound driver, slots 101 / 103 / 104 of ASOUND.117 (sound.md "2. Driver interface") ---- */
-int sim_snd_cmd(int cmd, int a, int b, int c) { (void)cmd; (void)a; (void)b; (void)c; return 0; }   /* TODO(S5.9): snd_cmd(cmd, ...) */
+/* ---- the sound driver, slots 101 / 103 / 104 of ASOUND.117 (sound.md "2. Driver interface"). In the sim tests (sim_test.active) the driver is a stand-in on
+ * both sides (the ORIGINAL VGAME under Unicorn has none either): snd_cmd does nothing and snd_poll returns sim_poll_result. */
+int sim_snd_cmd(int cmd, int a, int b, int c) { (void)b; (void)c; return sim_test.active ? 0 : snd_cmd(cmd, a); }
 unsigned sim_poll_calls;                                                                            /* TEST: how often the sound poll ran */
 int sim_poll_result;                                                                                /* TEST: what it returns */
-int sim_snd_poll(void) { sim_poll_calls++; return sim_poll_result; }                                                                /* TODO(S5.9): snd_poll(); > 0 fast tick divisor, < 0 idle */
+int sim_snd_poll(void) { sim_poll_calls++; return sim_test.active ? sim_poll_result : snd_poll(); } /* > 0 fast tick divisor, < 0 idle */
 unsigned sim_noise_calls;                                                                           /* TEST */
-void sim_snd_noise(void) { sim_noise_calls++; }                                                                        /* TODO(S5.9): snd_noise() */
+void sim_snd_noise(void) { sim_noise_calls++; if (!sim_test.active) snd_noise(); }
 
 
 /* ------------------------------------------------------------------------------------------------------------ stubs (see sim_stubs.h) */

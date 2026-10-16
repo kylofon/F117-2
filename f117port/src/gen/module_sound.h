@@ -71,16 +71,6 @@ void cmd39(void);
 void cmd4(void);
 /* ASOUND117 01b6:0b90  spec sound.md "(no heading)" */
 void cmd40(void);
-/* ASOUND117 01b6:096d  spec sound.md "(no heading)" */
-void cmd41(void);
-/* ASOUND117 01b6:0976  spec sound.md "(no heading)" */
-void cmd42(void);
-/* ASOUND117 01b6:097f  spec sound.md "(no heading)" */
-void cmd43(void);
-/* ASOUND117 01b6:0998  spec sound.md "(no heading)" */
-void cmd44(void);
-/* ASOUND117 01b6:09a1  spec sound.md "(no heading)" */
-void cmd45(void);
 /* ASOUND117 01b6:085f  spec sound.md "(no heading)" */
 void cmd5(void);
 /* ASOUND117 01b6:0887  spec sound.md "(no heading)" */
@@ -102,111 +92,65 @@ void engine_vol(void);
 /* ASOUND117 01b6:123e  spec sound.md "(no heading)" */
 void inst_load(int n);
 /* ASOUND117 01b6:1048  spec sound.md "(no heading)" */
-void inst_setop(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(int op char* patch)") */
+void inst_setop(int op, int patch, int ch);
 /* ASOUND117 01b6:03c4  spec sound.md "9. Random numbers (cs:03C4)" */
 unsigned lcg_rand(void);
 /* ASOUND.LOG 0000:0559  spec sound.md "(no heading)" */
 void logo_cmd1(void);
 /* ASOUND.LOG 0000:058f  spec sound.md "(no heading)" */
 void logo_cmd2(void);
-/* ASOUND.LOG 0000:0220  spec sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
-void logo_hw_reset(void);
-/* ASOUND.LOG 0000:0bfc  spec sound.md "(no heading)" */
-void logo_inst_load(void);
 /* ASOUND.LOG 0000:042f  spec sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
 void logo_isr_fast(void);
-/* ASOUND.LOG 0000:04ae  spec sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
-void logo_isr_fast_install(void);
 /* ASOUND.LOG 0000:04e5  spec sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
 void logo_isr_slow(void);
-/* ASOUND.LOG 0000:03f8  spec sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
-void logo_isr_slow_install(void);
-/* ASOUND.LOG 0000:07dc  spec sound.md "(no heading)" */
-void logo_keyoff(void);
-/* ASOUND.LOG 0000:0804  spec sound.md "(no heading)" */
-void logo_note_on(void);
-/* ASOUND.LOG 0000:06aa  spec sound.md "(no heading)" */
-void logo_pitch(void);
 /* ASOUND.LOG 0000:0344  spec sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
 void logo_poll(void);
 /* ASOUND.LOG 0000:019a  spec sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
 void logo_reset(void);
-/* ASOUND.LOG 0000:0be2  spec sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
-void logo_setop(void);
-/* ASOUND.LOG 0000:0754  spec sound.md "(no heading)" */
-void logo_slide(void);
 /* ASOUND.LOG 0000:0515  spec sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
-void logo_spawn(void);
-/* ASOUND.LOG 0000:116e  spec sound.md "(no heading)" */
-void logo_update_all(void);
-/* ASOUND.LOG 0000:0d1a  spec sound.md "(no heading)" */
-void logo_voice_tick(void);
-/* ASOUND.LOG 0000:0640  spec sound.md "8. Commands (cs:0911, 46 entries; AX = 0, BX = 2*cmd on entr" */
-void logo_vol(void);
+void logo_spawn(int voice, int track, int lptr);
 /* ASOUND117 01b6:0562  spec sound.md "2. Driver interface (ASOUND.117; slots 100-104)" */
 void noise_tick(void);
 /* ASOUND117 01b6:030b  spec sound.md "5.2 Primitives" */
-void opl_freq(void); /* TODO signature: spec sound.md "5.2 Primitives" (type column: "void(AL ch BX fnum)") */
+void opl_freq(int ch, int fnum);
 /* ASOUND117 01b6:0210  spec sound.md "(no heading)" */
 void opl_hw_reset(void);
 /* ASOUND117 01b6:02e6  spec sound.md "(no heading)" */
-void opl_mute_reg(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(AL reg)") */
-/* ASOUND117 01b6:0a5b  spec sound.md "(no heading)" */
-void opl_speech_regs(void);
+void opl_mute_reg(int reg);
 /* ASOUND117 01b6:02f6  spec sound.md "(no heading)" */
-void opl_unmute_reg(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(AL reg BH vol)") */
+void opl_unmute_reg(int reg, int vol);
 /* ASOUND117 01b6:036b  spec sound.md "5.1 Register write" */
-void opl_write(void); /* TODO signature: spec sound.md "5.1 Register write" (type column: "void(AL reg BL val)") */
-/* ASOUND117 01b6:035c  spec sound.md "(no heading)" */
-void opl_write_c(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(int port_sel int reg int val)") */
-/* ASOUND117 01b6:0b57  spec sound.md "(no heading)" */
-void pit2_setup(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(AL BL)") */
+void opl_write(int reg, int val);
 /* ASOUND117 01b6:0430  spec sound.md "7.1 poll_body() (0430) ? verified" */
 void poll_body(void);
-/* ASOUND117 01b6:0bd4  spec sound.md "(no heading)" */
-void rtc_to_dos_time(void);
-/* ASOUND117 01b6:18c8  spec sound.md "(no heading)" */
-void sb_dispatch(int fn);
-/* ASOUND117 01b6:0320  spec sound.md "1. What the port implements" */
-void sb_port_write_a(void);
 /* ASOUND117 01b6:0b98  spec sound.md "2. Driver interface (ASOUND.117; slots 100-104)" */
-void snd_cmd(void); /* TODO signature: spec sound.md "2. Driver interface (ASOUND.117; slots 1" (type column: "void(int cmd int arg)") */
+int snd_cmd(int cmd, int arg);
 /* ASOUND117 01b6:0b76  spec sound.md "6. Hardware reset and snd_init (verified writes)" */
 void snd_init(unsigned speech_seg);
 /* ASOUND117 01b6:0c1c  spec sound.md "7.2 Effect units and snd_noise() (0562) ? verified" */
 void snd_noise(void);
 /* ASOUND117 01b6:0c08  spec sound.md "2. Driver interface (ASOUND.117; slots 100-104)" */
 int snd_poll(void);
-/* ASOUND117 01b6:005e  spec sound.md "(no heading)" */
-void snd_probe_init(void);
 /* ASOUND117 01b6:018f  spec sound.md "(no heading)" */
 void snd_reset_all(void);
 /* ASOUND117 01b6:0bb5  spec sound.md "2. Driver interface (ASOUND.117; slots 100-104)" */
 void snd_shutdown(void);
-/* ASOUND117 01b6:025a  spec sound.md "(no heading)" */
-void snd_stop_all_wait(void);
 /* ASOUND117 01b6:05e7  spec sound.md "(no heading)" */
-void spawn_voice(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(BX voice CX track AX lptr)") */
+void spawn_voice(int voice, int track, int lptr);
 /* ASOUND117 01b6:05e3  spec sound.md "(no heading)" */
-void spawn_voice0(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(CX track)") */
+void spawn_voice0(int track);
 /* ASOUND117 01b6:05dc  spec sound.md "(no heading)" */
-void spawn_voice1(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(CX track)") */
+void spawn_voice1(int track);
 /* ASOUND117 01b6:05d5  spec sound.md "(no heading)" */
-void spawn_voice2(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(CX track)") */
+void spawn_voice2(int track);
 /* ASOUND117 01b6:05ce  spec sound.md "(no heading)" */
-void spawn_voice3(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(CX track)") */
+void spawn_voice3(int track);
 /* ASOUND117 01b6:05c7  spec sound.md "(no heading)" */
-void spawn_voice4(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(CX track)") */
+void spawn_voice4(int track);
 /* ASOUND117 01b6:05c0  spec sound.md "(no heading)" */
-void spawn_voice5(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(CX track)") */
+void spawn_voice5(int track);
 /* ASOUND117 01b6:05b9  spec sound.md "(no heading)" */
-void spawn_voice6(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(CX track)") */
-/* ASOUND117 01b6:0b01  spec sound.md "(no heading)" */
-void speech_loop(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(BX list)") */
-/* ASOUND117 01b6:09f2  spec sound.md "(no heading)" */
-void speech_play(void); /* TODO signature: spec sound.md "(no heading)" (type column: "void(BX list)") */
-/* ASOUND117 01b6:0a17  spec sound.md "(no heading)" */
-void speech_setup(void);
+void spawn_voice6(int track);
 /* ASOUND117 01b6:05a5  spec sound.md "7.1 poll_body() (0430) ? verified" */
 void units_started(void);
 /* ASOUND117 01b6:1882  spec sound.md "7.1 poll_body() (0430) ? verified" */
@@ -223,3 +167,33 @@ void voice_slide(void);
 void voice_tick(void);
 /* ASOUND117 01b6:0c2e  spec sound.md "(no heading)" */
 void voice_vol(void);
+
+/* ---- dead: not ported (listed for the record) */
+/* DEAD ASOUND.LOG 0000:0220 logo_hw_reset */
+/* DEAD ASOUND.LOG 0000:03f8 logo_isr_slow_install */
+/* DEAD ASOUND.LOG 0000:04ae logo_isr_fast_install */
+/* DEAD ASOUND.LOG 0000:0640 logo_vol */
+/* DEAD ASOUND.LOG 0000:06aa logo_pitch */
+/* DEAD ASOUND.LOG 0000:0754 logo_slide */
+/* DEAD ASOUND.LOG 0000:07dc logo_keyoff */
+/* DEAD ASOUND.LOG 0000:0804 logo_note_on */
+/* DEAD ASOUND.LOG 0000:0be2 logo_setop */
+/* DEAD ASOUND.LOG 0000:0bfc logo_inst_load */
+/* DEAD ASOUND.LOG 0000:0d1a logo_voice_tick */
+/* DEAD ASOUND.LOG 0000:116e logo_update_all */
+/* DEAD ASOUND117 01b6:005e snd_probe_init */
+/* DEAD ASOUND117 01b6:025a snd_stop_all_wait */
+/* DEAD ASOUND117 01b6:0320 sb_port_write_a */
+/* DEAD ASOUND117 01b6:035c opl_write_c */
+/* DEAD ASOUND117 01b6:096d cmd41 */
+/* DEAD ASOUND117 01b6:0976 cmd42 */
+/* DEAD ASOUND117 01b6:097f cmd43 */
+/* DEAD ASOUND117 01b6:0998 cmd44 */
+/* DEAD ASOUND117 01b6:09a1 cmd45 */
+/* DEAD ASOUND117 01b6:09f2 speech_play */
+/* DEAD ASOUND117 01b6:0a17 speech_setup */
+/* DEAD ASOUND117 01b6:0a5b opl_speech_regs */
+/* DEAD ASOUND117 01b6:0b01 speech_loop */
+/* DEAD ASOUND117 01b6:0b57 pit2_setup */
+/* DEAD ASOUND117 01b6:0bd4 rtc_to_dos_time */
+/* DEAD ASOUND117 01b6:18c8 sb_dispatch */

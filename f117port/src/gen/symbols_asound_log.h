@@ -7,22 +7,22 @@
 
 /* ---- Functions: index only (prototypes: gen/module_<spec>.h). Columns: address, C name, owner, spec file and section. */
 /* 0000:019a  logo_reset                     sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
-/* 0000:0220  logo_hw_reset                  sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
+/* 0000:0220  logo_hw_reset                  sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified"  DEAD */
 /* 0000:0344  logo_poll                      sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
-/* 0000:03f8  logo_isr_slow_install          sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
+/* 0000:03f8  logo_isr_slow_install          sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified"  DEAD */
 /* 0000:042f  logo_isr_fast                  sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
-/* 0000:04ae  logo_isr_fast_install          sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
+/* 0000:04ae  logo_isr_fast_install          sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified"  DEAD */
 /* 0000:04e5  logo_isr_slow                  sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
 /* 0000:0515  logo_spawn                     sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
 /* 0000:0559  logo_cmd1                      sound      sound.md "(no heading)" */
 /* 0000:058f  logo_cmd2                      sound      sound.md "(no heading)" */
-/* 0000:0640  logo_vol                       sound      sound.md "8. Commands (cs:0911, 46 entries; AX = 0, BX = 2*cmd on entr" */
-/* 0000:06aa  logo_pitch                     sound      sound.md "(no heading)" */
-/* 0000:0754  logo_slide                     sound      sound.md "(no heading)" */
-/* 0000:07dc  logo_keyoff                    sound      sound.md "(no heading)" */
-/* 0000:0804  logo_note_on                   sound      sound.md "(no heading)" */
-/* 0000:0be2  logo_setop                     sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified" */
-/* 0000:0bfc  logo_inst_load                 sound      sound.md "(no heading)" */
-/* 0000:0d1a  logo_voice_tick                sound      sound.md "(no heading)" */
-/* 0000:116e  logo_update_all                sound      sound.md "(no heading)" */
+/* 0000:0640  logo_vol                       sound      sound.md "8. Commands (cs:0911, 46 entries; AX = 0, BX = 2*cmd on entr"  DEAD */
+/* 0000:06aa  logo_pitch                     sound      sound.md "(no heading)"  DEAD */
+/* 0000:0754  logo_slide                     sound      sound.md "(no heading)"  DEAD */
+/* 0000:07dc  logo_keyoff                    sound      sound.md "(no heading)"  DEAD */
+/* 0000:0804  logo_note_on                   sound      sound.md "(no heading)"  DEAD */
+/* 0000:0be2  logo_setop                     sound      sound.md "11. Logo overlay (ASOUND.LOG; MPS_LOGO only) ? verified"  DEAD */
+/* 0000:0bfc  logo_inst_load                 sound      sound.md "(no heading)"  DEAD */
+/* 0000:0d1a  logo_voice_tick                sound      sound.md "(no heading)"  DEAD */
+/* 0000:116e  logo_update_all                sound      sound.md "(no heading)"  DEAD */
 

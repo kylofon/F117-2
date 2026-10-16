@@ -17,6 +17,7 @@
  *   --decoder-test DIR  every PIC / PAN / PAL / font in --game-dir against the Phase 2 Python decoders' output in DIR (77 = no game files)
 
  *   --debrief-test DIR   END against the references of port/notes/s58/end_ref.py (needs a scratch --game-dir with SCRATCH.MARK)
+ *   --sound-test DIR     the sound driver (src/sound): OPL register streams against the original driver under Unicorn (port/notes/s59/sound_ref.py) and the poll rates (77 = no game files)
  *   --sim-test DIR       VGAME (src/sim) against the references of port/notes/s55/sim_ref.py (77 = no game files)
  *   --render-test DIR    the whole 3D scene (render3d) against the original: golden frames of port/notes/s56/r3d_golden.py (77 = no game files)
  *   --r3d-test FILE      the render3d leaf routines (src/render3d) against the vectors port/notes/s56/r3d_leaf_ref.py writes (77 = no game files)
@@ -38,6 +39,7 @@
 #include "shell/shell.h"
 #include "debrief/debrief.h"
 #include "sim/simtest.h"
+#include "sound/snd.h"
 int r3d_leaf_selftest(const char *file);                          /* render3d/r3dtest.c */
 #include "programs/placeholder.h"
 #include "prog.h"
@@ -81,7 +83,7 @@ int main(int argc, char **argv)
     bool check = false, chain = false, tick = false, ptest = false, etest = false, vtest = false, vself = false;
     const char *simref = NULL;
     const char *r3dref = NULL;
-    const char *decref = NULL, *feref = NULL, *shref = NULL, *dbref = NULL;
+    const char *decref = NULL, *feref = NULL, *shref = NULL, *dbref = NULL, *sndref = NULL;
     int tick_ms = 1000;
     for (int i = 1; i < argc; i++) {
         const char *a = argv[i], *v = i + 1 < argc ? argv[i + 1] : NULL;
@@ -106,6 +108,7 @@ int main(int argc, char **argv)
         else if (!strcmp(a, "--frontend-test") && v) { feref = v; i++; }
         else if (!strcmp(a, "--shell-test") && v) { shref = v; i++; }
         else if (!strcmp(a, "--debrief-test") && v) { dbref = v; i++; }
+        else if (!strcmp(a, "--sound-test") && v) { sndref = v; i++; }
         else if (!strcmp(a, "--sim-test") && v) { simref = v; i++; }
         else if (!strcmp(a, "--render-test") && v) { simref = v; sim_test_render_mode(); i++; }
         else if (!strcmp(a, "--r3d-test") && v) { r3dref = v; i++; }
@@ -115,7 +118,7 @@ int main(int argc, char **argv)
         }
         else return usage(argv[0]);
     }
-    if (check || tick || ptest || etest || vself || decref || feref || shref || dbref || simref || r3dref) cfg.headless = true;
+    if (check || tick || ptest || etest || vself || decref || feref || shref || dbref || sndref || simref || r3dref) cfg.headless = true;
     if (host_trace()) prog_trace = true;
     if (chain) { prog_trace = true; prog_use_stubs = true; }
 
@@ -153,6 +156,12 @@ int main(int argc, char **argv)
 
     if (shref) {
         int rc = shell_selftest(shref);
+        host_shutdown();
+        return rc;
+    }
+
+    if (sndref) {
+        int rc = sound_selftest(sndref);
         host_shutdown();
         return rc;
     }

@@ -27,6 +27,7 @@
 #include "mem.h"
 #include "gen/module_video.h"
 #include "platform/platform.h"
+#include "sound/snd.h"
 #include "programs/placeholder.h"
 
 const ProgDef prog_table[PROG_COUNT] = {
@@ -95,7 +96,7 @@ void prog_comm_init(void)
     prog_log("[chain] F117.COM: comm block %04X:0000 (%u bytes), 0000:04F0 = %04X", comm_seg, COMM_SIZE, comm_seg);
 }
 
-int chain_run(const char *f117_tail)
+static int chain_body(const char *f117_tail)
 {
     int runs = 0;
 #define RUN(id, tail) (runs++, prog_run((id), (tail)))
@@ -117,6 +118,10 @@ int chain_run(const char *f117_tail)
     u16 page_seg = (u16)gfx_alloc(2);                          /* MGRAPHIC slot 0: dies with "Insufficient memory for MCGA graphics" */
     comm_get()->seg_offscreen = page_seg;
     prog_log("[chain] drivers bound (function tables); off-screen page at %04X:0000", page_seg);
+    /* The sound driver, the second overlay: ASOUND.117 read from the game folder and snd_init(0) (slot 100). PORT: Roland / IBM-speaker choices play on the AdLib
+     * model (decision U7 item 1); NSOUND is silent. A missing file leaves the game silent. */
+    if (snd_load_driver(comm_get()->snd_driver[0])) { snd_init(0); prog_log("[chain] sound: ASOUND.117 bound (AdLib via Nuked-OPL3)"); }
+    else prog_log("[chain] sound: no driver (silent)");
 
     if (logo == EXIT_LOGO_NOKEY) {
         RUN(PROG_PLAYER, " title-1 title-2 title-3a credit c-pit bunker");   /* exit code ignored */
@@ -139,5 +144,13 @@ int chain_run(const char *f117_tail)
         if (prog_abort) { f117_quit("aborted"); break; }
     }
 #undef RUN
+    return runs;
+}
+
+int chain_run(const char *f117_tail)
+{
+    int runs = chain_body(f117_tail);
+    if (snd_active()) prog_log("[chain] sound: %u polls, shutdown", snd_poll_count());
+    snd_shutdown();                                           /* quit = far call to the sound driver's shutdown entry (slot 102), then INT 21h/4C00h */
     return runs;
 }

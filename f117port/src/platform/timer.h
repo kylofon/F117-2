@@ -24,4 +24,6 @@ extern volatile u32 timer_ticks;                 /* ticks since timer_init */
 
 /* The per-program ISR body (S5): called on every tick after the counter was advanced, while installed. NULL = none. */
 void timer_set_hook(void (*isr_body)(void));
+/* A second tick consumer that is not a program's ISR and runs whether or not the timer is installed: the logo overlay's own INT 8 clock (sound/snd_logo.c). NULL removes it. */
+void timer_set_aux(void (*clock)(void));
 bool timer_installed(void);

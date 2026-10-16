@@ -344,10 +344,10 @@ void timer_step(void)
     if (DSW(PLAYER_DS_class) == 4) {
         s8 v = (s8)(DSB(PLAYER_DS_skip) - 1);
         DSB(PLAYER_DS_skip) = (u8)v;
-        if (v <= 0) { DSB(PLAYER_DS_skip) = 7; return; }
+        if (v <= 0) { DSB(PLAYER_DS_skip) = 7; fe_snd_poll_skipped(); return; }
     }
     tick_callback();
-    fe_snd_poll();                                          /* slot 103: <0 / >0 would change the divisor of the original ISR (S5.9) */
+    fe_snd_poll();                                          /* slot 103: its result steers the fast / idle state of the sound step */
 }
 
 /* PLAYER 0000:0F1A: ((inp(201h) >> (n + 4)) & 1) ^ 1 */

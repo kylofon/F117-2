@@ -40,13 +40,13 @@ int  fx_sin16(int a);
 int  fx_cos16(int a);
 static inline int fx_neg16(int v) { return (s16)(-v); }
 
-/* ---- the sound driver (S5.9 fills in; sim_stubs.c): slot 101 snd_cmd, 103 snd_poll, 104 snd_noise ---- */
-int  sim_snd_cmd(int cmd, int a, int b, int c);         /* TODO(S5.9) */
+/* ---- the sound driver (sim_stubs.c: the real one, a stand-in while sim_test.active): slot 101 snd_cmd, 103 snd_poll, 104 snd_noise ---- */
+int  sim_snd_cmd(int cmd, int a, int b, int c);         /* slot 101: a = the stack argument (cmds 23 and 40) */
 extern unsigned sim_poll_calls, sim_noise_calls;         /* TEST counters of the sound stand-ins */
 extern int sim_poll_result;
 void sim_tick_for_test(void);
-int  sim_snd_poll(void);                                 /* TODO(S5.9): its result steers the tick divisor of the original ISR */
-void sim_snd_noise(void);                                /* TODO(S5.9) */
+int  sim_snd_poll(void);                                 /* its result steers the tick divisor of the original ISR */
+void sim_snd_noise(void);                                /* slot 104 */
 
 /* ---- test hooks (simtest.c); all idle in a normal run ---- */
 typedef struct SimTest {

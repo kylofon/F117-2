@@ -75,6 +75,7 @@ bool host_init(const HostConfig *cfg)
     aspect43 = cfg->aspect_4_3;
     clock_start_ns = SDL_GetTicksNS();
     ticks_run = 0;
+    OPL3_Reset(&opl, OPL_RATE);                          /* the chip model exists in every mode: the sound driver writes to it, headless runs just never render it */
     if (cfg->headless) return SDL_Init(0);              /* the clock and the files only: no window, no audio */
 
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD)) {

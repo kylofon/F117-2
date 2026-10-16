@@ -32,15 +32,15 @@
 #define ASOUND117_CSSEG_event_table                  0x01B6
 
 /* ---- Functions: index only (prototypes: gen/module_<spec>.h). Columns: address, C name, owner, spec file and section. */
-/* 01b6:005e  snd_probe_init                 sound      sound.md "(no heading)" */
+/* 01b6:005e  snd_probe_init                 sound      sound.md "(no heading)"  DEAD */
 /* 01b6:018f  snd_reset_all                  sound      sound.md "(no heading)" */
 /* 01b6:0210  opl_hw_reset                   sound      sound.md "(no heading)" */
-/* 01b6:025a  snd_stop_all_wait              sound      sound.md "(no heading)" */
+/* 01b6:025a  snd_stop_all_wait              sound      sound.md "(no heading)"  DEAD */
 /* 01b6:02e6  opl_mute_reg                   sound      sound.md "(no heading)" */
 /* 01b6:02f6  opl_unmute_reg                 sound      sound.md "(no heading)" */
 /* 01b6:030b  opl_freq                       sound      sound.md "5.2 Primitives" */
-/* 01b6:0320  sb_port_write_a                sound      sound.md "1. What the port implements" */
-/* 01b6:035c  opl_write_c                    sound      sound.md "(no heading)" */
+/* 01b6:0320  sb_port_write_a                sound      sound.md "1. What the port implements"  DEAD */
+/* 01b6:035c  opl_write_c                    sound      sound.md "(no heading)"  DEAD */
 /* 01b6:036b  opl_write                      sound      sound.md "5.1 Register write" */
 /* 01b6:03c4  lcg_rand                       sound      sound.md "9. Random numbers (cs:03C4)" */
 /* 01b6:03d5  cmd_engine_value               sound      sound.md "(no heading)" */
@@ -94,21 +94,21 @@
 /* 01b6:08e8  cmd11                          sound      sound.md "(no heading)" */
 /* 01b6:08fc  cmd12                          sound      sound.md "(no heading)" */
 /* 01b6:0903  cmd19                          sound      sound.md "(no heading)" */
-/* 01b6:096d  cmd41                          sound      sound.md "(no heading)" */
-/* 01b6:0976  cmd42                          sound      sound.md "(no heading)" */
-/* 01b6:097f  cmd43                          sound      sound.md "(no heading)" */
-/* 01b6:0998  cmd44                          sound      sound.md "(no heading)" */
-/* 01b6:09a1  cmd45                          sound      sound.md "(no heading)" */
-/* 01b6:09f2  speech_play                    sound      sound.md "(no heading)" */
-/* 01b6:0a17  speech_setup                   sound      sound.md "(no heading)" */
-/* 01b6:0a5b  opl_speech_regs                sound      sound.md "(no heading)" */
-/* 01b6:0b01  speech_loop                    sound      sound.md "(no heading)" */
-/* 01b6:0b57  pit2_setup                     sound      sound.md "(no heading)" */
+/* 01b6:096d  cmd41                          sound      sound.md "(no heading)"  DEAD */
+/* 01b6:0976  cmd42                          sound      sound.md "(no heading)"  DEAD */
+/* 01b6:097f  cmd43                          sound      sound.md "(no heading)"  DEAD */
+/* 01b6:0998  cmd44                          sound      sound.md "(no heading)"  DEAD */
+/* 01b6:09a1  cmd45                          sound      sound.md "(no heading)"  DEAD */
+/* 01b6:09f2  speech_play                    sound      sound.md "(no heading)"  DEAD */
+/* 01b6:0a17  speech_setup                   sound      sound.md "(no heading)"  DEAD */
+/* 01b6:0a5b  opl_speech_regs                sound      sound.md "(no heading)"  DEAD */
+/* 01b6:0b01  speech_loop                    sound      sound.md "(no heading)"  DEAD */
+/* 01b6:0b57  pit2_setup                     sound      sound.md "(no heading)"  DEAD */
 /* 01b6:0b76  snd_init                       sound      sound.md "6. Hardware reset and snd_init (verified writes)" */
 /* 01b6:0b90  cmd40                          sound      sound.md "(no heading)" */
 /* 01b6:0b98  snd_cmd                        sound      sound.md "2. Driver interface (ASOUND.117; slots 100-104)" */
 /* 01b6:0bb5  snd_shutdown                   sound      sound.md "2. Driver interface (ASOUND.117; slots 100-104)" */
-/* 01b6:0bd4  rtc_to_dos_time                sound      sound.md "(no heading)" */
+/* 01b6:0bd4  rtc_to_dos_time                sound      sound.md "(no heading)"  DEAD */
 /* 01b6:0c08  snd_poll                       sound      sound.md "2. Driver interface (ASOUND.117; slots 100-104)" */
 /* 01b6:0c1c  snd_noise                      sound      sound.md "7.2 Effect units and snd_noise() (0562) ? verified" */
 /* 01b6:0c2e  voice_vol                      sound      sound.md "(no heading)" */
@@ -120,5 +120,5 @@
 /* 01b6:123e  inst_load                      sound      sound.md "(no heading)" */
 /* 01b6:1360  voice_tick                     sound      sound.md "7.3 voice_tick() (1360) ? verified" */
 /* 01b6:1882  update_all                     sound      sound.md "7.1 poll_body() (0430) ? verified" */
-/* 01b6:18c8  sb_dispatch                    sound      sound.md "(no heading)" */
+/* 01b6:18c8  sb_dispatch                    sound      sound.md "(no heading)"  DEAD */
 

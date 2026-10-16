@@ -13,6 +13,7 @@
 #include "host.h"
 #include "platform/platform.h"
 #include "platform/timer.h"
+#include "sound/snd.h"
 #include "platform/vga.h"
 #include "prog.h"
 #include "video/video.h"
@@ -245,6 +246,7 @@ int logo_main(int argc, char **argv)
     /* PORT: the .LOG overlay is not loaded (no overlay loader); "03 Bad ovrload" cannot happen. TSOUND.LOG is not shipped, T would die with 03. */
     if (drv != 'N') {
         (void)ovl;
+        snd_log_load(drv);                                   /* PORT: the .LOG file by letter, all played by the AdLib model */
         while (snd_init_log(0, 0) != 0) host_pump();         /* ovl_bind_log, then snd_init_log until it returns 0 */
     }
     text_clear_b800();

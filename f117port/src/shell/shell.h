@@ -54,7 +54,8 @@ static inline char *ds_str_ptr(u16 table, int idx) { return (char *)DSP(DSW(tabl
 #define UNIT(i)       ((u16)(START_DS_wld_units + UNIT_SIZE * (u16)(i)))
 
 /* ---- sound (S5.9 fills in the stub) --------------------------------------------------------------------------------- */
-static inline void sh_snd(int cmd) { fe_snd_cmd(cmd, 0); }              /* TODO(S5.9): MGRAPHIC-side slot 101 snd_cmd(cmd) of ASOUND.117 */
+void start_tick(void);                                      /* the ISR body of START (start.c) */
+static inline void sh_snd(int cmd) { fe_snd_cmd(cmd, 0); }              /* slot 101 snd_cmd(cmd) of ASOUND.117 */
 
 /* ---- test hooks (shelltest.c; all idle in a normal run) -------------------------------------------------------------- */
 typedef struct ShellTest {

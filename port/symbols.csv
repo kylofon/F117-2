@@ -1,49 +1,49 @@
 exe,kind,address,name,type,owner,other_names,notes,spec
 asound.log,func,0000:019a,logo_reset,void,sound,,,sound
-asound.log,func,0000:0220,logo_hw_reset,void,sound,,regs FF..01 <- 0; 01 <- 20,sound
+asound.log,func,0000:0220,logo_hw_reset,void,sound,,regs FF..01 <- 0; 01 <- 20; not ported (part of logo_reset); dead,sound
 asound.log,func,0000:0344,logo_poll,void,sound,,lcg; update_all; unit_tail; choose ISR mode,sound
-asound.log,func,0000:03f8,logo_isr_slow_install,void,sound,,INT 8 -> 04E5; PIT 4C90,sound
+asound.log,func,0000:03f8,logo_isr_slow_install,void,sound,,INT 8 -> 04E5; PIT 4C90; not ported (the port keeps the clock (snd_log_init)); dead,sound
 asound.log,func,0000:042f,logo_isr_fast,void,sound,,noise every tick; sequencer every 5th,sound
-asound.log,func,0000:04ae,logo_isr_fast_install,void,sound,,INT 8 -> 042F; PIT 0F88,sound
+asound.log,func,0000:04ae,logo_isr_fast_install,void,sound,,INT 8 -> 042F; PIT 0F88; not ported (the port keeps the clock (logo_clock)); dead,sound
 asound.log,func,0000:04e5,logo_isr_slow,void,sound,,sequencer every tick; chain every 3rd,sound
-asound.log,func,0000:0515,logo_spawn,void,sound,,voice start,sound
+asound.log,func,0000:0515,logo_spawn,"void(int voice, int track, int lptr)",sound,,voice start,sound
 asound.log,func,0000:0559,logo_cmd1,void,sound,,every voice ptr = 0100,sound
 asound.log,func,0000:058f,logo_cmd2,void,sound,,six voices on tracks 010E 0120 014C 017A 01A6 01B6,sound
-asound.log,func,0000:0640,logo_vol,void,sound,,,sound
-asound.log,func,0000:06aa,logo_pitch,void,sound,,,sound
-asound.log,func,0000:0754,logo_slide,void,sound,,,sound
-asound.log,func,0000:07dc,logo_keyoff,void,sound,,,sound
-asound.log,func,0000:0804,logo_note_on,void,sound,,,sound
-asound.log,func,0000:0be2,logo_setop,void,sound,,order BD 08 level C0 60 80 20 E0,sound
-asound.log,func,0000:0bfc,logo_inst_load,void,sound,,,sound
-asound.log,func,0000:0d1a,logo_voice_tick,void,sound,,,sound
-asound.log,func,0000:116e,logo_update_all,void,sound,,voices at DS:043C step 1Ah,sound
-asound117,func,01b6:005e,snd_probe_init,void(void),sound,,snd_init body: AdLib timer test (reg 4); SB DSP and PAS probes; then reset_all,sound
+asound.log,func,0000:0640,logo_vol,void,sound,,merged into voice_vol (SndLayout.logo); dead,sound
+asound.log,func,0000:06aa,logo_pitch,void,sound,,merged into voice_pitch (SndLayout.logo); dead,sound
+asound.log,func,0000:0754,logo_slide,void,sound,,merged into voice_slide (SndLayout.logo); dead,sound
+asound.log,func,0000:07dc,logo_keyoff,void,sound,,merged into voice_keyoff (SndLayout.logo); dead,sound
+asound.log,func,0000:0804,logo_note_on,void,sound,,merged into voice_note_on (SndLayout.logo); dead,sound
+asound.log,func,0000:0be2,logo_setop,void,sound,,order BD 08 level C0 60 80 20 E0; merged into inst_setop (SndLayout.logo); dead,sound
+asound.log,func,0000:0bfc,logo_inst_load,void,sound,,merged into inst_load (SndLayout.logo); dead,sound
+asound.log,func,0000:0d1a,logo_voice_tick,void,sound,,merged into voice_tick (SndLayout.logo); dead,sound
+asound.log,func,0000:116e,logo_update_all,void,sound,,voices at DS:043C step 1Ah; merged into update_all (SndLayout.logo); dead,sound
+asound117,func,01b6:005e,snd_probe_init,void(void),sound,,snd_init body: AdLib timer test (reg 4); SB DSP and PAS probes; then reset_all; not ported (SB / PAS probe); dead,sound
 asound117,func,01b6:018f,snd_reset_all,void(void),sound,,zero voices/units; hw_reset; busy=FFFF during,sound
 asound117,func,01b6:0210,opl_hw_reset,void(void),sound,,MOV BX 3Fh; regs 5F..40 <- 3F; FF..60 <- 0; 3F..01 <- 0; 01 <- 20,sound
-asound117,func,01b6:025a,snd_stop_all_wait,void(void),sound,,speech prelude: release 0E on 80..95; voices -> E9A; busy until all six inactive,sound
-asound117,func,01b6:02e6,opl_mute_reg,void(AL reg),sound,,opl(reg shadow|3F),sound
-asound117,func,01b6:02f6,opl_unmute_reg,void(AL reg BH vol),sound,,opl(reg (shadow&C0)|(BH^3F)),sound
-asound117,func,01b6:030b,opl_freq,void(AL ch BX fnum),sound,,opl(A0+ch lo) opl(B0+ch hi|20),sound
-asound117,func,01b6:0320,sb_port_write_a,void,sound,,state>=1 only (SB/PAS register write with delay),sound
-asound117,func,01b6:035c,opl_write_c,void(int port_sel int reg int val),sound,,C-callable wrapper of opl_write (port_sel ignored in state 0),sound
-asound117,func,01b6:036b,opl_write,void(AL reg BL val),sound,,shadow[reg]=val; out 388/389 with delays,sound
+asound117,func,01b6:025a,snd_stop_all_wait,void(void),sound,,speech prelude: release 0E on 80..95; voices -> E9A; busy until all six inactive; not ported (speech prelude); dead,sound
+asound117,func,01b6:02e6,opl_mute_reg,void(int reg),sound,,opl(reg shadow|3F),sound
+asound117,func,01b6:02f6,opl_unmute_reg,"void(int reg, int vol)",sound,,opl(reg (shadow&C0)|(BH^3F)),sound
+asound117,func,01b6:030b,opl_freq,"void(int ch, int fnum)",sound,,opl(A0+ch lo) opl(B0+ch hi|20),sound
+asound117,func,01b6:0320,sb_port_write_a,void,sound,,state>=1 only (SB/PAS register write with delay); not ported (state >= 1); dead,sound
+asound117,func,01b6:035c,opl_write_c,void(int port_sel int reg int val),sound,,"C-callable wrapper of opl_write (port_sel ignored in state 0); not ported (C wrapper, the port calls opl_write); dead",sound
+asound117,func,01b6:036b,opl_write,"void(int reg, int val)",sound,,shadow[reg]=val; out 388/389 with delays,sound
 asound117,func,01b6:03c4,lcg_rand,unsigned(void),sound,,lcg=ror16(lcg+9248h 3); far-called inside the segment,sound
-asound117,func,01b6:03d5,cmd_engine_value,void,sound,,set_engine(arg) clamp 301h,sound
+asound117,func,01b6:03d5,cmd_engine_value,void(void),sound,,set_engine(arg) clamp 301h,sound
 asound117,func,01b6:03fb,engine_vol,void,sound,,opl(50 3F-v); opl(53 v) when eng_on && eng_value,sound
 asound117,func,01b6:041e,cmd_engine_on,void,sound,,eng_on=FF,sound
 asound117,func,01b6:0424,cmd_engine_off,void,sound,,eng_on=0; eng_last=FFFF,sound
 asound117,func,01b6:0430,poll_body,void(void),sound,,per poll: count; lcg; engine drone; update_all; engine regs; unit_tail; rate result in 17DC,sound
 asound117,func,01b6:0562,noise_tick,void(void),sound,,effect units: random freq writes; called after each poll in fast mode,sound
 asound117,func,01b6:05a5,units_started,void(void),sound,,rate_state=1; poll_result=1,sound
-asound117,func,01b6:05b9,spawn_voice6,void(CX track),sound,,voice 6 (19BE),sound
-asound117,func,01b6:05c0,spawn_voice5,void(CX track),sound,,voice 5 (19A0),sound
-asound117,func,01b6:05c7,spawn_voice4,void(CX track),sound,,voice 4 (1982),sound
-asound117,func,01b6:05ce,spawn_voice3,void(CX track),sound,,voice 3 (1964),sound
-asound117,func,01b6:05d5,spawn_voice2,void(CX track),sound,,voice 2 (1946),sound
-asound117,func,01b6:05dc,spawn_voice1,void(CX track),sound,,voice 1 (1928),sound
-asound117,func,01b6:05e3,spawn_voice0,void(CX track),sound,,voice 0 (190A),sound
-asound117,func,01b6:05e7,spawn_voice,void(BX voice CX track AX lptr),sound,,fills the voice record; t=1,sound
+asound117,func,01b6:05b9,spawn_voice6,void(int track),sound,,voice 6 (19BE),sound
+asound117,func,01b6:05c0,spawn_voice5,void(int track),sound,,voice 5 (19A0),sound
+asound117,func,01b6:05c7,spawn_voice4,void(int track),sound,,voice 4 (1982),sound
+asound117,func,01b6:05ce,spawn_voice3,void(int track),sound,,voice 3 (1964),sound
+asound117,func,01b6:05d5,spawn_voice2,void(int track),sound,,voice 2 (1946),sound
+asound117,func,01b6:05dc,spawn_voice1,void(int track),sound,,voice 1 (1928),sound
+asound117,func,01b6:05e3,spawn_voice0,void(int track),sound,,voice 0 (190A),sound
+asound117,func,01b6:05e7,spawn_voice,"void(int voice, int track, int lptr)",sound,,fills the voice record; t=1,sound
 asound117,func,01b6:0634,cmd26,void,sound,,v5 <- E9C,sound
 asound117,func,01b6:063a,cmd34,void,sound,,v5 <- EAC,sound
 asound117,func,01b6:0640,cmd35,void,sound,,v5 <- EA4,sound
@@ -62,7 +62,7 @@ asound117,func,01b6:0720,cmd37,void,sound,,END jingle 2; 6 voices + loop pointer
 asound117,func,01b6:0761,cmd1,void,sound,,soft stop: ls1=E9A on all voices,sound
 asound117,func,01b6:0782,cmd21,void,sound,,mute carriers; park units,sound
 asound117,func,01b6:07c7,cmd22,void,sound,,unmute carriers; restore units,sound
-asound117,func,01b6:0839,cmd2,int,sound,,returns OR of voice t bytes,sound
+asound117,func,01b6:0839,cmd2,int(void),sound,,returns OR of voice t bytes,sound
 asound117,func,01b6:085f,cmd5,void,sound,,v0 <- cs:[0857+((2*cmd)>>2&6)],sound
 asound117,func,01b6:0876,cmd4,void,sound,,v1 <- cs:[086E+((2*cmd)>>3&6)],sound
 asound117,func,01b6:0887,cmd6,void,sound,,v4 <- F28,sound
@@ -80,33 +80,33 @@ asound117,func,01b6:08e1,cmd15,void,sound,,v0 <- F78,sound
 asound117,func,01b6:08e8,cmd11,void,sound,,engine on if idle; v3 <- FA2,sound
 asound117,func,01b6:08fc,cmd12,void,sound,,v3 <- FB4,sound
 asound117,func,01b6:0903,cmd19,void,sound,,v3 <- FC8; v2 <- FD4,sound
-asound117,func,01b6:096d,cmd41,void,sound,,speech clip list 9AA,sound
-asound117,func,01b6:0976,cmd42,void,sound,,speech clip list 9B2,sound
-asound117,func,01b6:097f,cmd43,void,sound,,speech clip list 9BA (even poll_count) or 9C8 (odd),sound
-asound117,func,01b6:0998,cmd44,void,sound,,speech clip list 9D6,sound
-asound117,func,01b6:09a1,cmd45,void,sound,,speech clip list 9E4,sound
-asound117,func,01b6:09f2,speech_play,void(BX list),sound,,AdLib path 0A09..; SB path calls 18C8,sound
-asound117,func,01b6:0a17,speech_setup,void,sound,,opl speech regs; PIT2 150 counts (7954 Hz),sound
-asound117,func,01b6:0a5b,opl_speech_regs,void,sound,,regs 20 23 40 43 60 63 80 83 C0 E0 E3 B0 A0 B0,sound
-asound117,func,01b6:0b01,speech_loop,void(BX list),sound,,per sample: wait PIT2 wrap; opl(43 speech_vol[s>>2]),sound
-asound117,func,01b6:0b57,pit2_setup,void(AL BL),sound,,out 43 BL; out 42 AL; save port 61 and PIC mask,sound
+asound117,func,01b6:096d,cmd41,void,sound,,speech clip list 9AA; not ported (speech); dead,sound
+asound117,func,01b6:0976,cmd42,void,sound,,speech clip list 9B2; not ported (speech); dead,sound
+asound117,func,01b6:097f,cmd43,void,sound,,speech clip list 9BA (even poll_count) or 9C8 (odd); not ported (speech); dead,sound
+asound117,func,01b6:0998,cmd44,void,sound,,speech clip list 9D6; not ported (speech); dead,sound
+asound117,func,01b6:09a1,cmd45,void,sound,,speech clip list 9E4; not ported (speech); dead,sound
+asound117,func,01b6:09f2,speech_play,void(BX list),sound,,AdLib path 0A09..; SB path calls 18C8; not ported (speech); dead,sound
+asound117,func,01b6:0a17,speech_setup,void,sound,,opl speech regs; PIT2 150 counts (7954 Hz); not ported (speech); dead,sound
+asound117,func,01b6:0a5b,opl_speech_regs,void,sound,,regs 20 23 40 43 60 63 80 83 C0 E0 E3 B0 A0 B0; not ported (speech); dead,sound
+asound117,func,01b6:0b01,speech_loop,void(BX list),sound,,per sample: wait PIT2 wrap; opl(43 speech_vol[s>>2]); not ported (speech); dead,sound
+asound117,func,01b6:0b57,pit2_setup,void(AL BL),sound,,out 43 BL; out 42 AL; save port 61 and PIC mask; not ported (speech); dead,sound
 asound117,func,01b6:0b76,snd_init,void(unsigned speech_seg),sound,,,sound
 asound117,func,01b6:0b90,cmd40,void,sound,,speech_seg = arg,sound
-asound117,func,01b6:0b98,snd_cmd,void(int cmd int arg),sound,,cmd > 2Dh ignored,sound
-asound117,func,01b6:0bb5,snd_shutdown,void,sound,,reset_all + RTC -> DOS clock,sound
-asound117,func,01b6:0bd4,rtc_to_dos_time,void,sound,,INT 1Ah/02 -> INT 21h/2Dh,sound
+asound117,func,01b6:0b98,snd_cmd,"int(int cmd, int arg)",sound,,cmd > 2Dh ignored,sound
+asound117,func,01b6:0bb5,snd_shutdown,void(void),sound,,reset_all + RTC -> DOS clock,sound
+asound117,func,01b6:0bd4,rtc_to_dos_time,void,sound,,INT 1Ah/02 -> INT 21h/2Dh; not ported (the PIT is never retuned); dead,sound
 asound117,func,01b6:0c08,snd_poll,int(void),sound,,returns 17DC (0/1/FFFF),sound
-asound117,func,01b6:0c1c,snd_noise,void,sound,,calls noise_tick (0562),sound
+asound117,func,01b6:0c1c,snd_noise,void(void),sound,,calls noise_tick (0562),sound
 asound117,func,01b6:0c2e,voice_vol,void,sound,,carrier level from vol+vofs,sound
 asound117,func,01b6:0d1c,voice_pitch,void,sound,,note -> A0/B0,sound
 asound117,func,01b6:0dce,voice_slide,void,sound,,A0/B0 += slide,sound
 asound117,func,01b6:0e5e,voice_keyoff,void,sound,,B0 &= DF,sound
 asound117,func,01b6:0e8a,voice_note_on,void,sound,,vol; pitch + key on or effect unit start,sound
-asound117,func,01b6:1048,inst_setop,void(int op char* patch),sound,,programs one operator (order in sound.md 5.2),sound
+asound117,func,01b6:1048,inst_setop,"void(int op, int patch, int ch)",sound,,programs one operator (order in sound.md 5.2),sound
 asound117,func,01b6:123e,inst_load,void(int n),sound,,key off; both operators; effect fields,sound
 asound117,func,01b6:1360,voice_tick,void,sound,,per voice per poll; events at 13A5..1754; tail 17D1,sound
 asound117,func,01b6:1882,update_all,void,sound,,voices 0..6,sound
-asound117,func,01b6:18c8,sb_dispatch,void(int fn),sound,,state>=1 (SB/PAS) dispatcher; not ported,sound
+asound117,func,01b6:18c8,sb_dispatch,void(int fn),sound,,state>=1 (SB/PAS) dispatcher; not ported; not ported (state >= 1); dead,sound
 asound117,global,0000:002e,instruments,byte[42][2Ch],sound,,,sound
 asound117,global,0000:17e4,lcg,word,sound,,seed 04D2,sound
 asound117,global,0000:17f2,state,word,sound,,0 AdLib / 1 SB / 2 SB Pro / 3 PAS,sound

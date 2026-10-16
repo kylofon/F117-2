@@ -7,10 +7,10 @@
 #include "shell/shell.h"
 
 /* the ISR body of START (8D0C..8E6D): the tick flag the palette queue waits for (DS:ADFC) and the sound poll */
-static void start_tick(void)
+void start_tick(void)
 {
     DSB(0xADFC)++;
-    fe_snd_poll();                                              /* TODO(S5.9): slot 103 snd_poll; its result steers the tick divisor */
+    fe_snd_poll();                                              /* slot 103 snd_poll (no 7th-tick skip in START), then snd_noise in the fast state */
     if (host_quit_requested()) shell_exit(0);                   /* PORT: a closed window ends START wherever it waits (the original has Ctrl-Break only) */
 }
 

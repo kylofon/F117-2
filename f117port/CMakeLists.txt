@@ -17,7 +17,7 @@ target_include_directories(nuked_opl3 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../thir
 
 # Coordinator files in src/, then one glob per module directory (PORTING.md "Source layout"): a module adds
 # <module>/<file>.c and it is built without touching this file. programs/ holds the phase 4 placeholders.
-set(F117_MODULES platform video frontend shell sim render3d flight debrief programs)
+set(F117_MODULES platform video sound frontend shell sim render3d flight debrief programs)
 file(GLOB F117_SOURCES CONFIGURE_DEPENDS src/*.c)
 foreach(m ${F117_MODULES})
     file(GLOB m_sources CONFIGURE_DEPENDS src/${m}/*.c)
@@ -147,6 +147,19 @@ if(Python3_Interpreter_FOUND)
     add_test(NAME debrief_chain COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s58/end_ref.py --chain
              $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game)
     set_tests_properties(debrief debrief_chain PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 900 DEPENDS shell)
+endif()
+
+# The sound module (src/sound, S5.9): ASOUND.117 and ASOUND.LOG ported from sound.md. `sound` replays scripts of driver calls (every single command, the PLAYER intro
+# soundtrack, the debrief music, mixes of the VGAME / shell / END effects with the engine drone, the logo jingle) recorded from the ORIGINAL drivers under Unicorn
+# (port/notes/s59/sound_ref.py) and compares every OPL register write and every snd_poll result (0 differences), and checks the poll rates of the program ISR bodies
+# (START 70.09 Hz; PLAYER, END, VGAME 60.08 Hz with the 7th-tick skip; the logo overlay 60.88 Hz). `sound_chain` runs the front-end chain with the driver on SDL's dummy
+# audio and video drivers (the launcher's Sound checkbox) and no --headless. Both skip (77) without ../Game or unicorn.
+if(Python3_Interpreter_FOUND)
+    add_test(NAME sound COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s59/sound_ref.py
+             $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game ${CMAKE_CURRENT_BINARY_DIR}/sound_ref)
+    add_test(NAME sound_chain COMMAND Python3::Interpreter ${CMAKE_CURRENT_SOURCE_DIR}/../port/notes/s59/sound_ref.py --chain
+             $<TARGET_FILE:f117> ${CMAKE_CURRENT_SOURCE_DIR}/../Game)
+    set_tests_properties(sound sound_chain PROPERTIES SKIP_RETURN_CODE 77 TIMEOUT 300)
 endif()
 
 # The generated headers are current: the generators re-run in memory and fail on any difference (tools/gen_*.py).

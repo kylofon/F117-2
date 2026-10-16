@@ -24,13 +24,14 @@ EndTest end_test;
 #define E_PALQ     0x1EE8
 #define E_PALQ_N   0x1F24
 
-void end_snd(int cmd) { fe_snd_cmd(cmd, 0); }                /* TODO(S5.9): slot 101 snd_cmd */
+void end_snd(int cmd) { fe_snd_cmd(cmd, 0); }                /* slot 101 snd_cmd */
 
 /* the ISR body of END (4C55..4D51): the tick flag the palette queue waits for (DS:50CC) and the sound poll */
 void end_tick(void)
 {
     DSB(0x50CC)++;
-    fe_snd_poll();                                           /* TODO(S5.9): slot 103 snd_poll; its result steers the tick divisor */
+    if (++DSB(0x50CD) == 7) { DSB(0x50CD) = 0; fe_snd_poll_skipped(); }       /* 4D51: every 7th tick skips the poll (60.08 Hz at 70.09 Hz) */
+    else fe_snd_poll();                                      /* slot 103 snd_poll, then snd_noise in the fast state */
     if (host_quit_requested()) end_exit(0);                  /* PORT: a closed window ends END wherever it waits */
 }
 
