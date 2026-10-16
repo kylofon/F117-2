@@ -54,8 +54,8 @@ static Action actions[] = {
     { "flare",           0x02,         0x02,         0 },
     { "chaff",           0x03,         0x03,         0 },
     { "decoy",           0x06,         0x06,         0 },
-    { "flare_mode",      0x04,         0x04,         0 },
-    { "chaff_mode",      0x05,         0x05,         0 },
+    { "ir_jammer",       0x04,         0x04,         0 },
+    { "ecm_jammer",      0x05,         0x05,         0 },
     { "drop_targets",    0x30,         0x30,         0 },
     { "master_mode",     0x3C,         0x3C,         0 },
     /* views */
