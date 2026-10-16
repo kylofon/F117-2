@@ -41,28 +41,32 @@ Slot 105 does not exist for ASOUND.117 (`n = 5`). Callers: RE_GUIDE §2.3 and §
 
 ## 3. Time base (corrects RE_GUIDE §5 "60 Hz")
 
-The driver has **no timer of its own** in-game: the *game's* INT 8 handler (START `8D1E..8D5E`, same shape in VGAME
-`1CC2`, END `4C28`, PLAYER `288C..29F3`) calls the driver. Per ISR tick, in this order: add the PIT reload
-(`[AE03]`) to the 32-bit game clock, run the frame-sync/calibration every Nth tick (`timer_calibrate`, platform.md),
-**call `snd_poll`**, then `snd_noise` **unless** `[AE07] == 1`. The PIT reload is `frame_period / [AE07]`, where the
-frame period is measured from 16 vertical retraces (`8DD8`, platform.md key finding). The poll result steers `[AE07]`
-(`8E6D..8EAC`):
+The driver has **no timer of its own** in-game: the *game's* INT 8 handler calls it (START `8D0C..8E6D`, same shape in VGAME `1C89`/`1E67`,
+END `4BEC..4D51`, PLAYER `026B:01A3`/`0336`). The ISR runs `[divisor]` times per **tick** (one tick = one video frame = 70.086 Hz in mode 13h;
+the PIT reload is `frame_period / divisor`). Per ISR call: the tick work runs once per `divisor` calls (frame counters, resync, **`snd_poll`**
+unless skipped, see below); then, whenever `divisor != 1`, **`snd_noise` runs on every ISR call**. The poll result steers the divisor
+(`8E6D..8EAC`): FFFFh (negative) = idle, `divisor = 1`; > 0 = fast, `divisor = class` (4 at 70 Hz, 5 at 60 Hz); 0 = unchanged.
 
-| `snd_poll` returns | Effect | ISR rate | `snd_noise` called |
-|---|---|---|---|
-| FFFFh (negative) | `[AE07] = 1` (idle) | **1 per video frame** = 70.086 Hz in VGA mode 13h | no |
-| >0 (1) | `[AE07] = [AE0A]` (class 4..6, measured: **4** at 70 Hz, 5 at 60 Hz) | 280 Hz (300 Hz) | yes |
-| 0 | unchanged | unchanged | per the current mode |
+**Corrected rule (S3.11, 2026-10-16).** The old text said the poll itself runs at the ISR rate (4x per frame in fast mode). That is wrong:
+the poll is part of the tick work, so it runs **once per video frame in both modes**; only `snd_noise` runs `class` times per frame in fast mode.
+Per program:
 
-So sequencer ticks are **70.09 Hz while idle** (not 60), and **4x faster (280 Hz) while a pitch-effect unit (§7) is
-active**. Every voice timer is counted in poll ticks, so notes with effect instruments make music run 4x faster
-for the duration of the effect; this is the original behaviour (effect counters are about 80 polls = 0.3 s). Tracks that
-use effect instruments are mostly short effects, so it is normally inaudible; `cmd 3` mixes them with a long
-sequence (see §13). The port's scheduler is a loop that, per frame, calls `poll` once (idle) or four times
-(fast) with `noise` after each poll in the fast mode, exactly as above. The `cs:000E` word counts polls (used only
-to alternate speech clip 2/3, §10). Frame rate: use the display refresh the port runs at; the original value for
-mode 13h is 70.086 Hz. **Open (U-check, PLAN)**: `work/sound/asound_cmd03_steered.wav` renders cmd 3 with this rule
-(the S2.4 renders used 60 Hz or the fixed 120 Hz that was accepted for cmd 3).
+| Program | `snd_poll` rate (70.086 Hz frame) | Skip | `snd_noise` in fast mode | Evidence |
+|---|---|---|---|---|
+| START | 70.09 Hz (every tick) | none | 4 per frame | `8D1E..8D5E`, `8E6D` (disassembly) |
+| PLAYER (class 4) | **60.08 Hz** | `timer_step` counts `[1A1E]` 7 -> 0, the 7th tick returns before the callback and the poll | 4 per frame (ISR level, also on skipped ticks) | frontend.md 3.2 / `026B:0336` |
+| PLAYER (class 5, 60 Hz display) | 60 Hz | none | 5 per frame | `026B:0336` |
+| VGAME | **60.08 Hz** | `++[264B] >= 7` skips the 7th tick | 4 per frame | simflow.md Part 1 section 1, `1E67` |
+| END | **60.08 Hz** | `inc [50CD]; cmp 7` skips the 7th tick (`4D51..4D65`; the old specs said END had no skip) | 4 per frame | `4D51` (disassembly) |
+| MPS_LOGO (`ASOUND.LOG`) | own INT 8: **60.88 Hz** (PIT 4C90h), sequencer every interrupt; in fast mode 300.1 Hz (PIT 0F88h), noise every interrupt, sequencer every 5th = 60.02 Hz | none | per interrupt | section 11 |
+| SETUP, DSWAP | no driver is loaded (SETUP only stores the choice) | | | |
+
+Sequencer clocks are therefore **70.09 Hz (START) and 60.08 Hz (PLAYER, VGAME, END)**, never 4x faster: an effect unit changes only the pitch noise
+rate (280 Hz), not the music tempo. (Skipped ticks drop one poll in seven, which is why the old "60 Hz" of S2.4 sounded right for 36-39: END polls at 60.08.)
+`cs:000E` counts polls (used only to alternate speech clip 2/3, section 10).
+Renders: `python tools/sound/asnd.py steer CMD [secs] [player|vgame|end|start]` (defaults: cmd 3 PLAYER, 36-39 END, others VGAME) writes
+`work/sound/asound_cmdNN_steered.wav` with this rule. cmd 3 is then about 90 s long (the old 4x rule shortened it to 55 s); PLAYER ends it with any key.
+Port: `f117port/src/sound/snd_game.c` `snd_isr_step(poll)` is the sound step of the ISR bodies of START, END and PLAYER; VGAME keeps its own divisor words.
 
 OPL time stamps for the OPL core: all writes inside one poll share the poll's time (the original writes them within
 microseconds; the OPL2 hardware needs only the 3.3/23 µs register delays).
@@ -417,6 +421,6 @@ The 7 voices, 42 instruments and tracks are loaded from `Game/ASOUND.117` at sta
 
 ## 14. Open items
 
-* Frame rate for the idle poll (70.086 Hz in mode 13h) is derived from `timer_calibrate`; PLAYER's ISR was only compared by shape.
-* U5-style listening check of the steered cmd 3 (and 36-39) is a PLAN user task.
+* (S3.11 closed the poll-rate question: section 3. The port's tick is the fixed 70.0866 Hz retrace clock.)
+* Listening check: PLAN user task U-sound (S5.9).
 * ISOUND/RSOUND/NSOUND drivers (and SB/PAS states of ASOUND) are not specified.

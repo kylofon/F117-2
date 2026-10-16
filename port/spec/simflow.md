@@ -92,7 +92,7 @@ Hand-off fields (comm = far pointer `DS:E548`, the 5120-byte block of F117.COM; 
 * **D1 Timing base (PLAN.md U7 item 7).** The timer ISR gives exactly one tick per video retrace (70.09 Hz in mode 13h, calibrated; 60 Hz fallback `4DAEh`), while the
   fps estimator in `39C4` (`[3660]`, Part 4 section 1.2) assumes 60 ticks per second. Sound is polled once per tick but skipped on every 7th tick (60.08 Hz at 70 Hz) and
   `snd_noise` runs `class` times per frame in fast mode. **Decided 2026-10-13 (PLAN.md Decisions):** the port emulates this exactly: a 70.09 Hz retrace tick, the
-  60-ticks/s estimator and the 7th-tick sound skip, bugs included. (The Enhanced repo will use its own 60 fps timing.) **S3.3 re-check needed**: `sound.md` section 3 assumes `snd_poll` at the ISR rate with no 7th-tick skip; Part 1 section 1 shows VGAME differs.
+  60-ticks/s estimator and the 7th-tick sound skip, bugs included. (The Enhanced repo will use its own 60 fps timing.) **S3.3 re-check done 2026-10-16 (S3.11: sound.md section 3 now follows this)**; old note: `sound.md` section 3 assumes `snd_poll` at the ISR rate with no 7th-tick skip; Part 1 section 1 shows VGAME differs.
 * **D2 Visual / runtime checks** are collected in the single User to-do row `U-vgame` of PLAN.md: rear-view centre piece, sensor window (position, labels, FLIR tint), moving-map
   signal bars / arcs colours, HUD tick-strip colour, tracer/explosion colour indices, nav-page ETA units, map zoom at start.
 * **Other open items** are listed at the end of each part. The meaning of a few globals stays (U): `[9B04]` bit 1, `[3D6A]`, `[E2FE]`, `[3D74]`, `[C0A2]`, `[4088]` in the shutter test.
@@ -550,7 +550,7 @@ Port: keyboard state -> the same two bytes; the tap/double-tap magnitude (5Ah th
 | 3 | `4B57`: assumption that the START generator reserves spare name slots (names 0x59..) for the copied target objects; check against a dump of `comm+7Ah` after START. |
 | 4 | `ea7c` 128 KB bug (see 2): confirm no shipped file exceeds 2 x 65 535 bytes (largest .3DX?). |
 | 5 | Keypad table entries `29h`/`2Bh` (backquote = up, backslash = left): intentional? (U) |
-| 6 | Sound clock: VGAME polls `snd_poll` once per frame, 6 of 7 frames (60.08 Hz at 70 Hz), and `snd_noise` `class` x per frame in fast mode. sound.md section 3 assumed poll at the ISR rate (4x faster during effect units) and no skip. START's ISR also polls only on ticks (no skip). Needs S3.3 re-check; the port should follow the code here for VGAME. At a 60 Hz refresh the sequencer would run at 51.4 Hz in the original. |
+| 6 | Sound clock: VGAME polls `snd_poll` once per frame, 6 of 7 frames (60.08 Hz at 70 Hz), and `snd_noise` `class` x per frame in fast mode. sound.md section 3 assumed poll at the ISR rate (4x faster during effect units) and no skip. START's ISR also polls only on ticks (no skip). Closed by S3.11 (2026-10-16): sound.md section 3 corrected; the port follows the code here for VGAME. At a 60 Hz refresh the sequencer would run at 51.4 Hz in the original. |
 | 7 | Exit code 81h: confirm with `F117.COM` that any non-zero value is accepted (RE_GUIDE: "VGAME: 0 = quit else END"). |
 
 ## DGROUP globals seen

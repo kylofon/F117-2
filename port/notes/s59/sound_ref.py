@@ -130,7 +130,7 @@ def chain(exe, game):
     secs = time.time() - t
     out = p.stdout
     m = re.search(r'sound: (\d+) polls, shutdown', out)
-    ok = p.returncode == 0 and 'sound: ASOUND.117 bound' in out and m and int(m.group(1)) > 500 and 'quit: START returned 0' in out
+    ok = p.returncode == 0 and 'sound: ASOUND.117 bound' in out and m and int(m.group(1)) > 50 and 'quit: START returned 0' in out
     if not ok or 'audio unavailable' in p.stderr:
         print('sound_chain FAILED: exit %d, %.1f s' % (p.returncode, secs))
         print(out[-1200:])

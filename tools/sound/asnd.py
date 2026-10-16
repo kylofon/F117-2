@@ -6,6 +6,7 @@ as (reg, value).  Needs the Game/ junction and (for verify) `pip install unicorn
   asnd.py verify [polls]     compare Game against the Unicorn run of the real driver (tools/sound/drvemu.py)
   asnd.py verifylog [ticks]  compare Logo against the real overlay
   asnd.py CMD [polls]        run Game command CMD, print the write count
+  asnd.py steer CMD [secs] [player|vgame|end|start]   render with the per-program ISR rule (S3.11) to work/sound/asound_cmdNN_steered.wav
 """
 import os, struct, sys
 
@@ -584,22 +585,34 @@ def emu_logo(ticks, cmd=2):
 OPL_RATE = 49716
 
 
-def steered(cmd, secs, frame_hz=70.086, cls=4, arg=0):
-    """Game command rendered with the game's ISR rule (spec §7): one poll per video frame while idle, `cls` polls
-    per frame (280 Hz at 70 Hz) while snd_poll returns > 0, back to idle on -1; slot 104 only in the fast mode.
-    Returns [(t_opl, reg, val)] and the end time."""
+PROGRAM_SKIP7 = {'player': True, 'vgame': True, 'end': True, 'start': False}    # S3.11: END (4D59), PLAYER (class 4) and VGAME drop every 7th poll; START does not
+
+
+def steered(cmd, secs, program=None, frame_hz=70.086, cls=4, arg=0):
+    """Game command rendered with the corrected ISR rule (sound.md section 3, S3.11): the tick comes once per video frame (70.086 Hz in mode 13h)
+    in both modes; snd_poll runs on each tick except every 7th one for PLAYER / END / VGAME (60.08 Hz); a poll result > 0 switches to the fast
+    state and < 0 back, and in the fast state slot 104 (snd_noise) runs `cls` times per frame, spaced evenly.  The poll is NOT sped up by the
+    fast state (the old rule polled 4x per frame).  Returns [(t_opl, reg, val)] and the end time."""
+    if program is None:
+        program = 'player' if cmd == 3 else 'end' if 36 <= cmd <= 39 else 'vgame'
+    skip7 = PROGRAM_SKIP7[program]
     s = Game(); s.init(); s.log.clear(); s.cmd(cmd, arg)
-    out = []; t = 0.0; fast = False; quiet = 0
+    out = []; fast = False; quiet = 0; f = 0; t = 0.0
     while t < secs:
-        n = len(s.log)
-        r = s.poll()
-        if r == 0xFFFF: fast = False
-        elif r != 0 and not (r & 0x8000): fast = True
-        if fast: s.noise()
+        t = f / frame_hz
+        n = len(out)
+        if not (skip7 and (f + 1) % 7 == 0):
+            r = s.poll()
+            if r == 0xFFFF: fast = False
+            elif r != 0 and not (r & 0x8000): fast = True
         out += [(int(t * OPL_RATE), a, b) for a, b in s.log]; s.log.clear()
-        t += 1.0 / (frame_hz * (cls if fast else 1))
+        if fast:
+            for k in range(cls):
+                s.noise()
+                out += [(int((t + k / (frame_hz * cls)) * OPL_RATE), a, b) for a, b in s.log]; s.log.clear()
         quiet = quiet + 1 if len(out) == n and not fast else 0
         if quiet > 2 * frame_hz and not any(s.fb(v, 't') for v in s.VOICES): break
+        f += 1
     return out, t
 
 
@@ -607,7 +620,7 @@ if __name__ == '__main__':
     if sys.argv[1] == 'steer':             # steer CMD [secs] -> work/sound/asound_cmdNN_steered.wav
         import subprocess
         c = int(sys.argv[2]); secs = float(sys.argv[3]) if len(sys.argv) > 3 else 90
-        out, t = steered(c, secs)
+        out, t = steered(c, secs, sys.argv[4] if len(sys.argv) > 4 else None)
         name = 'work/sound/asound_cmd%02d_steered' % c
         with open(name + '.opl', 'wb') as f:
             for tt, r, v in out: f.write(struct.pack('<IHB', tt, r, v))
