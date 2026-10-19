@@ -65,7 +65,8 @@ wxStaticBitmap* InfoIcon(wxWindow* parent, const wxString& text) {
     return icon;
 }
 
-// A label, a text field and a Browse button (and an optional info icon) in a row of a two-column grid.
+// A label, a text field, a Browse button and an info icon in a row of a two-column grid. Without `info` the
+// icon's place is kept empty, so the fields and Browse buttons of all rows line up.
 wxTextCtrl* PathRow(wxWindow* parent, wxFlexGridSizer* grid, const wxString& label, const wxString& tip,
                     wxButton** browse, const wxString& info = wxEmptyString) {
     grid->Add(new wxStaticText(parent, wxID_ANY, label), 0, wxALIGN_CENTER_VERTICAL);
@@ -75,7 +76,9 @@ wxTextCtrl* PathRow(wxWindow* parent, wxFlexGridSizer* grid, const wxString& lab
     *browse = new wxButton(parent, wxID_ANY, "B&rowse...");
     row->Add(text, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, parent->FromDIP(8));
     row->Add(*browse, 0, wxALIGN_CENTER_VERTICAL);
-    if (!info.empty()) row->Add(InfoIcon(parent, info), 0, wxALIGN_CENTER_VERTICAL | wxLEFT, parent->FromDIP(6));
+    wxStaticBitmap* icon = InfoIcon(parent, info);
+    row->Add(icon, wxSizerFlags().CenterVertical().Border(wxLEFT, parent->FromDIP(6)).ReserveSpaceEvenIfHidden());
+    if (info.empty()) icon->Hide();
     grid->Add(row, 1, wxEXPAND);
     return text;
 }
@@ -137,26 +140,18 @@ LauncherDialog::LauncherDialog()
     speed_->SetToolTip("Retrace ticks (70 a second) each frame takes at least in flight. The game times its flight "
                        "model by the frame rate it measures, so this changes how smooth it looks (and how fast "
                        "radar dishes spin), not how fast the aircraft flies. 0 = no limit: the original's own "
-                       "pacing, about 17 frames a second on any modern PC.");
-    speedRow->Add(speed_, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
-    speedRow->Add(InfoIcon(ob, "Ticks a frame: 7 recommended (10 frames a second); 0 = the original's own pacing, "
-                               "too fast on a modern PC (radar dishes spin wildly)."),
-                  0, wxALIGN_CENTER_VERTICAL);
+                       "pacing, about 17 frames a second on any modern PC, too fast (radar dishes spin wildly). "
+                       "7 recommended (10 frames a second).");
+    speedRow->Add(speed_, 0, wxALIGN_CENTER_VERTICAL);
     grid->Add(speedRow, 0, wxALIGN_CENTER_VERTICAL);
     optionsBox->Add(grid, 0, wxLEFT | wxRIGHT | wxTOP, gap);
-    auto* fullscreenRow = new wxBoxSizer(wxHORIZONTAL);
     fullscreen_ = new wxCheckBox(ob, wxID_ANY, "Start in f&ull screen");
-    fullscreenRow->Add(fullscreen_, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, small);
-    fullscreenRow->Add(InfoIcon(ob, "Alt+Enter switches between full screen and a window in the game."), 0,
-                       wxALIGN_CENTER_VERTICAL);
-    optionsBox->Add(fullscreenRow, 0, wxLEFT | wxRIGHT | wxTOP, gap);
-    auto* soundRow = new wxBoxSizer(wxHORIZONTAL);
+    fullscreen_->SetToolTip("Alt+Enter switches between full screen and a window in the game.");
+    optionsBox->Add(fullscreen_, 0, wxLEFT | wxRIGHT | wxTOP, gap);
     sound_ = new wxCheckBox(ob, wxID_ANY, "S&ound");
-    soundRow->Add(sound_, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, small);
-    soundRow->Add(InfoIcon(ob, "AdLib music and effects; off runs the game silently. Whatever sound device the "
-                               "game's setup chose is played as AdLib in this version."),
-                  0, wxALIGN_CENTER_VERTICAL);
-    optionsBox->Add(soundRow, 0, wxALL, gap);
+    sound_->SetToolTip("AdLib music and effects; off runs the game silently. Whatever sound device the game's "
+                       "setup chose is played as AdLib in this version.");
+    optionsBox->Add(sound_, 0, wxALL, gap);
     aspect_->Bind(wxEVT_CHOICE, [this](wxCommandEvent&) { FillScales(); });
 
     // Buttons
