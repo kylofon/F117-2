@@ -137,11 +137,7 @@ LauncherDialog::LauncherDialog()
     auto* speedRow = new wxBoxSizer(wxHORIZONTAL);
     speed_ = new wxSpinCtrl(ob, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(FromDIP(64), -1),
                             wxSP_ARROW_KEYS, MIN_TICKS, MAX_TICKS, DEFAULT_TICKS);
-    speed_->SetToolTip("Retrace ticks (70 a second) each frame takes at least in flight. The game times its flight "
-                       "model by the frame rate it measures, so this changes how smooth it looks (and how fast "
-                       "radar dishes spin), not how fast the aircraft flies. 0 = no limit: the original's own "
-                       "pacing, about 17 frames a second on any modern PC, too fast (radar dishes spin wildly). "
-                       "7 recommended (10 frames a second).");
+    speed_->SetToolTip("Retrace ticks (70 a second) each frame takes at least in flight.");
     speedRow->Add(speed_, 0, wxALIGN_CENTER_VERTICAL);
     grid->Add(speedRow, 0, wxALIGN_CENTER_VERTICAL);
     optionsBox->Add(grid, 0, wxLEFT | wxRIGHT | wxTOP, gap);
