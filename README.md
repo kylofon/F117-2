@@ -27,7 +27,8 @@ are not yet tested (see the CHANGELOG).
 `%APPDATA%\F-117A Nighthawk\settings.ini`; delete the file to go back to the defaults.
 
 * **Game files**: **Folder** (default `Game` beside the launcher) and **Program** (`f117.exe` beside it). The line
-  under them names what is missing. **Play** stays greyed out until both are there.
+  under them names what is missing. **Play** stays greyed out until both are there. The (i) icon next to the
+  folder's Browse button is a reminder that the folder must be writable.
 * **Aspect**: 4:3, as on a VGA monitor (the default), or 1:1 square pixels.
 * **Window size** and **Start in full screen**. Alt+Enter switches full screen in the game.
 * **Sound**: off starts the game without sound.
@@ -37,7 +38,9 @@ are not yet tested (see the CHANGELOG).
   flies at the same speed. **0** is the original pacing, the fast spin of the original on today's PCs.
 * **Key Bindings...**: every action of the game with its key, on four tabs (Flying, Weapons and countermeasures,
   Views, Displays and game). Click a key's button, press the new key (Shift, Ctrl and Alt can be held with it).
-  **Reset to defaults**, **OK**, **Cancel**. Changed keys are shown in bold and saved in `settings.ini`.
+  **Reset to defaults**, **OK**, **Cancel**. Changed keys are shown in bold and saved in `settings.ini`. The keys that cannot be changed are listed under
+  **Static keys**.
+* Hover over an option for a short explanation.
 * **About**: version, author and links.
 
 ### Main keys (defaults)

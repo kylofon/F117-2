@@ -57,4 +57,4 @@ you see:
 - the sound: the music tempo and pitch, the engine, weapons, warnings and explosions;
 - the debrief: the landing, eject and crash scenes, the summary and the roster;
 - the game speed: how the radar dish and the aircraft feel at 7 compared with 0 and with 5 or 9;
-- the launcher's key bindings: the dialog, Reset to defaults, and the keys in the game.
+- the launcher's key bindings: the dialog, Reset to defaults, and a rebound key in flight.

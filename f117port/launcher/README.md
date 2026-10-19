@@ -9,7 +9,7 @@ controls, like the Test Drive III launcher (`TestDrive3/td3port/launcher`) it is
 * **Game files**
   * **Folder** (`--game-dir`): the folder with the original game's files (default `Game` beside the launcher; in
     the source tree the repository's `Game`). The game writes its pilot roster and preferences there, so it must
-    be writable.
+    be writable (the (i) icon next to its Browse button says so when you hover over it).
   * **Program**: `f117.exe` (default: beside the launcher).
   * The line below says what is missing (`F117.COM`, `SETUP.EXE`, `MPS_LOGO.EXE`, `PLAYER.EXE`, `START.EXE`,
     `VGAME.EXE`, `END.EXE`, `DSWAP.EXE`, `MGRAPHIC.EXE`, `MISC.EXE`, or the program). **Play** stays greyed out
@@ -23,12 +23,11 @@ controls, like the Test Drive III launcher (`TestDrive3/td3port/launcher`) it is
     15), far above the 4 to 15 it was built for, so radar dishes spin wildly. 7 gives 10 frames a second, the middle of
     that range; the flight model scales with the measured rate, so the aircraft still flies at the same speed.
     0 = the original pacing only.
-* **Keys in the game**: a reminder of the main keys of the original (as in the Test Drive III launcher).
 * **Key Bindings...** opens a dialog with a button per action showing its key, on four tabs (Flying, Weapons and
   countermeasures, Views, Displays and game): click it, then press the new key (Shift, Ctrl or Alt can be held with it;
   a key already used asks before it is taken over; **No key** frees the action). **Reset to defaults**, **OK**,
   **Cancel**. Changed keys are shown in bold. The keys that keep their job (keypad stick, Esc, Alt+Q, Alt+B, Alt+S,
-  Alt+Enter) are listed under the tabs. Play passes only the changed keys, as `--keys name=code,...`
+  Alt+Enter) are listed under the tabs as **Static keys**. Play passes only the changed keys, as `--keys name=code,...`
   (`f117port/PORTING.md` "Key bindings").
 * **Play** starts the game; the launcher stays open. **About**: version, author and links.
 
