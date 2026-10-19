@@ -17,7 +17,7 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 ## Status
 
 - **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.3 (sound spec), S3.4 (front-end spec), S3.5 (shell spec), S3.6 (sim flow spec), S3.7 (render3d spec), S3.8 (flight/weapons/AI/detection/damage spec), S3.9 (debrief spec), S3.10 (hand-offs, coverage gate, symbols merge; closing pass: coverage 100 %, all conflicts settled), S4.1 (`f117port/` skeleton: CMake, SDL3 host, mem, VGA, OPL, chain loop with placeholder programs), S4.2 (generated symbol and module headers in `f117port/src/gen/`, symbol pipeline in `PORTING.md`), S5.1 (platform layer in `f117port/src/platform`: loader, RTL, DOS files, keyboard/joystick/mouse, timer hook), S5.2 (video: MGRAPHIC driver, program-side line/palette routines, PIC/PAN/PAL readers in `f117port/src/video`), S5.3 (front end in `f117port/src/frontend`: SETUP, MPS_LOGO with its .SS sprites, PLAYER with the PAN ring buffer and fade, DSWAP, the MISC slots, the text-mode screen; the first visible milestone), S5.4 (shell in `f117port/src/shell`: START with the roster, ready room, pilot orders, briefing map and folder, arming, hangar, the mission generator and the world hand-off to VGAME), S5.5 (sim flow in `f117port/src/sim`: VGAME start-up, frame loop, view modes, HUD, ADI, MFDs, key interpreter, step, overlay pass), S5.6 (render3d in `f117port/src/render3d`: the whole 3D renderer, golden frames byte for byte against the original), S5.7 (flight, weapons, AI, detection, damage in `f117port/src/flight`: the aircraft flies), S5.8 (debrief in `f117port/src/debrief`: END with the score, promotion, medals, map replay and ending scenes, byte for byte against the original)., S3.11 (sound poll-rate re-check: sound.md section 3), S5.9 (sound in `f117port/src/sound`: the AdLib driver and the logo overlay, bit-exact against the original drivers).
-- **Next:** S6.2 (the Enhanced repo, see Phase 6). The open U-checks can still be done against 0.1.0 (`release/F117-SDL3-v0.1.0-win64.zip`). Your tasks: **User to-do** above.
+- **Next:** the faithful port is done (v0.1.0). Enhancements continue in `C:\Coding\F117-2Enhanced` (its PLAN.md); engine bugs are fixed here first, then ported there.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
 
@@ -311,7 +311,7 @@ Notes:
 | Id | Task | Model |
 |---|---|---|
 | S6.1 | Launcher (copy from Aces Enhanced), README, CHANGELOG, v0.1.0 zip | H | done 2026-10-18 (v0.1.0, private) |
-| S6.2 | New `F117Enhanced` repo: native-resolution / widescreen / 60 fps 3D view, longer view distance | O plan, S port |
+| S6.2 | New Enhanced repo: higher resolution, frame rate, wider view (original art unchanged) | O plan, S port | moved → `C:\Coding\F117-2Enhanced` (S1.1-S6.1), 2026-10-19 |
 
 ## User tasks (cheap for you, expensive for a model)
 
