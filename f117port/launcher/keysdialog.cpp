@@ -22,11 +22,6 @@ public:
           edited_(bindings) {
         const int margin = FromDIP(12), gap = FromDIP(8), small = FromDIP(4);
 
-        auto* intro = new wxStaticText(this, wxID_ANY,
-                                       "Click a key, then press the new one. Keys are the keyboard's places, "
-                                       "whatever its layout.\nChanged keys are shown in bold.");
-        intro->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
-
         // A page per group, the actions in two columns of label and key button.
         auto* book = new wxNotebook(this, wxID_ANY);
         for (int g = 0; g < keys::GROUP_COUNT; ++g) {
@@ -61,7 +56,7 @@ public:
             book->AddPage(page, keys::GROUP_TITLES[g]);
         }
 
-        auto* fixedBox = new wxStaticBoxSizer(wxVERTICAL, this, "Keys that keep their job");
+        auto* fixedBox = new wxStaticBoxSizer(wxVERTICAL, this, "Static keys");
         wxWindow* fb = fixedBox->GetStaticBox();
         auto* fixedGrid = new wxFlexGridSizer(2, small, FromDIP(16));
         for (int i = 0; i < keys::FIXED_COUNT; ++i) {
@@ -84,7 +79,6 @@ public:
         row->Add(CreateStdDialogButtonSizer(wxOK | wxCANCEL), 0, wxALIGN_CENTER_VERTICAL);
 
         auto* all = new wxBoxSizer(wxVERTICAL);
-        all->Add(intro, 0, wxLEFT | wxRIGHT | wxTOP, margin);
         all->Add(book, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, margin);
         all->Add(fixedBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, margin);
         all->Add(row, 0, wxEXPAND | wxALL, margin);

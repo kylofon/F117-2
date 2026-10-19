@@ -58,15 +58,16 @@ void AddLink(wxWindow* parent, wxSizer* sizer, const wxString& label, const wxSt
 }
 #endif
 
-wxStaticText* GreyText(wxWindow* parent, const wxString& text = wxEmptyString) {
-    auto* label = new wxStaticText(parent, wxID_ANY, text);
-    label->SetForegroundColour(wxSystemSettings::GetColour(wxSYS_COLOUR_GRAYTEXT));
-    return label;
+// A small "i" icon whose hover label holds an explanation of the control beside it.
+wxStaticBitmap* InfoIcon(wxWindow* parent, const wxString& text) {
+    auto* icon = new wxStaticBitmap(parent, wxID_ANY, wxArtProvider::GetBitmapBundle(wxART_INFORMATION, wxART_MENU));
+    icon->SetToolTip(text);
+    return icon;
 }
 
-// A label, a text field and a Browse button in a row of a two-column grid.
+// A label, a text field and a Browse button (and an optional info icon) in a row of a two-column grid.
 wxTextCtrl* PathRow(wxWindow* parent, wxFlexGridSizer* grid, const wxString& label, const wxString& tip,
-                    wxButton** browse) {
+                    wxButton** browse, const wxString& info = wxEmptyString) {
     grid->Add(new wxStaticText(parent, wxID_ANY, label), 0, wxALIGN_CENTER_VERTICAL);
     auto* row = new wxBoxSizer(wxHORIZONTAL);
     auto* text = new wxTextCtrl(parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxSize(parent->FromDIP(300), -1));
@@ -74,6 +75,7 @@ wxTextCtrl* PathRow(wxWindow* parent, wxFlexGridSizer* grid, const wxString& lab
     *browse = new wxButton(parent, wxID_ANY, "B&rowse...");
     row->Add(text, 1, wxALIGN_CENTER_VERTICAL | wxRIGHT, parent->FromDIP(8));
     row->Add(*browse, 0, wxALIGN_CENTER_VERTICAL);
+    if (!info.empty()) row->Add(InfoIcon(parent, info), 0, wxALIGN_CENTER_VERTICAL | wxLEFT, parent->FromDIP(6));
     grid->Add(row, 1, wxEXPAND);
     return text;
 }
@@ -95,7 +97,9 @@ LauncherDialog::LauncherDialog()
     wxButton* browseProgram = nullptr;
     folder_ = PathRow(fb, filesGrid, "&Folder:",
                       "The folder with the original game's files (F117.COM, START.EXE, VGAME.EXE and the rest).",
-                      &browseFolder);
+                      &browseFolder,
+                      "The game saves its pilot roster and preferences in this folder, so it must be writable "
+                      "(not under Program Files).");
     program_ = PathRow(fb, filesGrid, "&Program:", "f117, the game.", &browseProgram);
     auto* statusRow = new wxBoxSizer(wxHORIZONTAL);
     statusIcon_ = new wxStaticBitmap(fb, wxID_ANY, wxArtProvider::GetBitmapBundle(wxART_WARNING, wxART_MENU));
@@ -103,10 +107,7 @@ LauncherDialog::LauncherDialog()
     statusRow->Add(statusIcon_, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, small);
     statusRow->Add(statusNote_, 1, wxALIGN_CENTER_VERTICAL);
     filesBox->Add(filesGrid, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, gap);
-    filesBox->Add(statusRow, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, gap);
-    filesBox->Add(GreyText(fb, "The game saves its pilot roster and preferences in this folder,\n"
-                               "so it must be writable (not under Program Files)."),
-                  0, wxALL, gap);
+    filesBox->Add(statusRow, 0, wxEXPAND | wxALL, gap);
     for (wxTextCtrl* field : {folder_, program_})
         field->Bind(wxEVT_TEXT, [this](wxCommandEvent&) {
             if (!loading_) UpdateState();
@@ -138,39 +139,25 @@ LauncherDialog::LauncherDialog()
                        "radar dishes spin), not how fast the aircraft flies. 0 = no limit: the original's own "
                        "pacing, about 17 frames a second on any modern PC.");
     speedRow->Add(speed_, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, gap);
-    speedRow->Add(GreyText(ob, "ticks a frame: 7 recommended (10 fps), 0 original (too fast)"), 0, wxALIGN_CENTER_VERTICAL);
+    speedRow->Add(InfoIcon(ob, "Ticks a frame: 7 recommended (10 frames a second); 0 = the original's own pacing, "
+                               "too fast on a modern PC (radar dishes spin wildly)."),
+                  0, wxALIGN_CENTER_VERTICAL);
     grid->Add(speedRow, 0, wxALIGN_CENTER_VERTICAL);
     optionsBox->Add(grid, 0, wxLEFT | wxRIGHT | wxTOP, gap);
-    fullscreen_ = new wxCheckBox(ob, wxID_ANY, "Start in f&ull screen (Alt+Enter switches)");
-    optionsBox->Add(fullscreen_, 0, wxLEFT | wxRIGHT | wxTOP, gap);
-    sound_ = new wxCheckBox(ob, wxID_ANY, "S&ound (AdLib music and effects)");
-    sound_->SetToolTip("Off runs the game silently. Whatever sound device the game's setup chose is played "
-                       "as AdLib in this version.");
-    optionsBox->Add(sound_, 0, wxALL, gap);
+    auto* fullscreenRow = new wxBoxSizer(wxHORIZONTAL);
+    fullscreen_ = new wxCheckBox(ob, wxID_ANY, "Start in f&ull screen");
+    fullscreenRow->Add(fullscreen_, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, small);
+    fullscreenRow->Add(InfoIcon(ob, "Alt+Enter switches between full screen and a window in the game."), 0,
+                       wxALIGN_CENTER_VERTICAL);
+    optionsBox->Add(fullscreenRow, 0, wxLEFT | wxRIGHT | wxTOP, gap);
+    auto* soundRow = new wxBoxSizer(wxHORIZONTAL);
+    sound_ = new wxCheckBox(ob, wxID_ANY, "S&ound");
+    soundRow->Add(sound_, 0, wxALIGN_CENTER_VERTICAL | wxRIGHT, small);
+    soundRow->Add(InfoIcon(ob, "AdLib music and effects; off runs the game silently. Whatever sound device the "
+                               "game's setup chose is played as AdLib in this version."),
+                  0, wxALIGN_CENTER_VERTICAL);
+    optionsBox->Add(soundRow, 0, wxALL, gap);
     aspect_->Bind(wxEVT_CHOICE, [this](wxCommandEvent&) { FillScales(); });
-
-    // Keys
-    auto* keysBox = new wxStaticBoxSizer(wxVERTICAL, this, "Keys in the game");
-    wxWindow* kb = keysBox->GetStaticBox();
-    auto* keyGrid = new wxFlexGridSizer(2, small, FromDIP(16));
-    const char* const KEYS[][2] = {
-        {"Arrows / keypad", "fly the stick (tap twice for full deflection)"},
-        {"- =   Shift+-  Shift+=", "throttle down / up, idle, full"},
-        {"6  8  7  0", "landing gear, weapon bay, altitude hold, wheel brakes"},
-        {"Space  Backspace  Enter", "select weapon, gun, release the weapon"},
-        {"1  2  5  (3  4)", "flare, chaff, decoy (flare and chaff modes)"},
-        {"F1  Shift+F1 - F6", "cockpit view, outside views"},
-        {"F2 - F8  F10", "master mode and the display pages"},
-        {"M , . /", "sensor looks left, right, rear, ahead"},
-        {"Shift+F10", "eject"},
-        {"Alt+P  Alt+Q  Alt+Enter", "pause, quit, full screen"},
-    };
-    for (const auto& k : KEYS) {
-        keyGrid->Add(new wxStaticText(kb, wxID_ANY, k[0]));
-        keyGrid->Add(GreyText(kb, k[1]));
-    }
-    keysBox->Add(keyGrid, 0, wxLEFT | wxRIGHT | wxTOP, gap);
-    keysBox->Add(GreyText(kb, "These are the original keys; Key Bindings... changes most of them."), 0, wxALL, gap);
 
     // Buttons
     auto* buttons = new wxBoxSizer(wxHORIZONTAL);
@@ -194,7 +181,6 @@ LauncherDialog::LauncherDialog()
     auto* all = new wxBoxSizer(wxVERTICAL);
     all->Add(filesBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, margin);
     all->Add(optionsBox, 0, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, margin);
-    all->Add(keysBox, 1, wxEXPAND | wxLEFT | wxRIGHT | wxTOP, margin);
     all->Add(buttons, 0, wxEXPAND | wxALL, margin);
     SetSizer(all);
 
