@@ -47,14 +47,8 @@ game files (see README.md, How to play).
 - The radar dish spin depends on the game speed (0 = the original pacing).
 - The ID quiz is not present: it is dead code in this version of the original.
 
-### Open checks (not yet compared side by side with the original)
+### Playtested
 
-These parts are not yet compared side by side with the original in DOSBox-X. Please report any difference
-you see:
-
-- the cockpit and HUD (tapes, frame, reticle, pitch ladder, colours) in the front view;
-- the 3D view: terrain, scenery, distance haze, sky and draw order, and the external and TV views;
-- the sound: the music tempo and pitch, the engine, weapons, warnings and explosions;
-- the debrief: the landing, eject and crash scenes, the summary and the roster;
-- the game speed: how the radar dish and the aircraft feel at 7 compared with 0 and with 5 or 9;
-- the launcher's key bindings: the dialog, Reset to defaults, and a rebound key in flight.
+The whole game was played through in this port and checked by the user (2026-10-18/19): the front end, the shell,
+missions with combat, crashes and ejection, the cockpit, the 3D view, the sound, the debrief, the game speed and
+the key bindings.
