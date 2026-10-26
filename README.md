@@ -4,8 +4,8 @@ A faithful native port of MicroProse's *F-117A Nighthawk Stealth Fighter 2.0* (1
 emulator: the game's logic is re-implemented function by function, and the port reads the original game files at
 run time. The release does not contain the game. You need your own copy.
 
-An enhanced version (higher resolution, frame rate, a wider view; the original art unchanged) is being built in
-`../F117-2Enhanced` (local for now).
+An enhanced version (higher resolution, a wider view, later a higher frame rate; the original art unchanged):
+[F117-2Enhanced](https://github.com/kylofon/F117-2Enhanced) (v0.1.0 released).
 
 Version 0.1.0 (first release, Windows x64). What changed and what is still open: [CHANGELOG.md](CHANGELOG.md).
 
