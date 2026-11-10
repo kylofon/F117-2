@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- The game checks the release of its programs at start and with `--check`: another build (such as the GOG
+  `VGAME.EXE` 473.04, which crashed at the first flight frame) stops with a clear message instead of crashing
+  (README, "Supported game version"; issue #2).
+
 ## 0.1.0 (2026-10-18)
 
 The first release: a port of the whole game for Windows x64. You need your own copy of the original
