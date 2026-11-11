@@ -13,10 +13,12 @@ remove it when it is done; subtasks marked `U<n> pending` are added automaticall
 
 | Task | What to do | For | Time |
 |---|---|---|---|
+| U-gog (S7.1, S7.2) | Install the GOG F-117A (or copy its game folder) and put the folder at `C:\Coding\F117-2\GameGOG` (a plain copy, never committed; the agents never write into it). Also say where a GOG `ROSTER.FIL` with a mission in progress is, if you have one (issue #2 reproduces with it without input) | S7.1, S7.2 | 10 min |
 
 ## Status
 
 - **Done:** S0.1 (repo), Phase 1 S1.1-S1.5 (survey, overlay chain, indexer, Ghidra, shared code), Phase 2 S2.1-S2.6, S3.1 (platform spec), S3.2 (video spec), S3.3 (sound spec), S3.4 (front-end spec), S3.5 (shell spec), S3.6 (sim flow spec), S3.7 (render3d spec), S3.8 (flight/weapons/AI/detection/damage spec), S3.9 (debrief spec), S3.10 (hand-offs, coverage gate, symbols merge; closing pass: coverage 100 %, all conflicts settled), S4.1 (`f117port/` skeleton: CMake, SDL3 host, mem, VGA, OPL, chain loop with placeholder programs), S4.2 (generated symbol and module headers in `f117port/src/gen/`, symbol pipeline in `PORTING.md`), S5.1 (platform layer in `f117port/src/platform`: loader, RTL, DOS files, keyboard/joystick/mouse, timer hook), S5.2 (video: MGRAPHIC driver, program-side line/palette routines, PIC/PAN/PAL readers in `f117port/src/video`), S5.3 (front end in `f117port/src/frontend`: SETUP, MPS_LOGO with its .SS sprites, PLAYER with the PAN ring buffer and fade, DSWAP, the MISC slots, the text-mode screen; the first visible milestone), S5.4 (shell in `f117port/src/shell`: START with the roster, ready room, pilot orders, briefing map and folder, arming, hangar, the mission generator and the world hand-off to VGAME), S5.5 (sim flow in `f117port/src/sim`: VGAME start-up, frame loop, view modes, HUD, ADI, MFDs, key interpreter, step, overlay pass), S5.6 (render3d in `f117port/src/render3d`: the whole 3D renderer, golden frames byte for byte against the original), S5.7 (flight, weapons, AI, detection, damage in `f117port/src/flight`: the aircraft flies), S5.8 (debrief in `f117port/src/debrief`: END with the score, promotion, medals, map replay and ending scenes, byte for byte against the original)., S3.11 (sound poll-rate re-check: sound.md section 3), S5.9 (sound in `f117port/src/sound`: the AdLib driver and the logo overlay, bit-exact against the original drivers).
+- **Phase 7 (user reports):** planned 2026-11-11: S7.1 (detect the game files' build, clear message), S7.2 (the GOG build); then ported to Enhanced S8.1.
 - **Next:** the faithful port is done (v0.1.0). Enhancements continue in `C:\Coding\F117-2Enhanced` (its PLAN.md); engine bugs are fixed here first, then ported there.
 - Escalation rule: a subtask that fails twice on Sonnet → new Opus session with a 5-line note
   (symptom, file, what was tried). Never carry an old transcript over.
@@ -312,6 +314,15 @@ Notes:
 |---|---|---|
 | S6.1 | Launcher (copy from Aces Enhanced), README, CHANGELOG, v0.1.0 zip | H | done 2026-10-18 (v0.1.0, private) |
 | S6.2 | New Enhanced repo: higher resolution, frame rate, wider view (original art unchanged) | O plan, S port | moved → `C:\Coding\F117-2Enhanced` (S1.1-S6.1), 2026-10-19 |
+
+### Phase 7 — Other releases of the game files (user reports, 2026-11-10)
+| Id | Task | Model | Status |
+|---|---|---|---|
+| S7.1 | Detect the build of the game files (`VGAME.EXE` first, then START / END / the other EXEs and the data files the port reads at fixed offsets): a hash of the unpacked image (after `lz91()`), a table of known builds (the reference 473.03 build = today's), and for an unknown one a clear message (`f117.log`, a message box, `--check`, the launcher's status line) instead of a crash. Issue #2 of F117-2Enhanced | S | |
+| S7.2 | Support the GOG build (issue #2: the LZ91-packed `VGAME.EXE`, crash in `fx_asin` at VGAME+0x44606, its `sin_tab` at DS:2084 differs by 1 from the reference build; needs U-gog): diff its unpacked images against the reference ones, list every offset and table the port reads, and read them per build (or from the loaded image) so the GOG files run like the reference ones; the faithful ctests still pass on the reference build and a scripted chain runs on the GOG build | O | |
+
+Notes:
+- 2026-11-11: the report and dump analysis are in github.com/kylofon/F117-2Enhanced issue #2 (Enyakk, 2026-11-10). The GOG title screen reads 473.03 like the reference, so the version text alone does not tell the builds apart: use the hash. A user there also points to the Internet Archive release as a workaround.
 
 ## User tasks (cheap for you, expensive for a model)
 
