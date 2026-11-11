@@ -314,6 +314,7 @@ Notes:
 |---|---|---|
 | S6.1 | Launcher (copy from Aces Enhanced), README, CHANGELOG, v0.1.0 zip | H | done 2026-10-18 (v0.1.0, private) |
 | S6.2 | New Enhanced repo: higher resolution, frame rate, wider view (original art unchanged) | O plan, S port | moved → `C:\Coding\F117-2Enhanced` (S1.1-S6.1), 2026-10-19 |
+| S6.3 | Build check (issue #2, Enhanced S8.1): the loader refuses a program of another release (load image size, DGROUP, VGAME sin_tab) with a message instead of crashing; `--check` too; README "Supported game version" | S | done 2026-11-10 · U2 pending (Enhanced S8.1) |
 
 ### Phase 7 — Other releases of the game files (user reports, 2026-11-10)
 | Id | Task | Model | Status |

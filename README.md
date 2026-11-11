@@ -66,6 +66,26 @@ are not yet tested (see the CHANGELOG).
 Alt+Q, Alt+B, Alt+S and Alt+Enter keep their jobs in the game. The launcher's Key Bindings dialog lists the rest
 (56 actions in all) and is the place to change them.
 
+### Supported game version
+
+The port reads each program's data at the offsets of the release it was made from: the MicroProse DOS release of
+*F-117A Nighthawk Stealth Fighter 2.0* (1991). At start (and with `--check`) it unpacks the seven programs and
+compares them with that release; another release stops with a message (also in `f117.log`) instead of crashing.
+What the port expects (LZEXE-packed files; the size of the unpacked load image and the DGROUP paragraph):
+
+| File | Load image (bytes) | DGROUP |
+|---|---|---|
+| `SETUP.EXE` | 13 437 | 024C |
+| `MPS_LOGO.EXE` | 14 721 | 0332 |
+| `PLAYER.EXE` | 18 455 | 02A3 |
+| `START.EXE` | 89 023 | 0A95 |
+| `VGAME.EXE` | 162 460 | 1E23 (and its sine table at DS:2084 starts 0, 804, 1608, 2411, 3212, 4011) |
+| `END.EXE` | 46 039 | 05FA |
+| `DSWAP.EXE` | 19 495 | 0225 |
+
+**The GOG release is not supported yet**: its `VGAME.EXE` (version 473.04, 95 979 bytes, load image 163 004 bytes,
+DGROUP 1E42) is a different build ([issue #2](https://github.com/kylofon/F117-2Enhanced/issues/2)).
+
 ### Saves, logs and errors
 
 * **Pilot roster**: `Game\ROSTER.FIL`, written by the game like the original.
@@ -86,7 +106,7 @@ f117 [--game-dir DIR] [--scale N] [--aspect 4:3|1:1] [--fullscreen] [--headless]
 * `--scale N`: the window is 320x240 times N (default 3). `--aspect 4:3|1:1` and `--fullscreen` as in the launcher.
 * `--frame-ticks N`: the game speed (default 7; 0 = the original pacing).
 * `--keys NAME=CODE,...`: key bindings for the actions not on their defaults (the launcher passes its changes this way).
-* `--check`: checks that the game folder holds the files the game needs and exits.
+* `--check`: checks that the game folder holds the files the game needs, of the supported release, and exits.
 * `--trace`: prints the program switches and their exit codes (also `F117_TRACE=1`).
 * `--headless`: no window and no sound, for tests. `--version` prints the version and exits.
 
